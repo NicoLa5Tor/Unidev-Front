@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 import { HeroFinalCtaSectionComponent } from './sections/hero-final-cta-section/hero-final-cta-section.component';
 import { HeroFeature, HeroFeaturesSectionComponent } from './sections/hero-features-section/hero-features-section.component';
@@ -14,11 +14,16 @@ import { HeroStep, HeroStepsSectionComponent } from './sections/hero-steps-secti
     HeroFinalCtaSectionComponent
   ],
   templateUrl: './hero.component.html',
-  styleUrl: './hero.component.scss'
+  styleUrl: './hero.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class HeroComponent implements OnInit, OnDestroy {
-  typedText = 'Proyectos Reales';
-  private typingInterval: any;
+export class HeroComponent {
+  readonly typewriterTexts = [
+    'Proyectos Reales',
+    'Experiencia Práctica',
+    'Crecimiento Profesional',
+    'Oportunidades Únicas'
+  ];
 
   stats: HeroStat[] = [
     { number: '500+', label: 'Proyectos Activos', icon: '⚡' },
@@ -74,44 +79,6 @@ export class HeroComponent implements OnInit, OnDestroy {
       description: 'Postúlate a proyectos que te interesen y empieza a construir tu experiencia profesional.'
     }
   ];
-
-
-  ngOnInit(): void {
-    this.startTypingAnimation();
-  }
-
-  ngOnDestroy(): void {
-    if (this.typingInterval) {
-      clearInterval(this.typingInterval);
-    }
-  }
-
-  private startTypingAnimation(): void {
-    const texts = ['Proyectos Reales', 'Experiencia Práctica', 'Crecimiento Profesional', 'Oportunidades Únicas'];
-    let currentIndex = 0;
-    let currentText = '';
-    let isDeleting = false;
-
-    this.typingInterval = setInterval(() => {
-      const fullText = texts[currentIndex];
-      
-      if (!isDeleting) {
-        currentText = fullText.substring(0, currentText.length + 1);
-      } else {
-        currentText = fullText.substring(0, currentText.length - 1);
-      }
-
-      this.typedText = currentText;
-
-      if (!isDeleting && currentText === fullText) {
-        setTimeout(() => isDeleting = true, 2000);
-      } else if (isDeleting && currentText === '') {
-        isDeleting = false;
-        currentIndex = (currentIndex + 1) % texts.length;
-      }
-    }, isDeleting ? 50 : 100);
-  }
-
 
 
   scrollToSection(sectionId: string): void {

@@ -22,8 +22,7 @@ html {
 .content {
   color: white;
   font-family: 'Work Sans', sans-serif;
-  padding: 3vw;
-  padding-top: 9vh;
+  padding: clamp(2rem, 3vw, 3.5rem);
   position: relative;
   z-index: 5;
 }

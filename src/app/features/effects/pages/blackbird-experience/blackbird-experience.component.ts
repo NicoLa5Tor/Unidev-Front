@@ -1,11 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  OnDestroy,
-  OnInit,
-  ViewChild
-} from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 
 import { BlackbirdExperience, BlackbirdExperienceDeps } from '../../../../shared/effects/blackbird-experience';
 import { HeaderComponent } from '../../../landing/components/header/header.component';
@@ -27,12 +20,10 @@ import { HeroStepsSectionComponent } from '../../../landing/components/hero/sect
   templateUrl: './blackbird-experience.component.html',
   styleUrl: './blackbird-experience.component.scss'
 })
-export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, OnInit {
+export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy {
   @ViewChild('threeContainer', { static: true }) private threeContainer?: ElementRef<HTMLDivElement>;
   @ViewChild('contentRoot', { static: true }) private contentRoot?: ElementRef<HTMLElement>;
 
-  typedText = 'Proyectos Reales';
-  private typingInterval?: ReturnType<typeof setInterval>;
   stats = [
     { number: '500+', label: 'Proyectos Activos', icon: '⚡' },
     { number: '1000+', label: 'Estudiantes', icon: '🎓' },
@@ -73,6 +64,13 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     }
   ];
 
+  readonly typewriterTexts = [
+    'Proyectos Reales',
+    'Experiencia Práctica',
+    'Crecimiento Profesional',
+    'Oportunidades Únicas'
+  ];
+
   steps = [
     {
       title: 'Regístrate y Crea tu Perfil',
@@ -99,16 +97,9 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     this.startExperience();
   }
 
-  ngOnInit(): void {
-    this.startTypingAnimation();
-  }
-
   ngOnDestroy(): void {
     cancelAnimationFrame(this.animationFrameId ?? 0);
     this.experience?.dispose();
-    if (this.typingInterval) {
-      clearInterval(this.typingInterval);
-    }
   }
 
   private async loadRequiredScripts(): Promise<void> {
@@ -179,31 +170,5 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     };
 
     this.experience = new BlackbirdExperience(deps);
-  }
-
-  private startTypingAnimation(): void {
-    const texts = ['Proyectos Reales', 'Experiencia Práctica', 'Crecimiento Profesional', 'Oportunidades Únicas'];
-    let currentIndex = 0;
-    let currentText = '';
-    let isDeleting = false;
-
-    this.typingInterval = setInterval(() => {
-      const fullText = texts[currentIndex];
-
-      if (!isDeleting) {
-        currentText = fullText.substring(0, currentText.length + 1);
-      } else {
-        currentText = fullText.substring(0, currentText.length - 1);
-      }
-
-      this.typedText = currentText;
-
-      if (!isDeleting && currentText === fullText) {
-        setTimeout(() => (isDeleting = true), 2000);
-      } else if (isDeleting && currentText === '') {
-        isDeleting = false;
-        currentIndex = (currentIndex + 1) % texts.length;
-      }
-    }, isDeleting ? 50 : 100);
   }
 }
