@@ -1,9 +1,18 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+
+import { HeroFinalCtaSectionComponent } from './sections/hero-final-cta-section/hero-final-cta-section.component';
+import { HeroFeature, HeroFeaturesSectionComponent } from './sections/hero-features-section/hero-features-section.component';
+import { HeroIntroSectionComponent, HeroStat } from './sections/hero-intro-section/hero-intro-section.component';
+import { HeroStep, HeroStepsSectionComponent } from './sections/hero-steps-section/hero-steps-section.component';
 
 @Component({
   selector: 'app-hero',
-  imports: [CommonModule],
+  imports: [
+    HeroIntroSectionComponent,
+    HeroFeaturesSectionComponent,
+    HeroStepsSectionComponent,
+    HeroFinalCtaSectionComponent
+  ],
   templateUrl: './hero.component.html',
   styleUrl: './hero.component.scss'
 })
@@ -11,14 +20,14 @@ export class HeroComponent implements OnInit, OnDestroy {
   typedText = 'Proyectos Reales';
   private typingInterval: any;
 
-  stats = [
+  stats: HeroStat[] = [
     { number: '500+', label: 'Proyectos Activos', icon: '⚡' },
     { number: '1000+', label: 'Estudiantes', icon: '🎓' },
     { number: '200+', label: 'Empresas', icon: '🏢' },
     { number: '95%', label: 'Satisfacción', icon: '⭐' }
   ];
 
-  features = [
+  features: HeroFeature[] = [
     {
       icon: '🚀',
       title: 'Proyectos Reales',
@@ -51,7 +60,7 @@ export class HeroComponent implements OnInit, OnDestroy {
     }
   ];
 
-  steps = [
+  steps: HeroStep[] = [
     {
       title: 'Regístrate y Crea tu Perfil',
       description: 'Completa tu perfil destacando tus habilidades, intereses y proyectos académicos.'

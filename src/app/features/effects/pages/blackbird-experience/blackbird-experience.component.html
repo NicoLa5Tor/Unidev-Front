@@ -1,0 +1,29 @@
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@800&display=swap" rel="stylesheet" />
+
+<app-header class="content__header"></app-header>
+
+
+<div id="content" class="content" #contentRoot>
+  <app-hero-intro-section [typedText]="typedText" [stats]="stats"></app-hero-intro-section>
+  <app-hero-features-section [features]="features"></app-hero-features-section>
+  <app-hero-steps-section [steps]="steps"></app-hero-steps-section>
+  <app-hero-final-cta-section></app-hero-final-cta-section>
+  <footer class="content__footer">
+  <div class="footer__inner">
+    <div>
+      <p class="footer__title">UniDev</p>
+      <p class="footer__subtitle">Conectando talento universitario con proyectos reales.</p>
+    </div>
+    <div class="footer__meta">
+      <span>© {{ currentYear }} UniDev. Todos los derechos reservados.</span>
+      <span>Hecho con pasión desde Unidev Studio.</span>
+    </div>
+  </div>
+</footer>
+
+</div>
+
+
+<div data-app-container #threeContainer></div>
