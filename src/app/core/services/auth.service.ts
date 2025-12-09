@@ -1,47 +1,78 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { fetchAuthSession, getCurrentUser, signIn, signInWithRedirect, signOut } from 'aws-amplify/auth';
+import { BehaviorSubject, from, Observable } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
+
+export type FederatedProvider = 'google' | 'apple' | 'microsoft';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
-  public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
+  private readonly isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
+  readonly isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
   constructor() {
-    // Check if token exists in localStorage on service initialization
-    const token = localStorage.getItem('token');
-    if (token) {
-      this.isAuthenticatedSubject.next(true);
+    this.hydrateAuthState();
+  }
+
+  login(email: string, password: string): Observable<void> {
+    return from(
+      signIn({
+        username: email,
+        password
+      })
+    ).pipe(
+      tap(() => this.updateAuthState(true)),
+      map(() => void 0)
+    );
+  }
+
+  federatedSignIn(provider: FederatedProvider): void {
+    if (provider === 'google') {
+      signInWithRedirect({ provider: 'Google' });
+      return;
+    }
+
+    if (provider === 'apple') {
+      signInWithRedirect({ provider: 'Apple' });
+      return;
+    }
+
+    signInWithRedirect({ provider: { custom: 'Microsoft' } });
+  }
+
+  logout(): Observable<void> {
+    return from(signOut()).pipe(
+      tap(() => this.updateAuthState(false)),
+      map(() => void 0)
+    );
+  }
+
+  async getToken(): Promise<string | null> {
+    try {
+      const { tokens } = await fetchAuthSession();
+      return tokens?.idToken?.toString() ?? null;
+    } catch (error) {
+      this.updateAuthState(false);
+      return null;
     }
   }
 
-  login(email: string, password: string): Observable<any> {
-    // TODO: Implement actual login logic with HTTP client
-    // This is a placeholder implementation
-    console.log('Login attempt:', { email, password });
-    return new Observable(observer => {
-      // Simulate API call
-      setTimeout(() => {
-        const mockToken = 'mock-jwt-token';
-        localStorage.setItem('token', mockToken);
-        this.isAuthenticatedSubject.next(true);
-        observer.next({ token: mockToken });
-        observer.complete();
-      }, 1000);
-    });
-  }
-
-  logout(): void {
-    localStorage.removeItem('token');
-    this.isAuthenticatedSubject.next(false);
-  }
-
-  getToken(): string | null {
-    return localStorage.getItem('token');
-  }
-
   isLoggedIn(): boolean {
-    return !!this.getToken();
+    return this.isAuthenticatedSubject.value;
   }
+
+  private hydrateAuthState(): void {
+    getCurrentUser()
+      .then(() => this.updateAuthState(true))
+      .catch(() => this.updateAuthState(false));
+  }
+
+  private updateAuthState(isAuthenticated: boolean): void {
+    if (this.isAuthenticatedSubject.value !== isAuthenticated) {
+      this.isAuthenticatedSubject.next(isAuthenticated);
+    }
+  }
+
 }

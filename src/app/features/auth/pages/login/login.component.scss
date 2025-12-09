@@ -74,6 +74,32 @@
   opacity: 0.8;
 }
 
+.password-toggle {
+  position: absolute;
+  inset: 0.5rem 0.75rem auto auto;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: rgba(221, 214, 254, 0.8);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.form-error {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: #fecaca;
+}
+
+.form-error--general {
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: 1rem;
+  background-color: rgba(127, 29, 29, 0.25);
+  padding: 0.75rem 1rem;
+  text-align: center;
+}
+
 @media (max-width: 1023px) {
   .login-card::before {
     inset: 12px;
