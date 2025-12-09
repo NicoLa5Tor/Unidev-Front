@@ -1,0 +1,106 @@
+<section class="login-page min-h-screen bg-slate-950 text-white relative overflow-hidden py-16 px-4 sm:px-8">
+  <div class="login-page__glow login-page__glow--one"></div>
+  <div class="login-page__glow login-page__glow--two"></div>
+
+  <div class="relative z-10 max-w-6xl mx-auto grid gap-12 lg:grid-cols-2 items-center">
+    <div class="space-y-8">
+      <div class="inline-flex items-center gap-2 bg-white/5 text-purple-200 px-4 py-2 rounded-full border border-white/10">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        Seguridad y acceso 24/7
+      </div>
+      <div class="space-y-6">
+        <h1 class="text-4xl lg:text-5xl font-bold leading-tight">
+          Inicia sesión para continuar construyendo <span class="text-purple-300">tu futuro profesional</span>
+        </h1>
+        <p class="text-lg text-purple-100/80">
+          Accede a tus proyectos, conecta con mentores y sigue el avance de tus habilidades desde un mismo lugar.
+          Elige el método que prefieras para iniciar sesión ó usa tu correo institucional.
+        </p>
+      </div>
+      <ul class="space-y-4">
+        <li class="flex items-center gap-3 text-purple-100">
+          <span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500/30 to-blue-500/30 flex items-center justify-center border border-white/10">1</span>
+          Conecta tus cuentas favoritas con un clic seguro.
+        </li>
+        <li class="flex items-center gap-3 text-purple-100">
+          <span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500/30 to-blue-500/30 flex items-center justify-center border border-white/10">2</span>
+          Mantén todos tus progresos sincronizados en UniDev.
+        </li>
+        <li class="flex items-center gap-3 text-purple-100">
+          <span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500/30 to-blue-500/30 flex items-center justify-center border border-white/10">3</span>
+          Retoma tus proyectos cuando quieras con acceso 24/7.
+        </li>
+      </ul>
+    </div>
+
+    <div class="login-card bg-slate-900/70 border border-white/10 rounded-3xl shadow-2xl backdrop-blur">
+      <div class="p-8 space-y-8">
+        <div class="space-y-2">
+          <p class="text-sm uppercase tracking-[0.3em] text-purple-200">Panel seguro</p>
+          <h2 class="text-3xl font-semibold">Inicia sesión en tu cuenta</h2>
+          <p class="text-purple-100/70 text-sm">
+            Hemos diseñado opciones rápidas para que entres en segundos.
+          </p>
+        </div>
+
+        <div class="space-y-3">
+          <button
+            *ngFor="let provider of socialProviders"
+            type="button"
+            class="social-button w-full border border-white/10 rounded-2xl px-5 py-4 flex items-center gap-4 text-left">
+            <span class="social-button__icon">{{ provider.iconText }}</span>
+            <span class="flex-1">
+              <span class="block font-semibold">Continuar con {{ provider.name }}</span>
+              <span class="text-sm text-purple-100/70">{{ provider.description }}</span>
+            </span>
+            <span class="social-button__accent bg-gradient-to-r" [ngClass]="provider.accent"></span>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-4 text-purple-200/60 text-xs">
+          <span class="flex-1 h-px bg-white/10"></span>
+          <span>o usa tu correo</span>
+          <span class="flex-1 h-px bg-white/10"></span>
+        </div>
+
+        <form class="space-y-5" autocomplete="off">
+          <div>
+            <label class="text-sm text-purple-100/80">Correo electrónico</label>
+            <div class="relative mt-2">
+              <input
+                type="email"
+                placeholder="tu@correo.com"
+                class="w-full rounded-2xl bg-slate-950/60 border border-white/10 px-4 py-3 text-base focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/40"
+              />
+            </div>
+          </div>
+          <div>
+            <label class="text-sm text-purple-100/80">Contraseña</label>
+            <div class="relative mt-2">
+              <input
+                type="password"
+                placeholder="********"
+                class="w-full rounded-2xl bg-slate-950/60 border border-white/10 px-4 py-3 text-base focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/40"
+              />
+              <button type="button" class="absolute inset-y-0 right-3 text-xs text-purple-200/70">Mostrar</button>
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-sm text-purple-100/80">
+            <label class="inline-flex items-center gap-2">
+              <input type="checkbox" class="rounded border-white/20 bg-slate-950/60 text-purple-500 focus:ring-0" />
+              Recordarme
+            </label>
+            <a class="text-purple-300 hover:text-purple-100 transition-colors" href="#">¿Olvidaste tu contraseña?</a>
+          </div>
+          <button type="button" class="btn-theme btn-theme--teal w-full flex justify-center uppercase tracking-widest">
+            Iniciar sesión
+          </button>
+        </form>
+
+        <p class="text-center text-sm text-purple-100/70">
+          ¿Necesitas una cuenta para tu equipo? <a href="#" class="text-purple-300 hover:text-purple-100 font-semibold">Pide acceso corporativo</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

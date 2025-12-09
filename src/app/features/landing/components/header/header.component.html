@@ -29,13 +29,10 @@
           </li>
         </ul>
         
-        <div class="flex items-center space-x-3">
-          <button class="gradient-button gradient-button--compact gradient-button--filled">
+        <div class="flex items-center">
+          <a routerLink="/login" class="gradient-button gradient-button--compact gradient-button--filled">
             <span class="gradient-text gradient-text--opaque">Login</span>
-          </button>
-          <button class="gradient-button gradient-button--compact">
-            <span class="gradient-text">Sign Up</span>
-          </button>
+          </a>
         </div>
       </nav>
 
@@ -61,13 +58,10 @@
            class="block py-2 hover:text-white transition-colors">
           {{ item.label }}
         </a>
-        <div class="pt-4 space-y-3">
-          <button class="gradient-button gradient-button--filled w-full">
+        <div class="pt-4">
+          <a routerLink="/login" class="gradient-button gradient-button--filled w-full">
             <span class="gradient-text gradient-text--opaque">Login</span>
-          </button>
-          <button class="gradient-button w-full">
-            <span class="gradient-text">Sign Up</span>
-          </button>
+          </a>
         </div>
       </nav>
     </div>
