@@ -120,7 +120,8 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
       'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js',
       'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollSmoother.min.js',
       'https://unpkg.com/three@0.139.2/build/three.min.js',
-      'https://unpkg.com/three@0.139.2/examples/js/controls/OrbitControls.js'
+      'https://unpkg.com/three@0.139.2/examples/js/controls/OrbitControls.js',
+      'https://unpkg.com/aos@2.3.1/dist/aos.js'
     ];
 
     for (const url of scriptUrls) {
@@ -184,6 +185,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
   private handleExperienceReady(): void {
     this.isReady = true;
     this.toggleBodyScroll(false);
+    this.initAos();
   }
 
   private toggleBodyScroll(lock: boolean): void {
@@ -191,5 +193,14 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
       return;
     }
     document.body.classList.toggle('preloader-active', lock);
+  }
+
+  private initAos(): void {
+    const aos = (window as any).AOS;
+    if (!aos?.init) {
+      console.warn('AOS no se encuentra disponible.');
+      return;
+    }
+    aos.init({ once: true, duration: 900, easing: 'ease-out-cubic', offset: 60 });
   }
 }
