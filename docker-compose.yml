@@ -1,0 +1,11 @@
+version: '3.9'
+
+services:
+  unidev-front:
+    build: .
+    image: unidev-front:latest
+    ports:
+      - "8080:80"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped

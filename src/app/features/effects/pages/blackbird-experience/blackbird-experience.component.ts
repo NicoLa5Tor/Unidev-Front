@@ -1,4 +1,5 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 
 import { BlackbirdExperience, BlackbirdExperienceDeps } from '../../../../shared/effects/blackbird-experience';
 import { HeaderComponent } from '../../../landing/components/header/header.component';
@@ -11,6 +12,7 @@ import { HeroStepsSectionComponent } from '../../../landing/components/hero/sect
   selector: 'app-blackbird-experience',
   standalone: true,
   imports: [
+    CommonModule,
     HeaderComponent,
     HeroIntroSectionComponent,
     HeroFeaturesSectionComponent,
@@ -20,10 +22,11 @@ import { HeroStepsSectionComponent } from '../../../landing/components/hero/sect
   templateUrl: './blackbird-experience.component.html',
   styleUrl: './blackbird-experience.component.scss'
 })
-export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy {
+export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, OnInit {
   @ViewChild('threeContainer', { static: true }) private threeContainer?: ElementRef<HTMLDivElement>;
   @ViewChild('contentRoot', { static: true }) private contentRoot?: ElementRef<HTMLElement>;
 
+  isReady = false;
   stats = [
     { number: '500+', label: 'Proyectos Activos', icon: '⚡' },
     { number: '1000+', label: 'Estudiantes', icon: '🎓' },
@@ -92,6 +95,10 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy {
   private scriptsLoaded = false;
   private experience?: BlackbirdExperience;
 
+  ngOnInit(): void {
+    this.toggleBodyScroll(true);
+  }
+
   async ngAfterViewInit(): Promise<void> {
     await this.loadRequiredScripts();
     this.startExperience();
@@ -100,6 +107,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     cancelAnimationFrame(this.animationFrameId ?? 0);
     this.experience?.dispose();
+    this.toggleBodyScroll(false);
   }
 
   private async loadRequiredScripts(): Promise<void> {
@@ -166,9 +174,22 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy {
       requestFrame: (callback: FrameRequestCallback) => {
         this.animationFrameId = requestAnimationFrame(callback);
         return this.animationFrameId;
-      }
+      },
+      onReady: () => this.handleExperienceReady()
     };
 
     this.experience = new BlackbirdExperience(deps);
+  }
+
+  private handleExperienceReady(): void {
+    this.isReady = true;
+    this.toggleBodyScroll(false);
+  }
+
+  private toggleBodyScroll(lock: boolean): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    document.body.classList.toggle('preloader-active', lock);
   }
 }

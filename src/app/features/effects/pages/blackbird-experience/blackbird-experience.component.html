@@ -4,7 +4,12 @@
 
 
 
-<div id="content" class="content" #contentRoot>
+<div class="preloader" *ngIf="!isReady">
+  <div class="preloader__spinner"></div>
+  <p>Cargando experiencia...</p>
+</div>
+
+<div id="content" class="content" #contentRoot [class.is-blurred]="!isReady">
   <app-header class="content__header"></app-header>
   <app-hero-intro-section [typewriterTexts]="typewriterTexts" [stats]="stats"></app-hero-intro-section>
   <app-hero-features-section [features]="features"></app-hero-features-section>

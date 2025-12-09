@@ -6,6 +6,7 @@ export type BlackbirdExperienceDeps = {
   ScrollTrigger: any;
   ScrollSmoother: any;
   requestFrame: (callback: FrameRequestCallback) => number;
+  onReady?: () => void;
 };
 
 export class BlackbirdExperience {
@@ -16,6 +17,7 @@ export class BlackbirdExperience {
   private readonly ScrollTrigger: any;
   private readonly ScrollSmoother: any;
   private readonly requestFrame: (callback: FrameRequestCallback) => number;
+  private readonly onReady?: () => void;
 
   private renderer?: any;
   private camera?: any;
@@ -41,6 +43,7 @@ export class BlackbirdExperience {
     this.ScrollTrigger = deps.ScrollTrigger;
     this.ScrollSmoother = deps.ScrollSmoother;
     this.requestFrame = deps.requestFrame;
+    this.onReady = deps.onReady;
 
     this.clock = new this.THREE.Clock();
     this.init();
@@ -64,6 +67,7 @@ export class BlackbirdExperience {
     this.initScroll();
     this.update();
     this.container.classList.add('is-ready');
+    this.onReady?.();
   }
 
   private initScroll(): void {
