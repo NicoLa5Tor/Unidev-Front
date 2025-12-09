@@ -1,1 +1,60 @@
 /* You can add global styles to this file, and also import other style files */
+@use 'tailwindcss/base';
+@use 'tailwindcss/components';
+@use 'tailwindcss/utilities';
+
+/* Import Google Fonts for futuristic look */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+/* Global animations configuration */
+:root {
+  --animate-duration: 1s;
+  --animate-delay: 0s;
+  --animate-repeat: 1;
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #a855f7;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9333ea;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Body dark theme */
+body {
+  background-color: #0a0a0a;
+  color: #ffffff;
+  font-family: 'Rajdhani', sans-serif;
+}
+
+/* Custom glow utilities */
+.text-glow {
+  text-shadow: 0 0 10px currentColor;
+}
+
+.border-glow {
+  box-shadow: 0 0 10px currentColor;
+}
+
+.bg-cyber-grid {
+  background-image: 
+    linear-gradient(rgba(168, 85, 247, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(168, 85, 247, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}

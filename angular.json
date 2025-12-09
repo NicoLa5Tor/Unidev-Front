@@ -36,10 +36,7 @@
             ],
             "scripts": [],
             "server": "src/main.server.ts",
-            "prerender": true,
-            "ssr": {
-              "entry": "src/server.ts"
-            }
+            "prerender": false
           },
           "configurations": {
             "production": {
@@ -60,13 +57,18 @@
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "prerender": false,
+              "ssr": false
             }
           },
           "defaultConfiguration": "production"
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "buildTarget": "UnidevFront:build:development"
+          },
           "configurations": {
             "production": {
               "buildTarget": "UnidevFront:build:production"
@@ -103,5 +105,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": "64c54857-5674-40ab-bae6-e70988f07a2c"
   }
 }

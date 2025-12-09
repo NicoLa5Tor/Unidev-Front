@@ -1,0 +1,41 @@
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+
+  &.centered {
+    justify-content: center;
+    min-height: 200px;
+  }
+
+  .spinner {
+    border-radius: 50%;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #007bff;
+
+    &.small {
+      width: 20px;
+      height: 20px;
+      border-width: 2px;
+    }
+
+    &.medium {
+      width: 40px;
+      height: 40px;
+      border-width: 3px;
+    }
+
+    &.large {
+      width: 60px;
+      height: 60px;
+      border-width: 4px;
+    }
+  }
+
+  .loader-message {
+    color: #6c757d;
+    font-size: 14px;
+    text-align: center;
+  }
+}
