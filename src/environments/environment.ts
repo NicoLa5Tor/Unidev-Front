@@ -27,7 +27,7 @@ export const environment = {
               redirectSignIn: ['http://localhost:5050'],
               redirectSignOut: ['http://localhost:5050'],
               responseType: 'code',
-              providers: ['Google', { custom: 'Microsoft' }, 'SignInWithApple']
+              providers: ['Google', { custom: 'AzureAD' }]
             }
           }
         }

@@ -37,13 +37,6 @@ export class LoginComponent {
       description: 'Ingresa con tu cuenta del ecosistema Microsoft',
       accent: 'from-sky-500 via-blue-500 to-indigo-500',
       iconText: 'MS'
-    },
-    {
-      key: 'apple',
-      name: 'Apple',
-      description: 'Accede con tu Apple ID',
-      accent: 'from-slate-900 via-gray-800 to-gray-600',
-      iconText: 'AP'
     }
   ];
 

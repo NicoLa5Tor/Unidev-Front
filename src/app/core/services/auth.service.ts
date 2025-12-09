@@ -3,7 +3,7 @@ import { fetchAuthSession, getCurrentUser, signIn, signInWithRedirect, signOut }
 import { BehaviorSubject, from, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
-export type FederatedProvider = 'google' | 'apple' | 'microsoft';
+export type FederatedProvider = 'google' | 'microsoft';
 
 @Injectable({
   providedIn: 'root'
@@ -34,12 +34,8 @@ export class AuthService {
       return;
     }
 
-    if (provider === 'apple') {
-      signInWithRedirect({ provider: 'Apple' });
-      return;
-    }
-
-    signInWithRedirect({ provider: { custom: 'Microsoft' } });
+    // MICROSOFT OIDC CUSTOM PROVIDER
+    signInWithRedirect({ provider: { custom: 'AzureAD' } });
   }
 
   logout(): Observable<void> {
