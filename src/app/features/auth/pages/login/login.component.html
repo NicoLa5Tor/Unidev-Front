@@ -60,63 +60,31 @@
 
         <div class="flex items-center gap-4 text-purple-200/60 text-xs">
           <span class="flex-1 h-px bg-white/10"></span>
-          <span>o usa tu correo</span>
+          <span>o accede vía Hosted UI</span>
           <span class="flex-1 h-px bg-white/10"></span>
         </div>
 
-        <form class="space-y-5" autocomplete="off" novalidate [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-          <div>
-            <label class="text-sm text-purple-100/80" for="login-email">Correo electrónico</label>
-            <div class="relative mt-2">
-              <input
-                id="login-email"
-                type="email"
-                formControlName="email"
-                placeholder="tu@correo.com"
-                class="w-full rounded-2xl bg-slate-950/60 border border-white/10 px-4 py-3 text-base focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/40"
-              />
-            </div>
-            <p class="form-error" *ngIf="loginForm.controls.email.invalid && loginForm.controls.email.touched">
-              Ingresa un correo válido.
+        <ng-template #loginActions>
+          <div class="space-y-4">
+            <p class="text-sm text-purple-100/80">
+              Serás redirigido al portal seguro de Cognito para ingresar con tu cuenta institucional.
             </p>
+            <button type="button" class="btn-theme btn-theme--teal w-full flex justify-center uppercase tracking-widest" (click)="login()">
+              Iniciar sesión con Cognito
+            </button>
           </div>
-          <div>
-            <label class="text-sm text-purple-100/80" for="login-password">Contraseña</label>
-            <div class="relative mt-2">
-              <input
-                id="login-password"
-                [type]="showPassword ? 'text' : 'password'"
-                formControlName="password"
-                placeholder="********"
-                class="w-full rounded-2xl bg-slate-950/60 border border-white/10 px-4 py-3 text-base focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/40"
-              />
-              <button type="button" class="password-toggle" (click)="togglePasswordVisibility()">
-                {{ showPassword ? 'Ocultar' : 'Mostrar' }}
-              </button>
-            </div>
-            <p class="form-error" *ngIf="loginForm.controls.password.invalid && loginForm.controls.password.touched">
-              La contraseña debe tener al menos 8 caracteres.
-            </p>
+        </ng-template>
+
+        <div *ngIf="isAuthenticated$ | async as isAuthenticated; else loginActions" class="space-y-5">
+          <p class="text-green-400 font-medium">Sesión activa en UniDev</p>
+          <div class="text-xs text-purple-100/80 bg-slate-950/60 border border-white/10 rounded-2xl p-4">
+            <p class="text-purple-300 mb-1">userData</p>
+            <pre class="whitespace-pre-wrap break-all">{{ userData$ | async | json }}</pre>
           </div>
-          <div class="flex items-center justify-between text-sm text-purple-100/80">
-            <label class="inline-flex items-center gap-2">
-              <input type="checkbox" formControlName="remember" class="rounded border-white/20 bg-slate-950/60 text-purple-500 focus:ring-0" />
-              Recordarme
-            </label>
-            <a class="text-purple-300 hover:text-purple-100 transition-colors" href="#">¿Olvidaste tu contraseña?</a>
-          </div>
-          <div *ngIf="errorMessage" class="form-error form-error--general">
-            {{ errorMessage }}
-          </div>
-          <button
-            type="submit"
-            class="btn-theme btn-theme--teal w-full flex justify-center uppercase tracking-widest"
-            [disabled]="loginForm.invalid || isSubmitting"
-            [attr.aria-busy]="isSubmitting"
-          >
-            {{ isSubmitting ? 'Validando...' : 'Iniciar sesión' }}
+          <button type="button" class="btn-theme btn-theme--danger w-full" (click)="logout()">
+            Cerrar sesión
           </button>
-        </form>
+        </div>
 
         <p class="text-center text-sm text-purple-100/70">
           ¿Necesitas una cuenta para tu equipo? <a href="#" class="text-purple-300 hover:text-purple-100 font-semibold">Pide acceso corporativo</a>

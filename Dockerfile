@@ -6,9 +6,11 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
-# Build application
+# Build application with configurable environment (defaults to production)
+ARG ANGULAR_CONFIGURATION=production
+ENV ANGULAR_CONFIGURATION=${ANGULAR_CONFIGURATION}
 COPY . .
-RUN npm run build -- --configuration production
+RUN npm run build -- --configuration ${ANGULAR_CONFIGURATION}
 
 # Runtime stage
 FROM nginx:1.27-alpine
