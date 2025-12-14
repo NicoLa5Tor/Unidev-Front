@@ -12,6 +12,17 @@ ng serve
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
+## Runtime configuration
+
+The Vite-based Angular builder consumes environment variables from `.env` files. Create a local `.env` by copying `.env.example` and updating the values (all keys must be prefixed with `NG_APP_`). Example:
+
+```bash
+cp .env.example .env
+# edit .env with your Cognito authority, client ID, redirects, etc.
+```
+
+At runtime the values from `.env` feed the files in `src/environments`, so secrets such as Cognito endpoints no longer live in source control.
+
 ## Code scaffolding
 
 Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
