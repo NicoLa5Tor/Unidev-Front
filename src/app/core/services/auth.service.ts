@@ -11,6 +11,8 @@ export type FederatedProvider = 'google' | 'microsoft';
 })
 export class AuthService {
   private readonly oidcSecurityService = inject(OidcSecurityService);
+  private readonly identityProviders: Partial<Record<FederatedProvider, string>> =
+    environment.auth?.identityProviders ?? {};
   readonly isAuthenticated$ = this.oidcSecurityService.isAuthenticated$.pipe(
     map((result: AuthenticatedResult) => result.isAuthenticated)
   );
@@ -21,7 +23,13 @@ export class AuthService {
   }
 
   federatedSignIn(provider: FederatedProvider): void {
-    const identityProvider = provider === 'google' ? 'Google' : 'AzureAD';
+    const identityProvider = this.identityProviders[provider];
+
+    if (!identityProvider) {
+      console.error(`No se encontró un identity_provider configurado para '${provider}'.`);
+      this.login();
+      return;
+    }
 
     this.oidcSecurityService.authorize(undefined, {
       customParams: {
@@ -38,7 +46,8 @@ export class AuthService {
         customParams: {
           client_id: clientId,
           logout_uri: postLogoutRedirectUri
-        }
+        },
+        logoffMethod: 'POST'
       })
       .pipe(map(() => void 0));
   }

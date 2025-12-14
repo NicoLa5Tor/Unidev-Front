@@ -16,13 +16,17 @@ export const environment = {
   },
   auth: {
     oidc: {
-      authority: 'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_m92TYnPrH',
-      clientId: '37akb5r5hqpa9jgr25oa9ju5m8',
-      cognitoDomain: 'https://unidev.auth.us-east-1.amazoncognito.com',
+      authority: 'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_7axlYpwa5',
+      clientId: '4sfn29tps38iodlmtk09p6rncj',
+      cognitoDomain: 'https://us-east-17axlypwa5.auth.us-east-1.amazoncognito.com',
       redirectUrl: 'http://localhost:5050/callback',
       postLogoutRedirectUri: 'http://localhost:5050/logout',
       scope: 'openid email profile',
       responseType: 'code'
+    },
+    identityProviders: {
+      google: 'Google',
+      microsoft: 'AzureSAML'
     }
   }
 };
