@@ -1,19 +1,17 @@
 import { readEnv } from './env.utils';
 
-const defaultApiUrl = 'https://api.yourdomain.com/api';
-const defaultOidcConfig = {
-  authority: 'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_7axlYpwa5',
-  clientId: '37akb5r5hqpa9jgr25oa9ju5m8',
-  cognitoDomain: 'https://unidev.auth.us-east-1.amazoncognito.com',
-  redirectUrl: 'https://unidev.site/callback',
-  postLogoutRedirectUri: 'https://unidev.site/logout',
-  scope: 'openid email profile',
-  responseType: 'code'
-} as const;
+const apiUrl = readEnv('NG_APP_API_URL');
+const oidcAuthority = readEnv('NG_APP_COGNITO_AUTHORITY');
+const oidcClientId = readEnv('NG_APP_COGNITO_CLIENT_ID');
+const oidcDomain = readEnv('NG_APP_COGNITO_DOMAIN');
+const oidcRedirect = readEnv('NG_APP_COGNITO_REDIRECT_URL');
+const oidcLogoutRedirect = readEnv('NG_APP_COGNITO_LOGOUT_REDIRECT');
+const oidcScope = readEnv('NG_APP_COGNITO_SCOPE');
+const oidcResponseType = readEnv('NG_APP_COGNITO_RESPONSE_TYPE');
 
 export const environment = {
   production: true,
-  apiUrl: readEnv('NG_APP_API_URL', defaultApiUrl),
+  apiUrl,
   appName: 'UnidevFront',
   enableLogging: false,
   features: {
@@ -29,16 +27,13 @@ export const environment = {
   },
   auth: {
     oidc: {
-      authority: readEnv('NG_APP_COGNITO_AUTHORITY', defaultOidcConfig.authority),
-      clientId: readEnv('NG_APP_COGNITO_CLIENT_ID', defaultOidcConfig.clientId),
-      cognitoDomain: readEnv('NG_APP_COGNITO_DOMAIN', defaultOidcConfig.cognitoDomain),
-      redirectUrl: readEnv('NG_APP_COGNITO_REDIRECT_URL', defaultOidcConfig.redirectUrl),
-      postLogoutRedirectUri: readEnv(
-        'NG_APP_COGNITO_LOGOUT_REDIRECT',
-        defaultOidcConfig.postLogoutRedirectUri
-      ),
-      scope: readEnv('NG_APP_COGNITO_SCOPE', defaultOidcConfig.scope),
-      responseType: readEnv('NG_APP_COGNITO_RESPONSE_TYPE', defaultOidcConfig.responseType)
+      authority: oidcAuthority,
+      clientId: oidcClientId,
+      cognitoDomain: oidcDomain,
+      redirectUrl: oidcRedirect,
+      postLogoutRedirectUri: oidcLogoutRedirect,
+      scope: oidcScope,
+      responseType: oidcResponseType
     },
     identityProviders: {
       google: 'Google',

@@ -21,7 +21,18 @@ cp .env.example .env
 # edit .env with your Cognito authority, client ID, redirects, etc.
 ```
 
-At runtime the values from `.env` feed the files in `src/environments`, so secrets such as Cognito endpoints no longer live in source control.
+Required keys:
+
+- `NG_APP_API_URL`
+- `NG_APP_COGNITO_AUTHORITY`
+- `NG_APP_COGNITO_CLIENT_ID`
+- `NG_APP_COGNITO_DOMAIN`
+- `NG_APP_COGNITO_REDIRECT_URL`
+- `NG_APP_COGNITO_LOGOUT_REDIRECT`
+- `NG_APP_COGNITO_SCOPE`
+- `NG_APP_COGNITO_RESPONSE_TYPE`
+
+Las variables se leen en tiempo de ejecución mediante `import.meta.env`, así que ningún dato sensible queda en los archivos de `environment`.
 
 ## Code scaffolding
 
