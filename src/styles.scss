@@ -196,3 +196,14 @@ a[href*="unicorn.studio"],
   opacity: 0 !important;
   pointer-events: none !important;
 }
+
+.microsoft-gate-dialog .mat-mdc-dialog-surface,
+.microsoft-gate-dialog .mdc-dialog__surface {
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(244, 114, 182, 0.4);
+  box-shadow: 0 30px 80px rgba(2, 6, 23, 0.8);
+  border-radius: 28px;
+  backdrop-filter: blur(24px);
+  padding: clamp(1.25rem, 2vw, 2.25rem) clamp(1.5rem, 3vw, 3rem);
+  width: min(520px, 92vw);
+}

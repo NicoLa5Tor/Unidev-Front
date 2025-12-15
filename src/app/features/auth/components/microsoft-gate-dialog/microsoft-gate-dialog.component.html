@@ -1,0 +1,28 @@
+<div class="dialog">
+  <button
+    type="button"
+    class="close-btn"
+    mat-icon-button
+    mat-dialog-close
+    (click)="close()"
+    aria-label="Cerrar"
+  >
+    &times;
+  </button>
+  <h2 mat-dialog-title>Acceso institucional requerido</h2>
+  <div mat-dialog-content>
+    <p>
+      Para utilizar el portal de Microsoft de UniDev necesitamos validar que tu organización (empresa, institución
+      educativa o equipo) ya esté registrada dentro de nuestro tenant. Usa tu correo institucional para solicitar el
+      alta y nos comunicaremos contigo apenas confirmemos tu suscripción.
+    </p>
+    <mat-form-field appearance="fill" class="w-full">
+      <mat-label>Correo institucional</mat-label>
+      <input #emailInput matInput type="email" placeholder="tucorreo@dominio" />
+      <mat-hint>Debe pertenecer a una organización con convenio activo en UniDev.</mat-hint>
+    </mat-form-field>
+  </div>
+  <div mat-dialog-actions>
+    <button type="button" class="btn-theme btn-theme--rose" (click)="register(emailInput.value)">Registrarme</button>
+  </div>
+</div>

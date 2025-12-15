@@ -18,7 +18,9 @@
         <div>{{ provider.ctaIntro || 'Inicia sesión en UniDev usando' }}</div>
         <div>{{ provider.ctaDetail || provider.description }}</div>
         <div class="cta">
-          <button type="button" class="btn-theme">Continuar con {{ provider.name }}</button>
+          <button type="button" class="btn-theme" (click)="confirmProvider($event, provider)">
+            Continuar con {{ provider.name }}
+          </button>
         </div>
       </div>
     </li>

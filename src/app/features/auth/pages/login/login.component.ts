@@ -1,20 +1,24 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
 
 import { AuthService, FederatedProvider } from '../../../../core/services/auth.service';
 import { AnimatedTitleComponent } from '../../../../shared/components/animated-title/animated-title.component';
 import { SocialLoginListComponent, SocialLoginProvider } from '../../../../shared/components/social-login-list/social-login-list.component';
+import { MicrosoftGateDialogComponent } from '../../components/microsoft-gate-dialog/microsoft-gate-dialog.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, AnimatedTitleComponent, SocialLoginListComponent],
+  imports: [CommonModule, AnimatedTitleComponent, SocialLoginListComponent, MatDialogModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
 export class LoginComponent {
   private readonly authService = inject(AuthService);
+  private readonly dialog = inject(MatDialog);
+  private readonly microsoftKey = 'incert';
 
   readonly socialProviders: SocialLoginProvider[] = [
     {
@@ -41,6 +45,15 @@ export class LoginComponent {
   readonly userData$ = this.authService.userData$;
 
   onProviderConfirmed(provider: SocialLoginProvider): void {
+    if (provider.key === 'microsoft') {
+      if (this.shouldBypassMicrosoftDialog()) {
+        this.authService.federatedSignIn('microsoft');
+      } else {
+        this.openMicrosoftDialog();
+      }
+      return;
+    }
+
     this.authService.federatedSignIn(provider.key as FederatedProvider);
   }
 
@@ -50,5 +63,21 @@ export class LoginComponent {
 
   logout(): void {
     this.authService.logout();
+  }
+
+  private shouldBypassMicrosoftDialog(): boolean {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    return window.localStorage.getItem(this.microsoftKey) === 'true';
+  }
+
+  private openMicrosoftDialog(): void {
+    this.dialog.open(MicrosoftGateDialogComponent, {
+      width: '420px',
+      maxWidth: '90vw',
+      panelClass: 'microsoft-gate-dialog'
+    });
   }
 }
