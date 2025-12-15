@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService, FederatedProvider } from '../../../../core/services/auth.service';
+import { AnimatedTitleComponent } from '../../../../shared/components/animated-title/animated-title.component';
 import { Observable } from 'rxjs';
 
 interface SocialProvider {
@@ -14,7 +15,7 @@ interface SocialProvider {
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, AnimatedTitleComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })

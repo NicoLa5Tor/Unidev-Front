@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Orelega+One&display=swap');
+
+:host {
+  display: block;
+}
+
+.text-block {
+  --mask: linear-gradient(-45deg, transparent 100%, black 150%);
+  -webkit-mask-image: var(--mask);
+  mask-image: var(--mask);
+  max-width: 800px;
+}
+
+p {
+  font-family: 'Orelega One', cursive;
+}

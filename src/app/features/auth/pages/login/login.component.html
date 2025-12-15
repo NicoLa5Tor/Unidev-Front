@@ -1,93 +1,101 @@
-<section class="login-page min-h-screen bg-slate-950 text-white relative overflow-hidden py-16 px-4 sm:px-8">
-  <div class="login-page__glow login-page__glow--one"></div>
-  <div class="login-page__glow login-page__glow--two"></div>
+<section class="relative min-h-screen bg-slate-950 text-white overflow-hidden">
+  <div class="pointer-events-none absolute inset-0">
+    <div class="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-purple-500/30 blur-3xl"></div>
+    <div class="absolute bottom-0 right-0 h-[28rem] w-[28rem] rounded-full bg-teal-400/20 blur-3xl"></div>
+  </div>
 
-  <div class="relative z-10 max-w-6xl mx-auto grid gap-12 lg:grid-cols-2 items-center">
-    <div class="space-y-8">
-      <div class="inline-flex items-center gap-2 bg-white/5 text-purple-200 px-4 py-2 rounded-full border border-white/10">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        Seguridad y acceso 24/7
-      </div>
+  <div class="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col gap-12 px-4 py-16 lg:flex-row lg:items-center lg:px-10">
+    <div class="space-y-10 text-slate-100">
+      <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.4em] text-purple-200">
+        <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        Acceso seguro
+      </span>
+
       <div class="space-y-6">
-        <h1 class="text-4xl lg:text-5xl font-bold leading-tight">
-          Inicia sesión para continuar construyendo <span class="text-purple-300">tu futuro profesional</span>
-        </h1>
-        <p class="text-lg text-purple-100/80">
-          Accede a tus proyectos, conecta con mentores y sigue el avance de tus habilidades desde un mismo lugar.
-          Elige el método que prefieras para iniciar sesión ó usa tu correo institucional.
+        <app-animated-title text="UniDev"></app-animated-title>
+        <p class="text-lg text-slate-200/80">
+          Conecta con mentores, gestiona tus proyectos y sincroniza tu avance desde un mismo lugar. Elige tu proveedor favorito o usa el portal institucional.
         </p>
       </div>
-      <ul class="space-y-4">
-        <li class="flex items-center gap-3 text-purple-100">
-          <span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500/30 to-blue-500/30 flex items-center justify-center border border-white/10">1</span>
-          Conecta tus cuentas favoritas con un clic seguro.
-        </li>
-        <li class="flex items-center gap-3 text-purple-100">
-          <span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500/30 to-blue-500/30 flex items-center justify-center border border-white/10">2</span>
-          Mantén todos tus progresos sincronizados en UniDev.
-        </li>
-        <li class="flex items-center gap-3 text-purple-100">
-          <span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500/30 to-blue-500/30 flex items-center justify-center border border-white/10">3</span>
-          Retoma tus proyectos cuando quieras con acceso 24/7.
-        </li>
-      </ul>
+
+      <div class="grid gap-4 text-sm text-slate-200/90 sm:grid-cols-3">
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
+          <p class="text-3xl font-semibold text-white">1</p>
+          <p class="text-sm text-slate-200/70">Conecta con un clic.</p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
+          <p class="text-3xl font-semibold text-white">2</p>
+          <p class="text-sm text-slate-200/70">Sincroniza tus progresos.</p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
+          <p class="text-3xl font-semibold text-white">3</p>
+          <p class="text-sm text-slate-200/70">Vuelve cuando quieras.</p>
+        </div>
+      </div>
     </div>
 
-    <div class="login-card bg-slate-900/70 border border-white/10 rounded-3xl shadow-2xl backdrop-blur">
-      <div class="p-8 space-y-8">
+    <div class="w-full max-w-xl rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl backdrop-blur">
+      <div class="space-y-8">
         <div class="space-y-2">
-          <p class="text-sm uppercase tracking-[0.3em] text-purple-200">Panel seguro</p>
-          <h2 class="text-3xl font-semibold">Inicia sesión en tu cuenta</h2>
-          <p class="text-purple-100/70 text-sm">
-            Hemos diseñado opciones rápidas para que entres en segundos.
-          </p>
+          <p class="text-xs uppercase tracking-[0.3em] text-purple-200">Panel seguro</p>
+          <h2 class="text-3xl font-semibold text-white">Inicia sesión</h2>
+          <p class="text-sm text-slate-200/70">Selecciona un proveedor o continúa con el Hosted UI.</p>
         </div>
 
-        <div class="space-y-3">
+        <div class="space-y-4">
           <button
             *ngFor="let provider of socialProviders"
             type="button"
             (click)="onSocialSignIn(provider)"
-            class="social-button w-full border border-white/10 rounded-2xl px-5 py-4 flex items-center gap-4 text-left">
-            <span class="social-button__icon">{{ provider.iconText }}</span>
-            <span class="flex-1">
-              <span class="block font-semibold">Continuar con {{ provider.name }}</span>
-              <span class="text-sm text-purple-100/70">{{ provider.description }}</span>
+            class="group flex w-full items-center gap-4 rounded-2xl border border-white/10 bg-slate-950/50 px-5 py-4 text-left transition hover:-translate-y-1 hover:border-white/30 hover:bg-slate-900/80"
+          >
+            <span class="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/20 text-sm font-semibold tracking-[0.2em] text-white">
+              {{ provider.iconText }}
             </span>
-            <span class="social-button__accent bg-gradient-to-r" [ngClass]="provider.accent"></span>
+            <span class="flex-1">
+              <span class="block font-semibold text-white">Continuar con {{ provider.name }}</span>
+              <span class="text-sm text-slate-200/70">{{ provider.description }}</span>
+            </span>
+            <span class="h-10 w-10 rounded-full bg-gradient-to-br" [ngClass]="provider.accent"></span>
           </button>
         </div>
 
-        <div class="flex items-center gap-4 text-purple-200/60 text-xs">
-          <span class="flex-1 h-px bg-white/10"></span>
-          <span>o accede vía Hosted UI</span>
-          <span class="flex-1 h-px bg-white/10"></span>
+        <div class="flex items-center gap-4 text-xs text-slate-200/60">
+          <span class="h-px flex-1 bg-white/10"></span>
+          <span>o usa el portal institucional</span>
+          <span class="h-px flex-1 bg-white/10"></span>
         </div>
 
         <ng-template #loginActions>
           <div class="space-y-4">
-            <p class="text-sm text-purple-100/80">
-              Serás redirigido al portal seguro de Cognito para ingresar con tu cuenta institucional.
-            </p>
-            <button type="button" class="btn-theme btn-theme--teal w-full flex justify-center uppercase tracking-widest" (click)="login()">
+            <p class="text-sm text-slate-200/80">Serás redirigido al Hosted UI de Cognito para validar tu cuenta institucional.</p>
+            <button
+              type="button"
+              class="w-full rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-500 to-indigo-500 px-6 py-3 text-center text-sm font-semibold uppercase tracking-[0.3em] text-slate-950 transition hover:opacity-90"
+              (click)="login()"
+            >
               Iniciar sesión con Cognito
             </button>
           </div>
         </ng-template>
 
         <div *ngIf="isAuthenticated$ | async as isAuthenticated; else loginActions" class="space-y-5">
-          <p class="text-green-400 font-medium">Sesión activa en UniDev</p>
-          <div class="text-xs text-purple-100/80 bg-slate-950/60 border border-white/10 rounded-2xl p-4">
-            <p class="text-purple-300 mb-1">userData</p>
-            <pre class="whitespace-pre-wrap break-all">{{ userData$ | async | json }}</pre>
+          <p class="text-sm text-emerald-300">Sesión activa en UniDev</p>
+          <div class="rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-xs text-slate-200/80">
+            <p class="text-purple-300">userData</p>
+            <pre class="mt-2 max-h-40 overflow-auto whitespace-pre-wrap break-all">{{ userData$ | async | json }}</pre>
           </div>
-          <button type="button" class="btn-theme btn-theme--danger w-full" (click)="logout()">
+          <button
+            type="button"
+            class="w-full rounded-2xl border border-red-400/40 bg-red-500/10 px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-red-200 transition hover:bg-red-500/20"
+            (click)="logout()"
+          >
             Cerrar sesión
           </button>
         </div>
 
-        <p class="text-center text-sm text-purple-100/70">
-          ¿Necesitas una cuenta para tu equipo? <a href="#" class="text-purple-300 hover:text-purple-100 font-semibold">Pide acceso corporativo</a>
+        <p class="text-center text-xs text-slate-300/70">
+          ¿Tu equipo necesita acceso? <a href="#" class="font-semibold text-purple-300 hover:text-purple-100">Solicita una cuenta corporativa</a>
         </p>
       </div>
     </div>

@@ -1,0 +1,14 @@
+:host {
+  display: block;
+  --fw: 600;
+  --fs: 150;
+}
+
+.txt {
+  font-variation-settings: 'wght' var(--fw), 'wdth' var(--fs);
+  cursor: grab;
+}
+
+.cursor-grabbing .txt {
+  cursor: grabbing;
+}

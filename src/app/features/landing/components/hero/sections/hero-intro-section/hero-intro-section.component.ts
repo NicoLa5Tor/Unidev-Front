@@ -1,4 +1,6 @@
 import { CommonModule } from '@angular/common';
+import { AnimatedTitleComponent } from '../../../../../../shared/components/animated-title/animated-title.component';
+import { AnimatedParagraphComponent } from '../../../../../../shared/components/animated-paragraph/animated-paragraph.component';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -15,7 +17,7 @@ export type HeroStat = { number: string; label: string; icon: string };
 @Component({
   selector: 'app-hero-intro-section',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, AnimatedTitleComponent, AnimatedParagraphComponent],
   templateUrl: './hero-intro-section.component.html',
   styleUrl: './hero-intro-section.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
