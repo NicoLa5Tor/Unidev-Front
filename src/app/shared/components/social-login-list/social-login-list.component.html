@@ -15,8 +15,8 @@
 
       <div class="description">
         <span class="sr-only">{{ provider.name }} - {{ provider.description }}</span>
-        <div>Inicia sesión en UniDev usando</div>
-        <div>tu cuenta de Google</div>
+        <div>{{ provider.ctaIntro || 'Inicia sesión en UniDev usando' }}</div>
+        <div>{{ provider.ctaDetail || provider.description }}</div>
         <div class="cta">
           <button type="button" class="btn-theme">Continuar con {{ provider.name }}</button>
         </div>

@@ -19,6 +19,8 @@ export interface SocialLoginProvider {
   description: string;
   icon?: string;
   avatarUrl?: string;
+  ctaIntro?: string;
+  ctaDetail?: string;
 }
 
 @Component({

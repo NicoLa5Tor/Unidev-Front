@@ -97,6 +97,14 @@
   pointer-events: auto;
 }
 
+.cta .btn-theme {
+  width: 100%;
+  white-space: nowrap;
+  font-size: clamp(0.8rem, 1.6vw, 1rem);
+  padding-left: 1.75rem;
+  padding-right: 1.75rem;
+}
+
 .line {
   background-color: #363636;
   width: 14rem;
