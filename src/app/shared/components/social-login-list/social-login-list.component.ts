@@ -91,7 +91,8 @@ export class SocialLoginListComponent implements AfterViewInit, OnDestroy {
     this.flipPlugin.from(state, {
       duration: 0.5,
       ease: 'power1.inOut',
-      nested: true
+      nested: true,
+      absolute: true
     });
   }
 
