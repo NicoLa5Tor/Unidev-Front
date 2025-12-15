@@ -1,11 +1,13 @@
-<section class="relative min-h-screen bg-slate-950 text-white overflow-hidden">
+<section class="relative min-h-screen bg-slate-950 text-white overflow-x-hidden">
   <div class="pointer-events-none absolute inset-0">
     <div class="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-purple-500/30 blur-3xl"></div>
     <div class="absolute bottom-0 right-0 h-[28rem] w-[28rem] rounded-full bg-teal-400/20 blur-3xl"></div>
   </div>
 
-  <div class="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col gap-12 px-4 py-16 lg:flex-row lg:items-start lg:px-10">
-    <div class="space-y-10 text-slate-100">
+  <div
+    class="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col gap-12 px-4 py-16 lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,480px)] lg:items-start lg:gap-16 lg:px-10"
+  >
+    <div class="space-y-10 text-slate-100 lg:sticky lg:top-24">
       <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.4em] text-purple-200">
         <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
         Acceso seguro
@@ -34,7 +36,7 @@
       </div>
     </div>
 
-    <div class="w-full max-w-xl space-y-10">
+    <div class="w-full max-w-xl space-y-10 lg:max-w-none">
       <app-social-login-list
         [providers]="socialProviders"
         (providerConfirmed)="onProviderConfirmed($event)"

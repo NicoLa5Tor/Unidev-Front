@@ -72,10 +72,18 @@ export class SocialLoginListComponent implements AfterViewInit, OnDestroy {
     const fragments = items.flatMap(item => Array.from(item.querySelectorAll<HTMLElement>('*')));
     const baseTargets: Element[] = items.map(item => item);
     const isSameAsLast = this.lastIndex === index && this.selectedKey === provider.key;
+    const listContainer = items[0]?.parentElement as HTMLElement | undefined;
+    const initialContainerHeight = listContainer?.offsetHeight ?? null;
+    if (listContainer && initialContainerHeight) {
+      listContainer.style.minHeight = `${initialContainerHeight}px`;
+    }
+
     const targets = isSameAsLast
       ? baseTargets.concat(fragments)
       : baseTargets.concat(fragments, this.lastFragments);
     const state = this.flipPlugin.getState(targets);
+
+    const scrollTarget = isSameAsLast ? null : items[index];
 
     if (isSameAsLast) {
       this.selectedKey = null;
@@ -94,7 +102,15 @@ export class SocialLoginListComponent implements AfterViewInit, OnDestroy {
       duration: 0.5,
       ease: 'power1.inOut',
       nested: true,
-      absolute: true
+      absolute: true,
+      onComplete: () => {
+        if (listContainer) {
+          listContainer.style.minHeight = '';
+        }
+        if (scrollTarget) {
+          this.ensureVisibility(scrollTarget);
+        }
+      }
     });
   }
 
@@ -120,5 +136,20 @@ export class SocialLoginListComponent implements AfterViewInit, OnDestroy {
       itemRef.nativeElement.addEventListener('click', handler);
       this.cleanup.push(() => itemRef.nativeElement.removeEventListener('click', handler));
     });
+  }
+
+  private ensureVisibility(target: HTMLElement | undefined): void {
+    if (typeof window === 'undefined' || !target) {
+      return;
+    }
+
+    const rect = target.getBoundingClientRect();
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    const offsetGap = 32;
+
+    if (rect.bottom > viewportHeight - offsetGap) {
+      const delta = rect.bottom - viewportHeight + offsetGap;
+      window.scrollBy({ top: delta, behavior: 'smooth' });
+    }
   }
 }
