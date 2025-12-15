@@ -14,21 +14,12 @@
       </ng-template>
 
       <div class="description">
-        <p class="line-text">{{ provider.description }}</p>
-      </div>
-
-      <div class="additional-content">
-        <div class="chunk" *ngIf="provider.key !== 'google'"></div>
-        <div class="chunk" *ngIf="provider.key !== 'google'"></div>
-        <div class="chunk" *ngIf="provider.key !== 'google'"></div>
-        <button
-          type="button"
-          class="btn-theme w-full text-center"
-          [ngClass]="provider.key === 'google' ? 'btn-theme--rose' : 'btn-theme--teal'"
-          (click)="confirm(provider, $event)"
-        >
-          Continuar con {{ provider.name }}
-        </button>
+        <span class="sr-only">{{ provider.name }} - {{ provider.description }}</span>
+        <div>Inicia sesión en UniDev usando</div>
+        <div>tu cuenta de Google</div>
+        <div class="cta">
+          <button type="button" class="btn-theme">Continuar con {{ provider.name }}</button>
+        </div>
       </div>
     </li>
   </ul>

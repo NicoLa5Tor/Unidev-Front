@@ -96,11 +96,6 @@ export class SocialLoginListComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  confirm(provider: SocialLoginProvider, event: Event): void {
-    event.stopPropagation();
-    this.providerConfirmed.emit(provider);
-  }
-
   private async loadScripts(): Promise<void> {
     await this.scriptLoader.load('gsap', 'https://unpkg.com/gsap@3/dist/gsap.min.js');
     await this.scriptLoader.load('flip', 'https://unpkg.com/gsap@3/dist/Flip.min.js');
