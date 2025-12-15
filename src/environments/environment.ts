@@ -1,17 +1,6 @@
-import { readEnv } from './env.utils';
-
-const apiUrl = readEnv('NG_APP_API_URL');
-const oidcAuthority = readEnv('NG_APP_COGNITO_AUTHORITY');
-const oidcClientId = readEnv('NG_APP_COGNITO_CLIENT_ID');
-const oidcDomain = readEnv('NG_APP_COGNITO_DOMAIN');
-const oidcRedirect = readEnv('NG_APP_COGNITO_REDIRECT_URL');
-const oidcLogoutRedirect = readEnv('NG_APP_COGNITO_LOGOUT_REDIRECT');
-const oidcScope = readEnv('NG_APP_COGNITO_SCOPE');
-const oidcResponseType = readEnv('NG_APP_COGNITO_RESPONSE_TYPE');
-
 export const environment = {
   production: false,
-  apiUrl,
+  apiUrl: 'http://localhost:3000/api',
   appName: 'UnidevFront',
   enableLogging: true,
   features: {
@@ -27,13 +16,13 @@ export const environment = {
   },
   auth: {
     oidc: {
-      authority: oidcAuthority,
-      clientId: oidcClientId,
-      cognitoDomain: oidcDomain,
-      redirectUrl: oidcRedirect,
-      postLogoutRedirectUri: oidcLogoutRedirect,
-      scope: oidcScope,
-      responseType: oidcResponseType
+      authority: 'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_7axlYpwa5',
+      clientId: '4sfn29tps38iodlmtk09p6rncj',
+      cognitoDomain: 'https://us-east-17axlypwa5.auth.us-east-1.amazoncognito.com',
+      redirectUrl: 'http://localhost:5050/callback',
+      postLogoutRedirectUri: 'http://localhost:5050/logout',
+      scope: 'openid email profile',
+      responseType: 'code'
     },
     identityProviders: {
       google: 'Google',
