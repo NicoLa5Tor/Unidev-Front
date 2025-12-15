@@ -76,8 +76,8 @@ export class AnimatedTitleComponent implements AfterViewInit, OnDestroy, OnChang
   }
 
   private async loadScripts(): Promise<void> {
-    await this.scriptLoader.load('gsap', 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js');
-    await this.scriptLoader.load('splitText', 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/16327/SplitText3.min.js');
+    await this.scriptLoader.load('gsap', 'https://unpkg.com/gsap@3/dist/gsap.min.js');
+    await this.scriptLoader.load('splitText', 'https://unpkg.com/gsap@3/dist/SplitText.min.js');
     this.ngZone.runOutsideAngular(() => this.initAnimation());
   }
 

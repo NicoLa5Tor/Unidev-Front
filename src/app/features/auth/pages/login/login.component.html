@@ -12,7 +12,7 @@
       </span>
 
       <div class="space-y-6">
-        <app-animated-title text="UniDev"></app-animated-title>
+        <app-animated-title text="UniDev" [fontWeight]="650" [fontStretch]="160"></app-animated-title>
         <p class="text-lg text-slate-200/80">
           Conecta con mentores, gestiona tus proyectos y sincroniza tu avance desde un mismo lugar. Elige tu proveedor favorito o usa el portal institucional.
         </p>
@@ -34,69 +34,25 @@
       </div>
     </div>
 
-    <div class="w-full max-w-xl rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl backdrop-blur">
-      <div class="space-y-8">
-        <div class="space-y-2">
-          <p class="text-xs uppercase tracking-[0.3em] text-purple-200">Panel seguro</p>
-          <h2 class="text-3xl font-semibold text-white">Inicia sesión</h2>
-          <p class="text-sm text-slate-200/70">Selecciona un proveedor o continúa con el Hosted UI.</p>
+    <div class="w-full max-w-xl space-y-10">
+      <app-social-login-list
+        [providers]="socialProviders"
+        (providerConfirmed)="onProviderConfirmed($event)"
+      ></app-social-login-list>
+
+      <div *ngIf="isAuthenticated$ | async as isAuthenticated" class="space-y-5 rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl backdrop-blur">
+        <p class="text-sm text-emerald-300">Sesión activa en UniDev</p>
+        <div class="rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-xs text-slate-200/80">
+          <p class="text-purple-300">userData</p>
+          <pre class="mt-2 max-h-40 overflow-auto whitespace-pre-wrap break-all">{{ userData$ | async | json }}</pre>
         </div>
-
-        <div class="space-y-4">
-          <button
-            *ngFor="let provider of socialProviders"
-            type="button"
-            (click)="onSocialSignIn(provider)"
-            class="group flex w-full items-center gap-4 rounded-2xl border border-white/10 bg-slate-950/50 px-5 py-4 text-left transition hover:-translate-y-1 hover:border-white/30 hover:bg-slate-900/80"
-          >
-            <span class="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/20 text-sm font-semibold tracking-[0.2em] text-white">
-              {{ provider.iconText }}
-            </span>
-            <span class="flex-1">
-              <span class="block font-semibold text-white">Continuar con {{ provider.name }}</span>
-              <span class="text-sm text-slate-200/70">{{ provider.description }}</span>
-            </span>
-            <span class="h-10 w-10 rounded-full bg-gradient-to-br" [ngClass]="provider.accent"></span>
-          </button>
-        </div>
-
-        <div class="flex items-center gap-4 text-xs text-slate-200/60">
-          <span class="h-px flex-1 bg-white/10"></span>
-          <span>o usa el portal institucional</span>
-          <span class="h-px flex-1 bg-white/10"></span>
-        </div>
-
-        <ng-template #loginActions>
-          <div class="space-y-4">
-            <p class="text-sm text-slate-200/80">Serás redirigido al Hosted UI de Cognito para validar tu cuenta institucional.</p>
-            <button
-              type="button"
-              class="w-full rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-500 to-indigo-500 px-6 py-3 text-center text-sm font-semibold uppercase tracking-[0.3em] text-slate-950 transition hover:opacity-90"
-              (click)="login()"
-            >
-              Iniciar sesión con Cognito
-            </button>
-          </div>
-        </ng-template>
-
-        <div *ngIf="isAuthenticated$ | async as isAuthenticated; else loginActions" class="space-y-5">
-          <p class="text-sm text-emerald-300">Sesión activa en UniDev</p>
-          <div class="rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-xs text-slate-200/80">
-            <p class="text-purple-300">userData</p>
-            <pre class="mt-2 max-h-40 overflow-auto whitespace-pre-wrap break-all">{{ userData$ | async | json }}</pre>
-          </div>
-          <button
-            type="button"
-            class="w-full rounded-2xl border border-red-400/40 bg-red-500/10 px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-red-200 transition hover:bg-red-500/20"
-            (click)="logout()"
-          >
-            Cerrar sesión
-          </button>
-        </div>
-
-        <p class="text-center text-xs text-slate-300/70">
-          ¿Tu equipo necesita acceso? <a href="#" class="font-semibold text-purple-300 hover:text-purple-100">Solicita una cuenta corporativa</a>
-        </p>
+        <button
+          type="button"
+          class="w-full rounded-2xl border border-red-400/40 bg-red-500/10 px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-red-200 transition hover:bg-red-500/20"
+          (click)="logout()"
+        >
+          Cerrar sesión
+        </button>
       </div>
     </div>
   </div>

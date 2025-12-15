@@ -1,0 +1,27 @@
+<div class="staggered-list-content">
+  <ul class="list">
+    <li
+      #listItem
+      *ngFor="let provider of providers; index as i"
+      class="listItem"
+      [class.expanded]="selectedKey === provider.key"
+    >
+      <img
+        class="avatar"
+        [src]="provider.avatarUrl || 'https://assets.codepen.io/756881/person.svg'"
+        [alt]="provider.name"
+      />
+
+      <div class="description">
+        <p class="line-text">{{ provider.description }}</p>
+      </div>
+
+      <div class="additional-content">
+        <div class="chunk" *ngIf="provider.key !== 'google'"></div>
+        <div class="chunk" *ngIf="provider.key !== 'google'"></div>
+        <div class="chunk" *ngIf="provider.key !== 'google'"></div>
+        <button type="button" (click)="confirm(provider, $event)">Continuar con {{ provider.name }}</button>
+      </div>
+    </li>
+  </ul>
+</div>
