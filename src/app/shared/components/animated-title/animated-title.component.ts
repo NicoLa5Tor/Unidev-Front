@@ -61,7 +61,7 @@ export class AnimatedTitleComponent implements AfterViewInit, OnDestroy, OnChang
     if (typeof window === 'undefined') {
       return;
     }
-    this.loadScripts();
+    this.isDesktop() ? this.loadScripts() : this.stageRef.nativeElement.classList.remove('opacity-0');
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -254,5 +254,12 @@ export class AnimatedTitleComponent implements AfterViewInit, OnDestroy, OnChang
     this.chars = [];
     this.isMouseDown = false;
     document.body.classList.remove('cursor-grabbing');
+  }
+
+  private isDesktop(): boolean {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+    return window.matchMedia('(pointer: fine)').matches && window.innerWidth >= 1024;
   }
 }

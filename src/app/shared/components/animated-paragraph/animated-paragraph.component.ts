@@ -56,4 +56,5 @@ export class AnimatedParagraphComponent implements AfterViewInit, OnDestroy {
       '--mask': 'linear-gradient(-45deg, transparent -50%, black 0%)'
     });
   }
+
 }

@@ -6,11 +6,12 @@
       class="listItem"
       [class.expanded]="selectedKey === provider.key"
     >
-      <img
-        class="avatar"
-        [src]="provider.avatarUrl || 'https://assets.codepen.io/756881/person.svg'"
-        [alt]="provider.name"
-      />
+      <ng-container *ngIf="provider.avatarUrl; else fallbackAvatar">
+        <img class="avatar" [src]="provider.avatarUrl" [alt]="provider.name" />
+      </ng-container>
+      <ng-template #fallbackAvatar>
+        <div class="avatar-fallback">{{ provider.icon || provider.name.charAt(0) }}</div>
+      </ng-template>
 
       <div class="description">
         <p class="line-text">{{ provider.description }}</p>
@@ -20,7 +21,14 @@
         <div class="chunk" *ngIf="provider.key !== 'google'"></div>
         <div class="chunk" *ngIf="provider.key !== 'google'"></div>
         <div class="chunk" *ngIf="provider.key !== 'google'"></div>
-        <button type="button" (click)="confirm(provider, $event)">Continuar con {{ provider.name }}</button>
+        <button
+          type="button"
+          class="btn-theme w-full text-center"
+          [ngClass]="provider.key === 'google' ? 'btn-theme--rose' : 'btn-theme--teal'"
+          (click)="confirm(provider, $event)"
+        >
+          Continuar con {{ provider.name }}
+        </button>
       </div>
     </li>
   </ul>
