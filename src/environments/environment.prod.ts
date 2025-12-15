@@ -20,7 +20,7 @@ export const environment = {
       clientId: '37akb5r5hqpa9jgr25oa9ju5m8',
       cognitoDomain: 'https://unidev.auth.us-east-1.amazoncognito.com',
       redirectUrl: 'https://unidev.site/callback',
-      postLogoutRedirectUri: 'https://unidev.site/logout',
+      postLogoutRedirectUri: 'https://unidev.site/',
       scope: 'openid email profile',
       responseType: 'code'
     },

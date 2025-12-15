@@ -75,17 +75,23 @@ export class CallbackComponent implements OnInit {
         const { isAuthenticated, userData } = await firstValueFrom<LoginResponse>(
           this.oidcSecurityService.checkAuth()
         );
-        this.isAuthenticated = isAuthenticated;
-        this.userData = userData;
-      } else {
-        const sessionState = await firstValueFrom<AuthenticatedResult>(this.oidcSecurityService.isAuthenticated$);
-        this.isAuthenticated = sessionState.isAuthenticated;
 
-        if (!this.isAuthenticated) {
-          this.error = 'No se encontró un código de autorización para procesar.';
+        if (!isAuthenticated) {
+          await this.router.navigate(['/login']);
           return;
         }
 
+        this.isAuthenticated = true;
+        this.userData = userData;
+      } else {
+        const sessionState = await firstValueFrom<AuthenticatedResult>(this.oidcSecurityService.isAuthenticated$);
+
+        if (!sessionState.isAuthenticated) {
+          await this.router.navigate(['/login']);
+          return;
+        }
+
+        this.isAuthenticated = true;
         this.userData = await firstValueFrom(this.oidcSecurityService.userData$);
       }
 
@@ -96,7 +102,7 @@ export class CallbackComponent implements OnInit {
 
       this.idTokenPreview = idToken || 'No disponible';
       this.accessTokenPreview = accessToken || 'No disponible';
-      this.error = this.isAuthenticated ? '' : 'No se pudo establecer la sesión.';
+      this.error = '';
     } catch (error) {
       this.error = error instanceof Error ? error.message : 'Ocurrió un error al validar la sesión.';
     } finally {

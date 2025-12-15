@@ -38,18 +38,13 @@ export class AuthService {
     });
   }
 
-  logout(): Observable<void> {
-    const { clientId, postLogoutRedirectUri } = environment.auth.oidc;
+  logout(): void {
+    const { clientId, postLogoutRedirectUri, cognitoDomain } = environment.auth.oidc;
+    const url = new URL('/logout', cognitoDomain);
+    url.searchParams.set('client_id', clientId);
+    url.searchParams.set('logout_uri', postLogoutRedirectUri);
 
-    return this.oidcSecurityService
-      .logoff(undefined, {
-        customParams: {
-          client_id: clientId,
-          logout_uri: postLogoutRedirectUri
-        },
-        logoffMethod: 'POST'
-      })
-      .pipe(map(() => void 0));
+    window.location.href = url.toString();
   }
 
   async getToken(): Promise<string | null> {

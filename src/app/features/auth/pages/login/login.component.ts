@@ -50,6 +50,6 @@ export class LoginComponent {
   }
 
   logout(): void {
-    this.authService.logout().subscribe();
+    this.authService.logout();
   }
 }

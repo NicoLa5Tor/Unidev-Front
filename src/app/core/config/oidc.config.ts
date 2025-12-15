@@ -16,6 +16,9 @@ export function provideOidcClient(): EnvironmentProviders {
         clientId,
         scope,
         responseType,
+        customParamsEndSessionRequest: {
+          client_id: clientId
+        },
         silentRenew: true,
         useRefreshToken: true,
         logLevel: LogLevel.Error
