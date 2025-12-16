@@ -4,6 +4,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
 
 import { AuthService, FederatedProvider } from '../../../../core/services/auth.service';
+import { MicrosoftAccessService } from '../../../../core/services/microsoft-access.service';
 import { AnimatedTitleComponent } from '../../../../shared/components/animated-title/animated-title.component';
 import { SocialLoginListComponent, SocialLoginProvider } from '../../../../shared/components/social-login-list/social-login-list.component';
 import { MicrosoftGateDialogComponent } from '../../components/microsoft-gate-dialog/microsoft-gate-dialog.component';
@@ -18,6 +19,7 @@ import { MicrosoftGateDialogComponent } from '../../components/microsoft-gate-di
 export class LoginComponent {
   private readonly authService = inject(AuthService);
   private readonly dialog = inject(MatDialog);
+  private readonly microsoftAccessService = inject(MicrosoftAccessService);
   private readonly microsoftKey = 'incert';
 
   readonly socialProviders: SocialLoginProvider[] = [
@@ -74,10 +76,28 @@ export class LoginComponent {
   }
 
   private openMicrosoftDialog(): void {
-    this.dialog.open(MicrosoftGateDialogComponent, {
-      width: '420px',
-      maxWidth: '90vw',
-      panelClass: 'microsoft-gate-dialog'
+    this.dialog
+      .open(MicrosoftGateDialogComponent, {
+        width: '420px',
+        maxWidth: '90vw',
+        panelClass: 'microsoft-gate-dialog'
+      })
+      .afterClosed()
+      .subscribe(result => {
+        if (result?.action === 'register' && result.email) {
+          this.requestMicrosoftAccess(result.email);
+        }
+      });
+  }
+
+  private requestMicrosoftAccess(email: string): void {
+    this.microsoftAccessService.requestAccess(email).subscribe({
+      next: response => {
+        console.info('Solicitud enviada', response);
+      },
+      error: error => {
+        console.error('Error registrando correo institucional', error);
+      }
     });
   }
 }
