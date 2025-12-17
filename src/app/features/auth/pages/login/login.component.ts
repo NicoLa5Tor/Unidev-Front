@@ -2,17 +2,21 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 
 import { AuthService, FederatedProvider } from '../../../../core/services/auth.service';
 import { MicrosoftAccessService } from '../../../../core/services/microsoft-access.service';
+import { MicrosoftAccessResponseDto } from '../../../../core/models/microsoft-access.dto';
 import { AnimatedTitleComponent } from '../../../../shared/components/animated-title/animated-title.component';
 import { SocialLoginListComponent, SocialLoginProvider } from '../../../../shared/components/social-login-list/social-login-list.component';
 import { MicrosoftGateDialogComponent } from '../../components/microsoft-gate-dialog/microsoft-gate-dialog.component';
+import { MessageDialogComponent, MessageDialogData } from '../../../../shared/components/modal/message-dialog/message-dialog.component';
+import { LoadingOverlayComponent } from '../../../../shared/components/loading-overlay/loading-overlay.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, AnimatedTitleComponent, SocialLoginListComponent, MatDialogModule],
+  imports: [CommonModule, AnimatedTitleComponent, SocialLoginListComponent, MatDialogModule, LoadingOverlayComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
@@ -20,7 +24,8 @@ export class LoginComponent {
   private readonly authService = inject(AuthService);
   private readonly dialog = inject(MatDialog);
   private readonly microsoftAccessService = inject(MicrosoftAccessService);
-  private readonly microsoftKey = 'incert';
+  isRequestingMicrosoftAccess = false;
+  private isRedirectingToMicrosoft = false;
 
   readonly socialProviders: SocialLoginProvider[] = [
     {
@@ -68,11 +73,7 @@ export class LoginComponent {
   }
 
   private shouldBypassMicrosoftDialog(): boolean {
-    if (typeof window === 'undefined') {
-      return false;
-    }
-
-    return window.localStorage.getItem(this.microsoftKey) === 'true';
+    return false;
   }
 
   private openMicrosoftDialog(): void {
@@ -91,13 +92,97 @@ export class LoginComponent {
   }
 
   private requestMicrosoftAccess(email: string): void {
-    this.microsoftAccessService.requestAccess(email).subscribe({
+    console.debug('[MicrosoftAccess] Solicitando registro para', email);
+    this.isRequestingMicrosoftAccess = true;
+    this.microsoftAccessService
+      .requestAccess(email)
+      .pipe(
+        finalize(() => {
+          this.isRequestingMicrosoftAccess = false;
+        })
+      )
+      .subscribe({
       next: response => {
-        console.info('Solicitud enviada', response);
+        this.handleMicrosoftInviteResponse(response);
       },
       error: error => {
         console.error('Error registrando correo institucional', error);
+        this.openMessageDialog({
+          title: 'No pudimos procesar tu solicitud',
+          message: 'Tuvimos un inconveniente al contactar con Microsoft. Intenta nuevamente en unos segundos.',
+          type: 'error',
+          confirmLabel: 'Reintentar más tarde'
+        });
       }
+      });
+  }
+
+  private handleMicrosoftInviteResponse(response: MicrosoftAccessResponseDto): void {
+    const inviteUrl = response.inviteUrl?.trim();
+    if (inviteUrl) {
+      this.startMicrosoftRedirect(inviteUrl);
+      return;
+    }
+
+    switch (response.status) {
+      case 'INVITED':
+        this.openMessageDialog({
+          title: 'No encontramos el enlace',
+          message: 'Recibimos tu solicitud pero Microsoft no devolvió el enlace de invitación. Intenta nuevamente.',
+          type: 'error'
+        });
+        break;
+      case 'EXISTS':
+        this.openMessageDialog({
+          title: 'Tu acceso ya está habilitado',
+          message: 'No recibimos el enlace de invitación. Intenta ingresar nuevamente o contáctanos para generar uno nuevo.',
+          type: 'info'
+        });
+        break;
+      case 'ERROR':
+      default:
+        this.openMessageDialog({
+          title: 'No pudimos habilitar tu dominio',
+          message: response.message || 'El dominio aún no está disponible para UniDev. Avísanos si crees que se trata de un error.',
+          type: 'error'
+        });
+        break;
+    }
+  }
+
+  private redirectToInvite(inviteUrl: string): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.location.href = inviteUrl;
+  }
+
+  private startMicrosoftRedirect(inviteUrl: string): void {
+    this.isRedirectingToMicrosoft = true;
+    this.redirectToInvite(inviteUrl);
+  }
+
+  private openMessageDialog(data: MessageDialogData) {
+    return this.dialog.open(MessageDialogComponent, {
+      width: '440px',
+      maxWidth: '92vw',
+      panelClass: 'message-dialog-panel',
+      data
     });
+  }
+
+  get overlayLabel(): string {
+    return this.isRedirectingToMicrosoft ? 'Redirigiendo a Microsoft...' : 'Contactando Microsoft...';
+  }
+
+  get overlayHint(): string {
+    return this.isRedirectingToMicrosoft
+      ? 'Estamos abriendo el portal oficial, no cierres esta ventana.'
+      : 'Estamos validando tu dominio institucional.';
+  }
+
+  get isOverlayVisible(): boolean {
+    return this.isRequestingMicrosoftAccess || this.isRedirectingToMicrosoft;
   }
 }

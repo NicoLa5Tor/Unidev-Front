@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://back.unidev.site',
+  apiUrl: 'https://back.unidev.site/api',
   appName: 'UnidevFront',
   enableLogging: false,
   features: {

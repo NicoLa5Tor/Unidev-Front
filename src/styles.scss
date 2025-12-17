@@ -207,3 +207,9 @@ a[href*="unicorn.studio"],
   padding: clamp(1.25rem, 2vw, 2.25rem) clamp(1.5rem, 3vw, 3rem);
   width: min(520px, 92vw);
 }
+.message-dialog-panel .mat-mdc-dialog-surface,
+.message-dialog-panel .mdc-dialog__surface {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}

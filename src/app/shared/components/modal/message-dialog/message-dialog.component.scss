@@ -1,0 +1,120 @@
+:host {
+  display: block;
+}
+
+:host ::ng-deep .message-dialog-panel .mat-mdc-dialog-surface,
+:host ::ng-deep .message-dialog-panel .mdc-dialog__surface {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.message-dialog {
+  position: relative;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  border-radius: 28px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 35px 90px rgba(2, 6, 23, 0.85);
+  color: #f8fafc;
+  overflow: hidden;
+}
+
+.message-dialog__glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.25), transparent 45%),
+    linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(15, 23, 42, 0.75));
+  filter: blur(40px);
+  opacity: 0.45;
+  z-index: 0;
+}
+
+.message-dialog__header,
+.message-dialog__body,
+.message-dialog__actions {
+  position: relative;
+  z-index: 1;
+}
+
+.message-dialog__header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.message-dialog h2 {
+  margin: 0;
+  font-family: var(--font-heading, 'Space Grotesk', sans-serif);
+  font-size: clamp(1.15rem, 2.4vw, 1.45rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: rgba(248, 250, 252, 0.96);
+}
+
+.message-dialog__badge {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  color: #0f172a;
+  background: linear-gradient(135deg, rgba(248, 250, 252, 0.95), #f472b6);
+  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.5);
+}
+
+.message-dialog__support {
+  margin: 0;
+  margin-top: 0.15rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: rgba(248, 250, 252, 0.75);
+}
+
+.message-dialog__body p {
+  margin: 0;
+  color: rgba(248, 250, 252, 0.95);
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
+  line-height: 1.65;
+  font-family: var(--font-body, 'Space Grotesk', sans-serif);
+  letter-spacing: 0.01em;
+  font-weight: 500;
+}
+
+.message-dialog__actions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 480px) {
+  .message-dialog {
+    padding: 1.25rem;
+  }
+
+  .message-dialog__header {
+    align-items: flex-start;
+  }
+
+  .message-dialog__badge {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.message-dialog.success .message-dialog__badge {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.85), rgba(110, 231, 183, 0.95));
+}
+
+.message-dialog.error .message-dialog__badge {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(248, 113, 113, 0.95));
+}

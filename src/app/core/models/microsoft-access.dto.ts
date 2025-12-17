@@ -3,6 +3,7 @@ export interface MicrosoftAccessRequestDto {
 }
 
 export interface MicrosoftAccessResponseDto {
-  status: 'pending' | 'registered';
-  message?: string;
+  status: 'ERROR' | 'INVITED' | 'EXISTS';
+  inviteUrl?: string | null;
+  message?: string | null;
 }

@@ -1,0 +1,18 @@
+<div class="message-dialog" [ngClass]="type">
+  <div class="message-dialog__glow" aria-hidden="true"></div>
+  <div class="message-dialog__header">
+    <div class="message-dialog__badge" aria-hidden="true">{{ badgeLabel }}</div>
+    <div>
+      <h2 mat-dialog-title>{{ data.title || 'Aviso importante' }}</h2>
+      <p class="message-dialog__support" *ngIf="supportText">{{ supportText }}</p>
+    </div>
+  </div>
+  <div mat-dialog-content class="message-dialog__body">
+    <p>{{ data.message }}</p>
+  </div>
+  <div mat-dialog-actions class="message-dialog__actions" align="end" *ngIf="showActions">
+    <button type="button" class="btn-theme btn-theme--rose" (click)="close()">
+      {{ data.confirmLabel || 'Entendido' }}
+    </button>
+  </div>
+</div>

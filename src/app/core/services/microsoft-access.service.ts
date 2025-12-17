@@ -8,7 +8,7 @@ import { MicrosoftAccessRequestDto, MicrosoftAccessResponseDto } from '../models
 @Injectable({ providedIn: 'root' })
 export class MicrosoftAccessService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/tenant/microsoft-access`;
+  private readonly baseUrl = `${environment.apiUrl}/auth/invite`;
 
   requestAccess(email: string): Observable<MicrosoftAccessResponseDto> {
     const payload: MicrosoftAccessRequestDto = { email };
