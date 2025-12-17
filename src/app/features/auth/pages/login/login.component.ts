@@ -73,7 +73,11 @@ export class LoginComponent {
   }
 
   private shouldBypassMicrosoftDialog(): boolean {
-    return false;
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    return window.localStorage.getItem('microsoft-bypass') === 'true';
   }
 
   private openMicrosoftDialog(): void {

@@ -7,3 +7,7 @@ export interface MicrosoftAccessResponseDto {
   inviteUrl?: string | null;
   message?: string | null;
 }
+
+export interface MicrosoftInvitationDeactivateRequestDto {
+  token: string;
+}
