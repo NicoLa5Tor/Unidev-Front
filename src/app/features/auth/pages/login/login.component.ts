@@ -138,11 +138,7 @@ export class LoginComponent {
         break;
       case 'EXISTS':
         this.persistMicrosoftBypass();
-        this.openMessageDialog({
-          title: 'Tu acceso ya está habilitado',
-          message: 'No recibimos el enlace de invitación. Intenta ingresar nuevamente o contáctanos para generar uno nuevo.',
-          type: 'info'
-        });
+        this.authService.federatedSignIn('microsoft');
         break;
       case 'ERROR':
       default:
