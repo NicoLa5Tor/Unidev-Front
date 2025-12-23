@@ -21,7 +21,7 @@ export const environment = {
       cognitoDomain: 'https://us-east-17axlypwa5.auth.us-east-1.amazoncognito.com',
       redirectUrl: 'http://localhost:5050/callback',
       postLogoutRedirectUri: 'http://localhost:5050/',
-      scope: 'openid email profile',
+      scope: 'openid',
       responseType: 'code'
     },
     identityProviders: {

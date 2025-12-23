@@ -17,11 +17,11 @@ export const environment = {
   auth: {
     oidc: {
       authority: 'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_7axlYpwa5',
-      clientId: '37akb5r5hqpa9jgr25oa9ju5m8',
-      cognitoDomain: 'https://unidev.auth.us-east-1.amazoncognito.com',
+      clientId: '4sfn29tps38iodlmtk09p6rncj',
+      cognitoDomain: 'https://us-east-17axlypwa5.auth.us-east-1.amazoncognito.com',
       redirectUrl: 'https://unidev.site/callback',
       postLogoutRedirectUri: 'https://unidev.site/',
-      scope: 'openid email profile',
+      scope: 'openid',
       responseType: 'code'
     },
     identityProviders: {

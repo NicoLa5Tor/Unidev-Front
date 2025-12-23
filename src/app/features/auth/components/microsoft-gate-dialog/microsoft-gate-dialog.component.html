@@ -18,11 +18,17 @@
     </p>
     <mat-form-field appearance="fill" class="w-full">
       <mat-label>Correo institucional</mat-label>
-      <input #emailInput matInput type="email" placeholder="tucorreo@dominio" />
+      <input matInput type="email" placeholder="tucorreo@dominio" [formControl]="emailControl" autocomplete="email" />
       <mat-hint>Usa únicamente dominios oficiales registrados por tu organización.</mat-hint>
+      <mat-error *ngIf="emailControl.hasError('required')">Este campo es obligatorio.</mat-error>
+      <mat-error *ngIf="emailControl.hasError('email') && !emailControl.hasError('required')">
+        Ingresa un correo válido (usuario&#64;dominio).
+      </mat-error>
     </mat-form-field>
   </div>
   <div mat-dialog-actions>
-    <button type="button" class="btn-theme btn-theme--rose" (click)="register(emailInput.value)">Registrarme</button>
+    <button type="button" class="btn-theme btn-theme--rose" (click)="register()">
+      Registrarme
+    </button>
   </div>
 </div>

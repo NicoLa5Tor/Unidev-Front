@@ -137,6 +137,7 @@ export class LoginComponent {
         });
         break;
       case 'EXISTS':
+        this.persistMicrosoftBypass();
         this.openMessageDialog({
           title: 'Tu acceso ya está habilitado',
           message: 'No recibimos el enlace de invitación. Intenta ingresar nuevamente o contáctanos para generar uno nuevo.',
@@ -165,6 +166,14 @@ export class LoginComponent {
   private startMicrosoftRedirect(inviteUrl: string): void {
     this.isRedirectingToMicrosoft = true;
     this.redirectToInvite(inviteUrl);
+  }
+
+  private persistMicrosoftBypass(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.localStorage.setItem('microsoft-bypass', 'true');
   }
 
   private openMessageDialog(data: MessageDialogData) {
