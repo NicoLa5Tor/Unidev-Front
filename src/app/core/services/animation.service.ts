@@ -1,7 +1,6 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-
-declare var require: any;
+import * as anime from 'animejs';
 
 export interface AnimationConfig {
   targets: string | Element | Element[] | NodeList;
@@ -24,7 +23,7 @@ export class AnimationService {
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
     if (isPlatformBrowser(this.platformId)) {
-      this.anime = require('animejs');
+      this.anime = anime;
     }
   }
 

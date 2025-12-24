@@ -1,5 +1,5 @@
 // User pages
-export * from './pages/user-list/user-list.component';
+export * from './pages/users-panel/users-panel.component';
 
 // User services
 export * from './services/user.service';

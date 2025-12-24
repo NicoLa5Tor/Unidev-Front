@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 
 import { environment } from '../environments/environment';
 import { UnicornBackgroundComponent } from './shared/layout/unicorn-background/unicorn-background.component';
+import { ThemeService } from './core/services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -12,4 +13,6 @@ import { UnicornBackgroundComponent } from './shared/layout/unicorn-background/u
 })
 export class AppComponent {
   protected readonly unicornConfig = environment.unicornEmbed;
+
+  constructor(private readonly themeService: ThemeService) {}
 }

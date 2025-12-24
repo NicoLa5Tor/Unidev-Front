@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -15,7 +17,11 @@ export const routes: Routes = [
   },
   {
     path: 'users',
-    loadComponent: () => import('./features/users/pages/user-list/user-list.component').then(m => m.UserListComponent)
+    loadComponent: () => import('./features/users/pages/users-panel/users-panel.component').then(m => m.UsersPanelComponent),
+    canActivate: [authGuard, roleGuard],
+    data: {
+      roles: ['USUARIOS']
+    }
   },
   {
     path: 'blackbird-experience',

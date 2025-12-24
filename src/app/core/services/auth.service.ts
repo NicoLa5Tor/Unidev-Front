@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { AuthenticatedResult, LoginResponse, OidcSecurityService } from 'angular-auth-oidc-client';
 import { Observable, firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -11,6 +12,7 @@ export type FederatedProvider = 'google' | 'microsoft';
 })
 export class AuthService {
   private readonly oidcSecurityService = inject(OidcSecurityService);
+  private readonly http = inject(HttpClient);
   private readonly identityProviders: Partial<Record<FederatedProvider, string>> =
     environment.auth?.identityProviders ?? {};
   readonly isAuthenticated$ = this.oidcSecurityService.isAuthenticated$.pipe(
@@ -38,21 +40,23 @@ export class AuthService {
     });
   }
 
-  logout(): void {
+  async logout(): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.http.post(`${environment.apiUrl}/auth/logout`, null, {
+          withCredentials: true
+        })
+      );
+    } catch {
+      // Even if the backend logout fails, continue with provider logout.
+    }
+
     const { clientId, postLogoutRedirectUri, cognitoDomain } = environment.auth.oidc;
     const url = new URL('/logout', cognitoDomain);
     url.searchParams.set('client_id', clientId);
     url.searchParams.set('logout_uri', postLogoutRedirectUri);
 
     window.location.href = url.toString();
-  }
-
-  async getToken(): Promise<string | null> {
-    try {
-      return await firstValueFrom(this.oidcSecurityService.getAccessToken());
-    } catch {
-      return null;
-    }
   }
 
   ensureAuthenticated(): Observable<boolean> {

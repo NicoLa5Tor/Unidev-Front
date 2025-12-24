@@ -4,7 +4,7 @@
 @use 'tailwindcss/utilities';
 
 /* Import Google Fonts for futuristic look */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap');
 @import url('https://unpkg.com/aos@2.3.1/dist/aos.css');
 
 /* Global animations configuration */
@@ -12,8 +12,73 @@
   --animate-duration: 1s;
   --animate-delay: 0s;
   --animate-repeat: 1;
-  --font-body: 'Space Grotesk', sans-serif;
-  --font-heading: 'Orbitron', 'Space Grotesk', sans-serif;
+  --font-body: 'Sora', 'Space Grotesk', sans-serif;
+  --font-heading: 'Sora', 'Space Grotesk', sans-serif;
+  --bg: #0a0a0a;
+  --panel: rgba(26, 26, 26, 0.86);
+  --panel-border: rgba(168, 85, 247, 0.25);
+  --text: #ffffff;
+  --muted: #cbd5f5;
+  --accent-1: #a855f7;
+  --accent-2: #ec4899;
+  --accent-3: #06b6d4;
+  --accent-4: #10b981;
+  --grid-color: rgba(168, 85, 247, 0.1);
+  --shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  --scroll-track: #1a1a1a;
+  --scroll-thumb: #a855f7;
+  --scroll-thumb-hover: #9333ea;
+}
+
+body.theme-cyber {
+  --bg: #0a0a0a;
+  --panel: rgba(26, 26, 26, 0.86);
+  --panel-border: rgba(168, 85, 247, 0.25);
+  --text: #ffffff;
+  --muted: #cbd5f5;
+  --accent-1: #a855f7;
+  --accent-2: #ec4899;
+  --accent-3: #06b6d4;
+  --accent-4: #10b981;
+  --grid-color: rgba(168, 85, 247, 0.1);
+  --shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  --scroll-track: #1a1a1a;
+  --scroll-thumb: #a855f7;
+  --scroll-thumb-hover: #9333ea;
+}
+
+body.theme-light {
+  --bg: #f8fafc;
+  --panel: rgba(255, 255, 255, 0.92);
+  --panel-border: rgba(59, 130, 246, 0.2);
+  --text: #0f172a;
+  --muted: #475569;
+  --accent-1: #2563eb;
+  --accent-2: #db2777;
+  --accent-3: #0891b2;
+  --accent-4: #16a34a;
+  --grid-color: rgba(59, 130, 246, 0.08);
+  --shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
+  --scroll-track: #e2e8f0;
+  --scroll-thumb: #94a3b8;
+  --scroll-thumb-hover: #64748b;
+}
+
+body.theme-abyss {
+  --bg: #050b1d;
+  --panel: rgba(10, 15, 30, 0.9);
+  --panel-border: rgba(56, 189, 248, 0.25);
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --accent-1: #38bdf8;
+  --accent-2: #f472b6;
+  --accent-3: #22d3ee;
+  --accent-4: #34d399;
+  --grid-color: rgba(56, 189, 248, 0.08);
+  --shadow: 0 20px 50px rgba(2, 6, 23, 0.6);
+  --scroll-track: #0f172a;
+  --scroll-thumb: #38bdf8;
+  --scroll-thumb-hover: #0ea5e9;
 }
 
 /* Custom scrollbar for dark theme */
@@ -22,16 +87,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #1a1a1a;
+  background: var(--scroll-track);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #a855f7;
+  background: var(--scroll-thumb);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #9333ea;
+  background: var(--scroll-thumb-hover);
 }
 
 /* Smooth scrolling */
@@ -41,8 +106,8 @@ html {
 
 /* Body dark theme */
 body {
-  background-color: #0a0a0a;
-  color: #ffffff;
+  background-color: var(--bg);
+  color: var(--text);
   font-family: var(--font-body);
   font-feature-settings: 'liga' 1, 'kern' 1;
   margin: 0;
@@ -179,8 +244,8 @@ app-root {
 
 .bg-cyber-grid {
   background-image:
-    linear-gradient(rgba(168, 85, 247, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(168, 85, 247, 0.1) 1px, transparent 1px);
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
   background-size: 20px 20px;
 }
 
