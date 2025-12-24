@@ -80,7 +80,10 @@ import { environment } from '../../../../../environments/environment';
                 </div>
 
                 <ng-container *ngIf="!error">
-                  <p *ngIf="isAuthenticated" class="text-emerald-300 font-medium">Sesión validada. Redirigiendo...</p>
+                  <p *ngIf="isAuthenticated" class="text-emerald-300 font-medium">Sesión validada. Revisando datos...</p>
+                  <p *ngIf="fetchUserStatus === 401" class="text-amber-300 font-medium mt-2">
+                    La sesión no está disponible en /users/me (401). Revisa cookies y CORS.
+                  </p>
                   <p class="text-sm text-purple-200/80 mt-4">
                     Ya puedes continuar en UniDev. Si no ocurre nada en unos segundos, usa los accesos rápidos.
                   </p>
@@ -128,6 +131,7 @@ export class CallbackComponent implements OnInit {
   lastPayload = '';
   lastResponse = '';
   debugInfo = '';
+  fetchUserStatus: number | null = null;
   private isBypassRedirect = false;
   private readonly redirectPath = '/';
   private readonly redirectDelayMs = 1200;
@@ -167,16 +171,53 @@ export class CallbackComponent implements OnInit {
 
       this.statusMessage = 'Validando con UniDev...';
       await this.exchangeAuthorizationCode(code, codeVerifier);
-      await this.fetchCurrentUser();
+
+      try {
+        await this.fetchCurrentUser();
+        this.fetchUserStatus = 200;
+      } catch (fetchError) {
+        const httpError = fetchError as HttpErrorResponse | undefined;
+        this.fetchUserStatus = httpError?.status ?? null;
+        this.debugInfo = JSON.stringify(
+          {
+            fetchUserStatus: httpError?.status ?? null,
+            fetchUserStatusText: httpError?.statusText ?? null,
+            fetchUserError: httpError?.error ?? null,
+            fetchUserMessage: fetchError instanceof Error ? fetchError.message : null
+          },
+          null,
+          2
+        );
+      }
 
       this.isAuthenticated = true;
       this.error = '';
-      this.statusMessage = 'Sesión validada. Puedes continuar desde aquí.';
+      this.statusMessage = 'Callback completado. Puedes revisar la respuesta aquí.';
     } catch (error) {
       if (error instanceof Error && error.message === 'BYPASS_REDIRECT') {
         return;
       }
-      this.error = error instanceof Error ? error.message : 'Ocurrió un error al validar la sesión.';
+      if (error instanceof HttpErrorResponse) {
+        const statusLine = `${error.status || '0'} ${error.statusText || 'Error'}`.trim();
+        const backendMessage =
+          typeof error.error === 'string'
+            ? error.error
+            : typeof error.error?.message === 'string'
+              ? error.error.message
+              : '';
+        this.error = `Error al validar la sesión (${statusLine}). ${backendMessage}`.trim();
+        this.lastResponse = JSON.stringify(
+          {
+            status: error.status,
+            statusText: error.statusText,
+            error: error.error ?? null
+          },
+          null,
+          2
+        );
+      } else {
+        this.error = error instanceof Error ? error.message : 'Ocurrió un error al validar la sesión.';
+      }
     } finally {
       this.isLoading = false;
     }
@@ -224,11 +265,19 @@ export class CallbackComponent implements OnInit {
             codeVerifier
           },
           {
-            withCredentials: true
+            observe: 'response',
+            responseType: 'text'
           }
         )
       );
-      this.lastResponse = JSON.stringify(response ?? null, null, 2);
+      this.lastResponse = JSON.stringify(
+        {
+          status: response.status,
+          statusText: response.statusText
+        },
+        null,
+        2
+      );
       if (this.shouldBypassFromResponse(response)) {
         this.isBypassRedirect = true;
         this.persistMicrosoftBypass();
@@ -252,10 +301,20 @@ export class CallbackComponent implements OnInit {
   }
 
   private async fetchCurrentUser(): Promise<void> {
-    await firstValueFrom(
+    const response = await firstValueFrom(
       this.http.get(`${environment.apiUrl}/users/me`, {
-        withCredentials: true
+        observe: 'response',
+        responseType: 'text'
       })
+    );
+    this.lastResponse = JSON.stringify(
+      {
+        status: response.status,
+        statusText: response.statusText,
+        body: response.body ?? null
+      },
+      null,
+      2
     );
   }
 
