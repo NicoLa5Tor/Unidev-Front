@@ -3,7 +3,7 @@
     <div class="flex justify-between items-center py-4">
       
       <!-- Logo -->
-      <div class="flex items-center space-x-3">
+      <a routerLink="/" class="flex items-center space-x-3">
         <div class="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
           <span class="text-white font-bold text-xl">U</span>
         </div>
@@ -13,17 +13,18 @@
           </h1>
           <p class="text-xs text-gray-400">Conectando Talentos</p>
         </div>
-      </div>
+      </a>
 
       <!-- Desktop Navigation -->
       <nav class="hidden md:flex items-center space-x-8">
         <ul class="flex items-center space-x-6">
-          <li *ngFor="let item of navItems; let i = index">
-            <a 
-              [href]="item.href" 
-              (click)="setActiveNav(i)"
-              [class]="item.active ? 'text-purple-400 border-b-2 border-purple-400 pb-1' : 'text-gray-300 hover:text-white transition-colors'"
-              class="font-medium">
+          <li *ngFor="let item of navItems">
+            <a
+              [routerLink]="item.route"
+              [fragment]="item.fragment || undefined"
+              [class]="isActive(item) ? 'text-purple-400 border-b-2 border-purple-400 pb-1' : 'text-gray-300 hover:text-white transition-colors'"
+              class="font-medium"
+            >
               {{ item.label }}
             </a>
           </li>
@@ -48,14 +49,17 @@
       </button>
     </div>
 
-    <!-- Mobile Menu -->
-    <div *ngIf="isMenuOpen" class="md:hidden py-4 border-t border-gray-700">
+      <!-- Mobile Menu -->
+      <div *ngIf="isMenuOpen" class="md:hidden py-4 border-t border-gray-700">
       <nav class="space-y-4">
-        <a *ngFor="let item of navItems; let i = index"
-           [href]="item.href" 
-           (click)="setActiveNav(i); closeMenu()"
-           [class]="item.active ? 'text-purple-400' : 'text-gray-300'"
-           class="block py-2 hover:text-white transition-colors">
+        <a
+          *ngFor="let item of navItems"
+          [routerLink]="item.route"
+          [fragment]="item.fragment || undefined"
+          (click)="closeMenu()"
+          [class]="isActive(item) ? 'text-purple-400' : 'text-gray-300'"
+          class="block py-2 hover:text-white transition-colors"
+        >
           {{ item.label }}
         </a>
         <div class="pt-4">

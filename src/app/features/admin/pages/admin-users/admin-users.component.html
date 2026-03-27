@@ -1,0 +1,324 @@
+<app-dashboard-shell
+  eyebrow="Consola administrativa"
+  title="Gestion de usuarios"
+  avatarLabel="AD"
+  [activeTab]="activeTab"
+  [navItems]="navItems"
+  (tabChange)="setActiveTab($event)"
+>
+  <button
+    dashboard-header-actions
+    class="rounded-full border border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/15 px-3 py-1 font-tech text-[var(--accent-1)]"
+    (click)="openCreateEditor()"
+  >
+    Nuevo usuario
+  </button>
+
+  <a
+    dashboard-header-actions
+    routerLink="/admin/companies"
+    class="rounded-full border border-[color:var(--accent-3)]/35 bg-[var(--accent-3)]/10 px-3 py-1 font-tech text-[var(--accent-3)]"
+  >
+    Empresas
+  </a>
+
+  <button
+    dashboard-header-actions-mobile
+    class="rounded-full border border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/15 px-3 py-1 font-tech text-[var(--accent-1)]"
+    (click)="openCreateEditor()"
+  >
+    Nuevo
+  </button>
+
+  <a
+    dashboard-header-actions-mobile
+    routerLink="/admin/companies"
+    class="rounded-full border border-[color:var(--accent-3)]/35 bg-[var(--accent-3)]/10 px-3 py-1 font-tech text-[var(--accent-3)]"
+  >
+    Empresas
+  </a>
+
+  <div
+    *ngIf="message"
+    class="rounded-3xl border px-4 py-3 text-sm shadow-[var(--shadow)]"
+    [ngClass]="message.type === 'success'
+      ? 'border-[color:var(--accent-4)]/30 bg-[var(--accent-4)]/10 text-[var(--text)]'
+      : 'border-rose-400/30 bg-rose-500/10 text-rose-100'"
+  >
+    {{ message.text }}
+  </div>
+
+  <section *ngIf="activeTab === 'overview'" class="space-y-6">
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <article class="rounded-3xl border border-[color:var(--accent-3)]/20 bg-[var(--panel)] p-5 shadow-[var(--shadow)]">
+        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-3)]">Total</p>
+        <h2 class="mt-3 text-4xl font-cyber text-[var(--text)]">{{ users.length }}</h2>
+        <p class="mt-2 text-sm text-[var(--muted)]">Usuarios registrados en la plataforma.</p>
+      </article>
+
+      <article class="rounded-3xl border border-[color:var(--accent-1)]/20 bg-[var(--panel)] p-5 shadow-[var(--shadow)]">
+        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-1)]">Admins</p>
+        <h2 class="mt-3 text-4xl font-cyber text-[var(--text)]">{{ adminUsersCount }}</h2>
+        <p class="mt-2 text-sm text-[var(--muted)]">Cuentas con acceso administrativo completo.</p>
+      </article>
+
+      <article class="rounded-3xl border border-[color:var(--accent-2)]/20 bg-[var(--panel)] p-5 shadow-[var(--shadow)]">
+        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-2)]">Empresas</p>
+        <h2 class="mt-3 text-4xl font-cyber text-[var(--text)]">{{ companyUsersCount }}</h2>
+        <p class="mt-2 text-sm text-[var(--muted)]">Perfiles asociados a empresas.</p>
+      </article>
+
+      <article class="rounded-3xl border border-[color:var(--accent-4)]/20 bg-[var(--panel)] p-5 shadow-[var(--shadow)]">
+        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-4)]">Sin empresa</p>
+        <h2 class="mt-3 text-4xl font-cyber text-[var(--text)]">{{ usersWithoutCompanyCount }}</h2>
+        <p class="mt-2 text-sm text-[var(--muted)]">Usuarios cuya cuenta no está ligada a `Company`.</p>
+      </article>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+      <div class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[var(--shadow)]">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-3)]">Estado actual</p>
+            <h3 class="mt-2 text-2xl font-cyber text-[var(--text)]">Consola central de accesos</h3>
+          </div>
+          <button
+            class="rounded-full border border-[color:var(--accent-3)]/35 bg-[var(--accent-3)]/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-[var(--accent-3)]"
+            (click)="refreshUsers()"
+          >
+            Refrescar
+          </button>
+        </div>
+
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
+          <div class="rounded-2xl border border-[color:var(--panel-border)] bg-black/10 p-4">
+            <p class="text-sm text-[var(--muted)]">Usuarios finales</p>
+            <p class="mt-2 text-3xl font-semibold text-[var(--text)]">{{ finalUsersCount }}</p>
+          </div>
+          <div class="rounded-2xl border border-[color:var(--panel-border)] bg-black/10 p-4">
+            <p class="text-sm text-[var(--muted)]">Empresas registradas</p>
+            <p class="mt-2 text-3xl font-semibold text-[var(--text)]">{{ companies.length }}</p>
+          </div>
+        </div>
+      </div>
+
+      <aside class="rounded-3xl border border-[color:var(--accent-1)]/20 bg-[var(--panel)] p-6 shadow-[var(--shadow)]">
+        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-1)]">Notas</p>
+        <ul class="mt-4 space-y-3 text-sm text-[var(--muted)]">
+          <li>Los administradores ya no requieren `Company` para iniciar sesión.</li>
+          <li>Los usuarios normales siguen necesitando una empresa válida.</li>
+          <li>El campo `sub` es importante para cuentas provisionadas manualmente.</li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <section *ngIf="activeTab === 'directory'" class="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
+    <div class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[var(--shadow)]">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-1)]">Directorio</p>
+          <h2 class="mt-2 text-2xl font-cyber text-[var(--text)]">Usuarios registrados</h2>
+        </div>
+        <input
+          type="search"
+          [(ngModel)]="searchTerm"
+          placeholder="Buscar por email, nombre o rol"
+          class="min-w-[18rem] rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-sm text-[var(--text)] placeholder:text-[var(--muted)] focus:border-[color:var(--accent-3)]/60 focus:outline-none"
+        />
+      </div>
+
+      <div *ngIf="isLoading" class="mt-6 rounded-2xl border border-[color:var(--panel-border)] bg-black/10 p-5 text-sm text-[var(--muted)]">
+        Cargando usuarios...
+      </div>
+
+      <div *ngIf="!isLoading" class="mt-6 space-y-3">
+        <button
+          *ngFor="let user of filteredUsers"
+          class="w-full rounded-2xl border p-4 text-left transition hover:scale-[1.01]"
+          [ngClass]="selectedUser?.id === user.id
+            ? 'border-[color:var(--accent-1)]/40 bg-[var(--accent-1)]/10'
+            : 'border-[color:var(--panel-border)] bg-black/10 hover:border-[color:var(--accent-3)]/30'"
+          (click)="selectUser(user)"
+        >
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 class="text-lg font-semibold text-[var(--text)]">{{ user.displayName || user.nombre || 'Sin nombre' }}</h3>
+              <p class="text-sm text-[var(--muted)]">{{ user.email }}</p>
+            </div>
+            <span class="rounded-full border border-[color:var(--accent-3)]/30 bg-[var(--accent-3)]/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-[var(--accent-3)]">
+              {{ user.roleName || 'Sin rol' }}
+            </span>
+          </div>
+          <div class="mt-4 flex flex-wrap gap-3 text-xs text-[var(--muted)]">
+            <span>Sub: {{ user.sub }}</span>
+            <span>Company: {{ user.companyId ?? 'N/A' }}</span>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <aside class="rounded-3xl border border-[color:var(--accent-3)]/20 bg-[var(--panel)] p-6 shadow-[var(--shadow)]">
+      <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-3)]">Detalle</p>
+      <ng-container *ngIf="selectedUser; else emptySelection">
+        <h2 class="mt-2 text-2xl font-cyber text-[var(--text)]">{{ selectedUser.displayName || selectedUser.nombre || 'Sin nombre' }}</h2>
+        <div class="mt-5 space-y-3 text-sm text-[var(--muted)]">
+          <p><span class="text-[var(--text)]">Email:</span> {{ selectedUser.email }}</p>
+          <p><span class="text-[var(--text)]">Rol:</span> {{ selectedUser.roleName || 'Sin rol' }}</p>
+          <p><span class="text-[var(--text)]">Company:</span> {{ selectedUser.companyId ?? 'Sin company' }}</p>
+          <p><span class="text-[var(--text)]">Provider:</span> {{ selectedUser.provider || 'N/A' }}</p>
+          <p><span class="text-[var(--text)]">Sub:</span> {{ selectedUser.sub }}</p>
+        </div>
+
+        <div class="mt-6 flex flex-wrap gap-3">
+          <button
+            class="rounded-xl border border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/15 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[var(--accent-1)]"
+            (click)="editUser(selectedUser)"
+          >
+            Editar
+          </button>
+          <button
+            class="rounded-xl border border-rose-400/35 bg-rose-500/10 px-4 py-2 text-xs uppercase tracking-[0.2em] text-rose-200"
+            (click)="deleteSelectedUser()"
+          >
+            Eliminar
+          </button>
+        </div>
+      </ng-container>
+
+      <ng-template #emptySelection>
+        <div class="mt-6 rounded-2xl border border-dashed border-[color:var(--panel-border)] p-5 text-sm text-[var(--muted)]">
+          Selecciona un usuario del listado para inspeccionarlo o editarlo.
+        </div>
+      </ng-template>
+    </aside>
+  </section>
+
+  <section *ngIf="activeTab === 'editor'" class="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+    <form class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[var(--shadow)]" (ngSubmit)="saveUser()">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-2)]">Editor</p>
+          <h2 class="mt-2 text-2xl font-cyber text-[var(--text)]">
+            {{ editorMode === 'edit' ? 'Editar usuario' : 'Crear usuario' }}
+          </h2>
+        </div>
+        <button
+          type="button"
+          class="rounded-full border border-[color:var(--panel-border)] bg-black/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-[var(--muted)]"
+          (click)="openCreateEditor()"
+        >
+          Limpiar
+        </button>
+      </div>
+
+      <div class="mt-6 grid gap-4 md:grid-cols-2">
+        <label class="space-y-2 text-sm text-[var(--muted)]">
+          <span>Nombre</span>
+          <input [(ngModel)]="editor.nombre" name="nombre" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none" />
+        </label>
+
+        <label class="space-y-2 text-sm text-[var(--muted)]">
+          <span>Display name</span>
+          <input [(ngModel)]="editor.displayName" name="displayName" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none" />
+        </label>
+
+        <label class="space-y-2 text-sm text-[var(--muted)]">
+          <span>Email</span>
+          <input [(ngModel)]="editor.email" name="email" type="email" required class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none" />
+        </label>
+
+        <label class="space-y-2 text-sm text-[var(--muted)]">
+          <span>Subject Cognito</span>
+          <input [(ngModel)]="editor.sub" name="sub" required class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none" />
+        </label>
+
+        <label class="space-y-2 text-sm text-[var(--muted)]">
+          <span>Rol</span>
+          <select
+            [(ngModel)]="editor.roleId"
+            name="roleId"
+            required
+            class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none"
+            (ngModelChange)="onRoleChange()"
+          >
+            <option [ngValue]="null">Selecciona un rol</option>
+            <option *ngFor="let role of roles" [ngValue]="role.id">{{ role.roleName }}</option>
+          </select>
+        </label>
+
+        <label class="space-y-2 text-sm text-[var(--muted)]">
+          <span>Company</span>
+          <select
+            [(ngModel)]="editor.companyId"
+            name="companyId"
+            [disabled]="!requiresCompany"
+            class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option [ngValue]="null">{{ requiresCompany ? 'Selecciona una company' : 'No aplica para admins' }}</option>
+            <option *ngFor="let company of companies" [ngValue]="company.id">{{ company.companyName }} · {{ company.domain }}</option>
+          </select>
+        </label>
+
+        <label class="space-y-2 text-sm text-[var(--muted)]">
+          <span>Provider</span>
+          <input [(ngModel)]="editor.provider" name="provider" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none" />
+        </label>
+
+        <label class="space-y-2 text-sm text-[var(--muted)]">
+          <span>Issuer</span>
+          <input [(ngModel)]="editor.issuer" name="issuer" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none" />
+        </label>
+
+        <label class="space-y-2 text-sm text-[var(--muted)]">
+          <span>Edad</span>
+          <input [(ngModel)]="editor.edad" name="edad" type="number" min="0" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none" />
+        </label>
+
+        <label class="space-y-2 text-sm text-[var(--muted)]">
+          <span>Wallet phone</span>
+          <input [(ngModel)]="editor.walletPhone" name="walletPhone" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none" />
+        </label>
+
+        <label class="space-y-2 text-sm text-[var(--muted)]">
+          <span>ID type</span>
+          <input [(ngModel)]="editor.idType" name="idType" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none" />
+        </label>
+
+        <label class="space-y-2 text-sm text-[var(--muted)]">
+          <span>ID number</span>
+          <input [(ngModel)]="editor.idNumber" name="idNumber" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none" />
+        </label>
+      </div>
+
+      <div class="mt-6 flex flex-wrap gap-3">
+        <button
+          type="submit"
+          class="rounded-xl border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/15 px-5 py-3 text-xs uppercase tracking-[0.2em] text-[var(--accent-2)]"
+          [disabled]="isSaving"
+        >
+          {{ isSaving ? 'Guardando...' : editorMode === 'edit' ? 'Actualizar usuario' : 'Crear usuario' }}
+        </button>
+
+        <button
+          *ngIf="editorMode === 'edit'"
+          type="button"
+          class="rounded-xl border border-rose-400/35 bg-rose-500/10 px-5 py-3 text-xs uppercase tracking-[0.2em] text-rose-200"
+          [disabled]="isSaving"
+          (click)="deleteSelectedUser()"
+        >
+          Eliminar usuario
+        </button>
+      </div>
+    </form>
+
+    <aside class="rounded-3xl border border-[color:var(--accent-2)]/20 bg-[var(--panel)] p-6 shadow-[var(--shadow)]">
+      <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-2)]">Ayuda</p>
+      <div class="mt-4 space-y-4 text-sm text-[var(--muted)]">
+        <p>Para cuentas bootstrap admin, deja `Company` vacío y selecciona `ADMINISTRADORES`.</p>
+        <p>Para usuarios normales o de empresa, asigna una `Company` válida antes de guardar.</p>
+        <p>El campo `sub` debe corresponder al subject real de Cognito si quieres mapear correctamente el login.</p>
+      </div>
+    </aside>
+  </section>
+</app-dashboard-shell>

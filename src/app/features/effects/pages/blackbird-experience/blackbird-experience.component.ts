@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 
 import { BlackbirdExperience, BlackbirdExperienceDeps } from '../../../../shared/effects/blackbird-experience';
-import { HeaderComponent } from '../../../landing/components/header/header.component';
 import { HeroFeaturesSectionComponent } from '../../../landing/components/hero/sections/hero-features-section/hero-features-section.component';
 import { HeroFinalCtaSectionComponent } from '../../../landing/components/hero/sections/hero-final-cta-section/hero-final-cta-section.component';
 import { HeroIntroSectionComponent } from '../../../landing/components/hero/sections/hero-intro-section/hero-intro-section.component';
@@ -13,7 +12,6 @@ import { HeroStepsSectionComponent } from '../../../landing/components/hero/sect
   standalone: true,
   imports: [
     CommonModule,
-    HeaderComponent,
     HeroIntroSectionComponent,
     HeroFeaturesSectionComponent,
     HeroStepsSectionComponent,

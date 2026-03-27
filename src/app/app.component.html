@@ -1,4 +1,7 @@
 <app-unicorn-background [config]="unicornConfig"></app-unicorn-background>
-<div class="app-shell">
+<div *ngIf="showPublicHeader" class="public-header-shell">
+  <app-header></app-header>
+</div>
+<div class="app-shell" [class.app-shell--with-public-header]="showPublicHeader">
   <router-outlet></router-outlet>
 </div>

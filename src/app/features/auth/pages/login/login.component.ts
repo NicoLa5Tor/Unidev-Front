@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 
@@ -16,7 +17,7 @@ import { LoadingOverlayComponent } from '../../../../shared/components/loading-o
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, AnimatedTitleComponent, SocialLoginListComponent, MatDialogModule, LoadingOverlayComponent],
+  imports: [CommonModule, RouterLink, AnimatedTitleComponent, SocialLoginListComponent, MatDialogModule, LoadingOverlayComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })

@@ -1,29 +1,20 @@
-import { Component, HostListener } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { ThemeName, ThemeService } from '../../../../core/services/theme.service';
-import { AuthService } from '../../../../core/services/auth.service';
+import { DashboardNavItem, DashboardShellComponent } from '../../../../shared/components/dashboard-shell/dashboard-shell.component';
 
 @Component({
   selector: 'app-users-panel',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, DashboardShellComponent],
   templateUrl: './users-panel.component.html'
 })
 export class UsersPanelComponent {
   activeTab: 'offers' | 'applications' | 'profile' = 'offers';
-  isMobileMenuOpen = false;
-  isHeaderCompact = false;
-  themes: Array<{ id: ThemeName; label: string }> = [
-    { id: 'cyber', label: 'Neon' },
-    { id: 'light', label: 'Claro' },
-    { id: 'abyss', label: 'Abyss' }
+  readonly navItems: DashboardNavItem[] = [
+    { id: 'offers', label: 'Ofertas', accent: 'accent-1', mobileBarWidthClass: 'w-20' },
+    { id: 'applications', label: 'Aplicaciones', accent: 'accent-3', mobileBarWidthClass: 'w-24' },
+    { id: 'profile', label: 'Perfil', accent: 'accent-2', mobileBarWidthClass: 'w-16' }
   ];
-
-  constructor(
-    private readonly themeService: ThemeService,
-    private readonly authService: AuthService
-  ) {}
 
   offers = [
     {
@@ -77,29 +68,9 @@ export class UsersPanelComponent {
     skills: ['Angular', 'TypeScript', 'Tailwind', 'UI Motion', 'Figma']
   };
 
-  get currentTheme(): ThemeName {
-    return this.themeService.theme;
-  }
-
-  setTab(tab: 'offers' | 'applications' | 'profile'): void {
-    this.activeTab = tab;
-    this.isMobileMenuOpen = false;
-  }
-
-  setTheme(theme: ThemeName): void {
-    this.themeService.setTheme(theme);
-  }
-
-  toggleMobileMenu(): void {
-    this.isMobileMenuOpen = !this.isMobileMenuOpen;
-  }
-
-  logout(): void {
-    this.authService.logout();
-  }
-
-  @HostListener('window:scroll')
-  onWindowScroll(): void {
-    this.isHeaderCompact = window.scrollY > 80;
+  setTab(tabId: string): void {
+    if (tabId === 'offers' || tabId === 'applications' || tabId === 'profile') {
+      this.activeTab = tabId;
+    }
   }
 }

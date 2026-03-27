@@ -5,7 +5,10 @@ import { roleGuard } from './core/guards/role.guard';
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./features/landing/pages/home/home.component').then(m => m.HomeComponent)
+    loadComponent: () => import('./features/landing/pages/home/home.component').then(m => m.HomeComponent),
+    data: {
+      publicHeader: true
+    }
   },
   {
     path: 'login',
@@ -24,11 +27,58 @@ export const routes: Routes = [
     }
   },
   {
+    path: 'admin/users',
+    loadComponent: () => import('./features/admin/pages/admin-users/admin-users.component').then(m => m.AdminUsersComponent),
+    canActivate: [authGuard, roleGuard],
+    data: {
+      roles: ['ADMINISTRADORES']
+    }
+  },
+  {
+    path: 'admin/companies',
+    loadComponent: () =>
+      import('./features/admin/pages/admin-companies/admin-companies.component').then(
+        m => m.AdminCompaniesComponent
+      ),
+    canActivate: [authGuard, roleGuard],
+    data: {
+      roles: ['ADMINISTRADORES']
+    }
+  },
+  {
+    path: 'companies',
+    loadComponent: () =>
+      import('./features/companies/pages/companies-home/companies-home.component').then(
+        m => m.CompaniesHomeComponent
+      ),
+    data: {
+      publicHeader: true
+    }
+  },
+  {
+    path: 'companies/onboarding',
+    loadComponent: () =>
+      import('./features/companies/pages/company-onboarding/company-onboarding.component').then(
+        m => m.CompanyOnboardingComponent
+      ),
+    canActivate: [authGuard, roleGuard],
+    data: {
+      roles: ['EMPRESAS']
+    }
+  },
+  {
     path: 'blackbird-experience',
     loadComponent: () =>
       import('./features/effects/pages/blackbird-experience/blackbird-experience.component').then(
         m => m.BlackbirdExperienceComponent
       )
+  },
+  {
+    path: 'pricing',
+    loadComponent: () => import('./features/pricing/pages/pricing/pricing.component').then(m => m.PricingComponent),
+    data: {
+      publicHeader: true
+    }
   },
   {
     path: '**',

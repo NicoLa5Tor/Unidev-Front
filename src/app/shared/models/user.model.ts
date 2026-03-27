@@ -1,30 +1,33 @@
 export interface User {
   id: number;
+  nombre: string | null;
+  displayName: string | null;
   email: string;
-  firstName: string;
-  lastName: string;
-  role: UserRole;
-  createdAt: Date;
-  updatedAt: Date;
+  sub: string;
+  provider: string | null;
+  issuer: string | null;
+  edad: number | null;
+  walletPhone: string | null;
+  idType: string | null;
+  idNumber: string | null;
+  companyId: number | null;
+  roleId: number | null;
+  roleName: string | null;
 }
 
 export interface CreateUserDto {
+  nombre?: string | null;
+  displayName?: string | null;
   email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
-  role?: UserRole;
+  sub: string;
+  provider?: string | null;
+  issuer?: string | null;
+  edad?: number | null;
+  walletPhone?: string | null;
+  idType?: string | null;
+  idNumber?: string | null;
+  roleId: number;
+  companyId?: number | null;
 }
 
-export interface UpdateUserDto {
-  email?: string;
-  firstName?: string;
-  lastName?: string;
-  role?: UserRole;
-}
-
-export enum UserRole {
-  ADMIN = 'admin',
-  USER = 'user',
-  MODERATOR = 'moderator'
-}
+export type UpdateUserDto = CreateUserDto;

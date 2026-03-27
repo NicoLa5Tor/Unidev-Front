@@ -1,6 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { filter, Subscription } from 'rxjs';
+
+interface HeaderNavItem {
+  label: string;
+  route: string;
+  fragment?: string;
+}
 
 @Component({
   selector: 'app-header',
@@ -8,16 +15,30 @@ import { RouterLink } from '@angular/router';
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnDestroy {
   isMenuOpen = false;
-  
-  navItems = [
-    { label: 'Inicio', href: '#home', active: true },
-    { label: 'Proyectos', href: '#projects' },
-    { label: 'Empresas', href: '#companies' },
-    { label: 'Estudiantes', href: '#students' },
-    { label: 'Contacto', href: '#contact' }
+
+  readonly navItems: HeaderNavItem[] = [
+    { label: 'Inicio', route: '/', fragment: 'home' },
+    { label: 'Pricing', route: '/pricing' },
+    { label: 'Empresas', route: '/companies' },
+    { label: 'Estudiantes', route: '/', fragment: 'students' },
+    { label: 'Contacto', route: '/', fragment: 'contact' }
   ];
+
+  private currentPath = '/';
+  private currentFragment: string | null = null;
+  private readonly routerSubscription: Subscription;
+
+  constructor(private readonly router: Router) {
+    this.syncActiveState(this.router.url);
+    this.routerSubscription = this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(event => {
+        this.syncActiveState((event as NavigationEnd).urlAfterRedirects);
+        this.closeMenu();
+      });
+  }
 
   toggleMenu(): void {
     this.isMenuOpen = !this.isMenuOpen;
@@ -27,9 +48,29 @@ export class HeaderComponent {
     this.isMenuOpen = false;
   }
 
-  setActiveNav(index: number): void {
-    this.navItems.forEach((item, i) => {
-      item.active = i === index;
-    });
+  isActive(item: HeaderNavItem): boolean {
+    if (item.route === '/' && item.fragment) {
+      if (this.currentPath !== '/') {
+        return false;
+      }
+
+      if (item.fragment === 'home') {
+        return !this.currentFragment || this.currentFragment === 'home';
+      }
+
+      return this.currentFragment === item.fragment;
+    }
+
+    return this.currentPath === item.route;
+  }
+
+  ngOnDestroy(): void {
+    this.routerSubscription.unsubscribe();
+  }
+
+  private syncActiveState(url: string): void {
+    const [path, fragment] = url.split('#');
+    this.currentPath = path || '/';
+    this.currentFragment = fragment ?? null;
   }
 }

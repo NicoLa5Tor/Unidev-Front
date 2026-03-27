@@ -63,6 +63,8 @@ export class CallbackComponent implements OnInit {
   isInvitationFlow = false;
   statusMessage = 'Procesando respuesta de Cognito y validando acceso...';
   private readonly roleRedirects: Record<string, string> = {
+    ADMINISTRADORES: '/admin/users',
+    EMPRESAS: '/companies/onboarding',
     USUARIOS: '/users'
   };
   private isBypassRedirect = false;
