@@ -85,7 +85,7 @@ export class CallbackComponent implements OnInit {
       const providerError = this.getProviderError();
 
       if (providerError) {
-        this.error = `Error reportado por el proveedor: ${providerError}`;
+        await this.redirectToAccessDenied('provider_error', providerError);
         return;
       }
 
@@ -112,6 +112,10 @@ export class CallbackComponent implements OnInit {
       this.redirectByRole(sessionUser?.roleName);
     } catch (error) {
       if (error instanceof Error && error.message === 'BYPASS_REDIRECT') {
+        return;
+      }
+      if (this.shouldRedirectToAccessDenied(error)) {
+        await this.redirectToAccessDenied('unauthorized', this.resolveErrorDetail(error));
         return;
       }
       this.error = error instanceof Error ? error.message : 'Ocurrió un error al validar la sesión.';
@@ -256,5 +260,34 @@ export class CallbackComponent implements OnInit {
 
     delete storedConfig[key];
     this.securityStorage.write(configId, JSON.stringify(storedConfig));
+  }
+
+  private shouldRedirectToAccessDenied(error: unknown): boolean {
+    const detail = this.resolveErrorDetail(error).toLowerCase();
+    return detail.includes('unauthorized') || detail.includes('no autorizado') || detail.includes('forbidden');
+  }
+
+  private resolveErrorDetail(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      if (typeof error.error === 'string' && error.error.trim()) {
+        return error.error;
+      }
+      if (typeof error.error?.message === 'string' && error.error.message.trim()) {
+        return error.error.message;
+      }
+    }
+    if (error instanceof Error && error.message.trim()) {
+      return error.message;
+    }
+    return 'No fue posible completar tu autenticacion.';
+  }
+
+  private async redirectToAccessDenied(reason: string, detail: string): Promise<void> {
+    await this.router.navigate(['/access-denied'], {
+      queryParams: {
+        reason,
+        detail
+      }
+    });
   }
 }

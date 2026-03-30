@@ -22,6 +22,14 @@
     Usuarios
   </a>
 
+  <a
+    dashboard-header-actions
+    routerLink="/admin/email-templates"
+    class="rounded-full border border-[color:var(--accent-4)]/35 bg-[var(--accent-4)]/10 px-3 py-1 font-tech text-[var(--accent-4)]"
+  >
+    Correos
+  </a>
+
   <button
     dashboard-header-actions-mobile
     class="rounded-full border border-[color:var(--accent-3)]/35 bg-[var(--accent-3)]/10 px-3 py-1 font-tech text-[var(--accent-3)]"
@@ -36,6 +44,14 @@
     class="rounded-full border border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/15 px-3 py-1 font-tech text-[var(--accent-1)]"
   >
     Usuarios
+  </a>
+
+  <a
+    dashboard-header-actions-mobile
+    routerLink="/admin/email-templates"
+    class="rounded-full border border-[color:var(--accent-4)]/35 bg-[var(--accent-4)]/10 px-3 py-1 font-tech text-[var(--accent-4)]"
+  >
+    Correos
   </a>
 
   <div
@@ -122,10 +138,26 @@
           <div class="mt-5 space-y-3 text-sm text-[var(--muted)]">
             <p><span class="text-[var(--text)]">Dominio:</span> {{ selectedCompany.domain }}</p>
             <p><span class="text-[var(--text)]">Correo:</span> {{ selectedCompany.contactEmail || 'Sin correo' }}</p>
+            <p><span class="text-[var(--text)]">Proveedor:</span> {{ selectedCompany.authProvider }}</p>
             <p><span class="text-[var(--text)]">Contacto:</span> {{ selectedCompany.contactName || 'Sin contacto' }}</p>
             <p><span class="text-[var(--text)]">Estado:</span> {{ selectedCompany.approvalStatus }}</p>
+            <p><span class="text-[var(--text)]">Owner verificado:</span> {{ selectedCompany.ownerVerificationStatus }}</p>
+            <p><span class="text-[var(--text)]">Correo verificado:</span> {{ selectedCompany.verifiedOwnerEmail || 'Aun no' }}</p>
             <p><span class="text-[var(--text)]">Descripcion:</span> {{ selectedCompany.description || 'Sin descripcion' }}</p>
           </div>
+
+          <label class="mt-6 block">
+            <span class="mb-2 block text-[11px] uppercase tracking-[0.24em] text-[var(--muted)]">
+              Mensaje opcional para el correo
+            </span>
+            <textarea
+              [(ngModel)]="approvalMessage"
+              name="approvalMessage"
+              rows="4"
+              placeholder="Instrucciones adicionales para la empresa aprobada o rechazada"
+              class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-sm text-[var(--text)] placeholder:text-[var(--muted)] focus:border-[color:var(--accent-3)]/40 focus:outline-none"
+            ></textarea>
+          </label>
 
           <div class="mt-6 flex flex-wrap gap-3">
             <button

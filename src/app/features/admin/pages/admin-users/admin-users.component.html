@@ -22,6 +22,14 @@
     Empresas
   </a>
 
+  <a
+    dashboard-header-actions
+    routerLink="/admin/email-templates"
+    class="rounded-full border border-[color:var(--accent-4)]/35 bg-[var(--accent-4)]/10 px-3 py-1 font-tech text-[var(--accent-4)]"
+  >
+    Correos
+  </a>
+
   <button
     dashboard-header-actions-mobile
     class="rounded-full border border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/15 px-3 py-1 font-tech text-[var(--accent-1)]"
@@ -36,6 +44,14 @@
     class="rounded-full border border-[color:var(--accent-3)]/35 bg-[var(--accent-3)]/10 px-3 py-1 font-tech text-[var(--accent-3)]"
   >
     Empresas
+  </a>
+
+  <a
+    dashboard-header-actions-mobile
+    routerLink="/admin/email-templates"
+    class="rounded-full border border-[color:var(--accent-4)]/35 bg-[var(--accent-4)]/10 px-3 py-1 font-tech text-[var(--accent-4)]"
+  >
+    Correos
   </a>
 
   <div
@@ -107,7 +123,7 @@
         <ul class="mt-4 space-y-3 text-sm text-[var(--muted)]">
           <li>Los administradores ya no requieren `Company` para iniciar sesión.</li>
           <li>Los usuarios normales siguen necesitando una empresa válida.</li>
-          <li>El campo `sub` es importante para cuentas provisionadas manualmente.</li>
+          <li>Los datos de autenticación se completan cuando el usuario inicia sesión.</li>
         </ul>
       </aside>
     </div>
@@ -151,7 +167,7 @@
             </span>
           </div>
           <div class="mt-4 flex flex-wrap gap-3 text-xs text-[var(--muted)]">
-            <span>Sub: {{ user.sub }}</span>
+            <span>Nombre: {{ user.displayName || user.nombre || 'Pendiente' }}</span>
             <span>Company: {{ user.companyId ?? 'N/A' }}</span>
           </div>
         </button>
@@ -166,8 +182,7 @@
           <p><span class="text-[var(--text)]">Email:</span> {{ selectedUser.email }}</p>
           <p><span class="text-[var(--text)]">Rol:</span> {{ selectedUser.roleName || 'Sin rol' }}</p>
           <p><span class="text-[var(--text)]">Company:</span> {{ selectedUser.companyId ?? 'Sin company' }}</p>
-          <p><span class="text-[var(--text)]">Provider:</span> {{ selectedUser.provider || 'N/A' }}</p>
-          <p><span class="text-[var(--text)]">Sub:</span> {{ selectedUser.sub }}</p>
+          <p><span class="text-[var(--text)]">Teléfono:</span> {{ selectedUser.walletPhone || 'N/A' }}</p>
         </div>
 
         <div class="mt-6 flex flex-wrap gap-3">
@@ -229,11 +244,6 @@
         </label>
 
         <label class="space-y-2 text-sm text-[var(--muted)]">
-          <span>Subject Cognito</span>
-          <input [(ngModel)]="editor.sub" name="sub" required class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none" />
-        </label>
-
-        <label class="space-y-2 text-sm text-[var(--muted)]">
           <span>Rol</span>
           <select
             [(ngModel)]="editor.roleId"
@@ -261,33 +271,8 @@
         </label>
 
         <label class="space-y-2 text-sm text-[var(--muted)]">
-          <span>Provider</span>
-          <input [(ngModel)]="editor.provider" name="provider" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none" />
-        </label>
-
-        <label class="space-y-2 text-sm text-[var(--muted)]">
-          <span>Issuer</span>
-          <input [(ngModel)]="editor.issuer" name="issuer" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none" />
-        </label>
-
-        <label class="space-y-2 text-sm text-[var(--muted)]">
-          <span>Edad</span>
-          <input [(ngModel)]="editor.edad" name="edad" type="number" min="0" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none" />
-        </label>
-
-        <label class="space-y-2 text-sm text-[var(--muted)]">
           <span>Wallet phone</span>
           <input [(ngModel)]="editor.walletPhone" name="walletPhone" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none" />
-        </label>
-
-        <label class="space-y-2 text-sm text-[var(--muted)]">
-          <span>ID type</span>
-          <input [(ngModel)]="editor.idType" name="idType" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none" />
-        </label>
-
-        <label class="space-y-2 text-sm text-[var(--muted)]">
-          <span>ID number</span>
-          <input [(ngModel)]="editor.idNumber" name="idNumber" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none" />
         </label>
       </div>
 

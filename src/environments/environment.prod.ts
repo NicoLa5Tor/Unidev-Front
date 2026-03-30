@@ -21,7 +21,7 @@ export const environment = {
       cognitoDomain: 'https://us-east-17axlypwa5.auth.us-east-1.amazoncognito.com',
       redirectUrl: 'https://unidev.site/callback',
       postLogoutRedirectUri: 'https://unidev.site/',
-      scope: 'openid',
+      scope: 'openid email profile',
       responseType: 'code'
     },
     identityProviders: {

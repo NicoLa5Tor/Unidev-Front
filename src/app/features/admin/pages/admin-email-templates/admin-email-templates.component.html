@@ -1,0 +1,291 @@
+<app-dashboard-shell
+  eyebrow="Consola administrativa"
+  title="Plantillas de correo"
+  avatarLabel="ET"
+  [activeTab]="activeTab"
+  [navItems]="navItems"
+  (tabChange)="setActiveTab($event)"
+>
+  <button
+    dashboard-header-actions
+    class="rounded-full border border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/15 px-3 py-1 font-tech text-[var(--accent-1)]"
+    (click)="openCreateEditor()"
+  >
+    Nueva plantilla
+  </button>
+
+  <a
+    dashboard-header-actions
+    routerLink="/admin/users"
+    class="rounded-full border border-[color:var(--accent-3)]/35 bg-[var(--accent-3)]/10 px-3 py-1 font-tech text-[var(--accent-3)]"
+  >
+    Usuarios
+  </a>
+
+  <a
+    dashboard-header-actions
+    routerLink="/admin/companies"
+    class="rounded-full border border-[color:var(--accent-4)]/35 bg-[var(--accent-4)]/10 px-3 py-1 font-tech text-[var(--accent-4)]"
+  >
+    Empresas
+  </a>
+
+  <button
+    dashboard-header-actions-mobile
+    class="rounded-full border border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/15 px-3 py-1 font-tech text-[var(--accent-1)]"
+    (click)="openCreateEditor()"
+  >
+    Nueva
+  </button>
+
+  <a
+    dashboard-header-actions-mobile
+    routerLink="/admin/users"
+    class="rounded-full border border-[color:var(--accent-3)]/35 bg-[var(--accent-3)]/10 px-3 py-1 font-tech text-[var(--accent-3)]"
+  >
+    Usuarios
+  </a>
+
+  <a
+    dashboard-header-actions-mobile
+    routerLink="/admin/companies"
+    class="rounded-full border border-[color:var(--accent-4)]/35 bg-[var(--accent-4)]/10 px-3 py-1 font-tech text-[var(--accent-4)]"
+  >
+    Empresas
+  </a>
+
+  <div
+    *ngIf="message"
+    class="rounded-3xl border px-4 py-3 text-sm shadow-[var(--shadow)]"
+    [ngClass]="message.type === 'success'
+      ? 'border-[color:var(--accent-4)]/30 bg-[var(--accent-4)]/10 text-[var(--text)]'
+      : 'border-rose-400/30 bg-rose-500/10 text-rose-100'"
+  >
+    {{ message.text }}
+  </div>
+
+  <section *ngIf="activeTab === 'library'" class="space-y-6">
+    <div class="grid gap-4 md:grid-cols-3">
+      <article class="rounded-3xl border border-[color:var(--accent-3)]/20 bg-[var(--panel)] p-5 shadow-[var(--shadow)]">
+        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-3)]">Total</p>
+        <h2 class="mt-3 text-4xl font-cyber text-[var(--text)]">{{ templates.length }}</h2>
+        <p class="mt-2 text-sm text-[var(--muted)]">Plantillas registradas en UniDev.</p>
+      </article>
+
+      <article class="rounded-3xl border border-[color:var(--accent-4)]/20 bg-[var(--panel)] p-5 shadow-[var(--shadow)]">
+        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-4)]">Activas</p>
+        <h2 class="mt-3 text-4xl font-cyber text-[var(--text)]">{{ activeTemplatesCount }}</h2>
+        <p class="mt-2 text-sm text-[var(--muted)]">Plantillas disponibles para envio.</p>
+      </article>
+
+      <article class="rounded-3xl border border-[color:var(--accent-1)]/20 bg-[var(--panel)] p-5 shadow-[var(--shadow)]">
+        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-1)]">Sistema</p>
+        <h2 class="mt-3 text-4xl font-cyber text-[var(--text)]">{{ systemTemplatesCount }}</h2>
+        <p class="mt-2 text-sm text-[var(--muted)]">Plantillas base protegidas del sistema.</p>
+      </article>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+      <div class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[var(--shadow)]">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-1)]">Biblioteca</p>
+            <h2 class="mt-2 text-2xl font-cyber text-[var(--text)]">Plantillas disponibles</h2>
+          </div>
+          <button
+            class="rounded-full border border-[color:var(--accent-3)]/35 bg-[var(--accent-3)]/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-[var(--accent-3)]"
+            (click)="refreshTemplates()"
+          >
+            Refrescar
+          </button>
+        </div>
+
+        <div *ngIf="isLoading" class="mt-6 rounded-2xl border border-[color:var(--panel-border)] bg-black/10 p-5 text-sm text-[var(--muted)]">
+          Cargando plantillas...
+        </div>
+
+        <div *ngIf="!isLoading" class="mt-6 space-y-3">
+          <button
+            *ngFor="let template of templates"
+            class="w-full rounded-2xl border p-4 text-left transition hover:scale-[1.01]"
+            [ngClass]="selectedTemplate?.id === template.id
+              ? 'border-[color:var(--accent-1)]/40 bg-[var(--accent-1)]/10'
+              : 'border-[color:var(--panel-border)] bg-black/10 hover:border-[color:var(--accent-3)]/30'"
+            (click)="selectTemplate(template)"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 class="text-lg font-semibold text-[var(--text)]">{{ template.name }}</h3>
+                <p class="text-sm text-[var(--muted)]">{{ template.code }}</p>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span
+                  class="rounded-full border px-3 py-1 text-xs uppercase tracking-[0.2em]"
+                  [ngClass]="template.active
+                    ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200'
+                    : 'border-rose-400/30 bg-rose-400/10 text-rose-200'"
+                >
+                  {{ template.active ? 'Activo' : 'Inactivo' }}
+                </span>
+                <span
+                  *ngIf="template.systemTemplate"
+                  class="rounded-full border border-[color:var(--accent-3)]/30 bg-[var(--accent-3)]/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-[var(--accent-3)]"
+                >
+                  Sistema
+                </span>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <aside class="rounded-3xl border border-[color:var(--accent-3)]/20 bg-[var(--panel)] p-6 shadow-[var(--shadow)]">
+        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-3)]">Detalle</p>
+        <ng-container *ngIf="selectedTemplate; else emptySelection">
+          <h2 class="mt-2 text-2xl font-cyber text-[var(--text)]">{{ selectedTemplate.name }}</h2>
+          <div class="mt-5 space-y-3 text-sm text-[var(--muted)]">
+            <p><span class="text-[var(--text)]">Codigo:</span> {{ selectedTemplate.code }}</p>
+            <p><span class="text-[var(--text)]">Asunto:</span> {{ selectedTemplate.subjectTemplate }}</p>
+            <p><span class="text-[var(--text)]">Estado:</span> {{ selectedTemplate.active ? 'Activo' : 'Inactivo' }}</p>
+          </div>
+
+          <div class="mt-6">
+            <p class="text-xs uppercase tracking-[0.24em] text-[var(--muted)]">Variables disponibles</p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <button
+                *ngFor="let variable of selectedVariables"
+                type="button"
+                class="rounded-full border border-[color:var(--accent-1)]/30 bg-[var(--accent-1)]/10 px-3 py-1 text-xs text-[var(--accent-1)]"
+                (click)="insertVariable(variable)"
+              >
+                {{ variable }}
+              </button>
+              <span *ngIf="!selectedVariables.length" class="text-sm text-[var(--muted)]">
+                Esta plantilla no tiene variables registradas.
+              </span>
+            </div>
+          </div>
+
+          <div class="mt-6 flex flex-wrap gap-3">
+            <button
+              class="rounded-xl border border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/15 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[var(--accent-1)]"
+              (click)="editTemplate(selectedTemplate)"
+            >
+              Editar
+            </button>
+            <button
+              *ngIf="!selectedTemplate.systemTemplate"
+              class="rounded-xl border border-rose-400/35 bg-rose-500/10 px-4 py-2 text-xs uppercase tracking-[0.2em] text-rose-200"
+              (click)="deleteSelectedTemplate()"
+            >
+              Eliminar
+            </button>
+          </div>
+        </ng-container>
+
+        <ng-template #emptySelection>
+          <div class="mt-6 rounded-2xl border border-dashed border-[color:var(--panel-border)] p-5 text-sm text-[var(--muted)]">
+            Selecciona una plantilla para inspeccionarla o editarla.
+          </div>
+        </ng-template>
+      </aside>
+    </div>
+  </section>
+
+  <section *ngIf="activeTab === 'editor'" class="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+    <form class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[var(--shadow)]" (ngSubmit)="saveTemplate()">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-2)]">Editor</p>
+          <h2 class="mt-2 text-2xl font-cyber text-[var(--text)]">
+            {{ editorMode === 'edit' ? 'Editar plantilla' : 'Crear plantilla' }}
+          </h2>
+        </div>
+        <button
+          type="button"
+          class="rounded-full border border-[color:var(--panel-border)] bg-black/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-[var(--muted)]"
+          (click)="openCreateEditor()"
+        >
+          Limpiar
+        </button>
+      </div>
+
+      <div class="mt-6 grid gap-4 md:grid-cols-2">
+        <label class="space-y-2 text-sm text-[var(--muted)]">
+          <span>Codigo</span>
+          <input
+            [(ngModel)]="editor.code"
+            name="code"
+            [readonly]="editor.systemTemplate"
+            class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none"
+          />
+        </label>
+
+        <label class="space-y-2 text-sm text-[var(--muted)]">
+          <span>Nombre</span>
+          <input
+            [(ngModel)]="editor.name"
+            name="name"
+            class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none"
+          />
+        </label>
+
+        <label class="space-y-2 text-sm text-[var(--muted)] md:col-span-2">
+          <span>Asunto</span>
+          <input
+            [(ngModel)]="editor.subjectTemplate"
+            name="subjectTemplate"
+            class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none"
+          />
+        </label>
+
+        <label class="space-y-2 text-sm text-[var(--muted)] md:col-span-2">
+          <span>HTML</span>
+          <textarea
+            [(ngModel)]="editor.htmlTemplate"
+            name="htmlTemplate"
+            rows="18"
+            class="w-full rounded-3xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 font-mono text-sm text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none"
+          ></textarea>
+        </label>
+
+        <label class="inline-flex items-center gap-3 text-sm text-[var(--muted)]">
+          <input
+            type="checkbox"
+            [(ngModel)]="editor.active"
+            name="active"
+            [disabled]="editor.systemTemplate"
+            class="h-4 w-4 rounded border-[color:var(--panel-border)] bg-black/10 text-[var(--accent-3)]"
+          />
+          <span>Plantilla activa</span>
+        </label>
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="isSaving"
+        class="mt-6 rounded-full border border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/15 px-6 py-3 text-sm uppercase tracking-[0.2em] text-[var(--accent-1)] disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {{ isSaving ? 'Guardando...' : 'Guardar plantilla' }}
+      </button>
+    </form>
+
+    <aside class="rounded-3xl border border-[color:var(--accent-4)]/20 bg-[var(--panel)] p-6 shadow-[var(--shadow)]">
+      <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-4)]">Variables</p>
+      <p class="mt-3 text-sm text-[var(--muted)]">
+        Usa placeholders tipo <code class="text-[var(--text)]">{{ '{{variable}}' }}</code>. Las plantillas del sistema no pueden cambiar de codigo ni eliminarse.
+      </p>
+
+      <div class="mt-5 flex flex-wrap gap-2">
+        <button
+          *ngFor="let variable of selectedVariables"
+          type="button"
+          class="rounded-full border border-[color:var(--accent-4)]/25 bg-[var(--accent-4)]/10 px-3 py-1 text-xs text-[var(--accent-4)]"
+          (click)="insertVariable(variable)"
+        >
+          {{ variable }}
+        </button>
+      </div>
+    </aside>
+  </section>
+</app-dashboard-shell>

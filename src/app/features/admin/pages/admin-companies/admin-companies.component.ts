@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { CompanyService } from '../../../companies/services/company.service';
@@ -11,7 +12,7 @@ type MessageState = { type: 'success' | 'error'; text: string } | null;
 @Component({
   selector: 'app-admin-companies',
   standalone: true,
-  imports: [CommonModule, RouterLink, DashboardShellComponent],
+  imports: [CommonModule, FormsModule, RouterLink, DashboardShellComponent],
   templateUrl: './admin-companies.component.html'
 })
 export class AdminCompaniesComponent implements OnInit {
@@ -21,6 +22,7 @@ export class AdminCompaniesComponent implements OnInit {
   message: MessageState = null;
   companies: Company[] = [];
   selectedCompany: Company | null = null;
+  approvalMessage = '';
 
   readonly navItems: DashboardNavItem[] = [
     { id: 'queue', label: 'Solicitudes', accent: 'accent-3', mobileBarWidthClass: 'w-24' }
@@ -48,6 +50,7 @@ export class AdminCompaniesComponent implements OnInit {
 
   selectCompany(company: Company): void {
     this.selectedCompany = company;
+    this.approvalMessage = '';
     this.message = null;
   }
 
@@ -93,6 +96,7 @@ export class AdminCompaniesComponent implements OnInit {
       nit: company.nit,
       contactName: company.contactName,
       contactEmail: company.contactEmail,
+      authProvider: company.authProvider,
       contactPhone: company.contactPhone,
       website: company.website,
       domain: company.domain,
@@ -100,13 +104,17 @@ export class AdminCompaniesComponent implements OnInit {
       address: company.address,
       onboardingCompleted: company.onboardingCompleted,
       approvalStatus,
-      subscriptionStatus: company.subscriptionStatus
+      subscriptionStatus: company.subscriptionStatus,
+      ownerVerificationStatus: company.ownerVerificationStatus,
+      verifiedOwnerEmail: company.verifiedOwnerEmail,
+      adminMessage: this.approvalMessage.trim() || null
     };
 
     this.companyService.updateCompany(company.id, payload).subscribe({
       next: updated => {
         this.companies = this.companies.map(item => item.id === updated.id ? updated : item);
         this.selectedCompany = updated;
+        this.approvalMessage = '';
         this.isSaving = false;
         this.message = {
           type: 'success',

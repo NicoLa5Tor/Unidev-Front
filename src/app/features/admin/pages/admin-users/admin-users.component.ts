@@ -19,13 +19,7 @@ interface UserEditorModel {
   nombre: string;
   displayName: string;
   email: string;
-  sub: string;
-  provider: string;
-  issuer: string;
-  edad: number | null;
   walletPhone: string;
-  idType: string;
-  idNumber: string;
   roleId: number | null;
   companyId: number | null;
 }
@@ -71,7 +65,7 @@ export class AdminUsersComponent implements OnInit {
       return this.users;
     }
     return this.users.filter(user =>
-      [user.displayName, user.nombre, user.email, user.roleName, user.sub]
+      [user.displayName, user.nombre, user.email, user.roleName]
         .filter(Boolean)
         .some(value => value!.toLowerCase().includes(term))
     );
@@ -129,13 +123,7 @@ export class AdminUsersComponent implements OnInit {
       nombre: user.nombre ?? '',
       displayName: user.displayName ?? '',
       email: user.email,
-      sub: user.sub,
-      provider: user.provider ?? '',
-      issuer: user.issuer ?? '',
-      edad: user.edad,
       walletPhone: user.walletPhone ?? '',
-      idType: user.idType ?? '',
-      idNumber: user.idNumber ?? '',
       roleId: user.roleId ?? null,
       companyId: user.companyId ?? null
     };
@@ -144,8 +132,8 @@ export class AdminUsersComponent implements OnInit {
   }
 
   saveUser(): void {
-    if (!this.editor.email.trim() || !this.editor.sub.trim() || !this.editor.roleId) {
-      this.message = { type: 'error', text: 'Email, subject Cognito y rol son obligatorios.' };
+    if (!this.editor.email.trim() || !this.editor.roleId) {
+      this.message = { type: 'error', text: 'Email y rol son obligatorios.' };
       return;
     }
 
@@ -162,13 +150,7 @@ export class AdminUsersComponent implements OnInit {
       nombre: this.editor.nombre || null,
       displayName: this.editor.displayName || null,
       email: this.editor.email.trim(),
-      sub: this.editor.sub.trim(),
-      provider: this.editor.provider.trim() || null,
-      issuer: this.editor.issuer.trim() || null,
-      edad: this.editor.edad,
       walletPhone: this.editor.walletPhone.trim() || null,
-      idType: this.editor.idType.trim() || null,
-      idNumber: this.editor.idNumber.trim() || null,
       roleId: this.editor.roleId,
       companyId: this.requiresCompany ? this.editor.companyId : null
     };
@@ -295,13 +277,7 @@ export class AdminUsersComponent implements OnInit {
       nombre: '',
       displayName: '',
       email: '',
-      sub: '',
-      provider: 'COGNITO',
-      issuer: '',
-      edad: null,
       walletPhone: '',
-      idType: '',
-      idNumber: '',
       roleId: null,
       companyId: null
     };

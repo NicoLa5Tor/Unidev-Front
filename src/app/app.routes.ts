@@ -19,6 +19,13 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/pages/callback/callback.component').then(m => m.CallbackComponent)
   },
   {
+    path: 'access-denied',
+    loadComponent: () =>
+      import('./features/auth/pages/access-denied/access-denied.component').then(
+        m => m.AccessDeniedComponent
+      )
+  },
+  {
     path: 'users',
     loadComponent: () => import('./features/users/pages/users-panel/users-panel.component').then(m => m.UsersPanelComponent),
     canActivate: [authGuard, roleGuard],
@@ -39,6 +46,17 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/admin/pages/admin-companies/admin-companies.component').then(
         m => m.AdminCompaniesComponent
+      ),
+    canActivate: [authGuard, roleGuard],
+    data: {
+      roles: ['ADMINISTRADORES']
+    }
+  },
+  {
+    path: 'admin/email-templates',
+    loadComponent: () =>
+      import('./features/admin/pages/admin-email-templates/admin-email-templates.component').then(
+        m => m.AdminEmailTemplatesComponent
       ),
     canActivate: [authGuard, roleGuard],
     data: {

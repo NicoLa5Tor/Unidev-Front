@@ -14,6 +14,7 @@ export interface Company {
   nit: string | null;
   contactName: string | null;
   contactEmail: string | null;
+  authProvider: string;
   contactPhone: string | null;
   website: string | null;
   domain: string;
@@ -21,6 +22,8 @@ export interface Company {
   address: string | null;
   approvalStatus: string;
   subscriptionStatus: string;
+  ownerVerificationStatus: string;
+  verifiedOwnerEmail: string | null;
   onboardingCompleted: boolean;
 }
 
@@ -31,6 +34,7 @@ export interface CreateCompanyDto {
   nit: string | null;
   contactName: string | null;
   contactEmail: string | null;
+  authProvider: string;
   contactPhone: string | null;
   website: string | null;
   domain: string;
@@ -39,6 +43,18 @@ export interface CreateCompanyDto {
   onboardingCompleted: boolean;
   approvalStatus?: string | null;
   subscriptionStatus?: string | null;
+  ownerVerificationStatus?: string | null;
+  verifiedOwnerEmail?: string | null;
+  adminMessage?: string | null;
+}
+
+export interface CompanyOtpRequestDto {
+  email: string;
+}
+
+export interface CompanyOtpVerifyDto {
+  email: string;
+  code: string;
 }
 
 export interface Plan {
