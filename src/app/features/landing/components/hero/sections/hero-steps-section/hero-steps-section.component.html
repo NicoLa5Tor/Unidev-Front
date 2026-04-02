@@ -2,12 +2,12 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="steps-section__heading text-center mb-16">
       <p class="section-eyebrow">Ruta de entrada</p>
-      <h2 class="text-4xl font-bold text-white mb-4">Cómo Funciona</h2>
-      <p class="text-xl text-gray-400">Simple, rápido y efectivo</p>
+      <h2 class="steps-section__title text-4xl font-bold text-white mb-4">Cómo Funciona</h2>
+      <p class="steps-section__subtitle text-xl text-gray-400">Simple, rápido y efectivo</p>
     </div>
 
-    <div class="grid md:grid-cols-3 gap-8">
-      <article *ngFor="let step of steps; let i = index" class="step-item text-center">
+    <div class="steps-section__grid grid md:grid-cols-3 gap-8">
+      <article *ngFor="let step of steps; let i = index" class="step-item text-center" [attr.data-step]="i">
         <div class="relative mb-8">
           <div class="step-item__badge w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
             {{ i + 1 }}

@@ -6,12 +6,25 @@
   position: relative;
 }
 
+.steps-section__heading {
+  will-change: transform, opacity;
+}
+
 .section-eyebrow {
   margin: 0 0 0.9rem;
   color: #c084fc;
   text-transform: uppercase;
   letter-spacing: 0.2em;
   font-size: 0.8rem;
+}
+
+.steps-section__title,
+.steps-section__subtitle {
+  will-change: transform, opacity;
+}
+
+.steps-section__grid {
+  position: relative;
 }
 
 .step-item {
@@ -25,14 +38,30 @@
   backdrop-filter: blur(12px);
   box-shadow: 0 24px 70px rgba(2, 6, 23, 0.22);
   will-change: transform;
+  transition: transform 0.45s ease, border-color 0.45s ease, box-shadow 0.45s ease, background 0.45s ease;
+}
+
+.step-item.is-active {
+  transform: translateY(-0.4rem);
+  border-color: rgba(196, 181, 253, 0.4);
+  background:
+    linear-gradient(180deg, rgba(30, 41, 59, 0.82), rgba(15, 23, 42, 0.34)),
+    radial-gradient(circle at top, rgba(168, 85, 247, 0.22), transparent 58%);
+  box-shadow: 0 30px 90px rgba(2, 6, 23, 0.3);
 }
 
 .step-item__badge {
   position: relative;
   box-shadow: 0 0 0 8px rgba(15, 23, 42, 0.55), 0 16px 30px rgba(59, 130, 246, 0.28);
+  will-change: transform;
+}
+
+.step-item.is-active .step-item__badge {
+  box-shadow: 0 0 0 8px rgba(15, 23, 42, 0.65), 0 18px 34px rgba(96, 165, 250, 0.34);
 }
 
 .step-line {
   opacity: 0.85;
   filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.35));
+  transform-origin: left center;
 }

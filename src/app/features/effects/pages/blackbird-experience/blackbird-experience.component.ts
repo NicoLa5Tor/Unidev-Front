@@ -138,6 +138,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
       'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js',
       'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js',
       'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollSmoother.min.js',
+      'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomEase.min.js',
       'https://unpkg.com/three@0.139.2/build/three.min.js',
       'https://unpkg.com/three@0.139.2/examples/js/controls/OrbitControls.js'
     ];
@@ -229,6 +230,8 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     this.gsapContext = gsap.context(() => {
       this.setupHeroReveal(gsap, ScrollTrigger, contentElement, prefersReducedMotion);
       this.setupFeatureStories(gsap, ScrollTrigger, contentElement, prefersReducedMotion);
+      this.setupStepsSequence(gsap, ScrollTrigger, contentElement, prefersReducedMotion);
+      this.setupFinalCtaSequence(gsap, ScrollTrigger, contentElement, prefersReducedMotion);
       this.setupAmbientMotion(gsap, contentElement, prefersReducedMotion);
       this.setupStatCounters(gsap, ScrollTrigger, contentElement, prefersReducedMotion);
       this.setupMagneticButtons(gsap, contentElement, prefersReducedMotion);
@@ -251,86 +254,71 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
       return;
     }
 
+    const publicHeader = document.querySelector<HTMLElement>('.public-header-shell');
+    const titleFragments = Array.from(root.querySelectorAll<HTMLElement>('.hero-title-fragment__text'));
+    const revealBlocks = Array.from(root.querySelectorAll<HTMLElement>('.hero-reveal__inner'));
+    const CustomEase = (window as any).CustomEase;
+    const introEase = CustomEase?.create
+      ? CustomEase.create('hero-intro-ease', '0.52, 0.00, 0.48, 1.00')
+      : 'power4.out';
+
     const heroTimeline = gsap.timeline({
       defaults: {
-        ease: 'power3.out',
+        ease: introEase,
         force3D: true
       }
     });
 
+    if (publicHeader) {
+      heroTimeline.from(
+        publicHeader,
+        {
+          y: reducedMotion ? 0 : -36,
+          opacity: 0,
+          duration: reducedMotion ? 0.01 : 0.8
+        },
+        0
+      );
+    }
+
+    titleFragments.forEach((fragment, index) => {
+      const shift = Number(fragment.parentElement?.getAttribute('data-shift') ?? 0);
+      heroTimeline.from(
+        fragment,
+        {
+          x: reducedMotion ? 0 : shift,
+          opacity: 0,
+          duration: reducedMotion ? 0.01 : 1.06
+        },
+        index === 0 ? 0.04 : 0.1 + index * 0.12
+      );
+    });
+
+    revealBlocks.forEach((block, index) => {
+      if (block.closest('.hero-note--top')) {
+        return;
+      }
+
+      heroTimeline.from(
+        block,
+        {
+          y: reducedMotion ? 0 : 28,
+          opacity: 0,
+          duration: reducedMotion ? 0.01 : 0.74
+        },
+        0.44 + index * 0.08
+      );
+    });
+
     heroTimeline
-      .from('.hero-badge', {
-        y: reducedMotion ? 0 : 22,
-        opacity: 0,
-        duration: 0.6
-      })
       .from(
-        '.hero-title',
+        '.hero-book-btn__circle',
         {
-          y: reducedMotion ? 0 : 48,
-          opacity: 0,
-          duration: 0.9
+          scale: reducedMotion ? 1 : 0.42,
+          autoAlpha: 0,
+          duration: reducedMotion ? 0.01 : 0.96
         },
-        '-=0.2'
-      )
-      .from(
-        '.hero-subtitle',
-        {
-          y: reducedMotion ? 0 : 32,
-          opacity: 0,
-          duration: 0.7
-        },
-        '-=0.45'
-      )
-      .from(
-        '.hero-copy',
-        {
-          y: reducedMotion ? 0 : 28,
-          opacity: 0,
-          duration: 0.65
-        },
-        '-=0.35'
-      )
-      .from(
-        '.hero-pill',
-        {
-          y: reducedMotion ? 0 : 22,
-          opacity: 0,
-          duration: 0.5,
-          stagger: 0.08
-        },
-        '-=0.25'
-      )
-      .from(
-        '.hero-actions .btn-theme',
-        {
-          y: reducedMotion ? 0 : 24,
-          opacity: 0,
-          duration: 0.55,
-          stagger: 0.1
-        },
-        '-=0.3'
-      )
-      .from(
-        '.hero-stat',
-        {
-          y: reducedMotion ? 0 : 28,
-          opacity: 0,
-          rotateX: reducedMotion ? 0 : -10,
-          transformOrigin: '50% 100%',
-          duration: 0.6,
-          stagger: 0.08
-        },
-        '-=0.15'
-      )
-      .from(
-        '.hero-scroll-cue',
-        {
-          y: reducedMotion ? 0 : 16,
-          opacity: 0,
-          duration: 0.45
-        },
-        '-=0.25'
+        0.7
       );
 
     if (reducedMotion) {
@@ -365,6 +353,167 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
       yoyo: true,
       ease: 'power1.inOut'
     });
+  }
+
+  private setupStepsSequence(gsap: any, ScrollTrigger: any, root: HTMLElement, reducedMotion: boolean): void {
+    const section = root.querySelector<HTMLElement>('.steps-section');
+    const heading = root.querySelector<HTMLElement>('.steps-section__heading');
+    const steps = Array.from(root.querySelectorAll<HTMLElement>('.step-item'));
+
+    if (!section || !heading || steps.length === 0) {
+      return;
+    }
+
+    gsap.from(heading, {
+      y: reducedMotion ? 0 : 36,
+      opacity: 0,
+      duration: reducedMotion ? 0.01 : 0.8,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: heading,
+        start: 'top 82%',
+        once: true
+      }
+    });
+
+    steps.forEach((step, index) => {
+      const badge = step.querySelector('.step-item__badge');
+      const title = step.querySelector('h3');
+      const copy = step.querySelector('p:last-of-type');
+      const line = step.querySelector('.step-line');
+
+      ScrollTrigger.create({
+        trigger: step,
+        start: 'top 70%',
+        end: 'bottom 45%',
+        toggleClass: { targets: step, className: 'is-active' },
+        onEnter: () => {
+          steps.forEach((item, itemIndex) => item.classList.toggle('is-active', itemIndex === index));
+        },
+        onEnterBack: () => {
+          steps.forEach((item, itemIndex) => item.classList.toggle('is-active', itemIndex === index));
+        }
+      });
+
+      if (line && !reducedMotion) {
+        gsap.fromTo(
+          line,
+          { scaleX: 0.2, opacity: 0.2 },
+          {
+            scaleX: 1,
+            opacity: 0.9,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: step,
+              start: 'top 75%',
+              end: 'bottom 50%',
+              scrub: 1
+            }
+          }
+        );
+      }
+
+      const parts = [badge, title, copy].filter(Boolean);
+      gsap.from(parts, {
+        y: reducedMotion ? 0 : 26,
+        opacity: 0,
+        duration: reducedMotion ? 0.01 : 0.7,
+        stagger: 0.08,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: step,
+          start: 'top 82%',
+          once: true
+        }
+      });
+
+      if (badge && !reducedMotion) {
+        gsap.fromTo(
+          badge,
+          { scale: 0.92 },
+          {
+            scale: 1.05,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: step,
+              start: 'top 72%',
+              end: 'bottom 48%',
+              scrub: 1
+            }
+          }
+        );
+      }
+    });
+  }
+
+  private setupFinalCtaSequence(gsap: any, ScrollTrigger: any, root: HTMLElement, reducedMotion: boolean): void {
+    const panel = root.querySelector<HTMLElement>('.cta-band__panel');
+    if (!panel) {
+      return;
+    }
+
+    const copyParts = Array.from(
+      panel.querySelectorAll<HTMLElement>('.cta-band__eyebrow, .cta-band__title, .cta-band__text, .cta-band__proof-chip')
+    );
+    const metaParts = Array.from(
+      panel.querySelectorAll<HTMLElement>('.cta-band__meta-label, .cta-band__stat, .cta-band__actions .btn-theme')
+    );
+
+    gsap.from(panel, {
+      y: reducedMotion ? 0 : 40,
+      opacity: 0,
+      scale: reducedMotion ? 1 : 0.96,
+      duration: reducedMotion ? 0.01 : 0.9,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: panel,
+        start: 'top 82%',
+        once: true
+      }
+    });
+
+    gsap.from(copyParts, {
+      y: reducedMotion ? 0 : 24,
+      opacity: 0,
+      duration: reducedMotion ? 0.01 : 0.7,
+      stagger: 0.08,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: panel,
+        start: 'top 78%',
+        once: true
+      }
+    });
+
+    gsap.from(metaParts, {
+      x: reducedMotion ? 0 : 24,
+      opacity: 0,
+      duration: reducedMotion ? 0.01 : 0.72,
+      stagger: 0.08,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: panel,
+        start: 'top 74%',
+        once: true
+      }
+    });
+
+    if (!reducedMotion) {
+      gsap.fromTo(
+        panel,
+        { yPercent: 4 },
+        {
+          yPercent: -4,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: panel,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 1.1
+          }
+        }
+      );
+    }
   }
 
   private setupFeatureStories(gsap: any, ScrollTrigger: any, root: HTMLElement, reducedMotion: boolean): void {
