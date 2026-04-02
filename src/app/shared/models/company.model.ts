@@ -14,7 +14,6 @@ export interface Company {
   nit: string | null;
   contactName: string | null;
   contactEmail: string | null;
-  authProvider: string;
   contactPhone: string | null;
   website: string | null;
   domain: string;
@@ -34,7 +33,6 @@ export interface CreateCompanyDto {
   nit: string | null;
   contactName: string | null;
   contactEmail: string | null;
-  authProvider: string;
   contactPhone: string | null;
   website: string | null;
   domain: string;

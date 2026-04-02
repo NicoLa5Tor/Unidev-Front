@@ -138,7 +138,6 @@
           <div class="mt-5 space-y-3 text-sm text-[var(--muted)]">
             <p><span class="text-[var(--text)]">Dominio:</span> {{ selectedCompany.domain }}</p>
             <p><span class="text-[var(--text)]">Correo:</span> {{ selectedCompany.contactEmail || 'Sin correo' }}</p>
-            <p><span class="text-[var(--text)]">Proveedor:</span> {{ selectedCompany.authProvider }}</p>
             <p><span class="text-[var(--text)]">Contacto:</span> {{ selectedCompany.contactName || 'Sin contacto' }}</p>
             <p><span class="text-[var(--text)]">Estado:</span> {{ selectedCompany.approvalStatus }}</p>
             <p><span class="text-[var(--text)]">Owner verificado:</span> {{ selectedCompany.ownerVerificationStatus }}</p>
@@ -164,7 +163,7 @@
             </ng-template>
           </div>
 
-          <label class="mt-6 block">
+          <label class="mt-6 block" *ngIf="canApproveOrRejectSelected">
             <span class="mb-2 block text-[11px] uppercase tracking-[0.24em] text-[var(--muted)]">
               Mensaje opcional para el correo
             </span>
@@ -177,7 +176,7 @@
             ></textarea>
           </label>
 
-          <div class="mt-6 flex flex-wrap gap-3">
+          <div class="mt-6 flex flex-wrap gap-3" *ngIf="canApproveOrRejectSelected; else resolvedActions">
             <button
               class="rounded-xl border border-emerald-400/35 bg-emerald-500/10 px-4 py-2 text-xs uppercase tracking-[0.2em] text-emerald-200"
               [disabled]="isSaving"
@@ -193,6 +192,12 @@
               Rechazar
             </button>
           </div>
+
+          <ng-template #resolvedActions>
+            <div class="mt-6 rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-sm text-[var(--muted)]">
+              Esta empresa ya fue {{ selectedCompany.approvalStatus === 'APPROVED' ? 'aprobada' : 'rechazada' }}.
+            </div>
+          </ng-template>
         </ng-container>
 
         <ng-template #emptySelection>

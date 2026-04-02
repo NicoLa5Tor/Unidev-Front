@@ -35,6 +35,12 @@ export class BlackbirdExperience {
     scalePeriod: 8
   };
 
+  private getViewportSize(): { width: number; height: number } {
+    const width = window.innerWidth || this.container.offsetWidth || this.container.clientWidth || 1;
+    const height = window.innerHeight || this.container.offsetHeight || this.container.clientHeight || 1;
+    return { width, height };
+  }
+
   constructor(deps: BlackbirdExperienceDeps) {
     this.container = deps.container;
     this.contentElement = deps.contentElement;
@@ -94,17 +100,14 @@ export class BlackbirdExperience {
   }
 
   private createApp(): void {
+    const { width, height } = this.getViewportSize();
+
     this.renderer = new this.THREE.WebGLRenderer({ antialias: false, alpha: true });
     this.renderer.setPixelRatio(1.5);
-    this.renderer.setSize(this.container.offsetWidth, this.container.offsetHeight);
+    this.renderer.setSize(width, height);
     this.container.appendChild(this.renderer.domElement);
 
-    this.camera = new this.THREE.PerspectiveCamera(
-      45,
-      this.container.offsetWidth / this.container.offsetHeight,
-      1,
-      10000
-    );
+    this.camera = new this.THREE.PerspectiveCamera(45, width / height, 1, 10000);
     this.camera.position.set(0, 0, this.settings.cameraDistance);
     this.scene = new this.THREE.Scene();
 
@@ -136,9 +139,10 @@ export class BlackbirdExperience {
     if (!this.camera || !this.renderer) {
       return;
     }
-    this.camera.aspect = this.container.offsetWidth / this.container.offsetHeight;
+    const { width, height } = this.getViewportSize();
+    this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
-    this.renderer.setSize(this.container.offsetWidth, this.container.offsetHeight);
+    this.renderer.setSize(width, height);
   }
 
   private createItems(): void {

@@ -43,6 +43,10 @@ export class AdminCompaniesComponent implements OnInit {
     return this.companies.filter(company => company.approvalStatus === 'APPROVED').length;
   }
 
+  get canApproveOrRejectSelected(): boolean {
+    return !!this.selectedCompany && this.selectedCompany.approvalStatus === 'PENDING';
+  }
+
   setActiveTab(tabId: string): void {
     if (tabId === 'queue') {
       this.activeTab = tabId;
@@ -64,6 +68,9 @@ export class AdminCompaniesComponent implements OnInit {
         this.companies = companies;
         if (this.selectedCompany) {
           this.selectedCompany = companies.find(company => company.id === this.selectedCompany?.id) ?? null;
+          if (this.selectedCompany) {
+            this.loadCompanyDocuments(this.selectedCompany);
+          }
         }
         this.isLoading = false;
       },
@@ -75,14 +82,14 @@ export class AdminCompaniesComponent implements OnInit {
   }
 
   approveSelected(): void {
-    if (!this.selectedCompany) {
+    if (!this.canApproveOrRejectSelected || !this.selectedCompany) {
       return;
     }
     this.saveStatus(this.selectedCompany, 'APPROVED');
   }
 
   rejectSelected(): void {
-    if (!this.selectedCompany) {
+    if (!this.canApproveOrRejectSelected || !this.selectedCompany) {
       return;
     }
     this.saveStatus(this.selectedCompany, 'REJECTED');
@@ -99,7 +106,6 @@ export class AdminCompaniesComponent implements OnInit {
       nit: company.nit,
       contactName: company.contactName,
       contactEmail: company.contactEmail,
-      authProvider: company.authProvider,
       contactPhone: company.contactPhone,
       website: company.website,
       domain: company.domain,
@@ -138,10 +144,10 @@ export class AdminCompaniesComponent implements OnInit {
   }
 
   private loadCompanyDocuments(company: Company): void {
-    if (!company.verifiedOwnerEmail) {
+    if (!company.id) {
       return;
     }
-    this.companyService.listRegistrationDocuments(company.verifiedOwnerEmail).subscribe({
+    this.companyService.listRegistrationDocumentsByCompany(company.id).subscribe({
       next: documents => {
         this.selectedCompanyDocuments = documents;
       },

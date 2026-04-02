@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 
@@ -13,11 +12,12 @@ import { SocialLoginListComponent, SocialLoginProvider } from '../../../../share
 import { MicrosoftGateDialogComponent } from '../../components/microsoft-gate-dialog/microsoft-gate-dialog.component';
 import { MessageDialogComponent, MessageDialogData } from '../../../../shared/components/modal/message-dialog/message-dialog.component';
 import { LoadingOverlayComponent } from '../../../../shared/components/loading-overlay/loading-overlay.component';
+import { HeaderComponent } from '../../../landing/components/header/header.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, RouterLink, AnimatedTitleComponent, SocialLoginListComponent, MatDialogModule, LoadingOverlayComponent],
+  imports: [CommonModule, AnimatedTitleComponent, SocialLoginListComponent, MatDialogModule, LoadingOverlayComponent, HeaderComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })

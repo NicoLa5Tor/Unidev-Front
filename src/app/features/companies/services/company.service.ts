@@ -60,6 +60,12 @@ export class CompanyService {
     });
   }
 
+  listRegistrationDocumentsByCompany(companyId: number) {
+    return this.http.get<CompanyRegistrationDocument[]>(`${this.companyRegistrationUrl}/documents`, {
+      params: { companyId }
+    });
+  }
+
   downloadRegistrationDocument(documentId: number) {
     return `${environment.apiUrl}/company-registration/documents/${documentId}/download`;
   }

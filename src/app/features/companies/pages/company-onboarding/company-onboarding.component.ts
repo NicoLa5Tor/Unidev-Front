@@ -19,7 +19,6 @@ interface CompanyFormModel {
   nit: string;
   contactName: string;
   contactEmail: string;
-  authProvider: string;
   contactPhone: string;
   website: string;
   domain: string;
@@ -51,7 +50,6 @@ export class CompanyOnboardingComponent implements OnInit {
     nit: '',
     contactName: '',
     contactEmail: '',
-    authProvider: 'MICROSOFT',
     contactPhone: '',
     website: '',
     domain: '',
@@ -103,7 +101,6 @@ export class CompanyOnboardingComponent implements OnInit {
       nit: this.toNullable(this.form.nit),
       contactName: this.toNullable(this.form.contactName),
       contactEmail: this.form.contactEmail.trim(),
-      authProvider: this.form.authProvider,
       contactPhone: this.toNullable(this.form.contactPhone),
       website: this.toNullable(this.form.website),
       domain: this.normalizeDomain(this.form.domain),
@@ -170,7 +167,6 @@ export class CompanyOnboardingComponent implements OnInit {
       nit: company.nit ?? '',
       contactName: company.contactName ?? '',
       contactEmail: company.contactEmail ?? this.sessionUser?.email ?? '',
-      authProvider: company.authProvider ?? 'MICROSOFT',
       contactPhone: company.contactPhone ?? '',
       website: company.website ?? '',
       domain: company.domain ?? '',

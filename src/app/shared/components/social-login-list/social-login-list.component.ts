@@ -145,17 +145,6 @@ export class SocialLoginListComponent implements AfterViewInit, OnDestroy {
       this.cleanup.push(() => itemRef.nativeElement.removeEventListener('click', handler));
     });
 
-    if (this.gsapInstance) {
-      const items = this.listItems.toArray().map(item => item.nativeElement as HTMLLIElement);
-      this.gsapInstance.from(items, {
-        y: 26,
-        autoAlpha: 0,
-        duration: 0.55,
-        stagger: 0.08,
-        ease: 'power2.out',
-        clearProps: 'transform,opacity,visibility'
-      });
-    }
   }
 
   private getAnimatedFragments(item: HTMLLIElement): HTMLElement[] {

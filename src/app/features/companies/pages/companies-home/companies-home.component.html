@@ -54,35 +54,6 @@
             <span class="rounded-full px-3 py-1" [ngClass]="registrationStep === 'company' ? 'bg-cyan-300/15 text-cyan-100 border border-cyan-300/30' : 'border border-white/10 bg-white/5'">Empresa</span>
           </div>
 
-          <div class="mt-6" *ngIf="registrationStep === 'company'">
-            <p class="mb-3 block text-[11px] uppercase tracking-[0.24em] text-slate-400">Proveedor de acceso</p>
-            <div class="flex items-center gap-3">
-              <button
-                type="button"
-                (click)="setAuthProvider('MICROSOFT')"
-                class="flex h-14 w-14 items-center justify-center rounded-2xl border bg-slate-950/70 transition"
-                [ngClass]="form.authProvider === 'MICROSOFT'
-                  ? 'border-cyan-300/60 ring-2 ring-cyan-300/25'
-                  : 'border-white/10 hover:border-white/20'"
-                aria-label="Seleccionar Microsoft"
-              >
-                <img [src]="microsoftLogo" alt="Microsoft" class="h-8 w-8" />
-              </button>
-
-              <button
-                type="button"
-                (click)="setAuthProvider('GOOGLE')"
-                class="flex h-14 w-14 items-center justify-center rounded-2xl border bg-slate-950/70 transition"
-                [ngClass]="form.authProvider === 'GOOGLE'
-                  ? 'border-cyan-300/60 ring-2 ring-cyan-300/25'
-                  : 'border-white/10 hover:border-white/20'"
-                aria-label="Seleccionar Google"
-              >
-                <img [src]="googleLogo" alt="Google" class="h-8 w-8" />
-              </button>
-            </div>
-          </div>
-
           <div
             *ngIf="message"
             class="mt-5 rounded-2xl border px-4 py-3 text-sm"
@@ -170,7 +141,7 @@
               <div class="rounded-3xl border border-white/10 bg-slate-950/55 p-4">
                 <p class="text-[11px] uppercase tracking-[0.24em] text-slate-400">Certificado legal</p>
                 <p class="mt-2 text-sm text-slate-300">Sube certificado de existencia o documento oficial equivalente.</p>
-                <div class="mt-4 flex flex-wrap items-center gap-3">
+                <div class="mt-4 flex flex-col items-start gap-3">
                   <label class="inline-flex cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-100">
                     <input type="file" accept=".pdf,.png,.jpg,.jpeg" class="hidden" (change)="uploadDocument($event, 'LEGAL_CERTIFICATE')" />
                     {{ isUploadingLegal ? 'Cargando...' : 'Subir archivo' }}
@@ -179,9 +150,13 @@
                     *ngIf="getDocument('LEGAL_CERTIFICATE') as legalDocument"
                     type="button"
                     (click)="downloadDocument(legalDocument)"
-                    class="rounded-full border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100"
+                    [title]="legalDocument.fileName"
+                    class="flex w-full min-w-0 items-center gap-3 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-4 py-2.5 text-left text-cyan-100"
                   >
-                    Ver {{ legalDocument.fileName }}
+                    <span class="shrink-0 text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200">Ver</span>
+                    <span class="min-w-0 truncate text-xs font-medium normal-case tracking-normal text-cyan-50">
+                      {{ legalDocument.fileName }}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -189,7 +164,7 @@
               <div class="rounded-3xl border border-white/10 bg-slate-950/55 p-4">
                 <p class="text-[11px] uppercase tracking-[0.24em] text-slate-400">Documento tributario</p>
                 <p class="mt-2 text-sm text-slate-300">Sube RUT o documento tributario oficial con razon social y NIT.</p>
-                <div class="mt-4 flex flex-wrap items-center gap-3">
+                <div class="mt-4 flex flex-col items-start gap-3">
                   <label class="inline-flex cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-100">
                     <input type="file" accept=".pdf,.png,.jpg,.jpeg" class="hidden" (change)="uploadDocument($event, 'TAX_DOCUMENT')" />
                     {{ isUploadingTax ? 'Cargando...' : 'Subir archivo' }}
@@ -198,9 +173,13 @@
                     *ngIf="getDocument('TAX_DOCUMENT') as taxDocument"
                     type="button"
                     (click)="downloadDocument(taxDocument)"
-                    class="rounded-full border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100"
+                    [title]="taxDocument.fileName"
+                    class="flex w-full min-w-0 items-center gap-3 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-4 py-2.5 text-left text-cyan-100"
                   >
-                    Ver {{ taxDocument.fileName }}
+                    <span class="shrink-0 text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200">Ver</span>
+                    <span class="min-w-0 truncate text-xs font-medium normal-case tracking-normal text-cyan-50">
+                      {{ taxDocument.fileName }}
+                    </span>
                   </button>
                 </div>
               </div>
