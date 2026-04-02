@@ -58,7 +58,7 @@
 
 .loading-overlay__label {
   margin: 0.5rem 0 0;
-  font-family: var(--font-heading, 'Space Grotesk', sans-serif);
+  font-family: var(--font-heading);
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -70,7 +70,7 @@
   margin: 0;
   font-size: 1rem;
   color: rgba(226, 232, 240, 0.9);
-  font-family: var(--font-body, 'Space Grotesk', sans-serif);
+  font-family: var(--font-body);
   letter-spacing: 0.05em;
 }
 

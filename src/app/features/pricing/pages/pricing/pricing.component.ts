@@ -3,15 +3,20 @@ import {
   Component,
   ElementRef,
   OnDestroy,
+  OnInit,
   PLATFORM_ID,
-  ViewChild,
   QueryList,
+  ViewChild,
   ViewChildren,
   inject
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 
+import { CompanyService } from '../../../companies/services/company.service';
+import { Plan } from '../../../../shared/models/company.model';
+
 type PricingPlan = {
+  id: number;
   kicker: string;
   name: string;
   price: string;
@@ -20,9 +25,7 @@ type PricingPlan = {
   features: string[];
   cta: string;
   href: string;
-  note: string;
   accent: 'teal' | 'violet' | 'rose';
-  featured?: boolean;
 };
 
 @Component({
@@ -32,99 +35,138 @@ type PricingPlan = {
   templateUrl: './pricing.component.html',
   styleUrl: './pricing.component.scss'
 })
-export class PricingComponent implements AfterViewInit, OnDestroy {
+export class PricingComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('cardsContainer') private cardsContainerRef?: ElementRef<HTMLElement>;
   @ViewChild('overlay') private overlayRef?: ElementRef<HTMLElement>;
   @ViewChildren('pricingCard') private pricingCards!: QueryList<ElementRef<HTMLElement>>;
   @ViewChildren('overlayCard') private overlayCards!: QueryList<ElementRef<HTMLElement>>;
-  readonly plans: PricingPlan[] = [
-    {
-      kicker: 'Starter',
-      name: 'Talent',
-      price: '$9',
-      period: 'USD / mes',
-      description: 'Para estudiantes y perfiles junior que quieren entrar a retos reales con estructura clara.',
-      features: [
-        'Perfil profesional y portafolio validable',
-        'Acceso a retos activos y postulaciones guiadas',
-        'Seguimiento básico de avance y entregables'
-      ],
-      cta: 'Empezar ahora',
-      href: '#talent',
-      note: 'Ideal para comenzar y construir historial.',
-      accent: 'teal'
-    },
-    {
-      kicker: 'Featured',
-      name: 'Studio',
-      price: '$29',
-      period: 'USD / mes',
-      description: 'Para equipos pequeños y células de mentoría que necesitan coordinar trabajo, feedback y progreso.',
-      features: [
-        'Panel colaborativo con revisión por hitos',
-        'Mentorías 1:1 y trazabilidad de feedback',
-        'Gestión de cohortes, roles y entregas'
-      ],
-      cta: 'Elegir Studio',
-      href: '#studio',
-      note: 'La opción más equilibrada para operación real.',
-      accent: 'violet',
-      featured: true
-    },
-    {
-      kicker: 'Scale',
-      name: 'Campus',
-      price: '$79',
-      period: 'USD / mes',
-      description: 'Para universidades, laboratorios y partners que quieren desplegar UniDev con más control y visibilidad.',
-      features: [
-        'Espacios multi-equipo y reportes ejecutivos',
-        'Integraciones, branding y flujos institucionales',
-        'Acompañamiento de onboarding prioritario'
-      ],
-      cta: 'Hablar con ventas',
-      href: '#campus',
-      note: 'Pensado para despliegues de mayor escala.',
-      accent: 'rose'
-    }
-  ];
+
+  plans: PricingPlan[] = [];
 
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly companyService = inject(CompanyService);
 
   private observer?: ResizeObserver;
   private pointerHandler?: (event: PointerEvent) => void;
   private pointerLeaveHandler?: () => void;
+  private viewInitialized = false;
   private cleanup: Array<() => void> = [];
   private setupFrameId?: number;
   private syncTimeoutId?: number;
 
+  ngOnInit(): void {
+    this.loadPlans();
+  }
+
   ngAfterViewInit(): void {
-    if (!isPlatformBrowser(this.platformId)) {
+    this.viewInitialized = true;
+    this.scheduleOverlaySetup();
+  }
+
+  ngOnDestroy(): void {
+    this.teardownOverlayInteraction();
+    if (this.setupFrameId) {
+      window.cancelAnimationFrame(this.setupFrameId);
+    }
+  }
+
+  private loadPlans(): void {
+    this.companyService.getPlans().subscribe({
+      next: (plans) => {
+        this.plans = plans
+          .filter((plan) => plan.active)
+          .sort((left, right) => left.displayOrder - right.displayOrder)
+          .map((plan, index) => this.toPricingPlan(plan, index));
+        this.scheduleOverlaySetup();
+      },
+      error: () => {
+        this.plans = [];
+      }
+    });
+  }
+
+  private toPricingPlan(plan: Plan, index: number): PricingPlan {
+    const accents: Array<PricingPlan['accent']> = ['teal', 'violet', 'rose'];
+    return {
+      id: plan.id,
+      kicker: this.buildKicker(plan, index),
+      name: plan.name,
+      price: this.formatPrice(plan.priceAmount),
+      period: 'USD / mes',
+      description: plan.description,
+      features: this.buildFeatures(plan),
+      cta: 'Comprar plan',
+      href: '/companies',
+      accent: accents[index % accents.length]
+    };
+  }
+
+  private buildKicker(plan: Plan, index: number): string {
+    if (plan.code === 'SCALE_UNLIMITED') {
+      return 'Scale';
+    }
+    if (index === 1) {
+      return 'Featured';
+    }
+    return 'Starter';
+  }
+
+  private buildFeatures(plan: Plan): string[] {
+    if (plan.accessMode === 'DOMAIN_WIDE') {
+      return [
+        'Acceso por dominio institucional aprobado',
+        'Usuarios ilimitados dentro de la organizacion',
+        'Ideal para empresas, universidades y operaciones amplias'
+      ];
+    }
+
+    return [
+      plan.maxUsers ? `Hasta ${plan.maxUsers} usuarios autorizados` : 'Usuarios administrados por el owner',
+      'Gestion centralizada por el owner del grupo',
+      'Altas y bajas de miembros segun el plan activo'
+    ];
+  }
+
+  private formatPrice(value: number): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0
+    }).format(value);
+  }
+
+  private scheduleOverlaySetup(): void {
+    if (!this.viewInitialized || !isPlatformBrowser(this.platformId)) {
       return;
     }
 
+    if (this.setupFrameId) {
+      window.cancelAnimationFrame(this.setupFrameId);
+    }
+
     this.setupFrameId = window.requestAnimationFrame(() => {
+      this.teardownOverlayInteraction();
       this.setupOverlayInteraction();
     });
   }
 
-  ngOnDestroy(): void {
-    this.cleanup.forEach(dispose => dispose());
+  private teardownOverlayInteraction(): void {
+    this.cleanup.forEach((dispose) => dispose());
     this.cleanup = [];
-    if (this.setupFrameId) {
-      window.cancelAnimationFrame(this.setupFrameId);
-    }
+    this.observer?.disconnect();
+    this.observer = undefined;
     if (this.syncTimeoutId) {
       window.clearTimeout(this.syncTimeoutId);
+      this.syncTimeoutId = undefined;
     }
-    this.observer?.disconnect();
   }
 
   private setupOverlayInteraction(): void {
-    const cards = this.pricingCards.toArray().map(card => card.nativeElement);
-    const overlayCards = this.overlayCards.toArray().map(card => card.nativeElement);
+    const cards = this.pricingCards.toArray().map((card) => card.nativeElement);
+    const overlayCards = this.overlayCards.toArray().map((card) => card.nativeElement);
     const cardsContainer = this.cardsContainerRef?.nativeElement ?? null;
     const overlay = this.overlayRef?.nativeElement ?? null;
+
     if (!cardsContainer || !overlay || cards.length === 0 || cards.length !== overlayCards.length) {
       return;
     }
@@ -132,8 +174,8 @@ export class PricingComponent implements AfterViewInit, OnDestroy {
     overlay.style.setProperty('--opacity', '0');
     this.syncAllOverlayCardSizes(cards, overlayCards);
 
-    this.observer = new ResizeObserver(entries => {
-      entries.forEach(entry => {
+    this.observer = new ResizeObserver((entries) => {
+      entries.forEach((entry) => {
         const cardIndex = cards.indexOf(entry.target as HTMLElement);
         const overlayCard = overlayCards[cardIndex];
         if (!overlayCard) {
@@ -151,7 +193,7 @@ export class PricingComponent implements AfterViewInit, OnDestroy {
       });
     });
 
-    cards.forEach(card => this.observer?.observe(card));
+    cards.forEach((card) => this.observer?.observe(card));
 
     this.pointerHandler = (event: PointerEvent) => {
       const rect = cardsContainer.getBoundingClientRect();

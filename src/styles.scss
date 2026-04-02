@@ -3,16 +3,20 @@
 @use 'tailwindcss/components';
 @use 'tailwindcss/utilities';
 
-/* Import Google Fonts for futuristic look */
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap');
+/* Global font stack */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 /* Global animations configuration */
 :root {
   --animate-duration: 1s;
   --animate-delay: 0s;
   --animate-repeat: 1;
-  --font-body: 'Sora', 'Space Grotesk', sans-serif;
-  --font-heading: 'Sora', 'Space Grotesk', sans-serif;
+  --font-body: 'Sora', sans-serif;
+  --font-heading: 'Space Grotesk', 'Sora', sans-serif;
+  --font-display: 'Space Grotesk', 'Sora', sans-serif;
+  --tracking-tight: -0.03em;
+  --tracking-heading: 0.02em;
+  --tracking-label: 0.08em;
   --bg: #0a0a0a;
   --panel: rgba(26, 26, 26, 0.86);
   --panel-border: rgba(168, 85, 247, 0.25);
@@ -109,8 +113,24 @@ body {
   color: var(--text);
   font-family: var(--font-body);
   font-feature-settings: 'liga' 1, 'kern' 1;
+  line-height: 1.5;
   margin: 0;
   padding: 0;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+p,
+li,
+span,
+label,
+small {
+  font-family: var(--font-body);
 }
 
 body.preloader-active {
@@ -217,7 +237,8 @@ h4,
 h5,
 h6 {
   font-family: var(--font-heading);
-  letter-spacing: 0.04em;
+  letter-spacing: var(--tracking-heading);
+  line-height: 1.05;
 }
 
 app-root {

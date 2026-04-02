@@ -77,6 +77,7 @@ export interface Plan {
   name: string;
   description: string;
   maxUsers: number | null;
+  accessMode: 'MANAGED_GROUP' | 'DOMAIN_WIDE';
   priceAmount: number;
   displayOrder: number;
   active: boolean;
