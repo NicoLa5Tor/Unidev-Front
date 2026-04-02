@@ -107,6 +107,7 @@
   border: 0;
   font-size: 1rem;
   font-weight: 600;
+  line-height: 1.2;
 }
 
 .overlay {
@@ -128,16 +129,13 @@
   box-shadow: 0 0 0 1px inset hsl(var(--hsl)), 0 0 24px hsla(var(--hsl), 0.12);
 }
 
-.overlay .card > :not(.cta) {
-  visibility: hidden;
-}
-
 .overlay .cta {
   display: block;
   grid-row: -1;
   width: 100%;
   background-color: hsl(var(--hsl));
   box-shadow: 0 0 0 1px hsl(var(--hsl));
+  color: #fff;
 }
 
 :not(.overlay) > .card {

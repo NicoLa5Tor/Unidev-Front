@@ -10,7 +10,6 @@ import {
   inject
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { ScriptLoaderService } from '../../../../shared/services/script-loader.service';
 
 type PricingPlan = {
   kicker: string;
@@ -37,7 +36,7 @@ export class PricingComponent implements AfterViewInit, OnDestroy {
   @ViewChild('cardsContainer') private cardsContainerRef?: ElementRef<HTMLElement>;
   @ViewChild('overlay') private overlayRef?: ElementRef<HTMLElement>;
   @ViewChildren('pricingCard') private pricingCards!: QueryList<ElementRef<HTMLElement>>;
-
+  @ViewChildren('overlayCard') private overlayCards!: QueryList<ElementRef<HTMLElement>>;
   readonly plans: PricingPlan[] = [
     {
       kicker: 'Starter',
@@ -90,27 +89,21 @@ export class PricingComponent implements AfterViewInit, OnDestroy {
     }
   ];
 
-  private readonly scriptLoader = inject(ScriptLoaderService);
   private readonly platformId = inject(PLATFORM_ID);
 
-  private gsapInstance: any;
+  private observer?: ResizeObserver;
   private pointerHandler?: (event: PointerEvent) => void;
   private pointerLeaveHandler?: () => void;
   private cleanup: Array<() => void> = [];
   private setupFrameId?: number;
+  private syncTimeoutId?: number;
 
-  async ngAfterViewInit(): Promise<void> {
+  ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
 
-    await this.loadGsap();
-    if (!this.gsapInstance) {
-      return;
-    }
-
     this.setupFrameId = window.requestAnimationFrame(() => {
-      this.runEntranceAnimation();
       this.setupOverlayInteraction();
     });
   }
@@ -121,39 +114,44 @@ export class PricingComponent implements AfterViewInit, OnDestroy {
     if (this.setupFrameId) {
       window.cancelAnimationFrame(this.setupFrameId);
     }
-  }
-
-  private async loadGsap(): Promise<void> {
-    await this.scriptLoader.load('gsap', 'https://unpkg.com/gsap@3/dist/gsap.min.js');
-    this.gsapInstance = (window as any).gsap;
-  }
-
-  private runEntranceAnimation(): void {
-    const cards = this.pricingCards.toArray().map(card => card.nativeElement);
-    if (cards.length === 0) {
-      return;
+    if (this.syncTimeoutId) {
+      window.clearTimeout(this.syncTimeoutId);
     }
-
-    this.gsapInstance.from(cards, {
-      y: 48,
-      autoAlpha: 0,
-      rotateX: -8,
-      transformPerspective: 1200,
-      duration: 0.82,
-      stagger: 0.1,
-      ease: 'power3.out',
-      clearProps: 'opacity,visibility'
-    });
+    this.observer?.disconnect();
   }
 
   private setupOverlayInteraction(): void {
+    const cards = this.pricingCards.toArray().map(card => card.nativeElement);
+    const overlayCards = this.overlayCards.toArray().map(card => card.nativeElement);
     const cardsContainer = this.cardsContainerRef?.nativeElement ?? null;
     const overlay = this.overlayRef?.nativeElement ?? null;
-    if (!cardsContainer || !overlay) {
+    if (!cardsContainer || !overlay || cards.length === 0 || cards.length !== overlayCards.length) {
       return;
     }
 
     overlay.style.setProperty('--opacity', '0');
+    this.syncAllOverlayCardSizes(cards, overlayCards);
+
+    this.observer = new ResizeObserver(entries => {
+      entries.forEach(entry => {
+        const cardIndex = cards.indexOf(entry.target as HTMLElement);
+        const overlayCard = overlayCards[cardIndex];
+        if (!overlayCard) {
+          return;
+        }
+
+        const size = Array.isArray(entry.borderBoxSize) ? entry.borderBoxSize[0] : entry.borderBoxSize;
+        if (size?.inlineSize && size?.blockSize) {
+          overlayCard.style.width = `${size.inlineSize}px`;
+          overlayCard.style.height = `${size.blockSize}px`;
+          return;
+        }
+
+        this.syncOverlayCardSize(entry.target as HTMLElement, overlayCard);
+      });
+    });
+
+    cards.forEach(card => this.observer?.observe(card));
 
     this.pointerHandler = (event: PointerEvent) => {
       const rect = cardsContainer.getBoundingClientRect();
@@ -176,6 +174,24 @@ export class PricingComponent implements AfterViewInit, OnDestroy {
       cardsContainer.removeEventListener('pointerenter', this.pointerHandler!);
       cardsContainer.removeEventListener('pointermove', this.pointerHandler!);
       cardsContainer.removeEventListener('pointerleave', this.pointerLeaveHandler!);
+    });
+
+    window.requestAnimationFrame(() => this.syncAllOverlayCardSizes(cards, overlayCards));
+    this.syncTimeoutId = window.setTimeout(() => this.syncAllOverlayCardSizes(cards, overlayCards), 120);
+  }
+
+  private syncOverlayCardSize(cardEl: HTMLElement, overlayCard: HTMLElement): void {
+    const rect = cardEl.getBoundingClientRect();
+    overlayCard.style.width = `${rect.width}px`;
+    overlayCard.style.height = `${rect.height}px`;
+  }
+
+  private syncAllOverlayCardSizes(cards: HTMLElement[], overlayCards: HTMLElement[]): void {
+    cards.forEach((card, index) => {
+      const overlayCard = overlayCards[index];
+      if (overlayCard) {
+        this.syncOverlayCardSize(card, overlayCard);
+      }
     });
   }
 }

@@ -21,19 +21,13 @@
 
       <div class="overlay cards__inner" #overlay aria-hidden="true">
         <article
+          #overlayCard
           *ngFor="let plan of plans"
           class="card"
           [attr.data-accent]="plan.accent"
           aria-hidden="true"
         >
-          <p class="card__eyebrow">{{ plan.kicker }}</p>
-          <h2 class="card__heading">{{ plan.name }}</h2>
-          <p class="card__price">{{ plan.price }}</p>
-          <p class="card__period">{{ plan.period }}</p>
-          <ul role="list" class="card__bullets flow">
-            <li *ngFor="let feature of plan.features">{{ feature }}</li>
-          </ul>
-          <span class="card__cta cta">{{ plan.cta }}</span>
+          <a class="card__cta cta" tabindex="-1">{{ plan.cta }}</a>
         </article>
       </div>
     </section>
