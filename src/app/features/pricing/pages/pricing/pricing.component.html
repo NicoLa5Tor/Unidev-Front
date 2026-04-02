@@ -1,43 +1,40 @@
 <section class="pricing-page">
-  <main class="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-16">
-    <section class="cards">
-      <div class="cards__surface">
-        <div class="cards__inner">
-          <div class="cards__card card">
-            <h2 class="card__heading">Basic</h2>
-            <p class="card__price">$9.99</p>
-            <ul role="list" class="card__bullets flow">
-              <li>Access to standard workouts and nutrition plans</li>
-              <li>Email support</li>
-            </ul>
-            <a href="#basic" class="card__cta cta">Get Started</a>
-          </div>
+  <main class="pricing-shell">
+    <section class="cards" #cardsContainer aria-label="Planes disponibles">
+      <div class="cards__inner">
+        <article
+          #pricingCard
+          *ngFor="let plan of plans"
+          class="card"
+          [attr.data-accent]="plan.accent"
+        >
+          <p class="card__eyebrow">{{ plan.kicker }}</p>
+          <h2 class="card__heading">{{ plan.name }}</h2>
+          <p class="card__price">{{ plan.price }}</p>
+          <p class="card__period">{{ plan.period }}</p>
+          <ul role="list" class="card__bullets flow">
+            <li *ngFor="let feature of plan.features">{{ feature }}</li>
+          </ul>
+          <a [href]="plan.href" class="card__cta cta">{{ plan.cta }}</a>
+        </article>
+      </div>
 
-          <div class="cards__card card">
-            <h2 class="card__heading">Pro</h2>
-            <p class="card__price">$19.99</p>
-            <ul role="list" class="card__bullets flow">
-              <li>Access to advanced workouts and nutrition plans</li>
-              <li>Priority Email support</li>
-              <li>Exclusive access to live Q&A sessions</li>
-            </ul>
-            <a href="#pro" class="card__cta cta">Upgrade to Pro</a>
-          </div>
-
-          <div class="cards__card card">
-            <h2 class="card__heading">Ultimate</h2>
-            <p class="card__price">$29.99</p>
-            <ul role="list" class="card__bullets flow">
-              <li>Access to all premium workouts and nutrition plans</li>
-              <li>24/7 Priority support</li>
-              <li>1-on-1 virtual coaching session every month</li>
-              <li>Exclusive content and early access to new features</li>
-            </ul>
-            <a href="#ultimate" class="card__cta cta">Go Ultimate</a>
-          </div>
-        </div>
-
-        <div class="overlay cards__inner"></div>
+      <div class="overlay cards__inner" #overlay aria-hidden="true">
+        <article
+          *ngFor="let plan of plans"
+          class="card"
+          [attr.data-accent]="plan.accent"
+          aria-hidden="true"
+        >
+          <p class="card__eyebrow">{{ plan.kicker }}</p>
+          <h2 class="card__heading">{{ plan.name }}</h2>
+          <p class="card__price">{{ plan.price }}</p>
+          <p class="card__period">{{ plan.period }}</p>
+          <ul role="list" class="card__bullets flow">
+            <li *ngFor="let feature of plan.features">{{ feature }}</li>
+          </ul>
+          <span class="card__cta cta">{{ plan.cta }}</span>
+        </article>
       </div>
     </section>
   </main>

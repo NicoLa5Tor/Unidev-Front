@@ -319,6 +319,24 @@ app-blackbird-experience .footer__meta {
   color: #94a3b8;
 }
 
+app-pricing .pricing-page {
+  position: relative;
+}
+
+app-pricing .pricing-shell {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 76rem);
+  margin: 0 auto;
+  padding: 1.25rem;
+}
+
+app-pricing {
+  display: block;
+  min-height: 100vh;
+  color: #e2e8f0;
+}
+
 .app-shell {
   position: relative;
   z-index: 20;
@@ -382,5 +400,23 @@ a[href*="unicorn.studio"],
   app-blackbird-experience .content__footer {
     margin-top: 3rem;
     border-radius: 1.2rem;
+  }
+
+  app-pricing .pricing-shell {
+    padding: 1rem;
+  }
+
+  app-pricing .pricing-card__surface {
+    padding: 1.2rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  app-pricing .pricing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  app-pricing .pricing-card--featured .pricing-card__surface {
+    transform: none;
   }
 }
