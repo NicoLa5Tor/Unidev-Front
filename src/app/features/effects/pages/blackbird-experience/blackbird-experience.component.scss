@@ -25,6 +25,7 @@ html {
   padding: clamp(2rem, 3vw, 3.5rem);
   position: relative;
   z-index: 5;
+  overflow: clip;
 
   &.is-blurred {
     filter: blur(6px);
@@ -36,41 +37,6 @@ html {
 
 .content__header {
   animation: fadeInDown 1s ease;
-}
-
-.content__footer {
-  margin-top: 4rem;
-  padding: 3rem 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  color: #cbd5f5;
-  text-align: center;
-}
-
-.footer__inner {
-  max-width: 960px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.footer__title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.footer__subtitle {
-  margin: 0;
-  color: #94a3b8;
-}
-
-.footer__meta {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.95rem;
-  color: #94a3b8;
 }
 
 .content__poem {
@@ -193,5 +159,11 @@ html {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 1rem;
   }
 }

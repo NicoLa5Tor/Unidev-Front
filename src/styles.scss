@@ -5,7 +5,6 @@
 
 /* Import Google Fonts for futuristic look */
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap');
-@import url('https://unpkg.com/aos@2.3.1/dist/aos.css');
 
 /* Global animations configuration */
 :root {
@@ -228,6 +227,98 @@ app-root {
   z-index: 10;
 }
 
+app-blackbird-experience .content__ambient {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+app-blackbird-experience .ambient-orb {
+  position: absolute;
+  display: block;
+  width: clamp(18rem, 26vw, 32rem);
+  height: clamp(18rem, 26vw, 32rem);
+  border-radius: 9999px;
+  filter: blur(55px);
+  opacity: 0.22;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+app-blackbird-experience .ambient-orb--violet {
+  top: 8vh;
+  left: -6vw;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.55) 0%, rgba(168, 85, 247, 0) 68%);
+}
+
+app-blackbird-experience .ambient-orb--cyan {
+  top: 32vh;
+  right: -8vw;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.5) 0%, rgba(34, 211, 238, 0) 72%);
+}
+
+app-blackbird-experience .ambient-orb--rose {
+  bottom: 8vh;
+  left: 18vw;
+  background: radial-gradient(circle, rgba(244, 114, 182, 0.38) 0%, rgba(244, 114, 182, 0) 72%);
+}
+
+app-blackbird-experience .content__footer {
+  position: relative;
+  margin: 5rem auto 1rem;
+  max-width: 1120px;
+  padding: 3rem 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.75rem;
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.72), rgba(3, 7, 18, 0.9)),
+    radial-gradient(circle at top, rgba(56, 189, 248, 0.14), transparent 45%);
+  color: #cbd5f5;
+  text-align: center;
+  overflow: hidden;
+  backdrop-filter: blur(18px);
+}
+
+app-blackbird-experience .content__footer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+app-blackbird-experience .footer__inner {
+  position: relative;
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  z-index: 1;
+}
+
+app-blackbird-experience .footer__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+app-blackbird-experience .footer__subtitle {
+  margin: 0;
+  color: #94a3b8;
+}
+
+app-blackbird-experience .footer__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.95rem;
+  color: #94a3b8;
+}
+
 .app-shell {
   position: relative;
   z-index: 20;
@@ -277,4 +368,19 @@ a[href*="unicorn.studio"],
   background: transparent !important;
   box-shadow: none !important;
   padding: 0 !important;
+}
+
+@media (max-width: 768px) {
+  app-blackbird-experience .content {
+    padding: 1rem;
+  }
+
+  app-blackbird-experience .ambient-orb {
+    opacity: 0.16;
+  }
+
+  app-blackbird-experience .content__footer {
+    margin-top: 3rem;
+    border-radius: 1.2rem;
+  }
 }

@@ -62,6 +62,15 @@ export interface CompanyOtpVerifyDto {
   code: string;
 }
 
+export interface CompanyRegistrationDocument {
+  id: number;
+  documentType: 'LEGAL_CERTIFICATE' | 'TAX_DOCUMENT';
+  fileName: string;
+  contentType: string;
+  fileSize: number;
+  status: string;
+}
+
 export interface Plan {
   id: number;
   code: string;

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
 import { CompanyService } from '../../services/company.service';
+import { CompanyRegistrationDocument } from '../../../../shared/models/company.model';
 
 @Component({
   selector: 'app-companies-home',
@@ -16,7 +17,10 @@ export class CompaniesHomeComponent {
   isRequestingOtp = false;
   isVerifyingOtp = false;
   registrationStep: 'email' | 'otp' | 'company' = 'email';
+  isUploadingLegal = false;
+  isUploadingTax = false;
   verifiedEmail: string | null = null;
+  uploadedDocuments: CompanyRegistrationDocument[] = [];
   message: { type: 'success' | 'error'; text: string } | null = null;
   readonly microsoftLogo =
     "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 256 256'><path fill='%23F1511B' d='M121.666 121.666H0V0h121.666z'/><path fill='%2380CC28' d='M256 121.666H134.335V0H256z'/><path fill='%2300ADEF' d='M121.663 256.002H0V134.336h121.663z'/><path fill='%23FBBC09' d='M256 256.002H134.335V134.336H256z'/></svg>";
@@ -151,6 +155,10 @@ export class CompaniesHomeComponent {
       this.message = { type: 'error', text: 'El correo verificado no coincide con el correo del administrador.' };
       return;
     }
+    if (!this.hasDocument('LEGAL_CERTIFICATE') || !this.hasDocument('TAX_DOCUMENT')) {
+      this.message = { type: 'error', text: 'Debes subir el certificado legal y el documento tributario antes de enviar.' };
+      return;
+    }
 
     this.isSubmitting = true;
     this.message = null;
@@ -204,6 +212,7 @@ export class CompaniesHomeComponent {
   private resetForm(): void {
     this.registrationStep = 'email';
     this.verifiedEmail = null;
+    this.uploadedDocuments = [];
     this.form.email = '';
     this.form.confirmEmail = '';
     this.form.otpCode = '';
@@ -227,6 +236,7 @@ export class CompaniesHomeComponent {
         this.verifiedEmail = this.form.email.trim().toLowerCase();
         this.form.contactEmail = this.verifiedEmail;
         this.form.confirmContactEmail = this.verifiedEmail;
+        this.loadDocumentsForVerifiedEmail();
         this.message = { type: 'success', text: message };
         break;
       case 'VERIFY_OTP':
@@ -246,5 +256,83 @@ export class CompaniesHomeComponent {
         this.message = { type: 'success', text: message };
         break;
     }
+  }
+
+  uploadDocument(event: Event, documentType: 'LEGAL_CERTIFICATE' | 'TAX_DOCUMENT'): void {
+    if (!this.verifiedEmail) {
+      this.message = { type: 'error', text: 'Primero debes verificar el correo del administrador.' };
+      return;
+    }
+
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    if (documentType === 'LEGAL_CERTIFICATE') {
+      this.isUploadingLegal = true;
+    } else {
+      this.isUploadingTax = true;
+    }
+    this.message = null;
+
+    this.companyService.uploadRegistrationDocument(this.verifiedEmail, documentType, file).subscribe({
+      next: document => {
+        this.upsertDocument(document);
+        if (documentType === 'LEGAL_CERTIFICATE') {
+          this.isUploadingLegal = false;
+        } else {
+          this.isUploadingTax = false;
+        }
+        input.value = '';
+        this.message = { type: 'success', text: 'Documento cargado correctamente.' };
+      },
+      error: (error) => {
+        if (documentType === 'LEGAL_CERTIFICATE') {
+          this.isUploadingLegal = false;
+        } else {
+          this.isUploadingTax = false;
+        }
+        input.value = '';
+        this.message = {
+          type: 'error',
+          text: error?.error?.message || 'No pudimos cargar el documento.'
+        };
+      }
+    });
+  }
+
+  getDocument(documentType: 'LEGAL_CERTIFICATE' | 'TAX_DOCUMENT'): CompanyRegistrationDocument | undefined {
+    return this.uploadedDocuments.find(document => document.documentType === documentType);
+  }
+
+  downloadDocument(document: CompanyRegistrationDocument): void {
+    window.open(this.companyService.downloadRegistrationDocument(document.id), '_blank', 'noopener');
+  }
+
+  private hasDocument(documentType: 'LEGAL_CERTIFICATE' | 'TAX_DOCUMENT'): boolean {
+    return !!this.getDocument(documentType);
+  }
+
+  private upsertDocument(document: CompanyRegistrationDocument): void {
+    this.uploadedDocuments = [
+      ...this.uploadedDocuments.filter(item => item.documentType !== document.documentType),
+      document
+    ];
+  }
+
+  private loadDocumentsForVerifiedEmail(): void {
+    if (!this.verifiedEmail) {
+      return;
+    }
+    this.companyService.listRegistrationDocuments(this.verifiedEmail).subscribe({
+      next: documents => {
+        this.uploadedDocuments = documents;
+      },
+      error: () => {
+        this.uploadedDocuments = [];
+      }
+    });
   }
 }

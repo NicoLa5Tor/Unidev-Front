@@ -146,6 +146,24 @@
             <p><span class="text-[var(--text)]">Descripcion:</span> {{ selectedCompany.description || 'Sin descripcion' }}</p>
           </div>
 
+          <div class="mt-6 rounded-2xl border border-[color:var(--panel-border)] bg-black/10 p-4">
+            <p class="text-[11px] uppercase tracking-[0.24em] text-[var(--muted)]">Documentos</p>
+            <div class="mt-3 space-y-2" *ngIf="selectedCompanyDocuments.length; else emptyDocuments">
+              <button
+                *ngFor="let document of selectedCompanyDocuments"
+                type="button"
+                (click)="downloadDocument(document)"
+                class="flex w-full items-center justify-between rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-left text-sm text-[var(--text)]"
+              >
+                <span>{{ document.documentType === 'LEGAL_CERTIFICATE' ? 'Certificado legal' : 'Documento tributario' }}</span>
+                <span class="text-[var(--muted)]">{{ document.fileName }}</span>
+              </button>
+            </div>
+            <ng-template #emptyDocuments>
+              <p class="mt-3 text-sm text-[var(--muted)]">No hay documentos cargados para esta empresa.</p>
+            </ng-template>
+          </div>
+
           <label class="mt-6 block">
             <span class="mb-2 block text-[11px] uppercase tracking-[0.24em] text-[var(--muted)]">
               Mensaje opcional para el correo

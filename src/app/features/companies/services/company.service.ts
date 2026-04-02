@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import {
   Company,
+  CompanyRegistrationDocument,
   CompanyOtpFlowResponseDto,
   CompanyOtpRequestDto,
   CompanyOtpVerifyDto,
@@ -43,6 +44,24 @@ export class CompanyService {
 
   verifyCompanyOtp(payload: CompanyOtpVerifyDto) {
     return this.http.post<{ message: string }>(`${this.companyRegistrationUrl}/otp/verify`, payload);
+  }
+
+  uploadRegistrationDocument(email: string, documentType: 'LEGAL_CERTIFICATE' | 'TAX_DOCUMENT', file: File) {
+    const formData = new FormData();
+    formData.append('email', email);
+    formData.append('documentType', documentType);
+    formData.append('file', file);
+    return this.http.post<CompanyRegistrationDocument>(`${this.companyRegistrationUrl}/documents`, formData);
+  }
+
+  listRegistrationDocuments(email: string) {
+    return this.http.get<CompanyRegistrationDocument[]>(`${this.companyRegistrationUrl}/documents`, {
+      params: { email }
+    });
+  }
+
+  downloadRegistrationDocument(documentId: number) {
+    return `${environment.apiUrl}/company-registration/documents/${documentId}/download`;
   }
 
   updateCompany(companyId: number, payload: CreateCompanyDto) {

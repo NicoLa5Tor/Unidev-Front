@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { CompanyService } from '../../../companies/services/company.service';
-import { Company, CreateCompanyDto } from '../../../../shared/models/company.model';
+import { Company, CompanyRegistrationDocument, CreateCompanyDto } from '../../../../shared/models/company.model';
 import { DashboardNavItem, DashboardShellComponent } from '../../../../shared/components/dashboard-shell/dashboard-shell.component';
 
 type MessageState = { type: 'success' | 'error'; text: string } | null;
@@ -22,6 +22,7 @@ export class AdminCompaniesComponent implements OnInit {
   message: MessageState = null;
   companies: Company[] = [];
   selectedCompany: Company | null = null;
+  selectedCompanyDocuments: CompanyRegistrationDocument[] = [];
   approvalMessage = '';
 
   readonly navItems: DashboardNavItem[] = [
@@ -50,8 +51,10 @@ export class AdminCompaniesComponent implements OnInit {
 
   selectCompany(company: Company): void {
     this.selectedCompany = company;
+    this.selectedCompanyDocuments = [];
     this.approvalMessage = '';
     this.message = null;
+    this.loadCompanyDocuments(company);
   }
 
   refreshCompanies(): void {
@@ -126,6 +129,24 @@ export class AdminCompaniesComponent implements OnInit {
       error: () => {
         this.isSaving = false;
         this.message = { type: 'error', text: 'No pudimos actualizar el estado de la empresa.' };
+      }
+    });
+  }
+
+  downloadDocument(document: CompanyRegistrationDocument): void {
+    window.open(this.companyService.downloadRegistrationDocument(document.id), '_blank', 'noopener');
+  }
+
+  private loadCompanyDocuments(company: Company): void {
+    if (!company.verifiedOwnerEmail) {
+      return;
+    }
+    this.companyService.listRegistrationDocuments(company.verifiedOwnerEmail).subscribe({
+      next: documents => {
+        this.selectedCompanyDocuments = documents;
+      },
+      error: () => {
+        this.selectedCompanyDocuments = [];
       }
     });
   }

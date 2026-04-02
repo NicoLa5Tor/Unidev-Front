@@ -165,6 +165,46 @@
               <span class="mb-2 block text-[11px] uppercase tracking-[0.24em] text-slate-400">Descripcion</span>
               <textarea [(ngModel)]="form.description" name="description" rows="4" placeholder="Que hace tu empresa y que tipo de accesos vas a necesitar" class="w-full rounded-3xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-cyan-300/50 focus:outline-none"></textarea>
             </label>
+
+            <div class="sm:col-span-2 grid gap-4 lg:grid-cols-2">
+              <div class="rounded-3xl border border-white/10 bg-slate-950/55 p-4">
+                <p class="text-[11px] uppercase tracking-[0.24em] text-slate-400">Certificado legal</p>
+                <p class="mt-2 text-sm text-slate-300">Sube certificado de existencia o documento oficial equivalente.</p>
+                <div class="mt-4 flex flex-wrap items-center gap-3">
+                  <label class="inline-flex cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-100">
+                    <input type="file" accept=".pdf,.png,.jpg,.jpeg" class="hidden" (change)="uploadDocument($event, 'LEGAL_CERTIFICATE')" />
+                    {{ isUploadingLegal ? 'Cargando...' : 'Subir archivo' }}
+                  </label>
+                  <button
+                    *ngIf="getDocument('LEGAL_CERTIFICATE') as legalDocument"
+                    type="button"
+                    (click)="downloadDocument(legalDocument)"
+                    class="rounded-full border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100"
+                  >
+                    Ver {{ legalDocument.fileName }}
+                  </button>
+                </div>
+              </div>
+
+              <div class="rounded-3xl border border-white/10 bg-slate-950/55 p-4">
+                <p class="text-[11px] uppercase tracking-[0.24em] text-slate-400">Documento tributario</p>
+                <p class="mt-2 text-sm text-slate-300">Sube RUT o documento tributario oficial con razon social y NIT.</p>
+                <div class="mt-4 flex flex-wrap items-center gap-3">
+                  <label class="inline-flex cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-100">
+                    <input type="file" accept=".pdf,.png,.jpg,.jpeg" class="hidden" (change)="uploadDocument($event, 'TAX_DOCUMENT')" />
+                    {{ isUploadingTax ? 'Cargando...' : 'Subir archivo' }}
+                  </label>
+                  <button
+                    *ngIf="getDocument('TAX_DOCUMENT') as taxDocument"
+                    type="button"
+                    (click)="downloadDocument(taxDocument)"
+                    class="rounded-full border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100"
+                  >
+                    Ver {{ taxDocument.fileName }}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <button

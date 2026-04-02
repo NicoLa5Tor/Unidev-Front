@@ -1,3 +1,38 @@
 :host {
   display: block;
 }
+
+.steps-section {
+  position: relative;
+}
+
+.section-eyebrow {
+  margin: 0 0 0.9rem;
+  color: #c084fc;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.8rem;
+}
+
+.step-item {
+  position: relative;
+  padding: 2rem 1.4rem;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 1.5rem;
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.62), rgba(15, 23, 42, 0.22)),
+    radial-gradient(circle at top, rgba(168, 85, 247, 0.14), transparent 55%);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 24px 70px rgba(2, 6, 23, 0.22);
+  will-change: transform;
+}
+
+.step-item__badge {
+  position: relative;
+  box-shadow: 0 0 0 8px rgba(15, 23, 42, 0.55), 0 16px 30px rgba(59, 130, 246, 0.28);
+}
+
+.step-line {
+  opacity: 0.85;
+  filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.35));
+}

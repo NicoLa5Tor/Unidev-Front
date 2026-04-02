@@ -1,52 +1,75 @@
 <section id="home" class="hero-intro min-h-screen text-white relative overflow-hidden">
-  <div class="absolute inset-0 bg-gradient-to-r from-purple-900/20 via-transparent to-blue-900/20"></div>
+  <div class="hero-parallax-layer hero-parallax-layer--top absolute inset-0 bg-gradient-to-r from-purple-900/20 via-transparent to-blue-900/20"></div>
+  <div class="hero-parallax-layer hero-parallax-layer--bottom hero-grid"></div>
   <div class="floating-blob floating-blob--left"></div>
   <div class="floating-blob floating-blob--right"></div>
+  <div class="hero-ring hero-ring--one" aria-hidden="true"></div>
+  <div class="hero-ring hero-ring--two" aria-hidden="true"></div>
 
   <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="pt-32 pb-20">
       <div class="text-center">
-        <app-animated-title
-          text="UniDev"
-          [fontWeight]="650"
-          [fontStretch]="160"
-          textClass="text-5xl md:text-7xl"
-        ></app-animated-title>
+        <div class="hero-badge">
+          <span class="hero-badge__dot"></span>
+          Plataforma premium para talento universitario
+        </div>
+
+        <div class="hero-title">
+          <app-animated-title
+            text="UniDev"
+            [fontWeight]="650"
+            [fontStretch]="160"
+            textClass="text-5xl md:text-7xl"
+          ></app-animated-title>
+        </div>
 
         <div class="hero-subtitle h-20 mb-8">
           <p class="text-2xl md:text-3xl text-gray-300 font-light">
             Conectando estudiantes con
-            <span class="text-purple-400 font-semibold">{{ typedText }}</span>
+            <span class="hero-keyword text-purple-400 font-semibold">{{ typedText }}</span>
             <span class="animate-pulse">|</span>
           </p>
         </div>
 
-        <div class="mb-12 flex justify-center">
+        <div class="hero-copy mb-12 flex justify-center">
           <app-animated-paragraph
             text="La plataforma que revoluciona la forma en que los estudiantes universitarios acceden a proyectos reales de empresas, desarrollando habilidades profesionales mientras ganan experiencia práctica."
             paragraphClass="text-xl text-gray-100 leading-relaxed"
           ></app-animated-paragraph>
         </div>
 
-        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-          <button class="btn-theme btn-theme--teal">
-            Comenzar Ahora
+        <div class="hero-pillars mb-8 flex flex-wrap justify-center gap-3">
+          <span class="hero-pill">Matching inteligente</span>
+          <span class="hero-pill">Rutas con mentoría</span>
+          <span class="hero-pill">Experiencia validable</span>
+        </div>
+
+        <div class="hero-actions flex flex-col sm:flex-row gap-4 justify-center mb-16">
+          <button class="btn-theme btn-theme--teal" data-magnetic>
+            <span class="btn-theme__label">Comenzar Ahora</span>
+            <span class="btn-theme__shine" aria-hidden="true"></span>
           </button>
-          <button class="btn-theme btn-theme--rose">
-            Ver Demo
+          <button class="btn-theme btn-theme--rose" data-magnetic>
+            <span class="btn-theme__label">Ver Demo</span>
+            <span class="btn-theme__shine" aria-hidden="true"></span>
           </button>
         </div>
       </div>
     </div>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-20">
-      <div *ngFor="let stat of stats" class="text-center">
+      <div *ngFor="let stat of stats" class="hero-stat text-center">
         <div class="stat-card bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50 hover:border-purple-500/50 transition-all duration-300">
-          <div class="text-4xl mb-2">{{ stat.icon }}</div>
-          <div class="text-3xl font-bold text-purple-400 mb-2">{{ stat.number }}</div>
+          <div class="stat-card__icon text-4xl mb-2">{{ stat.icon }}</div>
+          <div class="stat-card__number text-3xl font-bold text-purple-400 mb-2" [attr.data-value]="stat.number">{{ stat.number }}</div>
           <div class="text-gray-400 text-sm">{{ stat.label }}</div>
         </div>
       </div>
+    </div>
+
+    <div class="hero-scroll-cue" aria-hidden="true">
+      <span class="hero-scroll-cue__line"></span>
+      <span class="hero-scroll-cue__text">Scroll para explorar</span>
     </div>
   </div>
 </section>

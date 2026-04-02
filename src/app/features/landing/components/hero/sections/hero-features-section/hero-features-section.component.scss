@@ -1,3 +1,69 @@
 :host {
   display: block;
 }
+
+.features-section {
+  position: relative;
+}
+
+.section-heading {
+  position: relative;
+}
+
+.section-eyebrow {
+  margin: 0 0 0.9rem;
+  color: #67e8f9;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.8rem;
+}
+
+.feature-card {
+  position: relative;
+  min-height: 100%;
+  overflow: hidden;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 20px 60px rgba(2, 6, 23, 0.28);
+  will-change: transform;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 36%),
+      radial-gradient(circle at bottom right, rgba(34, 211, 238, 0.12), transparent 34%);
+    pointer-events: none;
+  }
+}
+
+.feature-card__shine {
+  position: absolute;
+  inset: -140% auto auto -30%;
+  width: 45%;
+  height: 280%;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+  transform: rotate(24deg);
+  opacity: 0;
+  transition: opacity 0.35s ease, transform 0.45s ease;
+  pointer-events: none;
+}
+
+.feature-card__index {
+  position: absolute;
+  top: 1.35rem;
+  right: 1.35rem;
+  color: rgba(148, 163, 184, 0.35);
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+}
+
+.feature-card__icon {
+  display: inline-flex;
+  filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.16));
+}
+
+.feature-card:hover .feature-card__shine {
+  opacity: 1;
+  transform: translateX(160%) rotate(24deg);
+}
