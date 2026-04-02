@@ -5,18 +5,28 @@
       *ngFor="let provider of providers; index as i"
       class="listItem"
       [class.expanded]="selectedKey === provider.key"
+      [attr.data-provider]="provider.key"
     >
-      <ng-container *ngIf="provider.avatarUrl; else fallbackAvatar">
-        <img class="avatar" [src]="provider.avatarUrl" [alt]="provider.name" />
-      </ng-container>
-      <ng-template #fallbackAvatar>
-        <div class="avatar-fallback">{{ provider.icon || provider.name.charAt(0) }}</div>
-      </ng-template>
+      <div class="provider-card__media">
+        <span class="provider-card__glow" aria-hidden="true"></span>
+        <ng-container *ngIf="provider.avatarUrl; else fallbackAvatar">
+          <img class="avatar" [src]="provider.avatarUrl" [alt]="provider.name" />
+        </ng-container>
+        <ng-template #fallbackAvatar>
+          <div class="avatar-fallback">{{ provider.icon || provider.name.charAt(0) }}</div>
+        </ng-template>
+      </div>
 
-      <div class="description">
+      <div class="description provider-card__body">
         <span class="sr-only">{{ provider.name }} - {{ provider.description }}</span>
-        <div>{{ provider.ctaIntro || 'Inicia sesión en UniDev usando' }}</div>
-        <div>{{ provider.ctaDetail || provider.description }}</div>
+        <div class="description__eyebrow">{{ provider.name }}</div>
+        <div class="description__headline">{{ provider.ctaIntro || 'Inicia sesión en UniDev usando' }}</div>
+        <div class="description__detail">{{ provider.ctaDetail || provider.description }}</div>
+        <div class="provider-card__chips" aria-hidden="true">
+          <span class="provider-card__chip">{{ provider.key === 'microsoft' ? 'Institucional' : 'Personal' }}</span>
+          <span class="provider-card__chip">OAuth</span>
+          <span class="provider-card__chip">UniDev Access</span>
+        </div>
         <div class="cta">
           <button type="button" class="btn-theme" (click)="confirmProvider($event, provider)">
             Continuar con {{ provider.name }}

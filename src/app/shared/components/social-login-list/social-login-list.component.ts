@@ -41,6 +41,7 @@ export class SocialLoginListComponent implements AfterViewInit, OnDestroy {
 
   private cleanup: Array<() => void> = [];
   private flipPlugin: any;
+  private gsapInstance: any;
   private lastFragments: Element[] = [];
   private lastIndex = -1;
 
@@ -64,12 +65,12 @@ export class SocialLoginListComponent implements AfterViewInit, OnDestroy {
   }
 
   selectProvider(provider: SocialLoginProvider, index: number): void {
-    if (!this.flipPlugin) {
+    if (!this.flipPlugin || !this.gsapInstance) {
       return;
     }
 
     const items = this.listItems.toArray().map(item => item.nativeElement as HTMLLIElement);
-    const fragments = items.flatMap(item => Array.from(item.querySelectorAll<HTMLElement>('*')));
+    const fragments = items.flatMap(item => this.getAnimatedFragments(item));
     const baseTargets: Element[] = items.map(item => item);
     const isSameAsLast = this.lastIndex === index && this.selectedKey === provider.key;
     const listContainer = items[0]?.parentElement as HTMLElement | undefined;
@@ -99,10 +100,12 @@ export class SocialLoginListComponent implements AfterViewInit, OnDestroy {
     }
 
     this.flipPlugin.from(state, {
-      duration: 0.5,
-      ease: 'power1.inOut',
+      duration: 0.7,
+      ease: 'power2.inOut',
       nested: true,
       absolute: true,
+      prune: true,
+      simple: false,
       onComplete: () => {
         if (listContainer) {
           listContainer.style.minHeight = '';
@@ -123,9 +126,9 @@ export class SocialLoginListComponent implements AfterViewInit, OnDestroy {
     await this.scriptLoader.load('gsap', 'https://unpkg.com/gsap@3/dist/gsap.min.js');
     await this.scriptLoader.load('flip', 'https://unpkg.com/gsap@3/dist/Flip.min.js');
     this.flipPlugin = (window as any).Flip;
-    const gsapInstance = (window as any).gsap;
-    if (gsapInstance && this.flipPlugin) {
-      gsapInstance.registerPlugin(this.flipPlugin);
+    this.gsapInstance = (window as any).gsap;
+    if (this.gsapInstance && this.flipPlugin) {
+      this.gsapInstance.registerPlugin(this.flipPlugin);
     }
   }
 
@@ -141,6 +144,26 @@ export class SocialLoginListComponent implements AfterViewInit, OnDestroy {
       itemRef.nativeElement.addEventListener('click', handler);
       this.cleanup.push(() => itemRef.nativeElement.removeEventListener('click', handler));
     });
+
+    if (this.gsapInstance) {
+      const items = this.listItems.toArray().map(item => item.nativeElement as HTMLLIElement);
+      this.gsapInstance.from(items, {
+        y: 26,
+        autoAlpha: 0,
+        duration: 0.55,
+        stagger: 0.08,
+        ease: 'power2.out',
+        clearProps: 'transform,opacity,visibility'
+      });
+    }
+  }
+
+  private getAnimatedFragments(item: HTMLLIElement): HTMLElement[] {
+    return Array.from(
+      item.querySelectorAll<HTMLElement>(
+        '.provider-card__media, .provider-card__glow, .avatar, .avatar-fallback, .provider-card__body, .description__eyebrow, .description__headline, .description__detail, .provider-card__chips, .provider-card__chip, .cta, .btn-theme'
+      )
+    );
   }
 
   private ensureVisibility(target: HTMLElement | undefined): void {
