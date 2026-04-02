@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import {
   Company,
+  CompanyOtpFlowResponseDto,
   CompanyOtpRequestDto,
   CompanyOtpVerifyDto,
   CreateCompanyDto,
@@ -37,7 +38,7 @@ export class CompanyService {
   }
 
   requestCompanyOtp(payload: CompanyOtpRequestDto) {
-    return this.http.post<{ message: string }>(`${this.companyRegistrationUrl}/otp/request`, payload);
+    return this.http.post<CompanyOtpFlowResponseDto>(`${this.companyRegistrationUrl}/otp/request`, payload);
   }
 
   verifyCompanyOtp(payload: CompanyOtpVerifyDto) {

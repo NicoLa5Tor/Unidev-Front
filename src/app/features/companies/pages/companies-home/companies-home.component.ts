@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { CompanyService } from '../../services/company.service';
 
@@ -61,7 +61,10 @@ export class CompaniesHomeComponent {
     address: ''
   };
 
-  constructor(private readonly companyService: CompanyService) {}
+  constructor(
+    private readonly companyService: CompanyService,
+    private readonly router: Router
+  ) {}
 
   setAuthProvider(provider: 'MICROSOFT' | 'GOOGLE'): void {
     this.form.authProvider = provider;
@@ -83,11 +86,7 @@ export class CompaniesHomeComponent {
     this.companyService.requestCompanyOtp({ email: this.form.email.trim() }).subscribe({
       next: (response) => {
         this.isRequestingOtp = false;
-        this.registrationStep = 'otp';
-        this.message = {
-          type: 'success',
-          text: response.message || 'Te enviamos un codigo OTP al correo indicado.'
-        };
+        this.applyOtpFlow(response.action, response.message || 'Operacion completada.');
       },
       error: () => {
         this.isRequestingOtp = false;
@@ -219,5 +218,33 @@ export class CompaniesHomeComponent {
     this.form.domain = '';
     this.form.description = '';
     this.form.address = '';
+  }
+
+  private applyOtpFlow(action: string, message: string): void {
+    switch (action) {
+      case 'CONTINUE_COMPANY':
+        this.registrationStep = 'company';
+        this.verifiedEmail = this.form.email.trim().toLowerCase();
+        this.form.contactEmail = this.verifiedEmail;
+        this.form.confirmContactEmail = this.verifiedEmail;
+        this.message = { type: 'success', text: message };
+        break;
+      case 'VERIFY_OTP':
+      case 'OTP_SENT':
+        this.registrationStep = 'otp';
+        this.message = { type: 'success', text: message };
+        break;
+      case 'GO_TO_LOGIN':
+        this.message = { type: 'success', text: message };
+        this.router.navigate(['/login']);
+        break;
+      case 'PENDING_REVIEW':
+        this.message = { type: 'error', text: message };
+        break;
+      default:
+        this.registrationStep = 'otp';
+        this.message = { type: 'success', text: message };
+        break;
+    }
   }
 }

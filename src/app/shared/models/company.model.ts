@@ -52,6 +52,11 @@ export interface CompanyOtpRequestDto {
   email: string;
 }
 
+export interface CompanyOtpFlowResponseDto {
+  action: 'OTP_SENT' | 'VERIFY_OTP' | 'CONTINUE_COMPANY' | 'GO_TO_LOGIN' | 'PENDING_REVIEW';
+  message: string;
+}
+
 export interface CompanyOtpVerifyDto {
   email: string;
   code: string;
