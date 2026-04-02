@@ -1,21 +1,88 @@
-<section class="features-section py-20">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="section-heading text-center mb-16">
+<section class="feature-arch-section" aria-labelledby="feature-arch-title">
+  <div class="feature-arch-section__inner">
+    <div class="feature-arch-section__intro">
       <p class="section-eyebrow">Ventaja competitiva</p>
-      <h2 class="text-4xl font-bold text-white mb-4">¿Por qué elegir UniDev?</h2>
-      <p class="text-xl text-gray-400 max-w-2xl mx-auto">
-        Ofrecemos la experiencia más completa para conectar talento universitario con oportunidades reales
+      <h2 id="feature-arch-title" class="feature-arch-section__title">
+        UniDev se entiende mejor cuando el scroll te deja ver capa por capa.
+      </h2>
+      <p class="feature-arch-section__text">
+        Cada bloque cuenta una parte del sistema mientras el panel visual fijo va revelando la siguiente escena con profundidad, cambio de foco y transición limpia.
       </p>
     </div>
 
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-      <article *ngFor="let feature of features; let i = index" class="feature-card bg-gray-900/50 rounded-xl p-8 border border-gray-700/50 hover:border-purple-500/50 transition-all duration-300 hover:transform hover:scale-105">
-        <div class="feature-card__shine" aria-hidden="true"></div>
-        <div class="feature-card__index">0{{ i + 1 }}</div>
-        <div class="text-4xl mb-4 feature-card__icon">{{ feature.icon }}</div>
-        <h3 class="text-xl font-semibold text-white mb-4">{{ feature.title }}</h3>
-        <p class="text-gray-400 leading-relaxed">{{ feature.description }}</p>
-      </article>
+    <div class="feature-arch">
+      <div class="feature-arch__left">
+        <ng-container *ngFor="let feature of features; let i = index">
+          <article
+            class="feature-arch__info"
+            [attr.id]="'feature-arch-' + i"
+            [attr.data-index]="i"
+            [attr.data-accent]="feature.accent"
+          >
+            <div class="feature-arch__content">
+              <p class="feature-arch__eyebrow">
+                <span class="feature-arch__eyebrow-icon" aria-hidden="true">{{ feature.icon }}</span>
+                {{ feature.eyebrow }}
+              </p>
+
+              <h3 class="feature-arch__title">
+                <span class="feature-arch__line" *ngFor="let line of feature.titleLines">
+                  <span class="feature-arch__line-inner">{{ line }}</span>
+                </span>
+              </h3>
+
+              <div class="feature-arch__body">
+                <p class="feature-arch__desc">{{ feature.description }}</p>
+
+                <div class="feature-arch__meta">
+                  <span class="feature-arch__meta-label">{{ feature.noteLabel }}</span>
+                  <strong class="feature-arch__meta-value">{{ feature.noteValue }}</strong>
+                </div>
+              </div>
+
+              <div class="feature-arch__next" *ngIf="i < features.length - 1" aria-hidden="true">
+                <span class="feature-arch__next-text">Siguiente escena</span>
+                <span class="feature-arch__next-line"></span>
+              </div>
+            </div>
+          </article>
+
+          <div
+            class="feature-arch__image-wrapper feature-arch__image-wrapper--mobile"
+            [attr.data-index]="features.length - i"
+            [attr.data-step]="i"
+            [attr.data-accent]="feature.accent"
+          >
+            <img class="feature-arch__image" [src]="feature.imageUrl" [alt]="feature.imageAlt" />
+            <div class="feature-arch__image-overlay">
+              <span class="feature-arch__image-index">0{{ i + 1 }}</span>
+              <div class="feature-arch__image-meta">
+                <p class="feature-arch__image-label">{{ feature.eyebrow }}</p>
+                <p class="feature-arch__image-value">{{ feature.noteValue }}</p>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <div class="feature-arch__right feature-arch__right--desktop">
+        <div
+          *ngFor="let feature of features; let i = index"
+          class="feature-arch__image-wrapper"
+          [attr.data-index]="features.length - i"
+          [attr.data-step]="i"
+          [attr.data-accent]="feature.accent"
+        >
+          <img class="feature-arch__image" [src]="feature.imageUrl" [alt]="feature.imageAlt" />
+          <div class="feature-arch__image-overlay">
+            <span class="feature-arch__image-index">0{{ i + 1 }}</span>
+            <div class="feature-arch__image-meta">
+              <p class="feature-arch__image-label">{{ feature.eyebrow }}</p>
+              <p class="feature-arch__image-value">{{ feature.noteValue }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>

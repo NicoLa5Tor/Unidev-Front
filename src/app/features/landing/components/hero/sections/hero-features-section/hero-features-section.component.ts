@@ -1,7 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
-export type HeroFeature = { icon: string; title: string; description: string };
+export type HeroFeature = {
+  icon: string;
+  eyebrow: string;
+  titleLines: string[];
+  description: string;
+  imageUrl: string;
+  imageAlt: string;
+  accent: 'violet' | 'cyan' | 'rose' | 'amber';
+  noteLabel: string;
+  noteValue: string;
+};
 
 @Component({
   selector: 'app-hero-features-section',

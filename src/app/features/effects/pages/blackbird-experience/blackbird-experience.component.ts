@@ -35,33 +35,51 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
   features = [
     {
       icon: '🚀',
-      title: 'Proyectos Reales',
-      description: 'Trabaja en proyectos auténticos de empresas establecidas, no simulaciones académicas.'
-    },
-    {
-      icon: '💰',
-      title: 'Compensación Justa',
-      description: 'Recibe pago por tu trabajo mientras adquieres experiencia valiosa en el mercado laboral.'
+      eyebrow: 'Proyectos con contexto',
+      titleLines: ['Proyectos', 'reales'],
+      description: 'Trabaja sobre entregables que sí vienen de empresas, con fricción real, revisión real y decisiones que no parecen ejercicio de clase.',
+      imageUrl:
+        'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400&q=80',
+      imageAlt: 'Equipo revisando entregables en una mesa de trabajo',
+      accent: 'violet' as const,
+      noteLabel: 'Modo',
+      noteValue: 'Live brief'
     },
     {
       icon: '🎯',
-      title: 'Mentorías Profesionales',
-      description: 'Aprende de expertos de la industria que te guían en cada paso de tu desarrollo.'
+      eyebrow: 'Acompañamiento experto',
+      titleLines: ['Mentoría', 'activa'],
+      description: 'Cada reto se mueve con criterio profesional: feedback en hitos, observaciones accionables y acompañamiento para no avanzar a ciegas.',
+      imageUrl:
+        'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400&q=80',
+      imageAlt: 'Mentores colaborando con estudiantes frente a un computador',
+      accent: 'cyan' as const,
+      noteLabel: 'Formato',
+      noteValue: '1:1 + review'
+    },
+    {
+      icon: '💰',
+      eyebrow: 'Valor para ambos lados',
+      titleLines: ['Compensa', 'justo'],
+      description: 'No solo practicas. Construyes experiencia con valor visible, y en los casos adecuados puedes entrar a dinámicas reales de compensación y continuidad.',
+      imageUrl:
+        'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1400&q=80',
+      imageAlt: 'Reunión de equipo con paneles y métricas de negocio',
+      accent: 'rose' as const,
+      noteLabel: 'Resultado',
+      noteValue: 'Historial validable'
     },
     {
       icon: '🏆',
-      title: 'Certificaciones',
-      description: 'Obtén certificados verificables que respalden tus habilidades ante futuros empleadores.'
-    },
-    {
-      icon: '🤝',
-      title: 'Networking',
-      description: 'Conecta con profesionales, empresarios y otros estudiantes talentosos de tu área.'
-    },
-    {
-      icon: '📈',
-      title: 'Crecimiento Acelerado',
-      description: 'Desarrolla habilidades técnicas y blandas más rápido que en métodos tradicionales.'
+      eyebrow: 'Prueba visible',
+      titleLines: ['Certifica', 'tu avance'],
+      description: 'Cada avance deja rastro: hitos, evaluación, entregables y evidencia suficiente para que una empresa vea algo más sólido que una promesa en CV.',
+      imageUrl:
+        'https://images.unsplash.com/photo-1516321165247-4aa89a48be28?auto=format&fit=crop&w=1400&q=80',
+      imageAlt: 'Persona presentando resultados y logros en una pantalla',
+      accent: 'amber' as const,
+      noteLabel: 'Señal',
+      noteValue: 'Skill proof'
     }
   ];
 
@@ -210,6 +228,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
 
     this.gsapContext = gsap.context(() => {
       this.setupHeroReveal(gsap, ScrollTrigger, contentElement, prefersReducedMotion);
+      this.setupFeatureStories(gsap, ScrollTrigger, contentElement, prefersReducedMotion);
       this.setupAmbientMotion(gsap, contentElement, prefersReducedMotion);
       this.setupStatCounters(gsap, ScrollTrigger, contentElement, prefersReducedMotion);
       this.setupMagneticButtons(gsap, contentElement, prefersReducedMotion);
@@ -345,6 +364,241 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
       repeat: -1,
       yoyo: true,
       ease: 'power1.inOut'
+    });
+  }
+
+  private setupFeatureStories(gsap: any, ScrollTrigger: any, root: HTMLElement, reducedMotion: boolean): void {
+    const stories = Array.from(root.querySelectorAll<HTMLElement>('.feature-arch__info'));
+    const arch = root.querySelector<HTMLElement>('.feature-arch');
+    const archRight = root.querySelector<HTMLElement>('.feature-arch__right');
+    const desktopImageWrappers = archRight
+      ? Array.from(archRight.querySelectorAll<HTMLElement>('.feature-arch__image-wrapper'))
+      : [];
+    const mobileImageWrappers = Array.from(
+      root.querySelectorAll<HTMLElement>('.feature-arch__image-wrapper--mobile')
+    );
+
+    if (stories.length === 0 || !arch || !archRight) {
+      return;
+    }
+
+    const intro = root.querySelector('.feature-stories-section__intro');
+    if (intro) {
+      gsap.from(intro, {
+        y: reducedMotion ? 0 : 36,
+        opacity: 0,
+        duration: reducedMotion ? 0.01 : 0.8,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: intro,
+          start: 'top 82%',
+          once: true
+        }
+      });
+    }
+
+    stories.forEach((story, index) => {
+      story.classList.toggle('is-active', index === 0);
+    });
+
+    desktopImageWrappers.forEach((wrapper) => {
+      const order = wrapper.dataset['index'];
+      if (order) {
+        wrapper.style.zIndex = order;
+      }
+    });
+
+    mobileImageWrappers.forEach((wrapper) => {
+      const order = wrapper.dataset['index'];
+      if (order) {
+        wrapper.style.zIndex = order;
+      }
+    });
+
+    const desktopQuery = window.matchMedia('(min-width: 981px)');
+    const mobileQuery = window.matchMedia('(max-width: 980px)');
+
+    if (desktopQuery.matches && desktopImageWrappers.length > 0) {
+      const images = desktopImageWrappers
+        .map(wrapper => wrapper.querySelector<HTMLElement>('.feature-arch__image'))
+        .filter(Boolean) as HTMLElement[];
+      const transitionHold = reducedMotion ? 0.01 : 0.38;
+      const finalHold = reducedMotion ? 0.01 : 0.7;
+
+      gsap.set(desktopImageWrappers, {
+        clipPath: 'inset(0% 0% 0% 0%)',
+        opacity: 1
+      });
+
+      gsap.set(images, {
+        objectPosition: '50% 0%'
+      });
+
+      const desktopTimeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: arch,
+          start: 'top top',
+          end: 'bottom bottom',
+          pin: archRight,
+          scrub: reducedMotion ? false : 1,
+          invalidateOnRefresh: true
+        }
+      });
+
+      images.forEach((image, index) => {
+        const currentWrapper = desktopImageWrappers[index];
+        const nextImage = images[index + 1] ?? null;
+        const nextWrapper = desktopImageWrappers[index + 1] ?? null;
+
+        const sectionTimeline = gsap.timeline({
+          onStart: () => {
+            stories.forEach((story, storyIndex) => story.classList.toggle('is-active', storyIndex === index));
+            currentWrapper?.classList.add('is-active');
+          },
+          onReverseComplete: () => {
+            stories.forEach((story, storyIndex) => story.classList.toggle('is-active', storyIndex === Math.max(index - 1, 0)));
+            currentWrapper?.classList.toggle('is-active', index === 0);
+          }
+        });
+
+        if (nextImage && nextWrapper) {
+          const holdState = { progress: 0 };
+          sectionTimeline
+            .to(holdState, {
+              progress: 1,
+              duration: transitionHold,
+              ease: 'none'
+            })
+            .to(
+              currentWrapper,
+              {
+                clipPath: reducedMotion ? 'inset(0% 0% 0% 0%)' : 'inset(0% 0% 100% 0%)',
+                duration: reducedMotion ? 0.01 : 1.3,
+                ease: 'none'
+              },
+              0
+            )
+            .to(
+              image,
+              {
+                objectPosition: reducedMotion ? '50% 0%' : '50% 60%',
+                duration: reducedMotion ? 0.01 : 1.3,
+                ease: 'none'
+              },
+              0
+            )
+            .fromTo(
+              nextImage,
+              {
+                objectPosition: reducedMotion ? '50% 50%' : '50% 35%',
+                scale: reducedMotion ? 1 : 1.06
+              },
+              {
+                objectPosition: reducedMotion ? '50% 50%' : '50% 55%',
+                scale: 1,
+                duration: reducedMotion ? 0.01 : 1.3,
+                ease: 'none'
+              },
+              0
+            )
+            .to(
+              nextWrapper,
+              {
+                opacity: 1,
+                duration: reducedMotion ? 0.01 : 1.3,
+                ease: 'none',
+                onStart: () => {
+                  stories.forEach((story, storyIndex) => story.classList.toggle('is-active', storyIndex === index + 1));
+                  nextWrapper.classList.add('is-active');
+                }
+              },
+              0
+            );
+        }
+
+        desktopTimeline.add(sectionTimeline);
+      });
+
+      const endState = { progress: 0 };
+      desktopTimeline.to(endState, {
+        progress: 1,
+        duration: finalHold,
+        ease: 'none'
+      });
+    }
+
+    stories.forEach((story) => {
+      const storyIndex = Number(story.dataset['index'] ?? '0');
+      const lines = Array.from(story.querySelectorAll<HTMLElement>('.feature-arch__line-inner'));
+      const copy = story.querySelector('.feature-arch__desc');
+      const note = story.querySelector('.feature-arch__meta');
+      const cue = story.querySelector('.feature-arch__next');
+      const textTargets = [copy, note].filter(Boolean);
+      const cueTargets = [cue].filter(Boolean);
+      const relatedImage = mobileImageWrappers[storyIndex]?.querySelector<HTMLElement>('.feature-arch__image');
+
+      ScrollTrigger.create({
+        trigger: story,
+        start: 'top 60%',
+        end: 'bottom 40%',
+        toggleClass: { targets: story, className: 'is-active' }
+      });
+
+      if (relatedImage && mobileQuery.matches && !reducedMotion) {
+        gsap.fromTo(
+          relatedImage,
+          { objectPosition: '50% 60%' },
+          {
+            objectPosition: '50% 30%',
+            ease: 'none',
+            scrollTrigger: {
+              trigger: story,
+              start: 'top 85%',
+              end: 'bottom 15%',
+              scrub: 1.1
+            }
+          }
+        );
+      }
+
+      const timeline = gsap.timeline({
+        defaults: {
+          ease: 'power4.out',
+          force3D: true
+        },
+        scrollTrigger: {
+          trigger: story,
+          start: 'top 72%',
+          once: true
+        }
+      });
+
+      timeline
+        .from(lines, {
+          yPercent: reducedMotion ? 0 : 120,
+          duration: reducedMotion ? 0.01 : 1.1,
+          stagger: 0.08
+        })
+        .from(
+          textTargets,
+          {
+            y: reducedMotion ? 0 : 28,
+            opacity: 0,
+            duration: reducedMotion ? 0.01 : 0.7,
+            stagger: 0.08
+          },
+          '-=0.75'
+        )
+        .from(
+          cueTargets,
+          {
+            y: reducedMotion ? 0 : 24,
+            opacity: 0,
+            duration: reducedMotion ? 0.01 : 0.65,
+            stagger: 0.06
+          },
+          '-=0.55'
+        );
     });
   }
 
