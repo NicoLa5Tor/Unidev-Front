@@ -90,18 +90,90 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     'Oportunidades Únicas'
   ];
 
+  reasons = [
+    {
+      tag: 'Trabajo en equipo',
+      title: 'Aprendes a coordinar entregables con otras personas.',
+      description: 'Dejas de trabajar aislado y empiezas a moverte con dependencias, feedback y objetivos compartidos.',
+      imageUrl:
+        'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400&q=80',
+      imageAlt: 'Equipo colaborando frente a una mesa de trabajo'
+    },
+    {
+      tag: 'Presión real',
+      title: 'Tomas decisiones con tiempo, contexto y fricción.',
+      description: 'No todo sale perfecto al primer intento. Aprendes a responder con criterio cuando el reloj sí importa.',
+      imageUrl:
+        'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1400&q=80',
+      imageAlt: 'Equipo trabajando bajo presión en una reunión intensa'
+    },
+    {
+      tag: 'Negociación',
+      title: 'Aprendes a defender alcance, prioridades y valor.',
+      description: 'No solo ejecutas tareas: entiendes qué negociar, qué priorizar y cómo sostener una conversación profesional.',
+      imageUrl:
+        'https://images.unsplash.com/photo-1515169067868-5387ec356754?auto=format&fit=crop&w=1400&q=80',
+      imageAlt: 'Profesionales negociando alrededor de una mesa'
+    },
+    {
+      tag: 'Estimación',
+      title: 'Vuelves visible cuánto cuesta hacer bien un trabajo.',
+      description: 'Empiezas a dimensionar tiempos, riesgos y esfuerzo con más precisión y menos improvisación.',
+      imageUrl:
+        'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1400&q=80',
+      imageAlt: 'Persona planificando tiempos y estimaciones en un tablero'
+    },
+    {
+      tag: 'Feedback',
+      title: 'Recibes criterio que sí sirve para mejorar.',
+      description: 'Cada revisión te obliga a ajustar, iterar y elevar el estándar, no solo a cumplir por cumplir.',
+      imageUrl:
+        'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400&q=80',
+      imageAlt: 'Mentoría activa con revisión de trabajo en computador'
+    },
+    {
+      tag: 'Señal profesional',
+      title: 'Construyes evidencia que una empresa sí entiende.',
+      description: 'Tu avance deja rastro: decisiones, entregables, revisiones y resultados que hablan por ti.',
+      imageUrl:
+        'https://images.unsplash.com/photo-1516321165247-4aa89a48be28?auto=format&fit=crop&w=1400&q=80',
+      imageAlt: 'Presentación de resultados frente a un equipo'
+    }
+  ];
+
   steps = [
     {
+      phase: 'Fase 01',
       title: 'Regístrate y Crea tu Perfil',
-      description: 'Completa tu perfil destacando tus habilidades, intereses y proyectos académicos.'
+      description: 'Completa tu perfil con habilidades, stack, intereses y la evidencia que quieres convertir en señal profesional.',
+      beforeImageUrl:
+        'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1400&q=80',
+      afterImageUrl:
+        'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1400&q=80',
+      beforeLabel: 'Antes: perfil vacío',
+      afterLabel: 'Después: perfil listo'
     },
     {
+      phase: 'Fase 02',
       title: 'Explora Proyectos Disponibles',
-      description: 'Navega por cientos de proyectos de empresas reales que buscan talento universitario.'
+      description: 'Filtra retos activos, entiende el contexto de cada empresa y detecta dónde sí encajas antes de postularte.',
+      beforeImageUrl:
+        'https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=1400&q=80',
+      afterImageUrl:
+        'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1400&q=80',
+      beforeLabel: 'Antes: búsqueda dispersa',
+      afterLabel: 'Después: oportunidades claras'
     },
     {
+      phase: 'Fase 03',
       title: 'Aplica y Comienza a Trabajar',
-      description: 'Postúlate a proyectos que te interesen y empieza a construir tu experiencia profesional.'
+      description: 'Postúlate, recibe feedback, entra al flujo de entregables y empieza a construir experiencia con contexto real.',
+      beforeImageUrl:
+        'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1400&q=80',
+      afterImageUrl:
+        'https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=1400&q=80',
+      beforeLabel: 'Antes: solo intención',
+      afterLabel: 'Después: ejecución visible'
     }
   ];
 
@@ -112,6 +184,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
   private experience?: BlackbirdExperience;
   private gsapContext?: { revert: () => void };
   private magneticCleanups: Array<() => void> = [];
+  private landingCleanups: Array<() => void> = [];
 
   ngOnInit(): void {
     this.toggleBodyScroll(true);
@@ -138,6 +211,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
       'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js',
       'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js',
       'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollSmoother.min.js',
+      'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/Flip.min.js',
       'https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomEase.min.js',
       'https://unpkg.com/three@0.139.2/build/three.min.js',
       'https://unpkg.com/three@0.139.2/examples/js/controls/OrbitControls.js'
@@ -245,6 +319,8 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
   private cleanupLandingAnimations(): void {
     this.magneticCleanups.forEach((cleanup) => cleanup());
     this.magneticCleanups = [];
+    this.landingCleanups.forEach((cleanup) => cleanup());
+    this.landingCleanups = [];
     this.gsapContext?.revert();
     this.gsapContext = undefined;
   }
@@ -372,92 +448,225 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     touchMode: boolean
   ): void {
     const section = root.querySelector<HTMLElement>('.steps-section');
-    const heading = root.querySelector<HTMLElement>('.steps-section__heading');
-    const steps = Array.from(root.querySelectorAll<HTMLElement>('.step-item'));
+    const whyIntro = root.querySelector<HTMLElement>('.steps-why-intro');
+    const howIntro = root.querySelector<HTMLElement>('.steps-how-intro');
+    const gridLayout = root.querySelector<HTMLElement>('.steps-why-grid-layout');
+    const parallaxStage = root.querySelector<HTMLElement>('.steps-why-parallax-stage');
+    const journey = root.querySelector<HTMLElement>('.steps-journey');
+    const storyColumn = root.querySelector<HTMLElement>('.steps-journey__story');
+    const visualColumn = root.querySelector<HTMLElement>('.steps-journey__visual');
+    const flowStage = root.querySelector<HTMLElement>('.steps-flow-stage');
+    const flowBox = root.querySelector<HTMLElement>('.steps-flow-box');
+    const flowImage = root.querySelector<HTMLImageElement>('.steps-flow-box__image');
+    const flowTargets = Array.from(root.querySelectorAll<HTMLElement>('.steps-flow-marker'));
+    const stepBlocks = Array.from(root.querySelectorAll<HTMLElement>('.steps-story-step'));
 
-    if (!section || !heading || steps.length === 0) {
+    if (!section || !whyIntro || !howIntro) {
       return;
     }
 
-    gsap.from(heading, {
-      y: reducedMotion ? 0 : 36,
-      opacity: 0,
-      duration: reducedMotion ? 0.01 : touchMode ? 0.45 : 0.8,
-      ease: 'power3.out',
-      scrollTrigger: {
-        trigger: heading,
-        start: 'top 82%',
-        once: true
-      }
-    });
-
-    steps.forEach((step, index) => {
-      const badge = step.querySelector('.step-item__badge');
-      const title = step.querySelector('h3');
-      const copy = step.querySelector('p:last-of-type');
-      const line = step.querySelector('.step-line');
-
-      ScrollTrigger.create({
-        trigger: step,
-        start: 'top 70%',
-        end: 'bottom 45%',
-        toggleClass: { targets: step, className: 'is-active' },
-        onEnter: () => {
-          steps.forEach((item, itemIndex) => item.classList.toggle('is-active', itemIndex === index));
-        },
-        onEnterBack: () => {
-          steps.forEach((item, itemIndex) => item.classList.toggle('is-active', itemIndex === index));
-        }
-      });
-
-      if (line && !reducedMotion && !touchMode) {
-        gsap.fromTo(
-          line,
-          { scaleX: 0.2, opacity: 0.2 },
-          {
-            scaleX: 1,
-            opacity: 0.9,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: step,
-              start: 'top 75%',
-              end: 'bottom 50%',
-              scrub: 1
-            }
-          }
-        );
-      }
-
-      const parts = [badge, title, copy].filter(Boolean);
-      gsap.from(parts, {
-        y: reducedMotion ? 0 : 26,
+    [whyIntro, howIntro].forEach((heading) =>
+      gsap.from(heading, {
+        y: reducedMotion ? 0 : 36,
         opacity: 0,
-        duration: reducedMotion ? 0.01 : touchMode ? 0.42 : 0.7,
-        stagger: 0.08,
+        duration: reducedMotion ? 0.01 : touchMode ? 0.45 : 0.8,
         ease: 'power3.out',
         scrollTrigger: {
-          trigger: step,
+          trigger: heading,
           start: 'top 82%',
           once: true
         }
+      })
+    );
+
+    if (gridLayout) {
+      const gridCards = Array.from(root.querySelectorAll<HTMLElement>('.steps-why-grid-card'));
+      const columnOne = Array.from(root.querySelectorAll<HTMLElement>('[data-column="0"] .steps-why-grid-card'));
+      const columnThree = Array.from(root.querySelectorAll<HTMLElement>('[data-column="2"] .steps-why-grid-card'));
+
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: gridLayout,
+          start: 'top 75%',
+          end: touchMode ? 'bottom 65%' : 'bottom bottom',
+          scrub: reducedMotion || touchMode ? false : 0.65
+        },
+        defaults: { ease: 'power1.inOut' }
+      })
+        .from(
+          gridLayout,
+          {
+            scale: reducedMotion ? 1 : touchMode ? 1.12 : 2.6
+          },
+          0
+        )
+        .from(
+          columnOne,
+          {
+            xPercent: (index: number) => -((index + 1) * 30 + index * 60),
+            yPercent: (index: number) => (index + 1) * 25 + index * 35,
+            duration: reducedMotion ? 0.01 : 0.6
+          },
+          0
+        )
+        .from(
+          columnThree,
+          {
+            xPercent: (index: number) => (index + 1) * 30 + index * 60,
+            yPercent: (index: number) => (index + 1) * 25 + index * 35,
+            duration: reducedMotion ? 0.01 : 0.6
+          },
+          0
+        )
+        .from(
+          gridCards,
+          {
+            opacity: 0,
+            duration: reducedMotion ? 0.01 : 0.35,
+            stagger: 0.04
+          },
+          0
+        );
+    }
+
+    if (parallaxStage && !touchMode) {
+      const parallaxImage = parallaxStage.querySelector('.steps-why-parallax-image');
+
+      gsap.from(parallaxStage, {
+        scale: reducedMotion ? 1 : 0.42,
+        scrollTrigger: {
+          trigger: parallaxStage,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: reducedMotion ? false : 0.65
+        }
       });
 
-      if (badge && !reducedMotion && !touchMode) {
+      if (parallaxImage) {
         gsap.fromTo(
-          badge,
-          { scale: 0.92 },
+          parallaxImage,
+          { yPercent: -8 },
           {
-            scale: 1.05,
+            yPercent: 8,
             ease: 'none',
             scrollTrigger: {
-              trigger: step,
-              start: 'top 72%',
-              end: 'bottom 48%',
+              trigger: parallaxStage,
+              start: 'top bottom',
+              end: 'bottom top',
               scrub: 1
             }
           }
         );
       }
+    }
+
+    stepBlocks.forEach((stepBlock) => {
+      const pieces = Array.from(stepBlock.children) as HTMLElement[];
+      gsap.from(pieces, {
+        y: reducedMotion ? 0 : 28,
+        opacity: 0,
+        duration: reducedMotion ? 0.01 : touchMode ? 0.45 : 0.7,
+        stagger: 0.08,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: stepBlock,
+          start: 'top 78%',
+          once: true
+        }
+      });
+    });
+
+    if (
+      touchMode ||
+      reducedMotion ||
+      !flowStage ||
+      !flowBox ||
+      !flowImage ||
+      flowTargets.length === 0 ||
+      stepBlocks.length === 0
+    ) {
+      return;
+    }
+
+    const Flip = (window as any).Flip;
+    if (!Flip) {
+      return;
+    }
+
+    if (journey && storyColumn && visualColumn && flowStage) {
+      ScrollTrigger.create({
+        trigger: journey,
+        start: 'top 16%',
+        end: () => `+=${Math.max(storyColumn.offsetHeight - flowStage.offsetHeight, window.innerHeight * 0.8)}`,
+        pin: visualColumn,
+        pinSpacing: false,
+        anticipatePin: 1,
+        invalidateOnRefresh: true
+      });
+    }
+
+    const setActiveStep = (activeIndex: number, animate = true) => {
+      stepBlocks.forEach((block, index) => {
+        block.classList.toggle('is-active', index === activeIndex);
+      });
+
+      const target = flowTargets[activeIndex];
+      if (!target) {
+        return;
+      }
+
+      const step = this.steps[activeIndex];
+      if (step) {
+        flowImage.src = step.afterImageUrl;
+        flowImage.alt = step.afterLabel;
+      }
+
+      if (animate) {
+        gsap.timeline({ defaults: { overwrite: true } })
+          .fromTo(
+            flowImage,
+            { autoAlpha: 0.45, scale: 0.92 },
+            { autoAlpha: 1, scale: 1, duration: 0.45, ease: 'power2.out' },
+            0
+          )
+          .add(
+            Flip.fit(flowBox, target, {
+              duration: 0.85,
+              ease: 'power2.inOut',
+              absolute: true,
+              scale: true
+            }),
+            0
+          );
+      } else {
+        Flip.fit(flowBox, target, {
+          duration: 0,
+          absolute: true,
+          scale: true
+        });
+        gsap.set(flowImage, { autoAlpha: 1, scale: 1 });
+      }
+    };
+
+    setActiveStep(0, false);
+
+    stepBlocks.forEach((stepBlock, index) => {
+      ScrollTrigger.create({
+        trigger: stepBlock,
+        start: 'top 58%',
+        end: 'bottom 42%',
+        onEnter: () => setActiveStep(index, true),
+        onEnterBack: () => setActiveStep(index, true)
+      });
+    });
+
+    const handleResize = () => {
+      setActiveStep(Math.max(0, stepBlocks.findIndex((block) => block.classList.contains('is-active'))), false);
+    };
+
+    window.addEventListener('resize', handleResize);
+    this.landingCleanups.push(() => {
+      window.removeEventListener('resize', handleResize);
     });
   }
 

@@ -4,9 +4,13 @@
 
 .steps-section {
   position: relative;
+  padding: 6rem 0 5rem;
 }
 
 .steps-section__heading {
+  margin: 0 auto 3.5rem;
+  max-width: 48rem;
+  text-align: center;
   will-change: transform, opacity;
 }
 
@@ -18,50 +22,383 @@
   font-size: 0.8rem;
 }
 
-.steps-section__title,
+.steps-section__title {
+  margin: 0 0 0.8rem;
+  color: #fff;
+  font-size: clamp(2.2rem, 4.6vw, 3.4rem);
+  line-height: 0.96;
+}
+
 .steps-section__subtitle {
+  margin: 0;
+  color: rgba(203, 213, 225, 0.82);
+  font-size: 1.02rem;
+  line-height: 1.65;
+}
+
+.steps-why-grid-section {
+  position: relative;
+  z-index: 2;
+}
+
+.steps-why-grid-layout {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  transform-origin: center top;
+}
+
+.steps-why-grid-column__content {
+  display: grid;
+  grid-template-rows: 42vh 42vh;
+  gap: 1rem;
+}
+
+.steps-why-grid-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.6rem;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(2, 6, 23, 0.2);
+  box-shadow: 0 26px 72px rgba(2, 6, 23, 0.28);
+}
+
+.steps-why-grid-card img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.steps-why-grid-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(3, 7, 18, 0.02), rgba(3, 7, 18, 0.78));
+}
+
+.steps-why-grid-card__meta {
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 1;
+  padding: 1rem 1.05rem;
+  border-radius: 1.1rem;
+  background: rgba(7, 12, 24, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  backdrop-filter: blur(12px);
+}
+
+.steps-why-grid-card__meta span,
+.steps-why-grid-card__meta p {
+  margin: 0;
+}
+
+.steps-why-grid-card__meta span {
+  display: inline-block;
+  margin-bottom: 0.45rem;
+  color: rgba(125, 211, 252, 0.92);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.steps-why-grid-card__meta p {
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+.steps-why-parallax-stage {
+  position: relative;
+  height: 100vh;
+  margin: 18vh 0 14vh;
+  padding: 0 1rem;
+  overflow: hidden;
+  transform-origin: center top;
+}
+
+.steps-why-parallax-image {
+  width: 100%;
+  height: 180vh;
+  object-fit: cover;
+  border-radius: 2.1rem;
+  will-change: transform;
+}
+
+.steps-why-parallax-copy {
+  position: absolute;
+  left: clamp(1.5rem, 6vw, 6rem);
+  bottom: clamp(1.5rem, 5vw, 4rem);
+  width: min(30rem, calc(100% - 3rem));
+  padding: 1.35rem 1.45rem;
+  border-radius: 1.3rem;
+  background: rgba(5, 9, 18, 0.64);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  backdrop-filter: blur(14px);
+}
+
+.steps-why-parallax-copy__eyebrow {
+  margin: 0 0 0.5rem;
+  color: rgba(192, 132, 252, 0.92);
+  font-size: 0.74rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.steps-why-parallax-copy h3 {
+  margin: 0 0 0.7rem;
+  color: #fff;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  line-height: 0.98;
+}
+
+.steps-why-parallax-copy p:last-child {
+  margin: 0;
+  color: rgba(226, 232, 240, 0.82);
+  line-height: 1.65;
+}
+
+.steps-how-intro {
+  margin-top: 2rem;
+}
+
+.steps-journey {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(24rem, 1.08fr);
+  gap: clamp(2rem, 4vw, 4rem);
+  align-items: start;
+}
+
+.steps-story-step {
+  min-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1.5rem 0;
   will-change: transform, opacity;
 }
 
-.steps-section__grid {
+.steps-story-step.is-active {
+  opacity: 1;
+}
+
+.steps-story-step__phase {
+  margin: 0 0 0.85rem;
+  color: rgba(125, 211, 252, 0.94);
+  font-size: 0.76rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.steps-story-step h3 {
+  margin: 0 0 0.95rem;
+  color: #fff;
+  font-size: clamp(2rem, 3.6vw, 3.3rem);
+  line-height: 0.95;
+}
+
+.steps-story-step__description {
+  margin: 0;
+  max-width: 28rem;
+  color: rgba(203, 213, 225, 0.84);
+  font-size: 1.02rem;
+  line-height: 1.72;
+}
+
+.steps-journey__visual {
   position: relative;
 }
 
-.step-item {
+.steps-compare-image {
+  position: absolute;
+  inset: 0;
+}
+
+.steps-compare-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.steps-compare-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(5, 9, 18, 0.08), rgba(5, 9, 18, 0.5));
+}
+
+.steps-compare-image--after {
+  overflow: hidden;
+  transform: translateX(100%);
+}
+
+.steps-compare-image--after img {
+  transform: translateX(-100%);
+}
+
+.steps-compare-image--after-static {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: auto;
+  width: 58%;
+  clip-path: inset(0 0 0 0 round 1rem);
+  border-left: 1px solid rgba(255, 255, 255, 0.16);
+  transform: none;
+}
+
+.steps-compare-image--after-static img {
+  transform: none;
+}
+
+.steps-compare-image__label {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 1;
+  display: inline-flex;
+  padding: 0.6rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(7, 12, 24, 0.62);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.steps-compare-card--mobile {
+  display: none;
+  margin-top: 1.35rem;
+  height: clamp(18rem, 54vw, 24rem);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background:
+    linear-gradient(180deg, rgba(9, 13, 24, 0.88), rgba(7, 10, 18, 0.74)),
+    radial-gradient(circle at top right, rgba(125, 211, 252, 0.18), transparent 45%);
+  box-shadow: 0 24px 80px rgba(2, 6, 23, 0.28);
+}
+
+.steps-flow-stage {
   position: relative;
-  padding: 2rem 1.4rem;
+  min-height: 78vh;
+  border-radius: 2rem;
   border: 1px solid rgba(148, 163, 184, 0.12);
-  border-radius: 1.5rem;
   background:
-    linear-gradient(180deg, rgba(15, 23, 42, 0.62), rgba(15, 23, 42, 0.22)),
-    radial-gradient(circle at top, rgba(168, 85, 247, 0.14), transparent 55%);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 24px 70px rgba(2, 6, 23, 0.22);
-  will-change: transform;
-  transition: transform 0.45s ease, border-color 0.45s ease, box-shadow 0.45s ease, background 0.45s ease;
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    radial-gradient(circle at top, rgba(168, 85, 247, 0.18), transparent 42%),
+    linear-gradient(180deg, rgba(8, 12, 24, 0.88), rgba(5, 9, 18, 0.76));
+  background-size: 72px 72px, 72px 72px, auto, auto;
+  background-position: -1px -1px, -1px -1px, center, center;
+  overflow: hidden;
 }
 
-.step-item.is-active {
-  transform: translateY(-0.4rem);
-  border-color: rgba(196, 181, 253, 0.4);
-  background:
-    linear-gradient(180deg, rgba(30, 41, 59, 0.82), rgba(15, 23, 42, 0.34)),
-    radial-gradient(circle at top, rgba(168, 85, 247, 0.22), transparent 58%);
-  box-shadow: 0 30px 90px rgba(2, 6, 23, 0.3);
+.steps-flow-target {
+  position: absolute;
 }
 
-.step-item__badge {
-  position: relative;
-  box-shadow: 0 0 0 8px rgba(15, 23, 42, 0.55), 0 16px 30px rgba(59, 130, 246, 0.28);
-  will-change: transform;
+.steps-flow-target--initial {
+  top: 10%;
+  right: 12%;
 }
 
-.step-item.is-active .step-item__badge {
-  box-shadow: 0 0 0 8px rgba(15, 23, 42, 0.65), 0 18px 34px rgba(96, 165, 250, 0.34);
+.steps-flow-target--second {
+  top: 44%;
+  left: 8%;
 }
 
-.step-line {
-  opacity: 0.85;
-  filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.35));
-  transform-origin: left center;
+.steps-flow-target--third {
+  right: 10%;
+  bottom: 10%;
+}
+
+.steps-flow-marker {
+  width: 8.5rem;
+  height: 8.5rem;
+  border-radius: 1rem;
+  border: 2px dashed rgba(210, 206, 255, 0.28);
+  outline: 1px dashed rgba(255, 255, 255, 0.08);
+  outline-offset: -6px;
+}
+
+.steps-flow-target--second .steps-flow-marker {
+  width: 7.2rem;
+  height: 7.2rem;
+}
+
+.steps-flow-box {
+  position: absolute;
+  top: 10%;
+  right: 12%;
+  width: 8.5rem;
+  height: 8.5rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid rgba(210, 206, 255, 0.72);
+  background: rgba(5, 9, 18, 0.2);
+  box-shadow: 0 24px 48px rgba(2, 6, 23, 0.32);
+  z-index: 3;
+}
+
+.steps-flow-box__image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+@media (max-width: 980px) {
+  .steps-section {
+    padding: 5rem 0 3rem;
+  }
+
+  .steps-why-grid-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .steps-why-grid-column__content {
+    grid-template-rows: repeat(2, minmax(18rem, 42vh));
+  }
+
+  .steps-why-parallax-stage {
+    height: auto;
+    margin: 4rem 0;
+    padding: 0 1rem;
+  }
+
+  .steps-why-parallax-image {
+    height: 68vh;
+  }
+
+  .steps-why-parallax-copy {
+    position: static;
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  .steps-how-intro {
+    margin-top: 1rem;
+  }
+
+  .steps-journey {
+    grid-template-columns: 1fr;
+  }
+
+  .steps-story-step {
+    min-height: auto;
+    padding: 1.25rem 0 2rem;
+  }
+
+  .steps-journey__visual {
+    display: none;
+  }
+
+  .steps-compare-card--mobile {
+    display: block;
+  }
 }
