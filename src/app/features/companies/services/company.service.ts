@@ -46,9 +46,15 @@ export class CompanyService {
     return this.http.post<{ message: string }>(`${this.companyRegistrationUrl}/otp/verify`, payload);
   }
 
-  uploadRegistrationDocument(email: string, documentType: 'LEGAL_CERTIFICATE' | 'TAX_DOCUMENT', file: File) {
+  uploadRegistrationDocument(
+    email: string,
+    companyName: string,
+    documentType: 'LEGAL_CERTIFICATE' | 'TAX_DOCUMENT',
+    file: File
+  ) {
     const formData = new FormData();
     formData.append('email', email);
+    formData.append('companyName', companyName);
     formData.append('documentType', documentType);
     formData.append('file', file);
     return this.http.post<CompanyRegistrationDocument>(`${this.companyRegistrationUrl}/documents`, formData);

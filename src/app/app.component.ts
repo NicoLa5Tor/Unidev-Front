@@ -8,10 +8,11 @@ import { environment } from '../environments/environment';
 import { UnicornBackgroundComponent } from './shared/layout/unicorn-background/unicorn-background.component';
 import { ThemeService } from './core/services/theme.service';
 import { HeaderComponent } from './features/landing/components/header/header.component';
+import { UiToastStackComponent } from './shared/components/ui-toast-stack/ui-toast-stack.component';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, RouterOutlet, UnicornBackgroundComponent, HeaderComponent],
+  imports: [CommonModule, RouterOutlet, UnicornBackgroundComponent, HeaderComponent, UiToastStackComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

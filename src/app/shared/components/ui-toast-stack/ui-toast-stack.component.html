@@ -1,0 +1,13 @@
+<div class="ui-toast-stack" *ngIf="toastService.toasts().length">
+  <button
+    *ngFor="let toast of toastService.toasts()"
+    type="button"
+    class="ui-toast-item"
+    [class.ui-toast-item--success]="toast.type === 'success'"
+    [class.ui-toast-item--error]="toast.type === 'error'"
+    (click)="dismiss(toast.id)"
+  >
+    <span class="ui-toast-item__badge">{{ toast.type === 'success' ? 'OK' : 'ERR' }}</span>
+    <span class="ui-toast-item__message">{{ toast.message }}</span>
+  </button>
+</div>
