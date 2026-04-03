@@ -93,11 +93,18 @@
 .hero-title__row {
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(0.25rem, 0.9vw, 0.7rem);
+  gap: clamp(0.65rem, 1.4vw, 1.2rem);
 }
 
 .hero-title__row--offset {
   padding-left: clamp(1rem, 6vw, 4.8rem);
+}
+
+.hero-title-word {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  gap: 0;
+  white-space: nowrap;
 }
 
 .hero-title-fragment,
@@ -264,7 +271,7 @@
 
 @media (max-width: 768px) {
   .hero-shell {
-    padding-top: 3.7rem;
+    padding-top: 4.9rem;
   }
 
   .hero-viewport {
@@ -274,7 +281,7 @@
   .hero-main-stack {
     width: 100%;
     align-items: center;
-    padding-top: 0.15rem;
+    padding-top: 0.9rem;
     text-align: center;
   }
 
