@@ -160,6 +160,10 @@ export class BlackbirdExperience {
   }
 
   private createItems(): void {
+    if (this.isMobile) {
+      return;
+    }
+
     const boxGeom = new this.THREE.BoxBufferGeometry(2, 2, 2);
     const material = new this.THREE.MeshLambertMaterial({
       color: 0x9333ea,

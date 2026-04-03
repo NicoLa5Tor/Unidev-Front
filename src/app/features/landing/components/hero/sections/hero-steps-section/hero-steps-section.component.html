@@ -38,7 +38,7 @@
     <div class="steps-how-intro steps-section__heading">
       <p class="section-eyebrow">Cómo funciona</p>
       <h2 class="steps-section__title">Tres fases. Una progresión clara.</h2>
-      <p class="steps-section__subtitle">Avanzas de perfil a ejecución mientras el panel visual revela cada cambio de estado.</p>
+      <p class="steps-section__subtitle">Perfil, validación y ejecución en un flujo simple.</p>
     </div>
 
     <div class="steps-journey">
@@ -49,14 +49,15 @@
           <p class="steps-story-step__description">{{ step.description }}</p>
 
           <div class="steps-compare-card steps-compare-card--mobile">
-            <div class="steps-compare-image steps-compare-image--before">
+            <figure class="steps-mobile-visual steps-mobile-visual--before">
+              <figcaption>{{ step.beforeLabel }}</figcaption>
               <img [src]="step.beforeImageUrl" [alt]="step.beforeLabel" />
-              <span class="steps-compare-image__label">{{ step.beforeLabel }}</span>
-            </div>
-            <div class="steps-compare-image steps-compare-image--after steps-compare-image--after-static">
+            </figure>
+
+            <figure class="steps-mobile-visual steps-mobile-visual--after">
+              <figcaption>{{ step.afterLabel }}</figcaption>
               <img [src]="step.afterImageUrl" [alt]="step.afterLabel" />
-              <span class="steps-compare-image__label">{{ step.afterLabel }}</span>
-            </div>
+            </figure>
           </div>
         </article>
       </div>
