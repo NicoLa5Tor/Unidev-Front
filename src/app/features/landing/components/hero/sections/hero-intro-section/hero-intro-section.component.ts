@@ -21,6 +21,7 @@ import { RouterLink } from '@angular/router';
 })
 export class HeroIntroSectionComponent implements OnInit, OnDestroy, OnChanges {
   @Input() typewriterTexts: string[] = [];
+  @Input() typewriterActive = false;
 
   typedText = '';
 
@@ -31,17 +32,30 @@ export class HeroIntroSectionComponent implements OnInit, OnDestroy, OnChanges {
   constructor(private readonly cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
-    this.restartTypewriter();
+    this.syncTypewriterState();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['typewriterTexts'] && !changes['typewriterTexts'].firstChange) {
-      this.restartTypewriter();
+    if (changes['typewriterTexts'] || changes['typewriterActive']) {
+      this.syncTypewriterState();
     }
   }
 
   ngOnDestroy(): void {
     this.clearTypingTimeout();
+  }
+
+  private syncTypewriterState(): void {
+    if (!this.typewriterActive) {
+      this.clearTypingTimeout();
+      this.currentIndex = 0;
+      this.isDeleting = false;
+      this.typedText = '';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    this.restartTypewriter();
   }
 
   private restartTypewriter(): void {

@@ -137,6 +137,11 @@ body.preloader-active {
   overflow: hidden;
 }
 
+body.preloader-active .public-header-shell {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .btn-theme {
   --btn-bg: #0f172a;
   --btn-border: #14b8a6;

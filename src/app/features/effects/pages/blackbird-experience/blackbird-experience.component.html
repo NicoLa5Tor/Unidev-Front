@@ -1,16 +1,19 @@
-<div class="preloader" *ngIf="!isReady">
+<div class="preloader" *ngIf="isPreloaderVisible" [class.preloader--exit]="isReady">
   <div class="preloader__spinner"></div>
   <p>Cargando experiencia...</p>
 </div>
 
-<div id="content" class="content" #contentRoot [class.is-blurred]="!isReady">
+<div id="content" class="content" #contentRoot [class.is-preloading]="!isReady">
   <div class="content__ambient" aria-hidden="true">
     <span class="ambient-orb ambient-orb--violet"></span>
     <span class="ambient-orb ambient-orb--cyan"></span>
     <span class="ambient-orb ambient-orb--rose"></span>
   </div>
 
-  <app-hero-intro-section [typewriterTexts]="typewriterTexts"></app-hero-intro-section>
+  <app-hero-intro-section
+    [typewriterTexts]="typewriterTexts"
+    [typewriterActive]="isHeroTypewriterActive"
+  ></app-hero-intro-section>
   <app-hero-features-section [features]="features"></app-hero-features-section>
   <app-hero-steps-section [reasons]="reasons" [steps]="steps"></app-hero-steps-section>
   <app-hero-final-cta-section></app-hero-final-cta-section>

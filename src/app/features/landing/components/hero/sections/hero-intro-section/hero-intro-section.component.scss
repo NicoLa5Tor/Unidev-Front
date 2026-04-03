@@ -50,7 +50,7 @@
 .hero-shell {
   position: relative;
   z-index: 2;
-  padding-top: clamp(4.5rem, 8vh, 6rem);
+  padding-top: clamp(3.6rem, 6.4vh, 5rem);
   padding-bottom: clamp(2rem, 4vh, 3rem);
 }
 
@@ -68,7 +68,7 @@
   align-items: flex-start;
   gap: clamp(1rem, 2vh, 1.5rem);
   width: min(100%, 68rem);
-  padding-top: clamp(2rem, 6vh, 5rem);
+  padding-top: clamp(0.8rem, 3.8vh, 3.2rem);
 }
 
 .hero-title-block {
@@ -264,7 +264,7 @@
 
 @media (max-width: 768px) {
   .hero-shell {
-    padding-top: 4.2rem;
+    padding-top: 3.7rem;
   }
 
   .hero-viewport {
@@ -274,7 +274,7 @@
   .hero-main-stack {
     width: 100%;
     align-items: center;
-    padding-top: 0.5rem;
+    padding-top: 0.15rem;
     text-align: center;
   }
 

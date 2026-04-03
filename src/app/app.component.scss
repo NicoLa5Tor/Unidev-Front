@@ -6,6 +6,7 @@
 .public-header-shell {
   position: relative;
   z-index: 40;
+  transition: opacity 0.38s ease;
 }
 
 .app-shell {

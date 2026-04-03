@@ -26,12 +26,14 @@ html {
   position: relative;
   z-index: 5;
   overflow: clip;
+  transition: opacity 0.42s ease, visibility 0s linear 0s;
 
-  &.is-blurred {
-    filter: blur(6px);
+  &.is-preloading {
+    opacity: 0;
+    visibility: hidden;
     pointer-events: none;
     user-select: none;
-    opacity: 0.4;
+    transition: opacity 0.18s ease, visibility 0s linear 0.18s;
   }
 }
 
@@ -140,11 +142,23 @@ html {
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(2, 6, 23, 0.95));
+  background:
+    radial-gradient(circle at top, rgba(56, 189, 248, 0.14), transparent 38%),
+    linear-gradient(180deg, #0f172a 0%, #020617 100%);
   color: #e0f2fe;
   font-weight: 600;
   letter-spacing: 0.1em;
   z-index: 999;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.42s ease, visibility 0s linear 0s;
+
+  &.preloader--exit {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.42s ease, visibility 0s linear 0.42s;
+  }
 }
 
 .preloader__spinner {

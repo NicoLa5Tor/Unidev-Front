@@ -25,6 +25,8 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
   @ViewChild('contentRoot', { static: true }) private contentRoot?: ElementRef<HTMLElement>;
 
   isReady = false;
+  isPreloaderVisible = true;
+  isHeroTypewriterActive = false;
   features = [
     {
       icon: '🚀',
@@ -178,6 +180,8 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
   private gsapContext?: { revert: () => void };
   private magneticCleanups: Array<() => void> = [];
   private landingCleanups: Array<() => void> = [];
+  private preloaderExitTimeoutId?: number;
+  private typewriterActivationTimeoutId?: number;
 
   ngOnInit(): void {
     this.toggleBodyScroll(true);
@@ -191,6 +195,8 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
   ngOnDestroy(): void {
     this.cleanupLandingAnimations();
     cancelAnimationFrame(this.animationFrameId ?? 0);
+    window.clearTimeout(this.preloaderExitTimeoutId);
+    window.clearTimeout(this.typewriterActivationTimeoutId);
     this.experience?.dispose();
     this.toggleBodyScroll(false);
   }
@@ -269,9 +275,8 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
   }
 
   private handleExperienceReady(): void {
-    this.isReady = true;
-    this.toggleBodyScroll(false);
     this.initLandingAnimations();
+    this.beginEntranceTransition();
   }
 
   private toggleBodyScroll(lock: boolean): void {
@@ -309,6 +314,26 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     window.setTimeout(() => ScrollTrigger.refresh(), 150);
   }
 
+  private beginEntranceTransition(): void {
+    this.isReady = true;
+    window.clearTimeout(this.preloaderExitTimeoutId);
+    this.preloaderExitTimeoutId = window.setTimeout(() => {
+      this.isPreloaderVisible = false;
+      this.toggleBodyScroll(false);
+    }, 420);
+  }
+
+  private scheduleTypewriterActivation(delay: number): void {
+    this.isHeroTypewriterActive = false;
+    window.clearTimeout(this.typewriterActivationTimeoutId);
+    if (delay < 0) {
+      return;
+    }
+    this.typewriterActivationTimeoutId = window.setTimeout(() => {
+      this.isHeroTypewriterActive = true;
+    }, delay);
+  }
+
   private cleanupLandingAnimations(): void {
     this.magneticCleanups.forEach((cleanup) => cleanup());
     this.magneticCleanups = [];
@@ -336,22 +361,63 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     const introEase = CustomEase?.create
       ? CustomEase.create('hero-intro-ease', '0.52, 0.00, 0.48, 1.00')
       : 'power4.out';
-    const heroDuration = reducedMotion ? 0.01 : touchMode ? 0.55 : 1.06;
-    const revealDuration = reducedMotion ? 0.01 : touchMode ? 0.42 : 0.74;
+    const heroDuration = reducedMotion ? 0.01 : touchMode ? 0.5 : 0.92;
+    const revealDuration = reducedMotion ? 0.01 : touchMode ? 0.38 : 0.62;
+    const typewriterDelay = reducedMotion ? 0 : touchMode ? 90 : 180;
+
+    this.scheduleTypewriterActivation(-1);
+
+    if (publicHeader) {
+      gsap.set(publicHeader, {
+        y: 0,
+        filter: reducedMotion ? 'blur(0px)' : 'blur(8px)',
+        opacity: reducedMotion ? 1 : 0
+      });
+    }
+
+    titleFragments.forEach((fragment) => {
+      const shift = Number(fragment.parentElement?.getAttribute('data-shift') ?? 0);
+      gsap.set(fragment, {
+        x: reducedMotion ? 0 : shift * 0.34,
+        y: 0,
+        filter: reducedMotion ? 'blur(0px)' : 'blur(10px)',
+        opacity: reducedMotion ? 1 : 0
+      });
+    });
+
+    revealBlocks.forEach((block) => {
+      if (block.closest('.hero-note--top')) {
+        return;
+      }
+
+      gsap.set(block, {
+        y: 0,
+        filter: reducedMotion ? 'blur(0px)' : 'blur(10px)',
+        opacity: reducedMotion ? 1 : 0
+      });
+    });
+
+    gsap.set('.hero-book-btn__circle', {
+      scale: reducedMotion ? 1 : 0.96,
+      filter: reducedMotion ? 'blur(0px)' : 'blur(12px)',
+      autoAlpha: reducedMotion ? 1 : 0
+    });
 
     const heroTimeline = gsap.timeline({
       defaults: {
         ease: introEase,
         force3D: true
-      }
+      },
+      onComplete: () => this.scheduleTypewriterActivation(typewriterDelay)
     });
 
     if (publicHeader) {
-      heroTimeline.from(
+      heroTimeline.to(
         publicHeader,
         {
-          y: reducedMotion ? 0 : -36,
-          opacity: 0,
+          y: 0,
+          filter: 'blur(0px)',
+          opacity: 1,
           duration: reducedMotion ? 0.01 : touchMode ? 0.45 : 0.8
         },
         0
@@ -359,12 +425,13 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     }
 
     titleFragments.forEach((fragment, index) => {
-      const shift = Number(fragment.parentElement?.getAttribute('data-shift') ?? 0);
-      heroTimeline.from(
+      heroTimeline.to(
         fragment,
         {
-          x: reducedMotion ? 0 : shift,
-          opacity: 0,
+          x: 0,
+          y: 0,
+          filter: 'blur(0px)',
+          opacity: 1,
           duration: heroDuration
         },
         index === 0 ? 0.04 : 0.1 + index * (touchMode ? 0.08 : 0.12)
@@ -376,11 +443,12 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
         return;
       }
 
-      heroTimeline.from(
+      heroTimeline.to(
         block,
         {
-          y: reducedMotion ? 0 : 28,
-          opacity: 0,
+          y: 0,
+          filter: 'blur(0px)',
+          opacity: 1,
           duration: revealDuration
         },
         0.34 + index * (touchMode ? 0.05 : 0.08)
@@ -388,11 +456,12 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     });
 
     heroTimeline
-      .from(
+      .to(
         '.hero-book-btn__circle',
         {
-          scale: reducedMotion ? 1 : 0.42,
-          autoAlpha: 0,
+          scale: 1,
+          filter: 'blur(0px)',
+          autoAlpha: 1,
           duration: reducedMotion ? 0.01 : touchMode ? 0.5 : 0.96
         },
         touchMode ? 0.5 : 0.7
