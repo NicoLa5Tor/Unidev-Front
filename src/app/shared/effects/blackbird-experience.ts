@@ -29,6 +29,12 @@ export class BlackbirdExperience {
   private smoother?: any;
   private animationFrameId?: number;
   private resizeHandler?: () => void;
+  private scrollHandler?: () => void;
+  private scrollProgress = 0;
+  private lastRenderTime = 0;
+  private readonly isMobile: boolean;
+  private readonly isReducedMotion: boolean;
+  private readonly quality: 'low' | 'high';
 
   private settings = {
     cameraDistance: 5,
@@ -50,6 +56,9 @@ export class BlackbirdExperience {
     this.ScrollSmoother = deps.ScrollSmoother;
     this.requestFrame = deps.requestFrame;
     this.onReady = deps.onReady;
+    this.isMobile = window.matchMedia('(max-width: 768px)').matches || window.matchMedia('(pointer: coarse)').matches;
+    this.isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.quality = this.isMobile || this.isReducedMotion ? 'low' : 'high';
 
     this.clock = new this.THREE.Clock();
     this.init();
@@ -63,6 +72,9 @@ export class BlackbirdExperience {
     this.ScrollTrigger?.getAll?.().forEach((trigger: any) => trigger.kill());
     if (this.resizeHandler) {
       window.removeEventListener('resize', this.resizeHandler, true);
+    }
+    if (this.scrollHandler) {
+      window.removeEventListener('scroll', this.scrollHandler, true);
     }
     this.container.innerHTML = '';
   }
@@ -79,49 +91,49 @@ export class BlackbirdExperience {
   private initScroll(): void {
     this.gsap.registerPlugin(this.ScrollTrigger, this.ScrollSmoother);
 
-    this.smoother = this.ScrollSmoother.create({
-      content: this.contentElement,
-      smooth: 1.2
-    });
-
-    const spans = Array.from(this.contentElement.querySelectorAll('span'));
-    spans.forEach((span) => {
-      this.ScrollTrigger.create({
-        trigger: span,
-        start: 'top 90%',
-        end: 'bottom 10%',
-        onUpdate: (self: any) => {
-          const dist = Math.abs(self.progress - 0.5);
-          const lightness = this.mapToRange(dist, 0, 0.5, 80, 100);
-          (span as HTMLElement).style.setProperty('--l', `${lightness}%`);
-        }
+    if (this.quality === 'high') {
+      this.smoother = this.ScrollSmoother.create({
+        content: this.contentElement,
+        smooth: 1.1,
+        smoothTouch: 0.1
       });
-    });
+
+      const spans = Array.from(this.contentElement.querySelectorAll('span'));
+      spans.forEach((span) => {
+        this.ScrollTrigger.create({
+          trigger: span,
+          start: 'top 90%',
+          end: 'bottom 10%',
+          onUpdate: (self: any) => {
+            const dist = Math.abs(self.progress - 0.5);
+            const lightness = this.mapToRange(dist, 0, 0.5, 80, 100);
+            (span as HTMLElement).style.setProperty('--l', `${lightness}%`);
+          }
+        });
+      });
+      return;
+    }
+
+    this.scrollHandler = () => {
+      const scrollable = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+      this.scrollProgress = window.scrollY / scrollable;
+    };
+    this.scrollHandler();
+    window.addEventListener('scroll', this.scrollHandler, { passive: true, capture: true });
   }
 
   private createApp(): void {
     const { width, height } = this.getViewportSize();
 
     this.renderer = new this.THREE.WebGLRenderer({ antialias: false, alpha: true });
-    this.renderer.setPixelRatio(1.5);
+    const pixelRatio = this.quality === 'high' ? Math.min(window.devicePixelRatio || 1, 1.5) : 1;
+    this.renderer.setPixelRatio(pixelRatio);
     this.renderer.setSize(width, height);
     this.container.appendChild(this.renderer.domElement);
 
     this.camera = new this.THREE.PerspectiveCamera(45, width / height, 1, 10000);
     this.camera.position.set(0, 0, this.settings.cameraDistance);
     this.scene = new this.THREE.Scene();
-
-    const globalOrbitControls =
-      (window as any).THREE?.OrbitControls ?? (window as any).OrbitControls ?? null;
-    const ControlsCtor = (this.THREE as any).OrbitControls ?? globalOrbitControls;
-    if (!ControlsCtor) {
-      throw new Error('OrbitControls no se encuentra disponible.');
-    }
-
-    this.controls = new ControlsCtor(this.camera, this.renderer.domElement);
-    this.controls.enableKeys = false;
-    this.controls.enableZoom = false;
-    this.controls.enableDamping = false;
 
     this.resizeHandler = () => this.handleResize();
     window.addEventListener('resize', this.resizeHandler, true);
@@ -140,8 +152,10 @@ export class BlackbirdExperience {
       return;
     }
     const { width, height } = this.getViewportSize();
+    const pixelRatio = this.quality === 'high' ? Math.min(window.devicePixelRatio || 1, 1.5) : 1;
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
+    this.renderer.setPixelRatio(pixelRatio);
     this.renderer.setSize(width, height);
   }
 
@@ -153,21 +167,31 @@ export class BlackbirdExperience {
       emissiveIntensity: 0.3
     });
 
-    const itemCount = 40;
+    const itemCount = this.quality === 'high' ? 40 : 14;
     for (let i = 0; i < itemCount; i++) {
       const mesh = new this.THREE.Mesh(boxGeom, material);
-      mesh.position.y = 13 * (Math.random() * 2 - 1);
-      mesh.position.x = 3 * (Math.random() * 2 - 1);
-      mesh.position.z = 4 * (Math.random() * 2 - 1);
+      mesh.position.y = (this.quality === 'high' ? 13 : 10) * (Math.random() * 2 - 1);
+      mesh.position.x = (this.quality === 'high' ? 3 : 2.2) * (Math.random() * 2 - 1);
+      mesh.position.z = (this.quality === 'high' ? 4 : 3) * (Math.random() * 2 - 1);
       mesh.rotation.y = Math.PI * Math.random();
-      mesh.rotationSpeed = Math.random() * 0.01 + 0.005;
+      mesh.rotationSpeed = this.quality === 'high' ? Math.random() * 0.01 + 0.005 : Math.random() * 0.004 + 0.002;
       this.scene.add(mesh);
       this.meshes.push(mesh);
     }
   }
 
   private update(): void {
-    this.time = this.clock.getElapsedTime();
+    const elapsed = this.clock.getElapsedTime();
+    if (this.quality === 'low') {
+      const now = performance.now();
+      if (now - this.lastRenderTime < 1000 / 30) {
+        this.animationFrameId = this.requestFrame(() => this.update());
+        return;
+      }
+      this.lastRenderTime = now;
+    }
+
+    this.time = elapsed;
     this.updateItems();
     this.renderer?.render(this.scene, this.camera);
     this.animationFrameId = this.requestFrame(() => this.update());
@@ -182,12 +206,16 @@ export class BlackbirdExperience {
     this.meshes.forEach((mesh) => {
       mesh.scale.set(scaleEffect, scaleEffect, scaleEffect);
       mesh.rotation.x += mesh.rotationSpeed;
+      if (this.quality === 'high') {
+        mesh.rotation.y += mesh.rotationSpeed * 0.5;
+      }
     });
 
-    if (this.camera && this.smoother) {
-      const cameraRange = 10;
+    if (this.camera) {
+      const progress = this.smoother ? this.smoother.progress : this.scrollProgress;
+      const cameraRange = this.quality === 'high' ? 10 : 6;
       this.camera.position.y = this.mapToRange(
-        this.smoother.progress,
+        progress,
         0,
         1,
         cameraRange,

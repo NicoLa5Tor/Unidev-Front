@@ -226,16 +226,17 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     }
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const touchMode = window.matchMedia('(max-width: 980px), (pointer: coarse)').matches;
 
     this.gsapContext = gsap.context(() => {
-      this.setupHeroReveal(gsap, ScrollTrigger, contentElement, prefersReducedMotion);
-      this.setupFeatureStories(gsap, ScrollTrigger, contentElement, prefersReducedMotion);
-      this.setupStepsSequence(gsap, ScrollTrigger, contentElement, prefersReducedMotion);
-      this.setupFinalCtaSequence(gsap, ScrollTrigger, contentElement, prefersReducedMotion);
-      this.setupAmbientMotion(gsap, contentElement, prefersReducedMotion);
-      this.setupStatCounters(gsap, ScrollTrigger, contentElement, prefersReducedMotion);
-      this.setupMagneticButtons(gsap, contentElement, prefersReducedMotion);
-      this.setupFinalCtaSpotlight(gsap, contentElement, prefersReducedMotion);
+      this.setupHeroReveal(gsap, ScrollTrigger, contentElement, prefersReducedMotion, touchMode);
+      this.setupFeatureStories(gsap, ScrollTrigger, contentElement, prefersReducedMotion, touchMode);
+      this.setupStepsSequence(gsap, ScrollTrigger, contentElement, prefersReducedMotion, touchMode);
+      this.setupFinalCtaSequence(gsap, ScrollTrigger, contentElement, prefersReducedMotion, touchMode);
+      this.setupAmbientMotion(gsap, contentElement, prefersReducedMotion, touchMode);
+      this.setupStatCounters(gsap, ScrollTrigger, contentElement, prefersReducedMotion, touchMode);
+      this.setupMagneticButtons(gsap, contentElement, prefersReducedMotion, touchMode);
+      this.setupFinalCtaSpotlight(gsap, contentElement, prefersReducedMotion, touchMode);
     }, contentElement);
 
     window.setTimeout(() => ScrollTrigger.refresh(), 150);
@@ -248,7 +249,13 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     this.gsapContext = undefined;
   }
 
-  private setupHeroReveal(gsap: any, ScrollTrigger: any, root: HTMLElement, reducedMotion: boolean): void {
+  private setupHeroReveal(
+    gsap: any,
+    ScrollTrigger: any,
+    root: HTMLElement,
+    reducedMotion: boolean,
+    touchMode: boolean
+  ): void {
     const hero = root.querySelector('.hero-intro');
     if (!hero) {
       return;
@@ -261,6 +268,8 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     const introEase = CustomEase?.create
       ? CustomEase.create('hero-intro-ease', '0.52, 0.00, 0.48, 1.00')
       : 'power4.out';
+    const heroDuration = reducedMotion ? 0.01 : touchMode ? 0.55 : 1.06;
+    const revealDuration = reducedMotion ? 0.01 : touchMode ? 0.42 : 0.74;
 
     const heroTimeline = gsap.timeline({
       defaults: {
@@ -275,7 +284,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
         {
           y: reducedMotion ? 0 : -36,
           opacity: 0,
-          duration: reducedMotion ? 0.01 : 0.8
+          duration: reducedMotion ? 0.01 : touchMode ? 0.45 : 0.8
         },
         0
       );
@@ -288,9 +297,9 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
         {
           x: reducedMotion ? 0 : shift,
           opacity: 0,
-          duration: reducedMotion ? 0.01 : 1.06
+          duration: heroDuration
         },
-        index === 0 ? 0.04 : 0.1 + index * 0.12
+        index === 0 ? 0.04 : 0.1 + index * (touchMode ? 0.08 : 0.12)
       );
     });
 
@@ -304,9 +313,9 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
         {
           y: reducedMotion ? 0 : 28,
           opacity: 0,
-          duration: reducedMotion ? 0.01 : 0.74
+          duration: revealDuration
         },
-        0.44 + index * 0.08
+        0.34 + index * (touchMode ? 0.05 : 0.08)
       );
     });
 
@@ -316,9 +325,9 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
         {
           scale: reducedMotion ? 1 : 0.42,
           autoAlpha: 0,
-          duration: reducedMotion ? 0.01 : 0.96
+          duration: reducedMotion ? 0.01 : touchMode ? 0.5 : 0.96
         },
-        0.7
+        touchMode ? 0.5 : 0.7
       );
 
     if (reducedMotion) {
@@ -326,8 +335,8 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     }
   }
 
-  private setupAmbientMotion(gsap: any, root: HTMLElement, reducedMotion: boolean): void {
-    if (reducedMotion) {
+  private setupAmbientMotion(gsap: any, root: HTMLElement, reducedMotion: boolean, touchMode: boolean): void {
+    if (reducedMotion || touchMode) {
       return;
     }
 
@@ -355,7 +364,13 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     });
   }
 
-  private setupStepsSequence(gsap: any, ScrollTrigger: any, root: HTMLElement, reducedMotion: boolean): void {
+  private setupStepsSequence(
+    gsap: any,
+    ScrollTrigger: any,
+    root: HTMLElement,
+    reducedMotion: boolean,
+    touchMode: boolean
+  ): void {
     const section = root.querySelector<HTMLElement>('.steps-section');
     const heading = root.querySelector<HTMLElement>('.steps-section__heading');
     const steps = Array.from(root.querySelectorAll<HTMLElement>('.step-item'));
@@ -367,7 +382,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     gsap.from(heading, {
       y: reducedMotion ? 0 : 36,
       opacity: 0,
-      duration: reducedMotion ? 0.01 : 0.8,
+      duration: reducedMotion ? 0.01 : touchMode ? 0.45 : 0.8,
       ease: 'power3.out',
       scrollTrigger: {
         trigger: heading,
@@ -395,7 +410,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
         }
       });
 
-      if (line && !reducedMotion) {
+      if (line && !reducedMotion && !touchMode) {
         gsap.fromTo(
           line,
           { scaleX: 0.2, opacity: 0.2 },
@@ -417,7 +432,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
       gsap.from(parts, {
         y: reducedMotion ? 0 : 26,
         opacity: 0,
-        duration: reducedMotion ? 0.01 : 0.7,
+        duration: reducedMotion ? 0.01 : touchMode ? 0.42 : 0.7,
         stagger: 0.08,
         ease: 'power3.out',
         scrollTrigger: {
@@ -427,7 +442,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
         }
       });
 
-      if (badge && !reducedMotion) {
+      if (badge && !reducedMotion && !touchMode) {
         gsap.fromTo(
           badge,
           { scale: 0.92 },
@@ -446,7 +461,13 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     });
   }
 
-  private setupFinalCtaSequence(gsap: any, ScrollTrigger: any, root: HTMLElement, reducedMotion: boolean): void {
+  private setupFinalCtaSequence(
+    gsap: any,
+    ScrollTrigger: any,
+    root: HTMLElement,
+    reducedMotion: boolean,
+    touchMode: boolean
+  ): void {
     const panel = root.querySelector<HTMLElement>('.cta-band__panel');
     if (!panel) {
       return;
@@ -463,7 +484,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
       y: reducedMotion ? 0 : 40,
       opacity: 0,
       scale: reducedMotion ? 1 : 0.96,
-      duration: reducedMotion ? 0.01 : 0.9,
+      duration: reducedMotion ? 0.01 : touchMode ? 0.5 : 0.9,
       ease: 'power3.out',
       scrollTrigger: {
         trigger: panel,
@@ -475,7 +496,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     gsap.from(copyParts, {
       y: reducedMotion ? 0 : 24,
       opacity: 0,
-      duration: reducedMotion ? 0.01 : 0.7,
+      duration: reducedMotion ? 0.01 : touchMode ? 0.42 : 0.7,
       stagger: 0.08,
       ease: 'power3.out',
       scrollTrigger: {
@@ -488,7 +509,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     gsap.from(metaParts, {
       x: reducedMotion ? 0 : 24,
       opacity: 0,
-      duration: reducedMotion ? 0.01 : 0.72,
+      duration: reducedMotion ? 0.01 : touchMode ? 0.44 : 0.72,
       stagger: 0.08,
       ease: 'power3.out',
       scrollTrigger: {
@@ -498,7 +519,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
       }
     });
 
-    if (!reducedMotion) {
+    if (!reducedMotion && !touchMode) {
       gsap.fromTo(
         panel,
         { yPercent: 4 },
@@ -516,7 +537,13 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     }
   }
 
-  private setupFeatureStories(gsap: any, ScrollTrigger: any, root: HTMLElement, reducedMotion: boolean): void {
+  private setupFeatureStories(
+    gsap: any,
+    ScrollTrigger: any,
+    root: HTMLElement,
+    reducedMotion: boolean,
+    touchMode: boolean
+  ): void {
     const stories = Array.from(root.querySelectorAll<HTMLElement>('.feature-arch__info'));
     const arch = root.querySelector<HTMLElement>('.feature-arch');
     const archRight = root.querySelector<HTMLElement>('.feature-arch__right');
@@ -536,7 +563,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
       gsap.from(intro, {
         y: reducedMotion ? 0 : 36,
         opacity: 0,
-        duration: reducedMotion ? 0.01 : 0.8,
+        duration: reducedMotion ? 0.01 : touchMode ? 0.45 : 0.8,
         ease: 'power3.out',
         scrollTrigger: {
           trigger: intro,
@@ -571,8 +598,8 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
       const images = desktopImageWrappers
         .map(wrapper => wrapper.querySelector<HTMLElement>('.feature-arch__image'))
         .filter(Boolean) as HTMLElement[];
-      const transitionHold = reducedMotion ? 0.01 : 0.38;
-      const finalHold = reducedMotion ? 0.01 : 0.7;
+      const transitionHold = reducedMotion ? 0.01 : touchMode ? 0.08 : 0.38;
+      const finalHold = reducedMotion ? 0.01 : touchMode ? 0.16 : 0.7;
 
       gsap.set(desktopImageWrappers, {
         clipPath: 'inset(0% 0% 0% 0%)',
@@ -589,7 +616,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
           start: 'top top',
           end: 'bottom bottom',
           pin: archRight,
-          scrub: reducedMotion ? false : 1,
+          scrub: reducedMotion || touchMode ? false : 1,
           invalidateOnRefresh: true
         }
       });
@@ -693,7 +720,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
         toggleClass: { targets: story, className: 'is-active' }
       });
 
-      if (relatedImage && mobileQuery.matches && !reducedMotion) {
+      if (relatedImage && mobileQuery.matches && !reducedMotion && !touchMode) {
         gsap.fromTo(
           relatedImage,
           { objectPosition: '50% 60%' },
@@ -725,7 +752,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
       timeline
         .from(lines, {
           yPercent: reducedMotion ? 0 : 120,
-          duration: reducedMotion ? 0.01 : 1.1,
+          duration: reducedMotion ? 0.01 : touchMode ? 0.5 : 1.1,
           stagger: 0.08
         })
         .from(
@@ -733,7 +760,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
           {
             y: reducedMotion ? 0 : 28,
             opacity: 0,
-            duration: reducedMotion ? 0.01 : 0.7,
+            duration: reducedMotion ? 0.01 : touchMode ? 0.42 : 0.7,
             stagger: 0.08
           },
           '-=0.75'
@@ -743,7 +770,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
           {
             y: reducedMotion ? 0 : 24,
             opacity: 0,
-            duration: reducedMotion ? 0.01 : 0.65,
+            duration: reducedMotion ? 0.01 : touchMode ? 0.4 : 0.65,
             stagger: 0.06
           },
           '-=0.55'
@@ -751,7 +778,13 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     });
   }
 
-  private setupStatCounters(gsap: any, ScrollTrigger: any, root: HTMLElement, reducedMotion: boolean): void {
+  private setupStatCounters(
+    gsap: any,
+    ScrollTrigger: any,
+    root: HTMLElement,
+    reducedMotion: boolean,
+    touchMode: boolean
+  ): void {
     const counters = Array.from(root.querySelectorAll<HTMLElement>('.stat-card__number'));
 
     counters.forEach((counter) => {
@@ -773,7 +806,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
         onEnter: () => {
           gsap.to(state, {
             value: targetValue,
-            duration: reducedMotion ? 0.01 : 1.6,
+            duration: reducedMotion ? 0.01 : touchMode ? 0.7 : 1.6,
             ease: 'power2.out',
             snap: { value: 1 },
             onUpdate: () => {
@@ -785,8 +818,8 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     });
   }
 
-  private setupMagneticButtons(gsap: any, root: HTMLElement, reducedMotion: boolean): void {
-    if (reducedMotion) {
+  private setupMagneticButtons(gsap: any, root: HTMLElement, reducedMotion: boolean, touchMode: boolean): void {
+    if (reducedMotion || touchMode) {
       return;
     }
 
@@ -827,8 +860,8 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     });
   }
 
-  private setupFinalCtaSpotlight(gsap: any, root: HTMLElement, reducedMotion: boolean): void {
-    if (reducedMotion) {
+  private setupFinalCtaSpotlight(gsap: any, root: HTMLElement, reducedMotion: boolean, touchMode: boolean): void {
+    if (reducedMotion || touchMode) {
       return;
     }
 
