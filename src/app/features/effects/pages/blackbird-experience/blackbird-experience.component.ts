@@ -25,13 +25,6 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
   @ViewChild('contentRoot', { static: true }) private contentRoot?: ElementRef<HTMLElement>;
 
   isReady = false;
-  stats = [
-    { number: '500+', label: 'Proyectos Activos', icon: '⚡' },
-    { number: '1000+', label: 'Estudiantes', icon: '🎓' },
-    { number: '200+', label: 'Empresas', icon: '🏢' },
-    { number: '95%', label: 'Satisfacción', icon: '⭐' }
-  ];
-
   features = [
     {
       icon: '🚀',
@@ -332,8 +325,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     reducedMotion: boolean,
     touchMode: boolean
   ): void {
-    const hero = root.querySelector('.hero-intro');
-    if (!hero) {
+    if (!root.querySelector('.hero-intro')) {
       return;
     }
 
@@ -429,15 +421,6 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
         ease: 'sine.inOut'
       });
     });
-
-    gsap.to('.hero-scroll-cue__line', {
-      y: 14,
-      opacity: 0.25,
-      duration: 1.2,
-      repeat: -1,
-      yoyo: true,
-      ease: 'power1.inOut'
-    });
   }
 
   private setupStepsSequence(
@@ -447,7 +430,6 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     reducedMotion: boolean,
     touchMode: boolean
   ): void {
-    const section = root.querySelector<HTMLElement>('.steps-section');
     const whyIntro = root.querySelector<HTMLElement>('.steps-why-intro');
     const howIntro = root.querySelector<HTMLElement>('.steps-how-intro');
     const gridLayout = root.querySelector<HTMLElement>('.steps-why-grid-layout');
@@ -461,7 +443,7 @@ export class BlackbirdExperienceComponent implements AfterViewInit, OnDestroy, O
     const flowTargets = Array.from(root.querySelectorAll<HTMLElement>('.steps-flow-marker'));
     const stepBlocks = Array.from(root.querySelectorAll<HTMLElement>('.steps-story-step'));
 
-    if (!section || !whyIntro || !howIntro) {
+    if (!whyIntro || !howIntro) {
       return;
     }
 

@@ -11,8 +11,6 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-export type HeroStat = { number: string; label: string; icon: string };
-
 @Component({
   selector: 'app-hero-intro-section',
   standalone: true,
@@ -22,7 +20,6 @@ export type HeroStat = { number: string; label: string; icon: string };
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HeroIntroSectionComponent implements OnInit, OnDestroy, OnChanges {
-  @Input({ required: true }) stats: HeroStat[] = [];
   @Input() typewriterTexts: string[] = [];
 
   typedText = '';
