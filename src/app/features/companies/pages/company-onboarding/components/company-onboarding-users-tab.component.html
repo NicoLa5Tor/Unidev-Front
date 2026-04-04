@@ -1,0 +1,167 @@
+<section class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+  <article class="rounded-[2rem] border border-[color:var(--panel-border)] bg-[var(--panel)]/95 p-6 shadow-[var(--shadow)]">
+    <ng-container *ngIf="currentCompany; else emptyCompany">
+      <ng-container *ngIf="isApprovedCompany; else pendingApproval">
+        <div class="grid gap-4 md:grid-cols-3">
+          <div class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel-2)]/70 p-5">
+            <p class="font-tech text-xs uppercase tracking-[0.28em] text-[var(--accent-4)]">Usuarios activos</p>
+            <h3 class="mt-3 font-cyber text-2xl text-[var(--text)]">{{ companyUsers.length }}</h3>
+            <p class="mt-2 text-sm text-[var(--muted)]">Cuentas internas visibles en el panel.</p>
+          </div>
+
+          <div class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel-2)]/70 p-5">
+            <p class="font-tech text-xs uppercase tracking-[0.28em] text-[var(--accent-2)]">Dominio requerido</p>
+            <h3 class="mt-3 break-all font-cyber text-lg text-[var(--text)]">{{ companyDomain }}</h3>
+            <p class="mt-2 text-sm text-[var(--muted)]">Todos los usuarios nuevos deben respetar este dominio.</p>
+          </div>
+
+          <div class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel-2)]/70 p-5">
+            <p class="font-tech text-xs uppercase tracking-[0.28em] text-[var(--accent-1)]">Estado del modulo</p>
+            <h3 class="mt-3 font-cyber text-lg text-[var(--text)]">Alta interna habilitada</h3>
+            <p class="mt-2 text-sm text-[var(--muted)]">Puedes crear perfiles sin salir del panel de empresa.</p>
+          </div>
+        </div>
+
+        <div class="mt-6 grid gap-6 xl:grid-cols-[1.05fr_0.95fr] xl:items-start">
+          <form class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel)]/85 p-6" (ngSubmit)="createUser.emit()">
+            <div class="rounded-[1.7rem] border border-white/10 bg-[var(--panel-2)]/35 p-5">
+              <p class="font-tech text-xs uppercase tracking-[0.28em] text-[var(--accent-4)]">Alta de usuarios de empresa</p>
+              <h3 class="mt-3 font-cyber text-2xl text-[var(--text)]">Crear usuario interno</h3>
+              <p class="mt-3 max-w-2xl text-sm leading-7 text-[var(--muted)]">
+                Este endpoint solo crea usuarios con rol `EMPRESAS` y exige correos del dominio {{ companyDomain }}.
+              </p>
+            </div>
+
+            <div class="mt-6 space-y-5">
+              <div class="rounded-[1.5rem] border border-white/10 bg-black/10 p-5">
+                <p class="font-tech text-[11px] uppercase tracking-[0.24em] text-[var(--muted)]">Identidad visible</p>
+                <div class="mt-4 grid gap-4 md:grid-cols-2">
+                  <label class="block">
+                    <span class="mb-2 block font-tech text-xs uppercase tracking-[0.24em] text-[var(--muted)]">Nombre</span>
+                    <input [(ngModel)]="companyUserForm.nombre" name="companyUserName" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] focus:border-[color:var(--accent-4)]/60 focus:outline-none" />
+                  </label>
+
+                  <label class="block">
+                    <span class="mb-2 block font-tech text-xs uppercase tracking-[0.24em] text-[var(--muted)]">Display name</span>
+                    <input [(ngModel)]="companyUserForm.displayName" name="companyUserDisplayName" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] focus:border-[color:var(--accent-4)]/60 focus:outline-none" />
+                  </label>
+                </div>
+              </div>
+
+              <div class="rounded-[1.5rem] border border-white/10 bg-black/10 p-5">
+                <p class="font-tech text-[11px] uppercase tracking-[0.24em] text-[var(--muted)]">Acceso y contacto</p>
+                <div class="mt-4 grid gap-4 md:grid-cols-2">
+                  <label class="block md:col-span-2">
+                    <span class="mb-2 block font-tech text-xs uppercase tracking-[0.24em] text-[var(--muted)]">Correo empresarial</span>
+                    <input [(ngModel)]="companyUserForm.email" name="companyUserEmail" type="email" [placeholder]="'usuario@' + companyDomain" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] focus:border-[color:var(--accent-4)]/60 focus:outline-none" />
+                  </label>
+
+                  <label class="block">
+                    <span class="mb-2 block font-tech text-xs uppercase tracking-[0.24em] text-[var(--muted)]">Telefono</span>
+                    <input [(ngModel)]="companyUserForm.walletPhone" name="companyUserPhone" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] focus:border-[color:var(--accent-4)]/60 focus:outline-none" />
+                  </label>
+
+                  <div class="rounded-2xl border border-dashed border-white/10 bg-white/5 px-4 py-3 text-sm text-[var(--muted)]">
+                    El correo debe terminar en {{ '@' }}{{ companyDomain }} para que el backend acepte el alta.
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-[1.5rem] border border-white/10 bg-black/10 p-5">
+                <p class="font-tech text-[11px] uppercase tracking-[0.24em] text-[var(--muted)]">Documento</p>
+                <div class="mt-4 grid gap-4 md:grid-cols-2">
+                  <label class="block">
+                    <span class="mb-2 block font-tech text-xs uppercase tracking-[0.24em] text-[var(--muted)]">Tipo de ID</span>
+                    <input [(ngModel)]="companyUserForm.idType" name="companyUserIdType" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] focus:border-[color:var(--accent-4)]/60 focus:outline-none" />
+                  </label>
+
+                  <label class="block">
+                    <span class="mb-2 block font-tech text-xs uppercase tracking-[0.24em] text-[var(--muted)]">Numero de ID</span>
+                    <input [(ngModel)]="companyUserForm.idNumber" name="companyUserIdNumber" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] focus:border-[color:var(--accent-4)]/60 focus:outline-none" />
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-8 flex justify-end">
+              <button
+                type="submit"
+                [disabled]="isCreatingCompanyUser"
+                class="rounded-full border border-[color:var(--accent-4)]/35 bg-[var(--accent-4)]/15 px-5 py-3 font-tech text-xs uppercase tracking-[0.24em] text-[var(--accent-4)] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {{ isCreatingCompanyUser ? 'Creando...' : 'Crear usuario empresa' }}
+              </button>
+            </div>
+          </form>
+
+          <div class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel)]/85 p-6">
+            <div class="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p class="font-tech text-xs uppercase tracking-[0.28em] text-[var(--accent-1)]">Usuarios actuales</p>
+                <h3 class="mt-3 font-cyber text-2xl text-[var(--text)]">Equipo registrado</h3>
+              </div>
+
+              <div class="rounded-2xl border border-white/10 bg-[var(--panel-2)]/50 px-4 py-3 text-right">
+                <p class="font-tech text-[11px] uppercase tracking-[0.24em] text-[var(--muted)]">Total</p>
+                <p class="mt-2 font-cyber text-2xl text-[var(--text)]">{{ companyUsers.length }}</p>
+              </div>
+            </div>
+
+            <div class="mt-6 rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)]/70 p-3">
+              <div *ngIf="isUsersLoading" class="rounded-2xl px-4 py-6 text-sm text-[var(--muted)]">Cargando usuarios de empresa...</div>
+              <div *ngIf="!isUsersLoading && !companyUsers.length" class="rounded-2xl px-4 py-6 text-sm text-[var(--muted)]">
+                Aun no hay usuarios internos registrados.
+              </div>
+              <div *ngIf="!isUsersLoading && companyUsers.length" class="space-y-3">
+                <div *ngFor="let user of companyUsers" class="rounded-2xl border border-white/10 bg-black/10 px-4 py-4">
+                  <div class="flex flex-wrap items-start justify-between gap-4">
+                    <div class="space-y-2">
+                      <p class="text-base font-semibold text-[var(--text)]">{{ user.displayName || user.nombre || 'Sin nombre' }}</p>
+                      <p class="text-sm break-all text-[var(--muted)]">{{ user.email }}</p>
+                    </div>
+                    <span class="rounded-full border border-[color:var(--accent-4)]/30 bg-[var(--accent-4)]/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-[var(--accent-4)]">
+                      {{ user.roleName || 'EMPRESAS' }}
+                    </span>
+                  </div>
+
+                  <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                    <div class="rounded-xl border border-white/10 bg-white/5 px-3 py-3">
+                      <p class="text-[11px] uppercase tracking-[0.2em] text-[var(--muted)]">Documento</p>
+                      <p class="mt-2 text-sm text-[var(--text)]">{{ user.idType || 'Sin tipo ID' }}</p>
+                    </div>
+                    <div class="rounded-xl border border-white/10 bg-white/5 px-3 py-3">
+                      <p class="text-[11px] uppercase tracking-[0.2em] text-[var(--muted)]">Numero</p>
+                      <p class="mt-2 text-sm text-[var(--text)]">{{ user.idNumber || 'Sin numero registrado' }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-template #pendingApproval>
+        <div class="rounded-3xl border border-amber-400/25 bg-amber-400/10 p-6 text-sm text-amber-100">
+          La empresa aun no esta aprobada. Cuando quede activa, podras crear usuarios de empresa del dominio {{ companyDomain }}.
+        </div>
+      </ng-template>
+    </ng-container>
+
+    <ng-template #emptyCompany>
+      <div class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel-2)]/70 p-8 text-sm text-[var(--muted)]">
+        Primero debes registrar la empresa antes de administrar usuarios.
+      </div>
+    </ng-template>
+  </article>
+
+  <aside class="space-y-6">
+    <article class="rounded-[2rem] border border-[color:var(--panel-border)] bg-[var(--panel)]/95 p-6 shadow-[var(--shadow)]">
+      <p class="font-tech text-xs uppercase tracking-[0.3em] text-[var(--accent-4)]">Contexto de acceso</p>
+      <div class="mt-4 space-y-3 text-sm text-[var(--muted)]">
+        <div class="rounded-2xl border border-white/10 bg-black/10 px-4 py-3">Dominio: {{ companyDomain || 'Sin dominio' }}</div>
+        <div class="rounded-2xl border border-white/10 bg-black/10 px-4 py-3">Usuarios visibles: {{ companyUsers.length }}</div>
+      </div>
+    </article>
+  </aside>
+</section>

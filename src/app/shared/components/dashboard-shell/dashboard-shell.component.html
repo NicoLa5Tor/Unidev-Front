@@ -10,10 +10,11 @@
       <div class="flex items-center justify-between gap-4">
         <div class="flex items-center gap-4">
           <div
-            class="flex items-center justify-center rounded-2xl bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)] font-cyber text-[var(--text)] transition-all duration-300"
+            class="flex items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)] font-cyber text-[var(--text)] transition-all duration-300"
             [ngClass]="isHeaderCompact ? 'h-9 w-9 text-sm' : 'h-12 w-12 text-lg'"
           >
-            {{ avatarLabel }}
+            <img *ngIf="avatarImageUrl; else avatarFallback" [src]="avatarImageUrl" alt="Avatar" class="h-full w-full object-cover" />
+            <ng-template #avatarFallback>{{ avatarLabel }}</ng-template>
           </div>
           <div>
             <p *ngIf="!isHeaderCompact && eyebrow" class="font-tech text-xs uppercase tracking-[0.3em] text-[var(--accent-3)]">

@@ -19,6 +19,7 @@ export interface Company {
   domain: string;
   description: string | null;
   address: string | null;
+  logoUrl: string | null;
   approvalStatus: string;
   subscriptionStatus: string;
   ownerVerificationStatus: string;
@@ -44,6 +45,14 @@ export interface CreateCompanyDto {
   ownerVerificationStatus?: string | null;
   verifiedOwnerEmail?: string | null;
   adminMessage?: string | null;
+}
+
+export interface UpdateCompanyProfileDto {
+  contactName?: string | null;
+  contactPhone?: string | null;
+  website?: string | null;
+  description?: string | null;
+  address?: string | null;
 }
 
 export interface CompanyOtpRequestDto {

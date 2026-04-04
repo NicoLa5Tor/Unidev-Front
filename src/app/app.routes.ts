@@ -45,7 +45,7 @@ export const routes: Routes = [
     loadComponent: () => import('./features/users/pages/users-panel/users-panel.component').then(m => m.UsersPanelComponent),
     canActivate: [authGuard, roleGuard],
     data: {
-      roles: ['USUARIOS'],
+      roles: ['USUARIOS', 'USUARIOS_EMPRESA'],
       description: 'Consulta y gestiona tu panel de usuario dentro de UniDev.'
     }
   },

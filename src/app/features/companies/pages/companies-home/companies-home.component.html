@@ -59,16 +59,6 @@
             <span class="rounded-full px-3 py-1" [ngClass]="registrationStep === 'company' ? 'bg-cyan-300/15 text-cyan-100 border border-cyan-300/30' : 'border border-white/10 bg-white/5'">Empresa</span>
           </div>
 
-          <div
-            *ngIf="message"
-            class="mt-5 rounded-2xl border px-4 py-3 text-sm"
-            [ngClass]="message.type === 'success'
-              ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-100'
-              : 'border-rose-400/30 bg-rose-400/10 text-rose-100'"
-          >
-            {{ message.text }}
-          </div>
-
           <div class="mt-6 grid gap-4 sm:grid-cols-2" *ngIf="registrationStep === 'email'">
             <label class="block sm:col-span-2">
               <span class="mb-2 block text-[11px] uppercase tracking-[0.24em] text-slate-400">Correo del administrador</span>
@@ -99,53 +89,72 @@
           <div class="mt-6 grid gap-4 sm:grid-cols-2" *ngIf="registrationStep === 'company'">
             <label class="block sm:col-span-2">
               <span class="mb-2 block text-[11px] uppercase tracking-[0.24em] text-slate-400">Nombre de empresa</span>
-              <input [(ngModel)]="form.companyName" name="companyName" placeholder="Acme Studio SAS" class="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-cyan-300/50 focus:outline-none" />
+              <input
+                [(ngModel)]="form.companyName"
+                (ngModelChange)="clearCompanyFieldError('companyName')"
+                name="companyName"
+                placeholder="Acme Studio SAS"
+                class="w-full rounded-2xl border bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none"
+                [ngClass]="hasCompanyFieldError('companyName') ? 'border-rose-400/60 focus:border-rose-400/70' : 'border-white/10 focus:border-cyan-300/50'"
+              />
+              <p *ngIf="getCompanyFieldError('companyName') as error" class="mt-2 text-xs text-rose-200">{{ error }}</p>
             </label>
 
             <label class="block">
               <span class="mb-2 block text-[11px] uppercase tracking-[0.24em] text-slate-400">Dominio</span>
-              <input [(ngModel)]="form.domain" name="domain" placeholder="empresa.com" class="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-cyan-300/50 focus:outline-none" />
+              <input
+                [(ngModel)]="form.domain"
+                (ngModelChange)="clearCompanyFieldError('domain')"
+                name="domain"
+                placeholder="empresa.com"
+                class="w-full rounded-2xl border bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none"
+                [ngClass]="hasCompanyFieldError('domain') ? 'border-rose-400/60 focus:border-rose-400/70' : 'border-white/10 focus:border-cyan-300/50'"
+              />
+              <p *ngIf="getCompanyFieldError('domain') as error" class="mt-2 text-xs text-rose-200">{{ error }}</p>
             </label>
 
             <label class="block">
               <span class="mb-2 block text-[11px] uppercase tracking-[0.24em] text-slate-400">Correo del administrador</span>
-              <input [(ngModel)]="form.contactEmail" name="contactEmail" type="email" readonly class="w-full rounded-2xl border border-cyan-300/20 bg-slate-950/90 px-4 py-3 text-sm text-cyan-100 placeholder:text-slate-500 focus:outline-none" />
-            </label>
-
-            <label class="block">
-              <span class="mb-2 block text-[11px] uppercase tracking-[0.24em] text-slate-400">Contacto principal</span>
-              <input [(ngModel)]="form.contactName" name="contactName" placeholder="Nombre completo" class="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-cyan-300/50 focus:outline-none" />
-            </label>
-
-            <label class="block">
-              <span class="mb-2 block text-[11px] uppercase tracking-[0.24em] text-slate-400">Telefono</span>
-              <input [(ngModel)]="form.contactPhone" name="contactPhone" placeholder="+57 300 000 0000" class="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-cyan-300/50 focus:outline-none" />
+              <input
+                [(ngModel)]="form.contactEmail"
+                name="contactEmail"
+                type="email"
+                readonly
+                class="w-full rounded-2xl border bg-slate-950/90 px-4 py-3 text-sm placeholder:text-slate-500 focus:outline-none"
+                [ngClass]="hasCompanyFieldError('contactEmail') ? 'border-rose-400/60 text-rose-100' : 'border-cyan-300/20 text-cyan-100'"
+              />
+              <p *ngIf="getCompanyFieldError('contactEmail') as error" class="mt-2 text-xs text-rose-200">{{ error }}</p>
             </label>
 
             <label class="block">
               <span class="mb-2 block text-[11px] uppercase tracking-[0.24em] text-slate-400">NIT</span>
-              <input [(ngModel)]="form.nit" name="nit" placeholder="900123456-7" class="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-cyan-300/50 focus:outline-none" />
-            </label>
-
-            <label class="block">
-              <span class="mb-2 block text-[11px] uppercase tracking-[0.24em] text-slate-400">Sitio web</span>
-              <input [(ngModel)]="form.website" name="website" placeholder="https://empresa.com" class="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-cyan-300/50 focus:outline-none" />
-            </label>
-
-            <label class="block sm:col-span-2">
-              <span class="mb-2 block text-[11px] uppercase tracking-[0.24em] text-slate-400">Direccion</span>
-              <input [(ngModel)]="form.address" name="address" placeholder="Ciudad, direccion principal" class="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-cyan-300/50 focus:outline-none" />
-            </label>
-
-            <label class="block sm:col-span-2">
-              <span class="mb-2 block text-[11px] uppercase tracking-[0.24em] text-slate-400">Descripcion</span>
-              <textarea [(ngModel)]="form.description" name="description" rows="4" placeholder="Que hace tu empresa y que tipo de accesos vas a necesitar" class="w-full rounded-3xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-cyan-300/50 focus:outline-none"></textarea>
+              <input
+                [(ngModel)]="form.nit"
+                (ngModelChange)="clearCompanyFieldError('nit')"
+                name="nit"
+                placeholder="900123456-7"
+                class="w-full rounded-2xl border bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none"
+                [ngClass]="hasCompanyFieldError('nit') ? 'border-rose-400/60 focus:border-rose-400/70' : 'border-white/10 focus:border-cyan-300/50'"
+              />
+              <p *ngIf="getCompanyFieldError('nit') as error" class="mt-2 text-xs text-rose-200">{{ error }}</p>
             </label>
 
             <div class="sm:col-span-2 grid gap-4 lg:grid-cols-2">
-              <div class="rounded-3xl border border-white/10 bg-slate-950/55 p-4">
-                <p class="text-[11px] uppercase tracking-[0.24em] text-slate-400">Certificado legal</p>
-                <p class="mt-2 text-sm text-slate-300">Sube certificado de existencia o documento oficial equivalente.</p>
+              <div
+                class="rounded-3xl border bg-slate-950/55 p-4"
+                [ngClass]="companyDocumentsError ? 'border-rose-400/35' : 'border-white/10'"
+              >
+                <div class="flex items-start justify-between gap-3">
+                  <p class="text-[11px] uppercase tracking-[0.24em] text-slate-400">Certificado legal</p>
+                  <button
+                    type="button"
+                    (click)="openDocumentHelp('LEGAL_CERTIFICATE')"
+                    class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-cyan-300/25 bg-cyan-300/10 text-xs font-semibold text-cyan-100 transition hover:bg-cyan-300/15"
+                    aria-label="Mas informacion sobre certificado legal"
+                  >
+                    i
+                  </button>
+                </div>
                 <div class="mt-4 flex flex-col items-start gap-3">
                   <label class="inline-flex cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-100">
                     <input type="file" accept=".pdf,.png,.jpg,.jpeg" class="hidden" (change)="uploadDocument($event, 'LEGAL_CERTIFICATE')" />
@@ -166,9 +175,21 @@
                 </div>
               </div>
 
-              <div class="rounded-3xl border border-white/10 bg-slate-950/55 p-4">
-                <p class="text-[11px] uppercase tracking-[0.24em] text-slate-400">Documento tributario</p>
-                <p class="mt-2 text-sm text-slate-300">Sube RUT o documento tributario oficial con razon social y NIT.</p>
+              <div
+                class="rounded-3xl border bg-slate-950/55 p-4"
+                [ngClass]="companyDocumentsError ? 'border-rose-400/35' : 'border-white/10'"
+              >
+                <div class="flex items-start justify-between gap-3">
+                  <p class="text-[11px] uppercase tracking-[0.24em] text-slate-400">Documento tributario</p>
+                  <button
+                    type="button"
+                    (click)="openDocumentHelp('TAX_DOCUMENT')"
+                    class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-cyan-300/25 bg-cyan-300/10 text-xs font-semibold text-cyan-100 transition hover:bg-cyan-300/15"
+                    aria-label="Mas informacion sobre documento tributario"
+                  >
+                    i
+                  </button>
+                </div>
                 <div class="mt-4 flex flex-col items-start gap-3">
                   <label class="inline-flex cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-100">
                     <input type="file" accept=".pdf,.png,.jpg,.jpeg" class="hidden" (change)="uploadDocument($event, 'TAX_DOCUMENT')" />
@@ -189,6 +210,10 @@
                 </div>
               </div>
             </div>
+
+            <p *ngIf="companyDocumentsError" class="sm:col-span-2 text-xs text-rose-200">
+              {{ companyDocumentsError }}
+            </p>
           </div>
 
           <button
@@ -221,6 +246,51 @@
           </button>
         </form>
       </aside>
+
+      <div
+        *ngIf="activeDocumentHelp as help"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 px-4 backdrop-blur-sm"
+        (click)="closeDocumentHelp()"
+      >
+        <div
+          class="w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-950/95 p-6 shadow-[0_24px_80px_rgba(3,7,18,0.45)]"
+          (click)="$event.stopPropagation()"
+        >
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="text-[11px] uppercase tracking-[0.24em] text-cyan-300">Documento requerido</p>
+              <h3 class="mt-2 text-2xl font-semibold text-white">{{ help.title }}</h3>
+            </div>
+            <button
+              type="button"
+              (click)="closeDocumentHelp()"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-sm text-slate-200 transition hover:bg-white/10"
+              aria-label="Cerrar ayuda"
+            >
+              x
+            </button>
+          </div>
+
+          <p class="mt-4 text-sm leading-7 text-slate-300">{{ help.summary }}</p>
+
+          <ul class="mt-5 space-y-3 text-sm text-slate-200">
+            <li *ngFor="let bullet of help.bullets" class="flex items-start gap-3 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3">
+              <span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-cyan-300"></span>
+              <span>{{ bullet }}</span>
+            </li>
+          </ul>
+
+          <div class="mt-6 flex justify-end">
+            <button
+              type="button"
+              (click)="closeDocumentHelp()"
+              class="inline-flex min-h-11 items-center justify-center rounded-full bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 px-5 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-950"
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
+      </div>
 
       <article class="companies-home__hero order-2 rounded-[1.75rem] p-5 sm:p-6 lg:order-1 lg:rounded-[2.25rem] lg:p-8">
         <p class="font-mono text-xs uppercase tracking-[0.35em] text-cyan-300">Empresas</p>

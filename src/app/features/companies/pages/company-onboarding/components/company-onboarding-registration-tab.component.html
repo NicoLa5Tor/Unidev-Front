@@ -1,0 +1,108 @@
+<section class="grid gap-6 xl:grid-cols-[1.18fr_0.82fr]">
+  <article class="rounded-[2rem] border border-[color:var(--panel-border)] bg-[var(--panel)]/95 p-6 shadow-[var(--shadow)]">
+    <ng-container *ngIf="!currentCompany; else registeredState">
+      <div class="rounded-[1.8rem] border border-white/10 bg-[var(--panel-2)]/35 p-6">
+        <p class="font-tech text-xs uppercase tracking-[0.32em] text-[var(--accent-1)]">Registro</p>
+        <h2 class="mt-4 font-cyber text-3xl text-[var(--text)]">Activa la ficha principal de tu empresa</h2>
+        <p class="mt-4 max-w-2xl text-sm leading-7 text-[var(--muted)]">
+          Este paso crea la base administrativa. Cuando se apruebe, se habilitan correos y usuarios internos.
+        </p>
+      </div>
+
+      <form class="mt-6 grid gap-5 md:grid-cols-2" (ngSubmit)="submitForm.emit()">
+        <label class="block">
+          <span class="mb-2 block font-tech text-xs uppercase tracking-[0.28em] text-[var(--muted)]">Nombre de empresa</span>
+          <input [(ngModel)]="form.companyName" name="companyName" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] focus:border-[color:var(--accent-1)]/60 focus:outline-none" />
+        </label>
+
+        <label class="block">
+          <span class="mb-2 block font-tech text-xs uppercase tracking-[0.28em] text-[var(--muted)]">Dominio principal</span>
+          <input [(ngModel)]="form.domain" name="domain" placeholder="empresa.com" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] focus:border-[color:var(--accent-1)]/60 focus:outline-none" />
+        </label>
+
+        <label class="block">
+          <span class="mb-2 block font-tech text-xs uppercase tracking-[0.28em] text-[var(--muted)]">Contacto principal</span>
+          <input [(ngModel)]="form.contactName" name="contactName" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] focus:border-[color:var(--accent-1)]/60 focus:outline-none" />
+        </label>
+
+        <label class="block">
+          <span class="mb-2 block font-tech text-xs uppercase tracking-[0.28em] text-[var(--muted)]">Correo de contacto</span>
+          <input [(ngModel)]="form.contactEmail" name="contactEmail" type="email" [placeholder]="sessionUser?.email || 'empresa@dominio.com'" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] focus:border-[color:var(--accent-1)]/60 focus:outline-none" />
+        </label>
+
+        <label class="block">
+          <span class="mb-2 block font-tech text-xs uppercase tracking-[0.28em] text-[var(--muted)]">Telefono</span>
+          <input [(ngModel)]="form.contactPhone" name="contactPhone" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] focus:border-[color:var(--accent-1)]/60 focus:outline-none" />
+        </label>
+
+        <label class="block">
+          <span class="mb-2 block font-tech text-xs uppercase tracking-[0.28em] text-[var(--muted)]">NIT</span>
+          <input [(ngModel)]="form.nit" name="nit" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] focus:border-[color:var(--accent-1)]/60 focus:outline-none" />
+        </label>
+
+        <label class="block md:col-span-2">
+          <span class="mb-2 block font-tech text-xs uppercase tracking-[0.28em] text-[var(--muted)]">Sitio web</span>
+          <input [(ngModel)]="form.website" name="website" placeholder="https://empresa.com" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] focus:border-[color:var(--accent-1)]/60 focus:outline-none" />
+        </label>
+
+        <label class="block md:col-span-2">
+          <span class="mb-2 block font-tech text-xs uppercase tracking-[0.28em] text-[var(--muted)]">Direccion</span>
+          <input [(ngModel)]="form.address" name="address" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] focus:border-[color:var(--accent-1)]/60 focus:outline-none" />
+        </label>
+
+        <label class="block md:col-span-2">
+          <span class="mb-2 block font-tech text-xs uppercase tracking-[0.28em] text-[var(--muted)]">Descripcion</span>
+          <textarea [(ngModel)]="form.description" name="description" rows="4" class="w-full rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] focus:border-[color:var(--accent-1)]/60 focus:outline-none"></textarea>
+        </label>
+
+        <div class="md:col-span-2 flex justify-end">
+          <button
+            type="submit"
+            [disabled]="isSaving || !canSubmit"
+            class="rounded-full bg-gradient-to-r from-[var(--accent-1)] via-[var(--accent-2)] to-[var(--accent-3)] px-6 py-3 font-tech text-xs uppercase tracking-[0.28em] text-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {{ isSaving ? 'Enviando...' : 'Registrar empresa' }}
+          </button>
+        </div>
+      </form>
+    </ng-container>
+
+    <ng-template #registeredState>
+      <div class="grid gap-4 md:grid-cols-2">
+        <div class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel-2)]/70 p-5">
+          <p class="font-tech text-xs uppercase tracking-[0.28em] text-[var(--muted)]">Empresa registrada</p>
+          <h3 class="mt-3 font-cyber text-xl text-[var(--text)]">{{ currentCompany?.companyName }}</h3>
+          <p class="mt-2 text-sm text-[var(--muted)]">La solicitud ya existe y ahora el foco es revisar su estado operativo.</p>
+        </div>
+        <div class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel-2)]/70 p-5">
+          <p class="font-tech text-xs uppercase tracking-[0.28em] text-[var(--muted)]">Dominio empresarial</p>
+          <h3 class="mt-3 font-cyber text-xl text-[var(--text)]">{{ companyDomain }}</h3>
+          <p class="mt-2 text-sm text-[var(--muted)]">Todas las altas de correos y usuarios quedan restringidas a este dominio.</p>
+        </div>
+      </div>
+    </ng-template>
+  </article>
+
+  <aside class="space-y-6">
+    <article class="rounded-[2rem] border border-[color:var(--panel-border)] bg-[var(--panel)]/95 p-6 shadow-[var(--shadow)]">
+      <p class="font-tech text-xs uppercase tracking-[0.3em] text-[var(--accent-2)]">Responsable</p>
+      <h3 class="mt-3 font-cyber text-xl text-[var(--text)]">{{ sessionUser?.displayName || 'Sesion de empresa' }}</h3>
+      <p class="mt-3 text-sm leading-7 text-[var(--muted)]">
+        La cuenta principal queda asociada al alta inicial y recibe las notificaciones administrativas.
+      </p>
+      <div class="mt-5 space-y-3 text-sm text-[var(--muted)]">
+        <div class="rounded-2xl border border-white/10 bg-black/10 px-4 py-3">{{ sessionUser?.email || 'Sin correo' }}</div>
+        <div class="rounded-2xl border border-white/10 bg-black/10 px-4 py-3">{{ companyDomain || 'Define un dominio primero' }}</div>
+      </div>
+    </article>
+
+    <article class="rounded-[2rem] border border-[color:var(--panel-border)] bg-[var(--panel)]/95 p-6 shadow-[var(--shadow)]">
+      <p class="font-tech text-xs uppercase tracking-[0.3em] text-[var(--accent-4)]">Flujo</p>
+      <div class="mt-4 space-y-3 text-sm text-[var(--muted)]">
+        <div class="rounded-2xl border border-white/10 bg-black/10 px-4 py-3">1. Registrar empresa</div>
+        <div class="rounded-2xl border border-white/10 bg-black/10 px-4 py-3">2. Esperar aprobacion</div>
+        <div class="rounded-2xl border border-white/10 bg-black/10 px-4 py-3">3. Activar correos y usuarios</div>
+      </div>
+    </article>
+  </aside>
+</section>

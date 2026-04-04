@@ -1,0 +1,56 @@
+<section class="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+  <article class="rounded-[2rem] border border-[color:var(--panel-border)] bg-[var(--panel)]/95 p-6 shadow-[var(--shadow)]">
+    <ng-container *ngIf="currentCompany; else emptyState">
+      <div class="rounded-[1.8rem] border border-white/10 bg-[var(--panel-2)]/35 p-6">
+        <p class="font-tech text-xs uppercase tracking-[0.32em] text-[var(--accent-3)]">Estado</p>
+        <h2 class="mt-4 font-cyber text-3xl text-[var(--text)]">{{ currentCompany.companyName }}</h2>
+        <p class="mt-4 text-sm leading-7 text-[var(--muted)]">
+          Revisa la aprobacion, el plan asignado y el correo administrativo que gobierna la empresa.
+        </p>
+      </div>
+
+      <div class="mt-6 grid gap-4 md:grid-cols-2">
+        <div class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel-2)]/70 p-5">
+          <p class="font-tech text-xs uppercase tracking-[0.28em] text-[var(--muted)]">Estado de empresa</p>
+          <h3 class="mt-3 font-cyber text-xl text-[var(--text)]">{{ currentCompany.approvalStatus }}</h3>
+          <p class="mt-2 text-sm text-[var(--muted)]">La empresa debe quedar aprobada antes de abrir accesos operativos.</p>
+        </div>
+
+        <div class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel-2)]/70 p-5">
+          <p class="font-tech text-xs uppercase tracking-[0.28em] text-[var(--muted)]">Plan asociado</p>
+          <h3 class="mt-3 font-cyber text-xl text-[var(--text)]">{{ currentCompany.planName || 'Sin plan asignado' }}</h3>
+          <p class="mt-2 text-sm text-[var(--muted)]">Sin plan no se puede inicializar el grupo de correos habilitados.</p>
+        </div>
+
+        <div class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel-2)]/70 p-5">
+          <p class="font-tech text-xs uppercase tracking-[0.28em] text-[var(--muted)]">Correo administrador</p>
+          <h3 class="mt-3 break-all font-cyber text-lg text-[var(--text)]">{{ currentCompany.contactEmail || sessionUser?.email }}</h3>
+          <p class="mt-2 text-sm text-[var(--muted)]">Este correo recibe las notificaciones administrativas de la empresa.</p>
+        </div>
+
+        <div class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel-2)]/70 p-5">
+          <p class="font-tech text-xs uppercase tracking-[0.28em] text-[var(--muted)]">Subscripcion</p>
+          <h3 class="mt-3 font-cyber text-xl text-[var(--text)]">{{ currentCompany.subscriptionStatus }}</h3>
+          <p class="mt-2 text-sm text-[var(--muted)]">Cuando el estado y el plan esten listos, podras administrar correos y usuarios.</p>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #emptyState>
+      <div class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel-2)]/70 p-8 text-sm text-[var(--muted)]">
+        Primero debes registrar la empresa para ver su estado.
+      </div>
+    </ng-template>
+  </article>
+
+  <aside class="space-y-6">
+    <article class="rounded-[2rem] border border-[color:var(--panel-border)] bg-[var(--panel)]/95 p-6 shadow-[var(--shadow)]">
+      <p class="font-tech text-xs uppercase tracking-[0.3em] text-[var(--accent-1)]">Lectura rapida</p>
+      <div class="mt-4 space-y-3 text-sm text-[var(--muted)]">
+        <div class="rounded-2xl border border-white/10 bg-black/10 px-4 py-3">Aprobacion: {{ currentCompany?.approvalStatus || 'Pendiente de crear' }}</div>
+        <div class="rounded-2xl border border-white/10 bg-black/10 px-4 py-3">Plan: {{ currentCompany?.planName || 'Sin plan' }}</div>
+        <div class="rounded-2xl border border-white/10 bg-black/10 px-4 py-3">Subscripcion: {{ currentCompany?.subscriptionStatus || 'Sin subscripcion' }}</div>
+      </div>
+    </article>
+  </aside>
+</section>

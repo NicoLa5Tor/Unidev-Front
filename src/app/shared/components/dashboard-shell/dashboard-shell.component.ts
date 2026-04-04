@@ -22,6 +22,7 @@ export class DashboardShellComponent {
   @Input({ required: true }) title = '';
   @Input() eyebrow = '';
   @Input() avatarLabel = 'UD';
+  @Input() avatarImageUrl: string | null = null;
   @Input() activeTab = '';
   @Input() navItems: DashboardNavItem[] = [];
   @Input() contentWidthClass = 'max-w-6xl';

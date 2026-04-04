@@ -9,6 +9,7 @@ import {
   CompanyOtpRequestDto,
   CompanyOtpVerifyDto,
   CreateCompanyDto,
+  UpdateCompanyProfileDto,
   Plan
 } from '../../../shared/models/company.model';
 
@@ -78,5 +79,15 @@ export class CompanyService {
 
   updateCompany(companyId: number, payload: CreateCompanyDto) {
     return this.http.put<Company>(`${this.companiesUrl}/${companyId}`, payload);
+  }
+
+  updateCompanyProfile(payload: UpdateCompanyProfileDto) {
+    return this.http.put<Company>(`${this.companiesUrl}/profile`, payload);
+  }
+
+  uploadCompanyProfileLogo(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<Company>(`${this.companiesUrl}/profile/logo`, formData);
   }
 }

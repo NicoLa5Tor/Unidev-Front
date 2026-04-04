@@ -10,6 +10,8 @@ import { ScriptLoaderService } from '../../../../shared/services/script-loader.s
 import { UiToastService } from '../../../../shared/services/ui-toast.service';
 
 type RegistrationDocumentType = CompanyRegistrationDocument['documentType'];
+type CompanyFormField = 'companyName' | 'domain' | 'nit' | 'contactEmail';
+type DocumentHelpType = 'LEGAL_CERTIFICATE' | 'TAX_DOCUMENT';
 
 @Component({
   selector: 'app-companies-home',
@@ -30,6 +32,14 @@ export class CompaniesHomeComponent implements AfterViewInit, OnDestroy {
   isUploadingTax = false;
   verifiedEmail: string | null = null;
   uploadedDocuments: CompanyRegistrationDocument[] = [];
+  activeDocumentHelp: {
+    type: DocumentHelpType;
+    title: string;
+    summary: string;
+    bullets: string[];
+  } | null = null;
+  companyFieldErrors: Partial<Record<CompanyFormField, string>> = {};
+  companyDocumentsError: string | null = null;
   private readonly localDocumentUrls: Partial<Record<CompanyRegistrationDocument['documentType'], string>> = {};
   private readonly pendingDocumentFiles: Partial<Record<RegistrationDocumentType, File>> = {};
   message: { type: 'success' | 'error'; text: string } | null = null;
@@ -166,6 +176,7 @@ export class CompaniesHomeComponent implements AfterViewInit, OnDestroy {
   backToEmail(): void {
     this.registrationStep = 'email';
     this.form.otpCode = '';
+    this.clearCompanyFormErrors();
     this.message = null;
   }
 
@@ -174,16 +185,10 @@ export class CompaniesHomeComponent implements AfterViewInit, OnDestroy {
       this.message = { type: 'error', text: 'Primero debes verificar el correo del administrador.' };
       return;
     }
-    if (!this.form.companyName.trim() || !this.form.domain.trim() || !this.form.contactEmail.trim()) {
-      this.message = { type: 'error', text: 'Nombre de empresa, dominio y correo del administrador son obligatorios.' };
-      return;
-    }
-    if (this.form.contactEmail.trim().toLowerCase() !== this.verifiedEmail.toLowerCase()) {
-      this.message = { type: 'error', text: 'El correo verificado no coincide con el correo del administrador.' };
-      return;
-    }
-    if (!this.hasDocument('LEGAL_CERTIFICATE') || !this.hasDocument('TAX_DOCUMENT')) {
-      this.message = { type: 'error', text: 'Debes subir el certificado legal y el documento tributario antes de enviar.' };
+
+    this.clearCompanyFormErrors();
+    if (!this.validateCompanyForm()) {
+      this.message = { type: 'error', text: 'Revisa los campos marcados en el formulario.' };
       return;
     }
 
@@ -220,11 +225,68 @@ export class CompaniesHomeComponent implements AfterViewInit, OnDestroy {
       },
       error: (error) => {
         this.isSubmitting = false;
-        const errorMessage = error?.error?.message || 'No pudimos registrar la solicitud. Revisa los datos e intenta de nuevo.';
+        const hasFieldErrors = this.applyCompanyFieldErrorsFromResponse(error);
+        const errorMessage = hasFieldErrors
+          ? 'Revisa los campos marcados en el formulario.'
+          : error?.error?.message || 'No pudimos registrar la solicitud. Revisa los datos e intenta de nuevo.';
         this.message = { type: 'error', text: errorMessage };
         this.toast.error(errorMessage);
       }
     });
+  }
+
+  clearCompanyFieldError(field: CompanyFormField): void {
+    if (!this.companyFieldErrors[field]) {
+      return;
+    }
+
+    this.companyFieldErrors = {
+      ...this.companyFieldErrors,
+      [field]: undefined
+    };
+  }
+
+  clearCompanyDocumentsError(): void {
+    this.companyDocumentsError = null;
+  }
+
+  hasCompanyFieldError(field: CompanyFormField): boolean {
+    return !!this.companyFieldErrors[field];
+  }
+
+  getCompanyFieldError(field: CompanyFormField): string | null {
+    return this.companyFieldErrors[field] ?? null;
+  }
+
+  openDocumentHelp(type: DocumentHelpType): void {
+    if (type === 'LEGAL_CERTIFICATE') {
+      this.activeDocumentHelp = {
+        type,
+        title: 'Certificado legal',
+        summary: 'Documento que demuestra la existencia formal de la empresa o su equivalente oficial.',
+        bullets: [
+          'Camara de Comercio, certificado de existencia o documento oficial equivalente.',
+          'Debe verse claro el nombre de la empresa.',
+          'Acepta PDF, PNG o JPG.'
+        ]
+      };
+      return;
+    }
+
+    this.activeDocumentHelp = {
+      type,
+      title: 'Documento tributario',
+      summary: 'Documento fiscal donde se vea la razon social y el NIT registrado.',
+      bullets: [
+        'RUT o documento tributario oficial equivalente.',
+        'Debe coincidir con el NIT que escribes en el formulario.',
+        'Acepta PDF, PNG o JPG.'
+      ]
+    };
+  }
+
+  closeDocumentHelp(): void {
+    this.activeDocumentHelp = null;
   }
 
   private normalizeDomain(value: string): string {
@@ -241,6 +303,7 @@ export class CompaniesHomeComponent implements AfterViewInit, OnDestroy {
     this.registrationStep = 'email';
     this.verifiedEmail = null;
     this.uploadedDocuments = [];
+    this.clearCompanyFormErrors();
     this.pendingDocumentFiles.LEGAL_CERTIFICATE = undefined;
     this.pendingDocumentFiles.TAX_DOCUMENT = undefined;
     this.form.email = '';
@@ -258,6 +321,70 @@ export class CompaniesHomeComponent implements AfterViewInit, OnDestroy {
     this.form.address = '';
   }
 
+  private validateCompanyForm(): boolean {
+    const fieldErrors: Partial<Record<CompanyFormField, string>> = {};
+    const companyName = this.form.companyName.trim();
+    const domain = this.normalizeDomain(this.form.domain);
+    const nit = this.form.nit.trim();
+    const contactEmail = this.form.contactEmail.trim().toLowerCase();
+
+    if (!companyName) {
+      fieldErrors.companyName = 'Escribe el nombre de la empresa.';
+    }
+
+    if (!domain) {
+      fieldErrors.domain = 'Escribe el dominio empresarial.';
+    }
+
+    if (!nit) {
+      fieldErrors.nit = 'Escribe el NIT de la empresa.';
+    }
+
+    if (!contactEmail) {
+      fieldErrors.contactEmail = 'Falta el correo del administrador.';
+    } else if (!this.isValidEmail(contactEmail)) {
+      fieldErrors.contactEmail = 'Escribe un correo valido.';
+    } else if (this.verifiedEmail && contactEmail !== this.verifiedEmail.toLowerCase()) {
+      fieldErrors.contactEmail = 'El correo verificado no coincide con el correo del administrador.';
+    }
+
+    this.companyFieldErrors = fieldErrors;
+
+    if (!this.hasDocument('LEGAL_CERTIFICATE') || !this.hasDocument('TAX_DOCUMENT')) {
+      this.companyDocumentsError = 'Debes subir el certificado legal y el documento tributario antes de enviar.';
+    }
+
+    return Object.keys(fieldErrors).length === 0 && !this.companyDocumentsError;
+  }
+
+  private clearCompanyFormErrors(): void {
+    this.companyFieldErrors = {};
+    this.companyDocumentsError = null;
+  }
+
+  private applyCompanyFieldErrorsFromResponse(error: any): boolean {
+    const fieldErrors = error?.error?.fieldErrors;
+    if (!fieldErrors || typeof fieldErrors !== 'object') {
+      return false;
+    }
+
+    const nextErrors: Partial<Record<CompanyFormField, string>> = {};
+
+    (['companyName', 'domain', 'nit', 'contactEmail'] as CompanyFormField[]).forEach((field) => {
+      const message = fieldErrors[field];
+      if (typeof message === 'string' && message.trim()) {
+        nextErrors[field] = message;
+      }
+    });
+
+    this.companyFieldErrors = nextErrors;
+    return Object.keys(nextErrors).length > 0;
+  }
+
+  private isValidEmail(value: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+  }
+
   private applyOtpFlow(action: string, message: string): void {
     switch (action) {
       case 'CONTINUE_COMPANY':
@@ -265,6 +392,7 @@ export class CompaniesHomeComponent implements AfterViewInit, OnDestroy {
         this.verifiedEmail = this.form.email.trim().toLowerCase();
         this.form.contactEmail = this.verifiedEmail;
         this.form.confirmContactEmail = this.verifiedEmail;
+        this.clearCompanyFormErrors();
         this.loadDocumentsForVerifiedEmail();
         this.message = { type: 'success', text: message };
         break;
@@ -293,7 +421,11 @@ export class CompaniesHomeComponent implements AfterViewInit, OnDestroy {
       return;
     }
     if (!this.form.companyName.trim()) {
-      this.message = { type: 'error', text: 'Escribe primero el nombre de la empresa antes de subir documentos.' };
+      this.companyFieldErrors = {
+        ...this.companyFieldErrors,
+        companyName: 'Escribe primero el nombre de la empresa.'
+      };
+      this.message = { type: 'error', text: 'Revisa los campos marcados en el formulario.' };
       return;
     }
 
@@ -304,6 +436,7 @@ export class CompaniesHomeComponent implements AfterViewInit, OnDestroy {
     }
 
     this.pendingDocumentFiles[documentType] = file;
+    this.clearCompanyDocumentsError();
     this.setLocalDocumentUrl(documentType, file);
     this.upsertDocument({
       id: this.getDocument(documentType)?.id ?? 0,
