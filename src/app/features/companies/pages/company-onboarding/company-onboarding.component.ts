@@ -10,7 +10,7 @@ import { DashboardNavItem, DashboardShellComponent } from '../../../../shared/co
 import { UiToastService } from '../../../../shared/services/ui-toast.service';
 import { CompanyService } from '../../services/company.service';
 import { CompanyAccessService } from '../../services/company-access.service';
-import { Company, CreateCompanyDto, UpdateCompanyProfileDto } from '../../../../shared/models/company.model';
+import { Company, CompanyRegistrationDocument, CreateCompanyDto, UpdateCompanyProfileDto, UpdateRejectedCompanyDraftDto } from '../../../../shared/models/company.model';
 import { SessionUser } from '../../../../shared/models/session-user.model';
 import { CompanyAllowedEmail } from '../../../../shared/models/company-access.model';
 import { CompanyFormModel } from './company-onboarding.types';
@@ -18,6 +18,7 @@ import { CompanyFormModel } from './company-onboarding.types';
 type CompanyTab = 'status' | 'profile' | 'access';
 type MessageState = { type: 'success' | 'error'; text: string } | null;
 type CreateField = 'companyName' | 'domain' | 'nit' | 'contactEmail';
+type RegistrationDocumentType = 'LEGAL_CERTIFICATE' | 'TAX_DOCUMENT';
 
 @Component({
   selector: 'app-company-onboarding',
@@ -37,12 +38,17 @@ export class CompanyOnboardingComponent implements OnInit {
   isUploadingLogo = false;
   isAccessLoading = false;
   isAddingAllowedEmail = false;
+  isDocumentsLoading = false;
+  isResubmissionModalOpen = false;
+  isSavingRejectedDraft = false;
   message: MessageState = null;
   createFieldErrors: Partial<Record<CreateField, string>> = {};
   sessionUser: SessionUser | null = null;
   currentCompany: Company | null = null;
   allowedEmails: CompanyAllowedEmail[] = [];
+  registrationDocuments: CompanyRegistrationDocument[] = [];
   allowedEmailInput = '';
+  uploadingDocumentType: RegistrationDocumentType | null = null;
   private hasLoadedAccessData = false;
 
   readonly navItems: DashboardNavItem[] = [
@@ -160,6 +166,11 @@ export class CompanyOnboardingComponent implements OnInit {
     if (!this.currentCompany) {
       return 'Completa el registro inicial';
     }
+    if (this.currentCompany.approvalStatus === 'REJECTED') {
+      return this.canResubmitRejectedCompany
+        ? 'La solicitud puede volver a enviarse'
+        : 'Solicitud rechazada con espera activa';
+    }
     if (this.currentCompany.approvalStatus !== 'APPROVED') {
       return 'Esperando decision administrativa';
     }
@@ -175,6 +186,11 @@ export class CompanyOnboardingComponent implements OnInit {
   get nextActionDescription(): string {
     if (!this.currentCompany) {
       return 'Registra nombre, dominio, NIT y correo principal para dejar la empresa lista para revision.';
+    }
+    if (this.currentCompany.approvalStatus === 'REJECTED') {
+      return this.canResubmitRejectedCompany
+        ? 'Ya puedes reenviar la solicitud para que el equipo administrador vuelva a revisar la empresa.'
+        : `Debes esperar ${this.resubmissionCountdownLabel} antes de poder reenviar la solicitud.`;
     }
     if (this.currentCompany.approvalStatus !== 'APPROVED') {
       return 'Mientras se revisa la solicitud no se habilitan accesos corporativos ni administracion de correos.';
@@ -216,9 +232,54 @@ export class CompanyOnboardingComponent implements OnInit {
     return 'Gestiona el perfil de la empresa y mantén bajo control los correos corporativos que pueden entrar a la plataforma.';
   }
 
+  get isRejectedCompany(): boolean {
+    return this.currentCompany?.approvalStatus === 'REJECTED';
+  }
+
+  get rejectionCooldownRemainingMs(): number {
+    if (!this.currentCompany || !this.isRejectedCompany) {
+      return 0;
+    }
+    const updatedAt = this.currentCompany.updatedAt ? new Date(this.currentCompany.updatedAt).getTime() : NaN;
+    if (Number.isNaN(updatedAt)) {
+      return 0;
+    }
+    const cooldownHours = Math.max(0, this.currentCompany.resubmissionCooldownHours ?? 72);
+    const availableAt = updatedAt + cooldownHours * 60 * 60 * 1000;
+    return Math.max(0, availableAt - Date.now());
+  }
+
+  get canResubmitRejectedCompany(): boolean {
+    return this.isRejectedCompany && this.rejectionCooldownRemainingMs === 0;
+  }
+
+  get resubmissionCountdownLabel(): string {
+    const remainingMs = this.rejectionCooldownRemainingMs;
+    if (remainingMs <= 0) {
+      return 'ahora mismo';
+    }
+
+    const totalHours = Math.ceil(remainingMs / (1000 * 60 * 60));
+    const days = Math.floor(totalHours / 24);
+    const hours = totalHours % 24;
+
+    if (days > 0 && hours > 0) {
+      return `${days} d ${hours} h`;
+    }
+    if (days > 0) {
+      return `${days} d`;
+    }
+    return `${totalHours} h`;
+  }
+
+  get resubmissionCooldownHours(): number {
+    return Math.max(0, this.currentCompany?.resubmissionCooldownHours ?? 72);
+  }
+
   refreshView(): void {
     this.hasLoadedAccessData = false;
     this.allowedEmails = [];
+    this.registrationDocuments = [];
     this.loadViewData();
   }
 
@@ -313,6 +374,114 @@ export class CompanyOnboardingComponent implements OnInit {
     });
   }
 
+  resubmitRejectedCompany(): void {
+    if (!this.currentCompany || !this.canResubmitRejectedCompany || this.isSaving) {
+      return;
+    }
+
+    this.isSaving = true;
+    this.companyService.resubmitCompanyProfile().subscribe({
+      next: company => {
+        this.currentCompany = company;
+        this.patchFormFromCompany(company);
+        this.isSaving = false;
+        this.closeResubmissionModal();
+        this.uiToastService.success('Solicitud reenviada. Ahora vuelve a quedar en revision administrativa.');
+      },
+      error: error => {
+        this.isSaving = false;
+        this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos reenviar la solicitud.'));
+      }
+    });
+  }
+
+  openResubmissionModal(): void {
+    if (!this.currentCompany || !this.isRejectedCompany) {
+      return;
+    }
+    this.isResubmissionModalOpen = true;
+    this.loadRegistrationDocuments();
+  }
+
+  closeResubmissionModal(): void {
+    this.isResubmissionModalOpen = false;
+    this.uploadingDocumentType = null;
+  }
+
+  jumpToProfileReview(): void {
+    this.closeResubmissionModal();
+    this.setActiveTab('profile');
+  }
+
+  saveRejectedDraft(): void {
+    if (!this.currentCompany || !this.isRejectedCompany || this.isSavingRejectedDraft) {
+      return;
+    }
+
+    const payload: UpdateRejectedCompanyDraftDto = {
+      companyName: this.form.companyName.trim(),
+      nit: this.form.nit.trim(),
+      contactName: this.toNullable(this.form.contactName),
+      contactEmail: this.form.contactEmail.trim(),
+      contactPhone: this.toNullable(this.form.contactPhone),
+      website: this.toNullable(this.form.website),
+      domain: this.normalizeDomain(this.form.domain),
+      description: this.toNullable(this.form.description),
+      address: this.toNullable(this.form.address)
+    };
+
+    this.isSavingRejectedDraft = true;
+    this.companyService.updateRejectedCompanyDraft(payload).subscribe({
+      next: company => {
+        this.currentCompany = company;
+        this.patchFormFromCompany(company);
+        this.isSavingRejectedDraft = false;
+        this.uiToastService.success('Cambios guardados para el nuevo reenvio.');
+      },
+      error: error => {
+        this.isSavingRejectedDraft = false;
+        this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos guardar los cambios del borrador.'));
+      }
+    });
+  }
+
+  getRegistrationDocument(documentType: RegistrationDocumentType): CompanyRegistrationDocument | undefined {
+    return this.registrationDocuments.find(document => document.documentType === documentType);
+  }
+
+  replaceRegistrationDocument(event: Event, documentType: RegistrationDocumentType): void {
+    if (!this.currentCompany || !this.isRejectedCompany) {
+      return;
+    }
+
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) {
+      return;
+    }
+
+    this.uploadingDocumentType = documentType;
+    this.companyService.uploadCompanyProfileDocument(documentType, file).subscribe({
+      next: document => {
+        this.registrationDocuments = [
+          ...this.registrationDocuments.filter(item => item.documentType !== document.documentType),
+          document
+        ];
+        this.uploadingDocumentType = null;
+        this.uiToastService.success('Documento actualizado correctamente.');
+      },
+      error: error => {
+        this.uploadingDocumentType = null;
+        this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos actualizar ese documento.'));
+      }
+    });
+  }
+
+  downloadRegistrationDocument(document: CompanyRegistrationDocument): void {
+    window.open(this.companyService.downloadRegistrationDocument(document.id), '_blank', 'noopener');
+  }
+
   uploadLogo(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -392,6 +561,7 @@ export class CompanyOnboardingComponent implements OnInit {
             this.currentCompany = company;
             if (company) {
               this.patchFormFromCompany(company);
+              this.registrationDocuments = [];
               this.activeTab = 'status';
               this.loadTabDataIfNeeded(this.activeTab);
             } else {
@@ -434,6 +604,26 @@ export class CompanyOnboardingComponent implements OnInit {
       this.hasLoadedAccessData = true;
       this.loadAccessGroup();
     }
+  }
+
+  private loadRegistrationDocuments(): void {
+    if (!this.currentCompany) {
+      this.registrationDocuments = [];
+      return;
+    }
+
+    this.isDocumentsLoading = true;
+    this.companyService.listCompanyProfileDocuments().subscribe({
+      next: documents => {
+        this.registrationDocuments = documents;
+        this.isDocumentsLoading = false;
+      },
+      error: error => {
+        this.registrationDocuments = [];
+        this.isDocumentsLoading = false;
+        this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos cargar los documentos de registro.'));
+      }
+    });
   }
 
   private sortAllowedEmails(items: CompanyAllowedEmail[]): CompanyAllowedEmail[] {

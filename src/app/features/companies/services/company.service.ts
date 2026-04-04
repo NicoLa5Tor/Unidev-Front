@@ -9,6 +9,7 @@ import {
   CompanyOtpRequestDto,
   CompanyOtpVerifyDto,
   CreateCompanyDto,
+  UpdateRejectedCompanyDraftDto,
   UpdateCompanyProfileDto,
   Plan
 } from '../../../shared/models/company.model';
@@ -73,6 +74,20 @@ export class CompanyService {
     });
   }
 
+  listCompanyProfileDocuments() {
+    return this.http.get<CompanyRegistrationDocument[]>(`${this.companiesUrl}/profile/documents`);
+  }
+
+  uploadCompanyProfileDocument(
+    documentType: 'LEGAL_CERTIFICATE' | 'TAX_DOCUMENT',
+    file: File
+  ) {
+    const formData = new FormData();
+    formData.append('documentType', documentType);
+    formData.append('file', file);
+    return this.http.post<CompanyRegistrationDocument>(`${this.companiesUrl}/profile/documents`, formData);
+  }
+
   downloadRegistrationDocument(documentId: number) {
     return `${environment.apiUrl}/company-registration/documents/${documentId}/download`;
   }
@@ -83,6 +98,14 @@ export class CompanyService {
 
   updateCompanyProfile(payload: UpdateCompanyProfileDto) {
     return this.http.put<Company>(`${this.companiesUrl}/profile`, payload);
+  }
+
+  updateRejectedCompanyDraft(payload: UpdateRejectedCompanyDraftDto) {
+    return this.http.put<Company>(`${this.companiesUrl}/profile/rejected-draft`, payload);
+  }
+
+  resubmitCompanyProfile() {
+    return this.http.post<Company>(`${this.companiesUrl}/profile/resubmit`, {});
   }
 
   uploadCompanyProfileLogo(file: File) {

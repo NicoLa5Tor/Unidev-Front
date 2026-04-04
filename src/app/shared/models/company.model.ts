@@ -20,6 +20,9 @@ export interface Company {
   description: string | null;
   address: string | null;
   logoUrl: string | null;
+  resubmissionCooldownHours?: number | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
   approvalStatus: string;
   subscriptionStatus: string;
   ownerVerificationStatus: string;
@@ -51,6 +54,18 @@ export interface UpdateCompanyProfileDto {
   contactName?: string | null;
   contactPhone?: string | null;
   website?: string | null;
+  description?: string | null;
+  address?: string | null;
+}
+
+export interface UpdateRejectedCompanyDraftDto {
+  companyName: string;
+  nit: string;
+  contactName?: string | null;
+  contactEmail: string;
+  contactPhone?: string | null;
+  website?: string | null;
+  domain: string;
   description?: string | null;
   address?: string | null;
 }
