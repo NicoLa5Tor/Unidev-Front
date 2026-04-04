@@ -6,6 +6,7 @@ import { RouterLink } from '@angular/router';
 import { CompanyService } from '../../../companies/services/company.service';
 import { Company, CompanyRegistrationDocument, CompanyReviewDecisionDto, CompanyReviewItem } from '../../../../shared/models/company.model';
 import { DashboardNavItem, DashboardShellComponent } from '../../../../shared/components/dashboard-shell/dashboard-shell.component';
+import { UiToastService } from '../../../../shared/services/ui-toast.service';
 
 type MessageState = { type: 'success' | 'error'; text: string } | null;
 
@@ -19,7 +20,12 @@ export class AdminCompaniesComponent implements OnInit {
   activeTab = 'queue';
   isLoading = false;
   isSaving = false;
+  isReviewModalOpen = false;
+  isReviewDocumentsLoading = false;
+  isReviewItemsLoading = false;
   message: MessageState = null;
+  searchTerm = '';
+  statusFilter: 'ALL' | 'PENDING' | 'CHANGES_REQUESTED' | 'REJECTED' | 'APPROVED' = 'PENDING';
   companies: Company[] = [];
   selectedCompany: Company | null = null;
   selectedCompanyDocuments: CompanyRegistrationDocument[] = [];
@@ -29,7 +35,10 @@ export class AdminCompaniesComponent implements OnInit {
     { id: 'queue', label: 'Solicitudes', accent: 'accent-3', mobileBarWidthClass: 'w-24' }
   ];
 
-  constructor(private readonly companyService: CompanyService) {}
+  constructor(
+    private readonly companyService: CompanyService,
+    private readonly toast: UiToastService
+  ) {}
 
   ngOnInit(): void {
     this.refreshCompanies();
@@ -37,6 +46,50 @@ export class AdminCompaniesComponent implements OnInit {
 
   get pendingCompanies(): Company[] {
     return this.companies.filter(company => company.approvalStatus === 'PENDING');
+  }
+
+  get filteredCompanies(): Company[] {
+    const normalizedSearch = this.searchTerm.trim().toLowerCase();
+
+    return this.sortedCompanies.filter(company => {
+      const matchesStatus = this.statusFilter === 'ALL' || company.approvalStatus === this.statusFilter;
+      if (!matchesStatus) {
+        return false;
+      }
+
+      if (!normalizedSearch) {
+        return true;
+      }
+
+      return [
+        company.companyName,
+        company.domain,
+        company.contactEmail,
+        company.verifiedOwnerEmail,
+        company.contactName,
+        company.nit
+      ]
+        .filter((value): value is string => !!value)
+        .some(value => value.toLowerCase().includes(normalizedSearch));
+    });
+  }
+
+  get sortedCompanies(): Company[] {
+    const order: Record<string, number> = {
+      PENDING: 0,
+      CHANGES_REQUESTED: 1,
+      REJECTED: 2,
+      APPROVED: 3
+    };
+
+    return [...this.companies].sort((left, right) => {
+      const leftOrder = order[left.approvalStatus] ?? 99;
+      const rightOrder = order[right.approvalStatus] ?? 99;
+      if (leftOrder !== rightOrder) {
+        return leftOrder - rightOrder;
+      }
+      return left.companyName.localeCompare(right.companyName);
+    });
   }
 
   get approvedCompanies(): number {
@@ -47,8 +100,36 @@ export class AdminCompaniesComponent implements OnInit {
     return this.companies.filter(company => company.approvalStatus === 'CHANGES_REQUESTED').length;
   }
 
+  get selectedFieldReviewItems(): CompanyReviewItem[] {
+    return this.selectedCompanyReviewItems.filter(item => item.itemType === 'FIELD');
+  }
+
+  get selectedDocumentReviewItems(): CompanyReviewItem[] {
+    return this.selectedCompanyReviewItems.filter(item => item.itemType === 'DOCUMENT');
+  }
+
+  get selectedApprovedItemsCount(): number {
+    return this.selectedCompanyReviewItems.filter(item => item.status === 'APPROVED').length;
+  }
+
+  get selectedRejectedItemsCount(): number {
+    return this.selectedCompanyReviewItems.filter(item => item.status === 'REJECTED').length;
+  }
+
+  get selectedPendingItemsCount(): number {
+    return this.selectedCompanyReviewItems.filter(item => item.status === 'PENDING').length;
+  }
+
   get canApplyReviewSelected(): boolean {
     return !!this.selectedCompany && this.selectedCompany.approvalStatus === 'PENDING';
+  }
+
+  get isReviewModalLoading(): boolean {
+    return this.isReviewDocumentsLoading || this.isReviewItemsLoading;
+  }
+
+  get hasPendingReviewItems(): boolean {
+    return this.selectedCompanyReviewItems.some(item => item.status === 'PENDING');
   }
 
   setActiveTab(tabId: string): void {
@@ -57,13 +138,32 @@ export class AdminCompaniesComponent implements OnInit {
     }
   }
 
+  setStatusFilter(filter: 'ALL' | 'PENDING' | 'CHANGES_REQUESTED' | 'REJECTED' | 'APPROVED'): void {
+    this.statusFilter = filter;
+  }
+
+  clearSearch(): void {
+    this.searchTerm = '';
+  }
+
   selectCompany(company: Company): void {
     this.selectedCompany = company;
     this.selectedCompanyDocuments = [];
     this.selectedCompanyReviewItems = [];
+    this.isReviewDocumentsLoading = true;
+    this.isReviewItemsLoading = true;
     this.message = null;
     this.loadCompanyDocuments(company);
     this.loadCompanyReviewItems(company);
+  }
+
+  openReviewModal(company: Company): void {
+    this.selectCompany(company);
+    this.isReviewModalOpen = true;
+  }
+
+  closeReviewModal(): void {
+    this.isReviewModalOpen = false;
   }
 
   refreshCompanies(): void {
@@ -101,6 +201,16 @@ export class AdminCompaniesComponent implements OnInit {
       return;
     }
 
+    if (!this.selectedCompanyReviewItems.length) {
+      this.toast.error('No hay items de revision para aplicar en esta empresa.');
+      return;
+    }
+
+    if (this.hasPendingReviewItems) {
+      this.toast.error('Debes decidir todos los items antes de aplicar la revision.');
+      return;
+    }
+
     this.isSaving = true;
     this.message = null;
 
@@ -118,6 +228,13 @@ export class AdminCompaniesComponent implements OnInit {
         this.companies = this.companies.map(item => item.id === updated.id ? updated : item);
         this.selectedCompany = updated;
         this.isSaving = false;
+        this.toast.success(
+          updated.approvalStatus === 'APPROVED'
+            ? 'La empresa quedo aprobada.'
+            : updated.approvalStatus === 'CHANGES_REQUESTED'
+              ? 'Se guardaron las correcciones solicitadas para el owner.'
+              : 'La revision se guardo correctamente.'
+        );
         this.message = {
           type: 'success',
           text: updated.approvalStatus === 'APPROVED'
@@ -130,6 +247,7 @@ export class AdminCompaniesComponent implements OnInit {
       },
       error: () => {
         this.isSaving = false;
+        this.toast.error('No pudimos aplicar la revision. Revisa los items y vuelve a intentarlo.');
         this.message = { type: 'error', text: 'No pudimos aplicar la revision de la empresa.' };
       }
     });
@@ -139,6 +257,111 @@ export class AdminCompaniesComponent implements OnInit {
     window.open(this.companyService.downloadRegistrationDocument(document.id), '_blank', 'noopener');
   }
 
+  companyStatusLabel(status: string): string {
+    switch (status) {
+      case 'APPROVED':
+        return 'Aprobada';
+      case 'CHANGES_REQUESTED':
+        return 'Correcciones';
+      case 'REJECTED':
+        return 'Rechazada';
+      case 'PENDING':
+        return 'Pendiente';
+      default:
+        return status;
+    }
+  }
+
+  companyStatusClass(status: string): string {
+    switch (status) {
+      case 'APPROVED':
+        return 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200';
+      case 'CHANGES_REQUESTED':
+        return 'border-[color:var(--accent-1)]/30 bg-[var(--accent-1)]/10 text-[var(--accent-1)]';
+      case 'REJECTED':
+        return 'border-rose-400/30 bg-rose-400/10 text-rose-200';
+      case 'PENDING':
+        return 'border-amber-400/30 bg-amber-400/10 text-amber-200';
+      default:
+        return 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)]';
+    }
+  }
+
+  reviewItemLabel(item: CompanyReviewItem): string {
+    if (item.itemType === 'FIELD') {
+      switch (item.itemKey) {
+        case 'companyName':
+          return 'Nombre de empresa';
+        case 'domain':
+          return 'Dominio';
+        case 'nit':
+          return 'NIT';
+        case 'contactEmail':
+          return 'Correo de contacto';
+        default:
+          return item.itemKey;
+      }
+    }
+
+    return item.itemKey === 'LEGAL_CERTIFICATE' ? 'Certificado legal' : 'Documento tributario';
+  }
+
+  reviewItemStatusClass(status: CompanyReviewItem['status']): string {
+    switch (status) {
+      case 'APPROVED':
+        return 'text-emerald-200';
+      case 'REJECTED':
+        return 'text-rose-200';
+      default:
+        return 'text-amber-200';
+    }
+  }
+
+  reviewItemSurfaceClass(status: CompanyReviewItem['status']): string {
+    switch (status) {
+      case 'APPROVED':
+        return 'border-emerald-400/20 bg-emerald-500/5';
+      case 'REJECTED':
+        return 'border-rose-400/20 bg-rose-500/5';
+      default:
+        return 'border-[color:var(--panel-border)] bg-[var(--panel-2)]';
+    }
+  }
+
+  documentLabel(documentType: CompanyRegistrationDocument['documentType']): string {
+    return documentType === 'LEGAL_CERTIFICATE' ? 'Certificado legal' : 'Documento tributario';
+  }
+
+  reviewItemCurrentValue(item: CompanyReviewItem): string {
+    if (!this.selectedCompany) {
+      return 'Sin dato';
+    }
+
+    if (item.itemType === 'FIELD') {
+      switch (item.itemKey) {
+        case 'companyName':
+          return this.selectedCompany.companyName || 'Sin dato';
+        case 'domain':
+          return this.selectedCompany.domain || 'Sin dato';
+        case 'nit':
+          return this.selectedCompany.nit || 'Sin dato';
+        case 'contactEmail':
+          return this.selectedCompany.contactEmail || this.selectedCompany.verifiedOwnerEmail || 'Sin dato';
+        default:
+          return 'Sin dato';
+      }
+    }
+
+    return this.reviewItemDocument(item)?.fileName || 'Sin archivo';
+  }
+
+  reviewItemDocument(item: CompanyReviewItem): CompanyRegistrationDocument | undefined {
+    if (item.itemType !== 'DOCUMENT') {
+      return undefined;
+    }
+    return this.selectedCompanyDocuments.find(document => document.documentType === item.itemKey);
+  }
+
   private loadCompanyDocuments(company: Company): void {
     if (!company.id) {
       return;
@@ -146,9 +369,11 @@ export class AdminCompaniesComponent implements OnInit {
     this.companyService.listRegistrationDocumentsByCompany(company.id).subscribe({
       next: documents => {
         this.selectedCompanyDocuments = documents;
+        this.isReviewDocumentsLoading = false;
       },
       error: () => {
         this.selectedCompanyDocuments = [];
+        this.isReviewDocumentsLoading = false;
       }
     });
   }
@@ -157,9 +382,11 @@ export class AdminCompaniesComponent implements OnInit {
     this.companyService.getCompanyReviewItems(company.id).subscribe({
       next: items => {
         this.selectedCompanyReviewItems = items;
+        this.isReviewItemsLoading = false;
       },
       error: () => {
         this.selectedCompanyReviewItems = [];
+        this.isReviewItemsLoading = false;
       }
     });
   }

@@ -85,173 +85,299 @@
       </article>
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
-      <div class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[var(--shadow)]">
+    <div class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[var(--shadow)]">
         <div class="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-1)]">Solicitudes</p>
-            <h2 class="mt-2 text-2xl font-cyber text-[var(--text)]">Empresas registradas</h2>
+            <h2 class="mt-2 text-2xl font-cyber text-[var(--text)]">Cola de revision</h2>
+            <p class="mt-2 text-sm text-[var(--muted)]">Prioriza pendientes y empresas con correcciones antes de revisar aprobadas.</p>
+          </div>
+          <div class="rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-right">
+            <p class="text-[11px] uppercase tracking-[0.24em] text-[var(--muted)]">Total</p>
+            <p class="mt-1 text-2xl font-cyber text-[var(--text)]">{{ companies.length }}</p>
           </div>
         </div>
 
-        <div *ngIf="isLoading" class="mt-6 rounded-2xl border border-[color:var(--panel-border)] bg-black/10 p-5 text-sm text-[var(--muted)]">
+        <div class="mt-6 space-y-4">
+          <label class="block space-y-2">
+            <span class="text-[11px] uppercase tracking-[0.22em] text-[var(--muted)]">Buscar empresa</span>
+            <div class="flex gap-2">
+              <input
+                [(ngModel)]="searchTerm"
+                name="companySearch"
+                type="text"
+                placeholder="Nombre, dominio, correo o NIT"
+                class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-3)]/40"
+              />
+              <button
+                *ngIf="searchTerm"
+                type="button"
+                class="rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]"
+                (click)="clearSearch()"
+              >
+                Limpiar
+              </button>
+            </div>
+          </label>
+
+          <div class="flex flex-wrap gap-2">
+            <button
+              type="button"
+              class="rounded-full border px-3 py-2 text-[11px] uppercase tracking-[0.18em] transition"
+              [ngClass]="statusFilter === 'PENDING' ? 'border-amber-400/35 bg-amber-400/10 text-amber-200' : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)]'"
+              (click)="setStatusFilter('PENDING')"
+            >
+              Pendientes
+            </button>
+            <button
+              type="button"
+              class="rounded-full border px-3 py-2 text-[11px] uppercase tracking-[0.18em] transition"
+              [ngClass]="statusFilter === 'CHANGES_REQUESTED' ? 'border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/10 text-[var(--accent-1)]' : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)]'"
+              (click)="setStatusFilter('CHANGES_REQUESTED')"
+            >
+              Correcciones
+            </button>
+            <button
+              type="button"
+              class="rounded-full border px-3 py-2 text-[11px] uppercase tracking-[0.18em] transition"
+              [ngClass]="statusFilter === 'REJECTED' ? 'border-rose-400/35 bg-rose-400/10 text-rose-200' : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)]'"
+              (click)="setStatusFilter('REJECTED')"
+            >
+              Rechazadas
+            </button>
+            <button
+              type="button"
+              class="rounded-full border px-3 py-2 text-[11px] uppercase tracking-[0.18em] transition"
+              [ngClass]="statusFilter === 'APPROVED' ? 'border-emerald-400/35 bg-emerald-400/10 text-emerald-200' : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)]'"
+              (click)="setStatusFilter('APPROVED')"
+            >
+              Aprobadas
+            </button>
+            <button
+              type="button"
+              class="rounded-full border px-3 py-2 text-[11px] uppercase tracking-[0.18em] transition"
+              [ngClass]="statusFilter === 'ALL' ? 'border-[color:var(--accent-3)]/35 bg-[var(--accent-3)]/10 text-[var(--accent-3)]' : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)]'"
+              (click)="setStatusFilter('ALL')"
+            >
+              Todas
+            </button>
+          </div>
+
+          <div class="rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--muted)]">
+            Mostrando {{ filteredCompanies.length }} de {{ companies.length }} empresas.
+          </div>
+        </div>
+
+        <div *ngIf="isLoading" class="mt-6 rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-5 text-sm text-[var(--muted)]">
           Cargando empresas...
         </div>
 
         <div *ngIf="!isLoading" class="mt-6 space-y-3">
           <button
-            *ngFor="let company of companies"
-            class="w-full rounded-2xl border p-4 text-left transition hover:scale-[1.01]"
-            [ngClass]="selectedCompany?.id === company.id
-              ? 'border-[color:var(--accent-1)]/40 bg-[var(--accent-1)]/10'
-              : 'border-[color:var(--panel-border)] bg-black/10 hover:border-[color:var(--accent-3)]/30'"
-            (click)="selectCompany(company)"
+            *ngFor="let company of filteredCompanies"
+            class="w-full rounded-[26px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-5 text-left transition hover:-translate-y-0.5 hover:border-[color:var(--accent-3)]/30"
+            (click)="openReviewModal(company)"
           >
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h3 class="text-lg font-semibold text-[var(--text)]">{{ company.companyName }}</h3>
-                <p class="text-sm text-[var(--muted)]">{{ company.contactEmail || company.domain }}</p>
+            <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <h3 class="truncate text-lg font-semibold text-[var(--text)]">{{ company.companyName }}</h3>
+                  <span
+                    class="rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.22em]"
+                    [ngClass]="companyStatusClass(company.approvalStatus)"
+                  >
+                    {{ companyStatusLabel(company.approvalStatus) }}
+                  </span>
+                </div>
+                <p class="mt-2 truncate text-sm text-[var(--muted)]">{{ company.contactEmail || company.verifiedOwnerEmail || 'Sin correo principal' }}</p>
+                <p class="mt-1 text-xs text-[var(--muted)]">NIT: {{ company.nit || 'Sin NIT' }}</p>
               </div>
-              <span
-                class="rounded-full border px-3 py-1 text-xs uppercase tracking-[0.2em]"
-                [ngClass]="company.approvalStatus === 'APPROVED'
-                  ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200'
-                  : company.approvalStatus === 'CHANGES_REQUESTED'
-                    ? 'border-rose-400/30 bg-rose-400/10 text-rose-200'
-                  : company.approvalStatus === 'REJECTED'
-                    ? 'border-rose-400/30 bg-rose-400/10 text-rose-200'
-                    : 'border-amber-400/30 bg-amber-400/10 text-amber-200'"
-              >
-                {{ company.approvalStatus }}
-              </span>
-            </div>
-            <div class="mt-4 flex flex-wrap gap-3 text-xs text-[var(--muted)]">
-              <span>Dominio: {{ company.domain }}</span>
-              <span>Owner: {{ company.ownerId ?? 'Sin asignar' }}</span>
+              <div class="flex flex-wrap items-center gap-3">
+                <span class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel)] px-3 py-2 text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+                  {{ company.approvalStatus === 'PENDING' ? 'Revision nueva' : company.approvalStatus === 'CHANGES_REQUESTED' ? 'Tiene correcciones' : company.approvalStatus === 'REJECTED' ? 'Cerrada' : 'Resuelta' }}
+                </span>
+                <span class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel)] px-3 py-2 text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+                  {{ company.createdAt ? ('Creada ' + (company.createdAt | date:'dd/MM/yyyy')) : 'Sin fecha' }}
+                </span>
+              </div>
             </div>
           </button>
+
+          <div *ngIf="!filteredCompanies.length" class="rounded-[26px] border border-dashed border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-8 text-center text-sm text-[var(--muted)]">
+            No hay empresas que coincidan con el filtro actual.
+          </div>
         </div>
       </div>
 
-      <aside class="rounded-3xl border border-[color:var(--accent-3)]/20 bg-[var(--panel)] p-6 shadow-[var(--shadow)]">
-        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-3)]">Detalle</p>
-        <ng-container *ngIf="selectedCompany; else emptySelection">
-          <h2 class="mt-2 text-2xl font-cyber text-[var(--text)]">{{ selectedCompany.companyName }}</h2>
-          <div class="mt-5 space-y-3 text-sm text-[var(--muted)]">
-            <p><span class="text-[var(--text)]">Dominio:</span> {{ selectedCompany.domain }}</p>
-            <p><span class="text-[var(--text)]">Correo:</span> {{ selectedCompany.contactEmail || 'Sin correo' }}</p>
-            <p><span class="text-[var(--text)]">Contacto:</span> {{ selectedCompany.contactName || 'Sin contacto' }}</p>
-            <p><span class="text-[var(--text)]">Estado:</span> {{ selectedCompany.approvalStatus }}</p>
-            <p><span class="text-[var(--text)]">Owner verificado:</span> {{ selectedCompany.ownerVerificationStatus }}</p>
-            <p><span class="text-[var(--text)]">Correo verificado:</span> {{ selectedCompany.verifiedOwnerEmail || 'Aun no' }}</p>
-            <p><span class="text-[var(--text)]">Descripcion:</span> {{ selectedCompany.description || 'Sin descripcion' }}</p>
-          </div>
+  </section>
 
-          <div class="mt-6 rounded-2xl border border-[color:var(--panel-border)] bg-black/10 p-4">
-            <p class="text-[11px] uppercase tracking-[0.24em] text-[var(--muted)]">Documentos</p>
-            <div class="mt-3 space-y-2" *ngIf="selectedCompanyDocuments.length; else emptyDocuments">
-              <button
-                *ngFor="let document of selectedCompanyDocuments"
-                type="button"
-                (click)="downloadDocument(document)"
-                class="flex w-full items-center justify-between rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-left text-sm text-[var(--text)]"
-              >
-                <span>{{ document.documentType === 'LEGAL_CERTIFICATE' ? 'Certificado legal' : 'Documento tributario' }}</span>
-                <span class="text-[var(--muted)]">{{ document.fileName }}</span>
-              </button>
+  <div
+    *ngIf="isReviewModalOpen && selectedCompany"
+    class="fixed inset-0 z-[100] overflow-hidden bg-slate-950/88 backdrop-blur-md"
+    (click)="closeReviewModal()"
+  >
+    <div class="flex min-h-full items-start justify-center px-4 pt-0 pb-6 sm:px-6 sm:pt-0 sm:pb-8">
+      <div
+        class="max-h-[calc(100vh-16px)] w-full max-w-5xl overflow-y-auto overscroll-contain rounded-[32px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[0_40px_120px_rgba(0,0,0,0.45)] sm:max-h-[calc(100vh-24px)]"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div class="min-w-0">
+            <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-3)]">Revision administrativa</p>
+            <h2 class="mt-3 truncate text-3xl font-cyber text-[var(--text)]">{{ selectedCompany.companyName }}</h2>
+            <p class="mt-2 text-sm text-[var(--muted)]">{{ selectedCompany.contactEmail || selectedCompany.verifiedOwnerEmail || 'Sin correo principal' }}</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <span
+              class="rounded-full border px-3 py-1 text-xs uppercase tracking-[0.2em]"
+              [ngClass]="companyStatusClass(selectedCompany.approvalStatus)"
+            >
+              {{ companyStatusLabel(selectedCompany.approvalStatus) }}
+            </span>
+            <button
+              type="button"
+              class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-[var(--muted)]"
+              (click)="closeReviewModal()"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="isReviewModalLoading" class="mt-6 rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-6 text-sm text-[var(--muted)]">
+          Cargando revision de la empresa...
+        </div>
+
+        <ng-container *ngIf="!isReviewModalLoading">
+          <div class="mt-6 rounded-[28px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-5">
+            <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <div class="rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3">
+                <p class="text-[10px] uppercase tracking-[0.22em] text-[var(--muted)]">Dominio</p>
+                <p class="mt-2 break-all text-sm font-medium text-[var(--text)]">{{ selectedCompany.domain }}</p>
+              </div>
+              <div class="rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3">
+                <p class="text-[10px] uppercase tracking-[0.22em] text-[var(--muted)]">NIT</p>
+                <p class="mt-2 break-all text-sm font-medium text-[var(--text)]">{{ selectedCompany.nit || 'Sin NIT' }}</p>
+              </div>
+              <div class="rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3">
+                <p class="text-[10px] uppercase tracking-[0.22em] text-[var(--muted)]">Correo verificado</p>
+                <p class="mt-2 break-all text-sm font-medium text-[var(--text)]">{{ selectedCompany.verifiedOwnerEmail || 'Aun no' }}</p>
+              </div>
+              <div class="rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3">
+                <p class="text-[10px] uppercase tracking-[0.22em] text-[var(--muted)]">Verificacion</p>
+                <p class="mt-2 text-sm font-medium text-[var(--text)]">{{ selectedCompany.ownerVerificationStatus }}</p>
+              </div>
             </div>
-            <ng-template #emptyDocuments>
-              <p class="mt-3 text-sm text-[var(--muted)]">No hay documentos cargados para esta empresa.</p>
-            </ng-template>
           </div>
 
-          <div class="mt-6 rounded-2xl border border-[color:var(--panel-border)] bg-black/10 p-4">
-            <p class="text-[11px] uppercase tracking-[0.24em] text-[var(--muted)]">Revision por item</p>
-            <div class="mt-3 space-y-3" *ngIf="selectedCompanyReviewItems.length; else emptyReviewItems">
-              <div
-                *ngFor="let item of selectedCompanyReviewItems"
-                class="rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] p-4"
-              >
-                <div class="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p class="text-sm font-semibold text-[var(--text)]">
-                      {{ item.itemType === 'FIELD'
-                        ? (item.itemKey === 'companyName'
-                            ? 'Nombre de empresa'
-                            : item.itemKey === 'domain'
-                              ? 'Dominio'
-                              : item.itemKey === 'nit'
-                                ? 'NIT'
-                                : 'Correo de contacto')
-                        : (item.itemKey === 'LEGAL_CERTIFICATE' ? 'Certificado legal' : 'Documento tributario') }}
-                    </p>
-                    <p class="mt-1 text-xs uppercase tracking-[0.18em]"
-                      [ngClass]="item.status === 'APPROVED'
-                        ? 'text-emerald-200'
-                        : item.status === 'REJECTED'
-                          ? 'text-rose-200'
-                          : 'text-amber-200'">
-                      {{ item.status }}
-                    </p>
-                  </div>
+          <div class="mt-6 space-y-4">
+            <section class="rounded-[28px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-5">
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <p class="text-[11px] uppercase tracking-[0.24em] text-[var(--muted)]">Revision por item</p>
+                  <h3 class="mt-2 text-lg font-semibold text-[var(--text)]">Checklist administrativo</h3>
+                </div>
+                <div class="hidden flex-wrap gap-2 md:flex">
+                  <span class="rounded-full border border-emerald-400/20 bg-emerald-500/8 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-emerald-200">{{ selectedApprovedItemsCount }} ok</span>
+                  <span class="rounded-full border border-rose-400/20 bg-rose-500/8 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-rose-200">{{ selectedRejectedItemsCount }} obs</span>
+                  <span class="rounded-full border border-amber-400/20 bg-amber-500/8 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-amber-200">{{ selectedPendingItemsCount }} pendientes</span>
+                </div>
+              </div>
 
-                  <div class="flex flex-wrap gap-2" *ngIf="canApplyReviewSelected">
-                    <button
-                      type="button"
-                      class="rounded-xl border px-3 py-2 text-[11px] uppercase tracking-[0.18em]"
-                      [ngClass]="item.status === 'APPROVED'
-                        ? 'border-emerald-400/35 bg-emerald-500/10 text-emerald-200'
-                        : 'border-[color:var(--panel-border)] bg-black/10 text-[var(--muted)]'"
-                      (click)="setReviewStatus(item, 'APPROVED')"
-                    >
-                      Aceptado
-                    </button>
-                    <button
-                      type="button"
-                      class="rounded-xl border px-3 py-2 text-[11px] uppercase tracking-[0.18em]"
-                      [ngClass]="item.status === 'REJECTED'
-                        ? 'border-rose-400/35 bg-rose-500/10 text-rose-200'
-                        : 'border-[color:var(--panel-border)] bg-black/10 text-[var(--muted)]'"
-                      (click)="setReviewStatus(item, 'REJECTED')"
-                    >
-                      Rechazado
-                    </button>
+              <div class="mt-4 space-y-3" *ngIf="selectedCompanyReviewItems.length; else emptyReviewItems">
+                <div
+                  *ngFor="let item of selectedCompanyReviewItems"
+                  class="rounded-[22px] border p-4"
+                  [ngClass]="reviewItemSurfaceClass(item.status)"
+                >
+                  <div class="space-y-4">
+                    <div class="flex flex-wrap items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <div class="flex flex-wrap items-center gap-2">
+                          <p class="text-sm font-semibold text-[var(--text)]">{{ reviewItemLabel(item) }}</p>
+                          <span class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel)] px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">
+                            {{ item.itemType === 'FIELD' ? 'Campo' : 'Documento' }}
+                          </span>
+                        </div>
+                        <p class="mt-2 text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">
+                          {{ item.itemType === 'FIELD' ? 'Valor actual del campo' : 'Archivo cargado por la empresa' }}
+                        </p>
+                      </div>
+                      <span
+                        *ngIf="!canApplyReviewSelected"
+                        class="rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.18em]"
+                        [ngClass]="reviewItemStatusClass(item.status)"
+                      >
+                        {{ item.status === 'APPROVED' ? 'Aceptado' : item.status === 'REJECTED' ? 'Rechazado' : 'Pendiente' }}
+                      </span>
+                    </div>
+
+                    <div class="rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3">
+                      <p class="break-all text-sm font-medium leading-6 text-[var(--text)]">
+                        {{ reviewItemCurrentValue(item) || (item.itemType === 'FIELD' ? 'Campo sin valor registrado.' : 'Documento no cargado.') }}
+                      </p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2" *ngIf="canApplyReviewSelected">
+                      <button
+                        *ngIf="item.itemType === 'DOCUMENT' && reviewItemDocument(item)"
+                        type="button"
+                        class="rounded-xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-3 py-2 text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]"
+                        (click)="downloadDocument(reviewItemDocument(item)!)"
+                      >
+                        Abrir
+                      </button>
+                      <button
+                        type="button"
+                        class="rounded-xl border px-3 py-2 text-[11px] uppercase tracking-[0.18em]"
+                        [ngClass]="item.status === 'APPROVED'
+                          ? 'border-emerald-400/35 bg-emerald-500/10 text-emerald-200'
+                          : 'border-[color:var(--panel-border)] bg-[var(--panel)] text-[var(--muted)]'"
+                        (click)="setReviewStatus(item, 'APPROVED')"
+                      >
+                        Aceptado
+                      </button>
+                      <button
+                        type="button"
+                        class="rounded-xl border px-3 py-2 text-[11px] uppercase tracking-[0.18em]"
+                        [ngClass]="item.status === 'REJECTED'
+                          ? 'border-rose-400/35 bg-rose-500/10 text-rose-200'
+                          : 'border-[color:var(--panel-border)] bg-[var(--panel)] text-[var(--muted)]'"
+                        (click)="setReviewStatus(item, 'REJECTED')"
+                      >
+                        Rechazado
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
+              <ng-template #emptyReviewItems>
+                <p class="mt-4 text-sm text-[var(--muted)]">No hay items de revision inicializados para esta empresa.</p>
+              </ng-template>
+            </section>
+
+            <div class="mt-6 flex flex-wrap gap-3" *ngIf="canApplyReviewSelected; else resolvedActions">
+              <button
+                class="rounded-full border border-[color:var(--accent-4)]/35 bg-[var(--accent-4)]/12 px-5 py-3 text-xs uppercase tracking-[0.22em] text-[var(--accent-4)] transition hover:bg-[var(--accent-4)]/18"
+                [disabled]="isSaving"
+                (click)="applySelectedReview()"
+              >
+                {{ isSaving ? 'Aplicando...' : 'Aplicar revision' }}
+              </button>
             </div>
-            <ng-template #emptyReviewItems>
-              <p class="mt-3 text-sm text-[var(--muted)]">No hay items de revision inicializados para esta empresa.</p>
+
+            <ng-template #resolvedActions>
+              <div class="mt-6 rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-sm text-[var(--muted)]">
+                {{ selectedCompany.approvalStatus === 'APPROVED'
+                  ? 'Esta empresa ya fue aprobada.'
+                  : selectedCompany.approvalStatus === 'CHANGES_REQUESTED'
+                    ? 'Esta empresa tiene correcciones solicitadas y espera respuesta del owner.'
+                    : 'Esta empresa no esta pendiente de revision administrativa.' }}
+              </div>
             </ng-template>
           </div>
-
-          <div class="mt-6 flex flex-wrap gap-3" *ngIf="canApplyReviewSelected; else resolvedActions">
-            <button
-              class="rounded-xl border border-emerald-400/35 bg-emerald-500/10 px-4 py-2 text-xs uppercase tracking-[0.2em] text-emerald-200"
-              [disabled]="isSaving"
-              (click)="applySelectedReview()"
-            >
-              Aplicar revision
-            </button>
-          </div>
-
-          <ng-template #resolvedActions>
-            <div class="mt-6 rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-sm text-[var(--muted)]">
-              {{ selectedCompany.approvalStatus === 'APPROVED'
-                ? 'Esta empresa ya fue aprobada.'
-                : selectedCompany.approvalStatus === 'CHANGES_REQUESTED'
-                  ? 'Esta empresa tiene correcciones solicitadas y espera respuesta del owner.'
-                  : 'Esta empresa no esta pendiente de revision administrativa.' }}
-            </div>
-          </ng-template>
         </ng-container>
-
-        <ng-template #emptySelection>
-          <div class="mt-6 rounded-2xl border border-dashed border-[color:var(--panel-border)] p-5 text-sm text-[var(--muted)]">
-            Selecciona una empresa para aprobarla o rechazarla.
-          </div>
-        </ng-template>
-      </aside>
+      </div>
     </div>
-  </section>
+  </div>
 </app-dashboard-shell>
