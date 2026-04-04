@@ -111,6 +111,19 @@ export const routes: Routes = [
     }
   },
   {
+    path: 'company/workspace',
+    title: 'Espacio empresarial | UniDev',
+    loadComponent: () =>
+      import('./features/companies/pages/company-onboarding/company-onboarding.component').then(
+        m => m.CompanyOnboardingComponent
+      ),
+    canActivate: [authGuard, roleGuard],
+    data: {
+      roles: ['USUARIOS_EMPRESA'],
+      description: 'Consulta y actualiza la informacion de tu empresa dentro de UniDev.'
+    }
+  },
+  {
     path: 'blackbird-experience',
     title: 'Blackbird Experience | UniDev',
     loadComponent: () =>

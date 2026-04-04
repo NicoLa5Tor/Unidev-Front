@@ -45,7 +45,7 @@
 
     <div
       class="grid gap-6"
-      [ngClass]="activeTab === 'access' ? 'xl:grid-cols-[1.6fr_minmax(280px,0.9fr)]' : 'xl:grid-cols-1'"
+      [ngClass]="!isCompanyMemberView && activeTab === 'access' ? 'xl:grid-cols-[1.6fr_minmax(280px,0.9fr)]' : 'xl:grid-cols-1'"
     >
       <section class="space-y-6">
         <div
@@ -176,14 +176,19 @@
                         <div>
                           <p class="text-sm font-medium text-[var(--text)]">Correcciones solicitadas</p>
                           <p class="mt-1 text-sm leading-6 text-[var(--muted)]">
-                            Revisa solo los campos y documentos observados por el admin, corrigelos y vuelve a enviar la solicitud.
+                            {{
+                              isCompanyMemberView
+                                ? 'El owner de la empresa debe revisar los campos y documentos observados por el admin antes de reenviar la solicitud.'
+                                : 'Revisa solo los campos y documentos observados por el admin, corrigelos y vuelve a enviar la solicitud.'
+                            }}
                           </p>
                           <p class="mt-3 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-3)]">
-                            Items observados listos para correccion
+                            {{ isCompanyMemberView ? 'Correccion administrada por el owner' : 'Items observados listos para correccion' }}
                           </p>
                         </div>
 
                         <button
+                          *ngIf="canManageCompanyAssets"
                           type="button"
                           class="inline-flex items-center justify-center rounded-full border border-[color:var(--accent-2)]/40 bg-[var(--accent-2)]/12 px-4 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--accent-2)] transition hover:bg-[var(--accent-2)]/20"
                           (click)="openResubmissionModal()"
@@ -204,7 +209,7 @@
                     </div>
 
                     <div
-                      *ngIf="currentCompany.approvalStatus === 'APPROVED'"
+                      *ngIf="!isCompanyMemberView && currentCompany.approvalStatus === 'APPROVED'"
                       class="flex items-start justify-between gap-4 rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3"
                     >
                       <div>
@@ -219,7 +224,7 @@
                     </div>
 
                     <div
-                      *ngIf="currentCompany.approvalStatus === 'APPROVED' && profileCompletionCount === 5 && activeAllowedEmailsCount > 0"
+                      *ngIf="!isCompanyMemberView && currentCompany.approvalStatus === 'APPROVED' && profileCompletionCount === 5 && activeAllowedEmailsCount > 0"
                       class="rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4"
                     >
                       <p class="text-sm font-medium text-[var(--text)]">Operacion al dia</p>
@@ -251,7 +256,11 @@
                   <div>
                     <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-2)]">Reglas del perfil</p>
                     <p class="mt-2 max-w-3xl text-sm leading-6 text-[var(--muted)]">
-                      Dominio, NIT y correo de contacto quedan bloqueados despues del registro. Los documentos solo pueden reemplazarse cuando una solicitud fue rechazada. Desde aqui puedes mantener al dia el perfil operativo.
+                      {{
+                        isCompanyMemberView
+                          ? 'Aqui ves la informacion compartida de la empresa. Solo puedes actualizar nombre de contacto, telefono y direccion; el resto queda visible como referencia del owner.'
+                          : 'Dominio, NIT y correo de contacto quedan bloqueados despues del registro. Los documentos solo pueden reemplazarse cuando una solicitud fue rechazada. Desde aqui puedes mantener al dia el perfil operativo.'
+                      }}
                     </p>
                   </div>
                   <div class="inline-flex items-center rounded-full border border-[color:var(--panel-border)] bg-black/10 px-4 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
@@ -285,10 +294,18 @@
                           <p class="mt-2 text-sm leading-6 text-[var(--muted)]">
                             Sube un logo cuadrado o una foto de perfil de la empresa. Se mostrara en este panel.
                           </p>
-                          <label class="mt-4 inline-flex cursor-pointer items-center justify-center rounded-full border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/12 px-4 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--accent-2)] transition hover:bg-[var(--accent-2)]/18">
+                          <label
+                            *ngIf="canManageCompanyAssets; else ownerOnlyLogoMessage"
+                            class="mt-4 inline-flex cursor-pointer items-center justify-center rounded-full border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/12 px-4 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--accent-2)] transition hover:bg-[var(--accent-2)]/18"
+                          >
                             <input type="file" accept="image/png,image/jpeg,image/webp" class="hidden" (change)="uploadLogo($event)" />
                             {{ isUploadingLogo ? 'Subiendo...' : 'Cambiar imagen' }}
                           </label>
+                          <ng-template #ownerOnlyLogoMessage>
+                            <div class="mt-4 inline-flex items-center rounded-full border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+                              Solo owner
+                            </div>
+                          </ng-template>
                         </div>
                       </div>
                     </div>
@@ -328,7 +345,7 @@
                       <h3 class="mt-2 text-xl font-semibold text-[var(--text)]">Datos editables</h3>
                     </div>
                     <div class="rounded-full border border-[color:var(--panel-border)] bg-black/10 px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
-                      Reeditable
+                      {{ isCompanyMemberView ? 'Acceso parcial' : 'Reeditable' }}
                     </div>
                   </div>
 
@@ -336,96 +353,112 @@
                     <label class="space-y-2">
                       <div class="flex items-center justify-between gap-3">
                         <span class="block text-xs font-tech uppercase tracking-[0.2em] text-[var(--muted)]">Nombre de contacto</span>
-                        <span class="text-[11px] font-tech uppercase tracking-[0.16em] text-[var(--accent-4)]">
-                          Editable
+                        <span class="text-[11px] font-tech uppercase tracking-[0.16em]" [ngClass]="canEditProfileField('contactName') ? 'text-[var(--accent-4)]' : 'text-[var(--muted)]'">
+                          {{ canEditProfileField('contactName') ? 'Editable' : 'Solo lectura' }}
                         </span>
                       </div>
                       <input
                         [(ngModel)]="form.contactName"
                         name="profileContactName"
                         type="text"
-                        [readonly]="isUpdatingProfile"
+                        [readonly]="isUpdatingProfile || !canEditProfileField('contactName')"
                         class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]"
                         placeholder="Responsable de la cuenta"
                       />
-                      <span class="block text-xs text-[var(--muted)]">Puedes actualizar este nombre desde el panel de empresa.</span>
+                      <span class="block text-xs text-[var(--muted)]">
+                        {{ canEditProfileField('contactName') ? 'Puedes actualizar este nombre desde el panel de empresa.' : 'Este dato se muestra como referencia compartida de la empresa.' }}
+                      </span>
                     </label>
 
                     <label class="space-y-2">
                       <div class="flex items-center justify-between gap-3">
                         <span class="block text-xs font-tech uppercase tracking-[0.2em] text-[var(--muted)]">Telefono</span>
-                        <span class="text-[11px] font-tech uppercase tracking-[0.16em] text-[var(--accent-4)]">
-                          Editable
+                        <span class="text-[11px] font-tech uppercase tracking-[0.16em]" [ngClass]="canEditProfileField('contactPhone') ? 'text-[var(--accent-4)]' : 'text-[var(--muted)]'">
+                          {{ canEditProfileField('contactPhone') ? 'Editable' : 'Solo lectura' }}
                         </span>
                       </div>
                       <input
                         [(ngModel)]="form.contactPhone"
                         name="profileContactPhone"
                         type="text"
-                        [readonly]="isUpdatingProfile"
+                        [readonly]="isUpdatingProfile || !canEditProfileField('contactPhone')"
                         class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]"
                         placeholder="+57 300 000 0000"
                       />
-                      <span class="block text-xs text-[var(--muted)]">Puedes actualizar este dato cuando lo necesites.</span>
+                      <span class="block text-xs text-[var(--muted)]">
+                        {{ canEditProfileField('contactPhone') ? 'Puedes actualizar este dato cuando lo necesites.' : 'Este dato se muestra como referencia compartida de la empresa.' }}
+                      </span>
                     </label>
 
                     <label class="space-y-2">
                       <div class="flex items-center justify-between gap-3">
                         <span class="block text-xs font-tech uppercase tracking-[0.2em] text-[var(--muted)]">Sitio web</span>
-                        <span class="text-[11px] font-tech uppercase tracking-[0.16em] text-[var(--accent-4)]">
-                          Editable
+                        <span class="text-[11px] font-tech uppercase tracking-[0.16em]" [ngClass]="canEditProfileField('website') ? 'text-[var(--accent-4)]' : 'text-[var(--muted)]'">
+                          {{ canEditProfileField('website') ? 'Editable' : 'Solo owner' }}
                         </span>
                       </div>
                       <input
                         [(ngModel)]="form.website"
                         name="profileWebsite"
                         type="text"
-                        [readonly]="isUpdatingProfile"
+                        [readonly]="isUpdatingProfile || !canEditProfileField('website')"
                         class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]"
                         placeholder="https://empresa.com"
                       />
-                      <span class="block text-xs text-[var(--muted)]">Puedes actualizar este dato cuando lo necesites.</span>
+                      <span class="block text-xs text-[var(--muted)]">
+                        {{ canEditProfileField('website') ? 'Puedes actualizar este dato cuando lo necesites.' : 'Visible para el equipo, editable solo por el owner.' }}
+                      </span>
                     </label>
 
                     <label class="space-y-2">
                       <div class="flex items-center justify-between gap-3">
                         <span class="block text-xs font-tech uppercase tracking-[0.2em] text-[var(--muted)]">Direccion</span>
-                        <span class="text-[11px] font-tech uppercase tracking-[0.16em] text-[var(--accent-4)]">
-                          Editable
+                        <span class="text-[11px] font-tech uppercase tracking-[0.16em]" [ngClass]="canEditProfileField('address') ? 'text-[var(--accent-4)]' : 'text-[var(--muted)]'">
+                          {{ canEditProfileField('address') ? 'Editable' : 'Solo lectura' }}
                         </span>
                       </div>
                       <input
                         [(ngModel)]="form.address"
                         name="profileAddress"
                         type="text"
-                        [readonly]="isUpdatingProfile"
+                        [readonly]="isUpdatingProfile || !canEditProfileField('address')"
                         class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]"
                         placeholder="Oficina principal o sede operativa"
                       />
-                      <span class="block text-xs text-[var(--muted)]">Puedes actualizar este dato cuando lo necesites.</span>
+                      <span class="block text-xs text-[var(--muted)]">
+                        {{ canEditProfileField('address') ? 'Puedes actualizar este dato cuando lo necesites.' : 'Este dato se muestra como referencia compartida de la empresa.' }}
+                      </span>
                     </label>
 
                     <label class="space-y-2 md:col-span-2">
                       <div class="flex items-center justify-between gap-3">
                         <span class="block text-xs font-tech uppercase tracking-[0.2em] text-[var(--muted)]">Descripcion</span>
-                        <span class="text-[11px] font-tech uppercase tracking-[0.16em] text-[var(--accent-4)]">
-                          Editable
+                        <span class="text-[11px] font-tech uppercase tracking-[0.16em]" [ngClass]="canEditProfileField('description') ? 'text-[var(--accent-4)]' : 'text-[var(--muted)]'">
+                          {{ canEditProfileField('description') ? 'Editable' : 'Solo owner' }}
                         </span>
                       </div>
                       <textarea
                         [(ngModel)]="form.description"
                         name="profileDescription"
                         rows="4"
-                        [readonly]="isUpdatingProfile"
+                        [readonly]="isUpdatingProfile || !canEditProfileField('description')"
                         class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]"
                         placeholder="Contexto breve de la empresa"
                       ></textarea>
-                      <span class="block text-xs text-[var(--muted)]">Puedes actualizar este dato cuando lo necesites.</span>
+                      <span class="block text-xs text-[var(--muted)]">
+                        {{ canEditProfileField('description') ? 'Puedes actualizar este dato cuando lo necesites.' : 'Visible para el equipo, editable solo por el owner.' }}
+                      </span>
                     </label>
 
                     <div class="md:col-span-2 flex flex-col gap-3 border-t border-[color:var(--panel-border)] pt-4 sm:flex-row sm:items-center sm:justify-between">
                       <p class="text-sm text-[var(--muted)]">
-                        {{ hasEditableProfileFields ? 'Puedes editar los datos operativos cuando lo necesites.' : 'No hay perfil operativo disponible para editar.' }}
+                        {{
+                          hasEditableProfileFields
+                            ? (isCompanyMemberView
+                                ? 'Puedes editar nombre de contacto, telefono y direccion. El resto del perfil sigue visible como referencia de la empresa.'
+                                : 'Puedes editar los datos operativos cuando lo necesites.')
+                            : 'No hay perfil operativo disponible para editar.'
+                        }}
                       </p>
 
                       <button
@@ -582,7 +615,7 @@
           </section>
 
           <section
-            *ngIf="activeTab === 'access'"
+            *ngIf="!isCompanyMemberView && activeTab === 'access'"
             class="rounded-[32px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[var(--shadow)] md:p-8"
           >
             <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">

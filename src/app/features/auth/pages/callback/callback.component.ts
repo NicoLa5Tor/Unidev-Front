@@ -65,7 +65,7 @@ export class CallbackComponent implements OnInit {
   private readonly roleRedirects: Record<string, string> = {
     ADMINISTRADORES: '/admin/users',
     EMPRESAS: '/companies/onboarding',
-    USUARIOS_EMPRESA: '/users',
+    USUARIOS_EMPRESA: '/company/workspace',
     USUARIOS: '/users'
   };
   private isBypassRedirect = false;

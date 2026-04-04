@@ -53,10 +53,15 @@ export class CompanyOnboardingComponent implements OnInit {
   uploadingDocumentType: RegistrationDocumentType | null = null;
   private hasLoadedAccessData = false;
 
-  readonly navItems: DashboardNavItem[] = [
+  readonly ownerNavItems: DashboardNavItem[] = [
     { id: 'status', label: 'Estado', accent: 'accent-3', mobileBarWidthClass: 'w-20' },
     { id: 'profile', label: 'Perfil', accent: 'accent-1', mobileBarWidthClass: 'w-20' },
     { id: 'access', label: 'Correos', accent: 'accent-2', mobileBarWidthClass: 'w-20' }
+  ];
+
+  readonly memberNavItems: DashboardNavItem[] = [
+    { id: 'status', label: 'Estado', accent: 'accent-3', mobileBarWidthClass: 'w-20' },
+    { id: 'profile', label: 'Perfil', accent: 'accent-1', mobileBarWidthClass: 'w-20' }
   ];
 
   readonly form: CompanyFormModel = {
@@ -80,6 +85,26 @@ export class CompanyOnboardingComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadViewData();
+  }
+
+  get isCompanyMemberView(): boolean {
+    return this.sessionUser?.roleName === 'USUARIOS_EMPRESA';
+  }
+
+  get isCompanyOwnerView(): boolean {
+    return this.sessionUser?.roleName === 'EMPRESAS';
+  }
+
+  get canManageCompanyAccess(): boolean {
+    return this.isCompanyOwnerView;
+  }
+
+  get canManageCompanyAssets(): boolean {
+    return this.isCompanyOwnerView;
+  }
+
+  get navItems(): DashboardNavItem[] {
+    return this.isCompanyMemberView ? this.memberNavItems : this.ownerNavItems;
   }
 
   get isApprovedCompany(): boolean {
@@ -241,6 +266,9 @@ export class CompanyOnboardingComponent implements OnInit {
     if (!this.currentCompany) {
       return 'Registra la empresa, define el dominio oficial y deja listo el acceso para que un administrador valide la operacion.';
     }
+    if (this.isCompanyMemberView) {
+      return 'Consulta la informacion compartida de la empresa y mantén al dia los datos operativos que usa el equipo.';
+    }
     return 'Gestiona el perfil de la empresa y mantén bajo control los correos corporativos que pueden entrar a la plataforma.';
   }
 
@@ -353,6 +381,10 @@ export class CompanyOnboardingComponent implements OnInit {
   }
 
   setActiveTab(tabId: string): void {
+    if (this.isCompanyMemberView && tabId === 'access') {
+      this.activeTab = 'status';
+      return;
+    }
     if (tabId === 'status' || tabId === 'profile' || tabId === 'access') {
       this.activeTab = tabId;
       this.loadTabDataIfNeeded(tabId);
@@ -673,6 +705,9 @@ export class CompanyOnboardingComponent implements OnInit {
   }
 
   private loadTabDataIfNeeded(tab: CompanyTab): void {
+    if (this.isCompanyMemberView && tab === 'access') {
+      return;
+    }
     if (!this.currentCompany || this.currentCompany.approvalStatus !== 'APPROVED') {
       return;
     }
@@ -804,6 +839,9 @@ export class CompanyOnboardingComponent implements OnInit {
   canEditProfileField(field: string): boolean {
     if (!this.currentCompany) {
       return false;
+    }
+    if (this.isCompanyMemberView) {
+      return ['contactName', 'contactPhone', 'address'].includes(field);
     }
     return ['contactName', 'contactPhone', 'website', 'description', 'address'].includes(field);
   }
