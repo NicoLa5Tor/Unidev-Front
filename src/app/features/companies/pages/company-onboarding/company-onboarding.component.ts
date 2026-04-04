@@ -10,7 +10,7 @@ import { DashboardNavItem, DashboardShellComponent } from '../../../../shared/co
 import { UiToastService } from '../../../../shared/services/ui-toast.service';
 import { CompanyService } from '../../services/company.service';
 import { CompanyAccessService } from '../../services/company-access.service';
-import { Company, CompanyRegistrationDocument, CreateCompanyDto, UpdateCompanyProfileDto, UpdateRejectedCompanyDraftDto } from '../../../../shared/models/company.model';
+import { Company, CompanyRegistrationDocument, CompanyReviewItem, CreateCompanyDto, UpdateCompanyProfileDto, UpdateRejectedCompanyDraftDto } from '../../../../shared/models/company.model';
 import { SessionUser } from '../../../../shared/models/session-user.model';
 import { CompanyAllowedEmail } from '../../../../shared/models/company-access.model';
 import { CompanyFormModel } from './company-onboarding.types';
@@ -47,6 +47,7 @@ export class CompanyOnboardingComponent implements OnInit {
   currentCompany: Company | null = null;
   allowedEmails: CompanyAllowedEmail[] = [];
   registrationDocuments: CompanyRegistrationDocument[] = [];
+  reviewItems: CompanyReviewItem[] = [];
   allowedEmailInput = '';
   uploadingDocumentType: RegistrationDocumentType | null = null;
   private hasLoadedAccessData = false;
@@ -122,6 +123,8 @@ export class CompanyOnboardingComponent implements OnInit {
         return 'Aprobada';
       case 'REJECTED':
         return 'Rechazada';
+      case 'CHANGES_REQUESTED':
+        return 'Correcciones solicitadas';
       case 'PENDING':
         return 'Pendiente';
       default:
@@ -134,6 +137,8 @@ export class CompanyOnboardingComponent implements OnInit {
       case 'APPROVED':
         return 'border-emerald-400/35 bg-emerald-400/12 text-emerald-100';
       case 'REJECTED':
+        return 'border-rose-400/35 bg-rose-400/12 text-rose-100';
+      case 'CHANGES_REQUESTED':
         return 'border-rose-400/35 bg-rose-400/12 text-rose-100';
       case 'PENDING':
         return 'border-amber-400/35 bg-amber-400/12 text-amber-100';
@@ -166,6 +171,9 @@ export class CompanyOnboardingComponent implements OnInit {
     if (!this.currentCompany) {
       return 'Completa el registro inicial';
     }
+    if (this.currentCompany.approvalStatus === 'CHANGES_REQUESTED') {
+      return 'Hay correcciones obligatorias por resolver';
+    }
     if (this.currentCompany.approvalStatus === 'REJECTED') {
       return this.canResubmitRejectedCompany
         ? 'La solicitud puede volver a enviarse'
@@ -186,6 +194,9 @@ export class CompanyOnboardingComponent implements OnInit {
   get nextActionDescription(): string {
     if (!this.currentCompany) {
       return 'Registra nombre, dominio, NIT y correo principal para dejar la empresa lista para revision.';
+    }
+    if (this.currentCompany.approvalStatus === 'CHANGES_REQUESTED') {
+      return 'Revisa los campos obligatorios y documentos observados por el admin, corrige solo esos items y vuelve a enviarlos.';
     }
     if (this.currentCompany.approvalStatus === 'REJECTED') {
       return this.canResubmitRejectedCompany
@@ -236,6 +247,10 @@ export class CompanyOnboardingComponent implements OnInit {
     return this.currentCompany?.approvalStatus === 'REJECTED';
   }
 
+  get isChangesRequestedCompany(): boolean {
+    return this.currentCompany?.approvalStatus === 'CHANGES_REQUESTED';
+  }
+
   get rejectionCooldownRemainingMs(): number {
     if (!this.currentCompany || !this.isRejectedCompany) {
       return 0;
@@ -274,6 +289,18 @@ export class CompanyOnboardingComponent implements OnInit {
 
   get resubmissionCooldownHours(): number {
     return Math.max(0, this.currentCompany?.resubmissionCooldownHours ?? 72);
+  }
+
+  isRejectedField(fieldKey: string): boolean {
+    return this.reviewItems.some(item => item.itemType === 'FIELD' && item.itemKey === fieldKey && item.status === 'REJECTED');
+  }
+
+  isRejectedDocument(documentKey: RegistrationDocumentType): boolean {
+    return this.reviewItems.some(item => item.itemType === 'DOCUMENT' && item.itemKey === documentKey && item.status === 'REJECTED');
+  }
+
+  getReviewComment(itemType: 'FIELD' | 'DOCUMENT', itemKey: string): string | null {
+    return this.reviewItems.find(item => item.itemType === itemType && item.itemKey === itemKey)?.adminComment ?? null;
   }
 
   refreshView(): void {
@@ -396,11 +423,12 @@ export class CompanyOnboardingComponent implements OnInit {
   }
 
   openResubmissionModal(): void {
-    if (!this.currentCompany || !this.isRejectedCompany) {
+    if (!this.currentCompany || (!this.isRejectedCompany && !this.isChangesRequestedCompany)) {
       return;
     }
     this.isResubmissionModalOpen = true;
     this.loadRegistrationDocuments();
+    this.loadReviewItems();
   }
 
   closeResubmissionModal(): void {
@@ -414,20 +442,20 @@ export class CompanyOnboardingComponent implements OnInit {
   }
 
   saveRejectedDraft(): void {
-    if (!this.currentCompany || !this.isRejectedCompany || this.isSavingRejectedDraft) {
+    if (!this.currentCompany || !this.isChangesRequestedCompany || this.isSavingRejectedDraft) {
       return;
     }
 
     const payload: UpdateRejectedCompanyDraftDto = {
       companyName: this.form.companyName.trim(),
       nit: this.form.nit.trim(),
-      contactName: this.toNullable(this.form.contactName),
       contactEmail: this.form.contactEmail.trim(),
-      contactPhone: this.toNullable(this.form.contactPhone),
-      website: this.toNullable(this.form.website),
       domain: this.normalizeDomain(this.form.domain),
-      description: this.toNullable(this.form.description),
-      address: this.toNullable(this.form.address)
+      contactName: null,
+      contactPhone: null,
+      website: null,
+      description: null,
+      address: null
     };
 
     this.isSavingRejectedDraft = true;
@@ -450,7 +478,7 @@ export class CompanyOnboardingComponent implements OnInit {
   }
 
   replaceRegistrationDocument(event: Event, documentType: RegistrationDocumentType): void {
-    if (!this.currentCompany || !this.isRejectedCompany) {
+    if (!this.currentCompany || !this.isChangesRequestedCompany) {
       return;
     }
 
@@ -561,6 +589,7 @@ export class CompanyOnboardingComponent implements OnInit {
             this.currentCompany = company;
             if (company) {
               this.patchFormFromCompany(company);
+              this.reviewItems = [];
               this.registrationDocuments = [];
               this.activeTab = 'status';
               this.loadTabDataIfNeeded(this.activeTab);
@@ -622,6 +651,23 @@ export class CompanyOnboardingComponent implements OnInit {
         this.registrationDocuments = [];
         this.isDocumentsLoading = false;
         this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos cargar los documentos de registro.'));
+      }
+    });
+  }
+
+  private loadReviewItems(): void {
+    if (!this.currentCompany) {
+      this.reviewItems = [];
+      return;
+    }
+
+    this.companyService.listCompanyProfileReviewItems().subscribe({
+      next: items => {
+        this.reviewItems = items;
+      },
+      error: error => {
+        this.reviewItems = [];
+        this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos cargar los items de revision.'));
       }
     });
   }

@@ -93,6 +93,24 @@ export interface CompanyRegistrationDocument {
   status: string;
 }
 
+export interface CompanyReviewItem {
+  id: number;
+  itemType: 'FIELD' | 'DOCUMENT';
+  itemKey: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  adminComment: string | null;
+  reviewedAt: string | null;
+}
+
+export interface CompanyReviewDecisionDto {
+  items: Array<{
+    itemType: string;
+    itemKey: string;
+    status: string;
+    adminComment?: string | null;
+  }>;
+}
+
 export interface Plan {
   id: number;
   code: string;

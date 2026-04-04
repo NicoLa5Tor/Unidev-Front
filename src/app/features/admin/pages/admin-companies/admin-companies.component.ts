@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { CompanyService } from '../../../companies/services/company.service';
-import { Company, CompanyRegistrationDocument, CreateCompanyDto } from '../../../../shared/models/company.model';
+import { Company, CompanyRegistrationDocument, CompanyReviewDecisionDto, CompanyReviewItem } from '../../../../shared/models/company.model';
 import { DashboardNavItem, DashboardShellComponent } from '../../../../shared/components/dashboard-shell/dashboard-shell.component';
 
 type MessageState = { type: 'success' | 'error'; text: string } | null;
@@ -23,7 +23,7 @@ export class AdminCompaniesComponent implements OnInit {
   companies: Company[] = [];
   selectedCompany: Company | null = null;
   selectedCompanyDocuments: CompanyRegistrationDocument[] = [];
-  approvalMessage = '';
+  selectedCompanyReviewItems: CompanyReviewItem[] = [];
 
   readonly navItems: DashboardNavItem[] = [
     { id: 'queue', label: 'Solicitudes', accent: 'accent-3', mobileBarWidthClass: 'w-24' }
@@ -43,7 +43,11 @@ export class AdminCompaniesComponent implements OnInit {
     return this.companies.filter(company => company.approvalStatus === 'APPROVED').length;
   }
 
-  get canApproveOrRejectSelected(): boolean {
+  get changesRequestedCompanies(): number {
+    return this.companies.filter(company => company.approvalStatus === 'CHANGES_REQUESTED').length;
+  }
+
+  get canApplyReviewSelected(): boolean {
     return !!this.selectedCompany && this.selectedCompany.approvalStatus === 'PENDING';
   }
 
@@ -56,9 +60,10 @@ export class AdminCompaniesComponent implements OnInit {
   selectCompany(company: Company): void {
     this.selectedCompany = company;
     this.selectedCompanyDocuments = [];
-    this.approvalMessage = '';
+    this.selectedCompanyReviewItems = [];
     this.message = null;
     this.loadCompanyDocuments(company);
+    this.loadCompanyReviewItems(company);
   }
 
   refreshCompanies(): void {
@@ -70,6 +75,7 @@ export class AdminCompaniesComponent implements OnInit {
           this.selectedCompany = companies.find(company => company.id === this.selectedCompany?.id) ?? null;
           if (this.selectedCompany) {
             this.loadCompanyDocuments(this.selectedCompany);
+            this.loadCompanyReviewItems(this.selectedCompany);
           }
         }
         this.isLoading = false;
@@ -81,60 +87,50 @@ export class AdminCompaniesComponent implements OnInit {
     });
   }
 
-  approveSelected(): void {
-    if (!this.canApproveOrRejectSelected || !this.selectedCompany) {
+  setReviewStatus(item: CompanyReviewItem, status: 'APPROVED' | 'REJECTED'): void {
+    if (!this.canApplyReviewSelected) {
       return;
     }
-    this.saveStatus(this.selectedCompany, 'APPROVED');
+    this.selectedCompanyReviewItems = this.selectedCompanyReviewItems.map(current =>
+      current.id === item.id ? { ...current, status } : current
+    );
   }
 
-  rejectSelected(): void {
-    if (!this.canApproveOrRejectSelected || !this.selectedCompany) {
+  applySelectedReview(): void {
+    if (!this.canApplyReviewSelected || !this.selectedCompany) {
       return;
     }
-    this.saveStatus(this.selectedCompany, 'REJECTED');
-  }
 
-  private saveStatus(company: Company, approvalStatus: string): void {
     this.isSaving = true;
     this.message = null;
 
-    const payload: CreateCompanyDto = {
-      ownerId: company.ownerId,
-      planId: company.planId,
-      companyName: company.companyName,
-      nit: company.nit,
-      contactName: company.contactName,
-      contactEmail: company.contactEmail,
-      contactPhone: company.contactPhone,
-      website: company.website,
-      domain: company.domain,
-      description: company.description,
-      address: company.address,
-      onboardingCompleted: company.onboardingCompleted,
-      approvalStatus,
-      subscriptionStatus: company.subscriptionStatus,
-      ownerVerificationStatus: company.ownerVerificationStatus,
-      verifiedOwnerEmail: company.verifiedOwnerEmail,
-      adminMessage: this.approvalMessage.trim() || null
+    const payload: CompanyReviewDecisionDto = {
+      items: this.selectedCompanyReviewItems.map(item => ({
+        itemType: item.itemType,
+        itemKey: item.itemKey,
+        status: item.status,
+        adminComment: null
+      }))
     };
 
-    this.companyService.updateCompany(company.id, payload).subscribe({
+    this.companyService.applyCompanyReviewItems(this.selectedCompany.id, payload).subscribe({
       next: updated => {
         this.companies = this.companies.map(item => item.id === updated.id ? updated : item);
         this.selectedCompany = updated;
-        this.approvalMessage = '';
         this.isSaving = false;
         this.message = {
           type: 'success',
-          text: approvalStatus === 'APPROVED'
+          text: updated.approvalStatus === 'APPROVED'
             ? 'Empresa aprobada correctamente.'
-            : 'Empresa rechazada correctamente.'
+            : updated.approvalStatus === 'CHANGES_REQUESTED'
+              ? 'Se solicitaron correcciones a la empresa.'
+              : 'Revision guardada correctamente.'
         };
+        this.loadCompanyReviewItems(updated);
       },
       error: () => {
         this.isSaving = false;
-        this.message = { type: 'error', text: 'No pudimos actualizar el estado de la empresa.' };
+        this.message = { type: 'error', text: 'No pudimos aplicar la revision de la empresa.' };
       }
     });
   }
@@ -153,6 +149,17 @@ export class AdminCompaniesComponent implements OnInit {
       },
       error: () => {
         this.selectedCompanyDocuments = [];
+      }
+    });
+  }
+
+  private loadCompanyReviewItems(company: Company): void {
+    this.companyService.getCompanyReviewItems(company.id).subscribe({
+      next: items => {
+        this.selectedCompanyReviewItems = items;
+      },
+      error: () => {
+        this.selectedCompanyReviewItems = [];
       }
     });
   }

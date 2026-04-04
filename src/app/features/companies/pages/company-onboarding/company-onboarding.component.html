@@ -169,19 +169,17 @@
                     </div>
 
                     <div
-                      *ngIf="currentCompany.approvalStatus === 'REJECTED'"
+                      *ngIf="currentCompany.approvalStatus === 'CHANGES_REQUESTED'"
                       class="rounded-[22px] border border-rose-400/25 bg-rose-500/8 p-4"
                     >
                       <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                         <div>
-                          <p class="text-sm font-medium text-[var(--text)]">Solicitud rechazada</p>
+                          <p class="text-sm font-medium text-[var(--text)]">Correcciones solicitadas</p>
                           <p class="mt-1 text-sm leading-6 text-[var(--muted)]">
-                            {{ canResubmitRejectedCompany
-                              ? 'Ya puedes reenviar la solicitud para una nueva revision administrativa.'
-                              : 'El reenvio queda bloqueado durante ' + resubmissionCooldownHours + ' horas desde el ultimo rechazo.' }}
+                            Revisa solo los campos y documentos observados por el admin, corrigelos y vuelve a enviar la solicitud.
                           </p>
                           <p class="mt-3 font-tech text-[11px] uppercase tracking-[0.18em] text-rose-200">
-                            {{ canResubmitRejectedCompany ? 'Reenvio habilitado' : 'Disponible en ' + resubmissionCountdownLabel }}
+                            Items observados listos para correccion
                           </p>
                         </div>
 
@@ -732,10 +730,10 @@
     <section class="relative z-10 max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[32px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[var(--shadow)] md:p-8">
       <div class="flex items-start justify-between gap-4">
         <div class="space-y-2">
-          <p class="font-tech text-xs uppercase tracking-[0.24em] text-rose-200">Solicitud rechazada</p>
-          <h3 class="text-2xl font-semibold text-[var(--text)]">Revisa perfil, reemplaza documentos y vuelve a enviar</h3>
+          <p class="font-tech text-xs uppercase tracking-[0.24em] text-rose-200">Correcciones solicitadas</p>
+          <h3 class="text-2xl font-semibold text-[var(--text)]">Corrige solo los items rechazados y vuelve a enviar</h3>
           <p class="max-w-3xl text-sm leading-6 text-[var(--muted)]">
-            Antes de reenviar, revisa bien los datos del perfil de la empresa. Si necesitas ajustar nombre de contacto, telefono, sitio web, direccion o descripcion, hazlo primero desde el tab Perfil.
+            Aqui solo se corrigen campos obligatorios y documentos marcados por el admin. Los datos operativos siguen en el tab Perfil.
           </p>
         </div>
 
@@ -753,7 +751,7 @@
           <div class="flex items-start justify-between gap-4">
             <div>
               <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-2)]">Revision previa</p>
-              <h4 class="mt-2 text-lg font-semibold text-[var(--text)]">Corrige los datos antes del nuevo envio</h4>
+              <h4 class="mt-2 text-lg font-semibold text-[var(--text)]">Campos obligatorios observados</h4>
             </div>
             <button
               type="button"
@@ -765,52 +763,27 @@
           </div>
 
           <form class="mt-4 grid gap-4 md:grid-cols-2" (ngSubmit)="saveRejectedDraft()">
-            <label class="space-y-2 md:col-span-2">
+            <label *ngIf="isRejectedField('companyName')" class="space-y-2 md:col-span-2">
               <span class="block text-xs font-tech uppercase tracking-[0.2em] text-[var(--muted)]">Nombre de la empresa</span>
               <input [(ngModel)]="form.companyName" name="resubmissionCompanyName" class="w-full rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)]/70 px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]/50" />
             </label>
 
-            <label class="space-y-2">
+            <label *ngIf="isRejectedField('domain')" class="space-y-2">
               <span class="block text-xs font-tech uppercase tracking-[0.2em] text-[var(--muted)]">Dominio empresarial</span>
               <input [(ngModel)]="form.domain" name="resubmissionDomain" class="w-full rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)]/70 px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]/50" />
             </label>
 
-            <label class="space-y-2">
+            <label *ngIf="isRejectedField('nit')" class="space-y-2">
               <span class="block text-xs font-tech uppercase tracking-[0.2em] text-[var(--muted)]">NIT</span>
               <input [(ngModel)]="form.nit" name="resubmissionNit" class="w-full rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)]/70 px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]/50" />
             </label>
 
-            <label class="space-y-2 md:col-span-2">
+            <label *ngIf="isRejectedField('contactEmail')" class="space-y-2 md:col-span-2">
               <span class="block text-xs font-tech uppercase tracking-[0.2em] text-[var(--muted)]">Correo de contacto</span>
               <input [(ngModel)]="form.contactEmail" name="resubmissionContactEmail" class="w-full rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)]/70 px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]/50" />
             </label>
 
-            <label class="space-y-2">
-              <span class="block text-xs font-tech uppercase tracking-[0.2em] text-[var(--muted)]">Nombre de contacto</span>
-              <input [(ngModel)]="form.contactName" name="resubmissionContactName" class="w-full rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)]/70 px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]/50" />
-            </label>
-
-            <label class="space-y-2">
-              <span class="block text-xs font-tech uppercase tracking-[0.2em] text-[var(--muted)]">Telefono</span>
-              <input [(ngModel)]="form.contactPhone" name="resubmissionContactPhone" class="w-full rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)]/70 px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]/50" />
-            </label>
-
-            <label class="space-y-2">
-              <span class="block text-xs font-tech uppercase tracking-[0.2em] text-[var(--muted)]">Sitio web</span>
-              <input [(ngModel)]="form.website" name="resubmissionWebsite" class="w-full rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)]/70 px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]/50" />
-            </label>
-
-            <label class="space-y-2">
-              <span class="block text-xs font-tech uppercase tracking-[0.2em] text-[var(--muted)]">Direccion</span>
-              <input [(ngModel)]="form.address" name="resubmissionAddress" class="w-full rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)]/70 px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]/50" />
-            </label>
-
-            <label class="space-y-2 md:col-span-2">
-              <span class="block text-xs font-tech uppercase tracking-[0.2em] text-[var(--muted)]">Descripcion</span>
-              <textarea [(ngModel)]="form.description" name="resubmissionDescription" rows="3" class="w-full rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)]/70 px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]/50"></textarea>
-            </label>
-
-            <div class="md:col-span-2">
+            <div class="md:col-span-2" *ngIf="isRejectedField('companyName') || isRejectedField('domain') || isRejectedField('nit') || isRejectedField('contactEmail')">
               <button
                 type="submit"
                 class="inline-flex items-center justify-center rounded-full border border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/12 px-4 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--accent-1)] transition hover:bg-[var(--accent-1)]/18"
@@ -820,19 +793,25 @@
               </button>
             </div>
           </form>
+
+          <div *ngIf="!isRejectedField('companyName') && !isRejectedField('domain') && !isRejectedField('nit') && !isRejectedField('contactEmail')" class="mt-4 rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)]/70 px-4 py-3 text-sm text-[var(--muted)]">
+            No hay campos obligatorios rechazados. Solo debes revisar los documentos observados si aplica.
+          </div>
         </section>
 
         <section class="rounded-[28px] border border-[color:var(--panel-border)] bg-black/10 p-5">
           <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-3)]">Reenvio</p>
           <h4 class="mt-2 text-lg font-semibold text-[var(--text)]">
-            {{ canResubmitRejectedCompany ? 'Listo para reenviar' : 'Espera activa' }}
+            {{ isChangesRequestedCompany ? 'Listo para reenviar correcciones' : (canResubmitRejectedCompany ? 'Listo para reenviar' : 'Espera activa') }}
           </h4>
           <p class="mt-3 text-sm leading-6 text-[var(--muted)]">
-            {{ canResubmitRejectedCompany
+            {{ isChangesRequestedCompany
+              ? 'Cuando termines de corregir los items observados, puedes reenviar la solicitud desde aqui.'
+              : canResubmitRejectedCompany
               ? 'Cuando termines de revisar perfil y documentos, puedes reenviar la solicitud desde aqui.'
               : 'El reenvio se habilitara cuando termine la espera definida para solicitudes rechazadas.' }}
           </p>
-          <div class="mt-4 rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel)]/70 p-4">
+          <div *ngIf="!isChangesRequestedCompany" class="mt-4 rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel)]/70 p-4">
             <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Disponibilidad</p>
             <p class="mt-2 text-sm font-medium text-[var(--text)]">
               {{ canResubmitRejectedCompany ? 'Disponible ahora' : 'Disponible en ' + resubmissionCountdownLabel }}
@@ -841,10 +820,10 @@
           <button
             type="button"
             class="mt-5 inline-flex w-full items-center justify-center rounded-full border px-4 py-3 font-tech text-xs uppercase tracking-[0.18em] transition"
-            [ngClass]="canResubmitRejectedCompany
+            [ngClass]="(isChangesRequestedCompany || canResubmitRejectedCompany)
               ? 'border-[color:var(--accent-2)]/40 bg-[var(--accent-2)]/12 text-[var(--accent-2)] hover:bg-[var(--accent-2)]/20'
               : 'cursor-not-allowed border-[color:var(--panel-border)] bg-black/10 text-[var(--muted)] opacity-70'"
-            [disabled]="!canResubmitRejectedCompany || isSaving"
+            [disabled]="(!isChangesRequestedCompany && !canResubmitRejectedCompany) || isSaving"
             (click)="resubmitRejectedCompany()"
           >
             {{ isSaving ? 'Reenviando...' : 'Volver a enviar solicitud' }}
@@ -855,9 +834,9 @@
       <section class="mt-6 rounded-[28px] border border-[color:var(--panel-border)] bg-black/10 p-5">
         <div class="flex flex-col gap-2">
           <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-4)]">Documentos de registro</p>
-          <h4 class="text-lg font-semibold text-[var(--text)]">Reemplaza los archivos si necesitas corregir soportes</h4>
+          <h4 class="text-lg font-semibold text-[var(--text)]">Documentos rechazados</h4>
           <p class="text-sm leading-6 text-[var(--muted)]">
-            Cada cambio reemplaza el archivo actual en el servicio de documentos y deja la empresa lista para un nuevo envio cuando se habilite.
+            Solo aparecen acciones de cambio sobre los documentos que el admin marco como rechazados.
           </p>
         </div>
 
@@ -883,7 +862,7 @@
               >
                 Ver actual
               </button>
-              <label class="inline-flex cursor-pointer items-center justify-center rounded-full border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/12 px-4 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--accent-2)] transition hover:bg-[var(--accent-2)]/18">
+              <label *ngIf="isRejectedDocument('LEGAL_CERTIFICATE')" class="inline-flex cursor-pointer items-center justify-center rounded-full border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/12 px-4 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--accent-2)] transition hover:bg-[var(--accent-2)]/18">
                 <input type="file" accept="application/pdf,image/png,image/jpeg" class="hidden" (change)="replaceRegistrationDocument($event, 'LEGAL_CERTIFICATE')" />
                 {{ uploadingDocumentType === 'LEGAL_CERTIFICATE' ? 'Subiendo...' : 'Cambiar archivo' }}
               </label>
@@ -907,7 +886,7 @@
               >
                 Ver actual
               </button>
-              <label class="inline-flex cursor-pointer items-center justify-center rounded-full border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/12 px-4 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--accent-2)] transition hover:bg-[var(--accent-2)]/18">
+              <label *ngIf="isRejectedDocument('TAX_DOCUMENT')" class="inline-flex cursor-pointer items-center justify-center rounded-full border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/12 px-4 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--accent-2)] transition hover:bg-[var(--accent-2)]/18">
                 <input type="file" accept="application/pdf,image/png,image/jpeg" class="hidden" (change)="replaceRegistrationDocument($event, 'TAX_DOCUMENT')" />
                 {{ uploadingDocumentType === 'TAX_DOCUMENT' ? 'Subiendo...' : 'Cambiar archivo' }}
               </label>

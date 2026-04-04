@@ -9,6 +9,8 @@ import {
   CompanyOtpRequestDto,
   CompanyOtpVerifyDto,
   CreateCompanyDto,
+  CompanyReviewDecisionDto,
+  CompanyReviewItem,
   UpdateRejectedCompanyDraftDto,
   UpdateCompanyProfileDto,
   Plan
@@ -34,6 +36,14 @@ export class CompanyService {
 
   getCompany(companyId: number) {
     return this.http.get<Company>(`${this.companiesUrl}/${companyId}`);
+  }
+
+  getCompanyReviewItems(companyId: number) {
+    return this.http.get<CompanyReviewItem[]>(`${this.companiesUrl}/${companyId}/review-items`);
+  }
+
+  applyCompanyReviewItems(companyId: number, payload: CompanyReviewDecisionDto) {
+    return this.http.put<Company>(`${this.companiesUrl}/${companyId}/review-items`, payload);
   }
 
   createCompany(payload: CreateCompanyDto) {
@@ -76,6 +86,10 @@ export class CompanyService {
 
   listCompanyProfileDocuments() {
     return this.http.get<CompanyRegistrationDocument[]>(`${this.companiesUrl}/profile/documents`);
+  }
+
+  listCompanyProfileReviewItems() {
+    return this.http.get<CompanyReviewItem[]>(`${this.companiesUrl}/profile/review-items`);
   }
 
   uploadCompanyProfileDocument(
