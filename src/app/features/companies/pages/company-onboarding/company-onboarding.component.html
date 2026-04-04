@@ -119,20 +119,20 @@
                     </div>
 
                     <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                      <div class="rounded-[22px] border border-[color:var(--panel-border)] bg-black/10 p-4">
+                      <div class="rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
                         <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-3)]">Aprobacion</p>
                         <p class="mt-2 text-lg font-semibold text-[var(--text)]">{{ companyStatusLabel }}</p>
                       </div>
-                      <div class="rounded-[22px] border border-[color:var(--panel-border)] bg-black/10 p-4">
+                      <div class="rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
                         <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-4)]">Verificacion</p>
                         <p class="mt-2 text-lg font-semibold" [ngClass]="ownerVerificationClass">{{ ownerVerificationLabel }}</p>
                       </div>
-                      <div class="rounded-[22px] border border-[color:var(--panel-border)] bg-black/10 p-4">
+                      <div class="rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
                         <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-2)]">Perfil</p>
                         <p class="mt-2 text-lg font-semibold text-[var(--text)]">{{ profileCompletionPercent }}%</p>
                         <p class="mt-1 text-sm text-[var(--muted)]">{{ profileCompletionCount }} de 5</p>
                       </div>
-                      <div class="rounded-[22px] border border-[color:var(--panel-border)] bg-black/10 p-4">
+                      <div class="rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
                         <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-1)]">Acceso</p>
                         <p class="mt-2 text-lg font-semibold text-[var(--text)]">{{ activeAllowedEmailsCount }} activos</p>
                         <p class="mt-1 text-sm text-[var(--muted)]">Lista blanca corporativa</p>
@@ -141,25 +141,25 @@
                   </div>
                 </section>
 
-                <section class="rounded-[30px] border border-[color:var(--panel-border)] bg-[var(--panel)]/72 p-5 sm:p-6">
+                <section class="rounded-[30px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-5 sm:p-6">
                   <div class="flex items-start justify-between gap-4">
                     <div>
                       <p class="font-tech text-xs uppercase tracking-[0.24em] text-[var(--muted)]">Pendientes actuales</p>
                       <h3 class="mt-3 text-xl font-semibold text-[var(--text)]">{{ nextActionTitle }}</h3>
                     </div>
-                    <div class="rounded-full border border-[color:var(--panel-border)] bg-black/10 px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+                    <div class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
                       {{ profileCompletionPercent }}%
                     </div>
                   </div>
 
-                  <div class="mt-5 h-2 rounded-full bg-black/10">
+                  <div class="mt-5 h-2 rounded-full bg-[var(--panel-2)]">
                     <div class="h-2 rounded-full bg-gradient-to-r from-[var(--accent-1)] via-[var(--accent-3)] to-[var(--accent-4)]" [style.width.%]="profileCompletionPercent"></div>
                   </div>
 
                   <div class="mt-5 space-y-3">
                     <div
                       *ngIf="currentCompany.approvalStatus === 'PENDING'"
-                      class="flex items-start justify-between gap-4 rounded-[22px] border border-[color:var(--panel-border)] bg-black/10 px-4 py-3"
+                      class="flex items-start justify-between gap-4 rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3"
                     >
                       <div>
                         <p class="text-sm font-medium text-[var(--text)]">Revision administrativa</p>
@@ -170,7 +170,7 @@
 
                     <div
                       *ngIf="currentCompany.approvalStatus === 'CHANGES_REQUESTED'"
-                      class="rounded-[22px] border border-rose-400/25 bg-rose-500/8 p-4"
+                      class="rounded-[22px] border border-[color:var(--accent-3)]/25 bg-[var(--panel-2)] p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)]"
                     >
                       <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                         <div>
@@ -178,7 +178,7 @@
                           <p class="mt-1 text-sm leading-6 text-[var(--muted)]">
                             Revisa solo los campos y documentos observados por el admin, corrigelos y vuelve a enviar la solicitud.
                           </p>
-                          <p class="mt-3 font-tech text-[11px] uppercase tracking-[0.18em] text-rose-200">
+                          <p class="mt-3 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-3)]">
                             Items observados listos para correccion
                           </p>
                         </div>
@@ -193,7 +193,7 @@
                       </div>
                     </div>
 
-                    <div class="flex items-start justify-between gap-4 rounded-[22px] border border-[color:var(--panel-border)] bg-black/10 px-4 py-3">
+                    <div class="flex items-start justify-between gap-4 rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3">
                       <div>
                         <p class="text-sm font-medium text-[var(--text)]">Perfil operativo</p>
                         <p class="mt-1 text-sm text-[var(--muted)]">{{ profileCompletionCount }} de 5 campos completos.</p>
@@ -205,7 +205,7 @@
 
                     <div
                       *ngIf="currentCompany.approvalStatus === 'APPROVED'"
-                      class="flex items-start justify-between gap-4 rounded-[22px] border border-[color:var(--panel-border)] bg-black/10 px-4 py-3"
+                      class="flex items-start justify-between gap-4 rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3"
                     >
                       <div>
                         <p class="text-sm font-medium text-[var(--text)]">Acceso corporativo</p>
@@ -220,7 +220,7 @@
 
                     <div
                       *ngIf="currentCompany.approvalStatus === 'APPROVED' && profileCompletionCount === 5 && activeAllowedEmailsCount > 0"
-                      class="rounded-[22px] border border-[color:var(--panel-border)] bg-black/10 p-4"
+                      class="rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4"
                     >
                       <p class="text-sm font-medium text-[var(--text)]">Operacion al dia</p>
                       <p class="mt-1 text-sm leading-6 text-[var(--muted)]">
@@ -762,40 +762,48 @@
             </button>
           </div>
 
-          <form class="mt-4 grid gap-4 md:grid-cols-2" (ngSubmit)="saveRejectedDraft()">
+          <div *ngIf="isReviewItemsLoading" class="mt-4 rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--muted)]">
+            Cargando items observados por el admin...
+          </div>
+
+          <form *ngIf="!isReviewItemsLoading" class="mt-4 grid gap-4 md:grid-cols-2" (ngSubmit)="saveRejectedDraft()">
             <label *ngIf="isRejectedField('companyName')" class="space-y-2 md:col-span-2">
               <span class="block text-xs font-tech uppercase tracking-[0.2em] text-[var(--muted)]">Nombre de la empresa</span>
-              <input [(ngModel)]="form.companyName" name="resubmissionCompanyName" class="w-full rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)]/70 px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]/50" />
+              <input [(ngModel)]="form.companyName" name="resubmissionCompanyName" type="text" class="w-full rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] placeholder:text-[var(--muted)] outline-none transition focus:border-[color:var(--accent-2)]/50" />
             </label>
 
             <label *ngIf="isRejectedField('domain')" class="space-y-2">
               <span class="block text-xs font-tech uppercase tracking-[0.2em] text-[var(--muted)]">Dominio empresarial</span>
-              <input [(ngModel)]="form.domain" name="resubmissionDomain" class="w-full rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)]/70 px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]/50" />
+              <input [(ngModel)]="form.domain" name="resubmissionDomain" type="text" class="w-full rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] placeholder:text-[var(--muted)] outline-none transition focus:border-[color:var(--accent-2)]/50" />
             </label>
 
             <label *ngIf="isRejectedField('nit')" class="space-y-2">
               <span class="block text-xs font-tech uppercase tracking-[0.2em] text-[var(--muted)]">NIT</span>
-              <input [(ngModel)]="form.nit" name="resubmissionNit" class="w-full rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)]/70 px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]/50" />
+              <input [(ngModel)]="form.nit" name="resubmissionNit" type="text" class="w-full rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] placeholder:text-[var(--muted)] outline-none transition focus:border-[color:var(--accent-2)]/50" />
             </label>
 
             <label *ngIf="isRejectedField('contactEmail')" class="space-y-2 md:col-span-2">
               <span class="block text-xs font-tech uppercase tracking-[0.2em] text-[var(--muted)]">Correo de contacto</span>
-              <input [(ngModel)]="form.contactEmail" name="resubmissionContactEmail" class="w-full rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)]/70 px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]/50" />
+              <input [(ngModel)]="form.contactEmail" name="resubmissionContactEmail" type="email" class="w-full rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] placeholder:text-[var(--muted)] outline-none transition focus:border-[color:var(--accent-2)]/50" />
             </label>
 
-            <div class="md:col-span-2" *ngIf="isRejectedField('companyName') || isRejectedField('domain') || isRejectedField('nit') || isRejectedField('contactEmail')">
+            <div class="md:col-span-2" *ngIf="hasRejectedFieldItems">
               <button
                 type="submit"
                 class="inline-flex items-center justify-center rounded-full border border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/12 px-4 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--accent-1)] transition hover:bg-[var(--accent-1)]/18"
-                [disabled]="isSavingRejectedDraft"
+                [disabled]="isSavingRejectedDraft || !canSaveRejectedDraft"
               >
                 {{ isSavingRejectedDraft ? 'Guardando...' : 'Guardar cambios del borrador' }}
               </button>
             </div>
           </form>
 
-          <div *ngIf="!isRejectedField('companyName') && !isRejectedField('domain') && !isRejectedField('nit') && !isRejectedField('contactEmail')" class="mt-4 rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)]/70 px-4 py-3 text-sm text-[var(--muted)]">
-            No hay campos obligatorios rechazados. Solo debes revisar los documentos observados si aplica.
+          <div *ngIf="!isReviewItemsLoading && !hasRejectedFieldItems && hasRejectedDocumentItems" class="mt-4 rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--muted)]">
+            No hay campos obligatorios rechazados. Los items observados son documentos: {{ rejectedItemsSummary }}.
+          </div>
+
+          <div *ngIf="!isReviewItemsLoading && !hasRejectedFieldItems && !hasRejectedDocumentItems" class="mt-4 rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--muted)]">
+            No encontramos items rechazados en la revision actual.
           </div>
         </section>
 
@@ -811,7 +819,13 @@
               ? 'Cuando termines de revisar perfil y documentos, puedes reenviar la solicitud desde aqui.'
               : 'El reenvio se habilitara cuando termine la espera definida para solicitudes rechazadas.' }}
           </p>
-          <div *ngIf="!isChangesRequestedCompany" class="mt-4 rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel)]/70 p-4">
+          <div *ngIf="isChangesRequestedCompany" class="mt-4 rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4 text-sm text-[var(--muted)]">
+            <strong class="text-[var(--text)]">Pendientes observados:</strong>
+            {{ hasRejectedFieldItems ? rejectedFieldItems.length + ' campo(s)' : '0 campos' }}
+            y
+            {{ hasRejectedDocumentItems ? rejectedDocumentItems.length + ' documento(s)' : '0 documentos' }}.
+          </div>
+          <div *ngIf="!isChangesRequestedCompany" class="mt-4 rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
             <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Disponibilidad</p>
             <p class="mt-2 text-sm font-medium text-[var(--text)]">
               {{ canResubmitRejectedCompany ? 'Disponible ahora' : 'Disponible en ' + resubmissionCountdownLabel }}
@@ -820,13 +834,13 @@
           <button
             type="button"
             class="mt-5 inline-flex w-full items-center justify-center rounded-full border px-4 py-3 font-tech text-xs uppercase tracking-[0.18em] transition"
-            [ngClass]="(isChangesRequestedCompany || canResubmitRejectedCompany)
+            [ngClass]="canSubmitReviewResubmission
               ? 'border-[color:var(--accent-2)]/40 bg-[var(--accent-2)]/12 text-[var(--accent-2)] hover:bg-[var(--accent-2)]/20'
               : 'cursor-not-allowed border-[color:var(--panel-border)] bg-black/10 text-[var(--muted)] opacity-70'"
-            [disabled]="(!isChangesRequestedCompany && !canResubmitRejectedCompany) || isSaving"
+            [disabled]="!canSubmitReviewResubmission || isSaving"
             (click)="resubmitRejectedCompany()"
           >
-            {{ isSaving ? 'Reenviando...' : 'Volver a enviar solicitud' }}
+            {{ isSaving ? 'Reenviando...' : (isChangesRequestedCompany ? 'Reenviar correcciones ahora' : 'Volver a enviar solicitud') }}
           </button>
         </section>
       </div>
@@ -840,12 +854,12 @@
           </p>
         </div>
 
-        <div *ngIf="isDocumentsLoading" class="mt-5 rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel)]/70 p-4 text-sm text-[var(--muted)]">
+        <div *ngIf="isDocumentsLoading" class="mt-5 rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4 text-sm text-[var(--muted)]">
           Cargando documentos actuales...
         </div>
 
         <div *ngIf="!isDocumentsLoading" class="mt-5 grid gap-4 md:grid-cols-2">
-          <div class="rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel)]/70 p-4">
+          <div class="rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
             <div class="space-y-2">
               <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Certificado legal</p>
               <p class="text-sm text-[var(--muted)]">
@@ -869,7 +883,7 @@
             </div>
           </div>
 
-          <div class="rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel)]/70 p-4">
+          <div class="rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
             <div class="space-y-2">
               <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Documento tributario</p>
               <p class="text-sm text-[var(--muted)]">

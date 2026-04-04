@@ -39,6 +39,7 @@ export class CompanyOnboardingComponent implements OnInit {
   isAccessLoading = false;
   isAddingAllowedEmail = false;
   isDocumentsLoading = false;
+  isReviewItemsLoading = false;
   isResubmissionModalOpen = false;
   isSavingRejectedDraft = false;
   message: MessageState = null;
@@ -268,6 +269,10 @@ export class CompanyOnboardingComponent implements OnInit {
     return this.isRejectedCompany && this.rejectionCooldownRemainingMs === 0;
   }
 
+  get canSubmitReviewResubmission(): boolean {
+    return this.isChangesRequestedCompany || this.canResubmitRejectedCompany;
+  }
+
   get resubmissionCountdownLabel(): string {
     const remainingMs = this.rejectionCooldownRemainingMs;
     if (remainingMs <= 0) {
@@ -297,6 +302,43 @@ export class CompanyOnboardingComponent implements OnInit {
 
   isRejectedDocument(documentKey: RegistrationDocumentType): boolean {
     return this.reviewItems.some(item => item.itemType === 'DOCUMENT' && item.itemKey === documentKey && item.status === 'REJECTED');
+  }
+
+  get rejectedFieldItems(): CompanyReviewItem[] {
+    return this.reviewItems.filter(item => item.itemType === 'FIELD' && item.status === 'REJECTED');
+  }
+
+  get rejectedDocumentItems(): CompanyReviewItem[] {
+    return this.reviewItems.filter(item => item.itemType === 'DOCUMENT' && item.status === 'REJECTED');
+  }
+
+  get hasRejectedFieldItems(): boolean {
+    return this.rejectedFieldItems.length > 0;
+  }
+
+  get hasRejectedDocumentItems(): boolean {
+    return this.rejectedDocumentItems.length > 0;
+  }
+
+  get canSaveRejectedDraft(): boolean {
+    if (!this.currentCompany || !this.isChangesRequestedCompany || !this.hasRejectedFieldItems) {
+      return false;
+    }
+
+    return (
+      this.hasRejectedFieldValueChanged('companyName', this.currentCompany.companyName, this.form.companyName) ||
+      this.hasRejectedFieldValueChanged('domain', this.currentCompany.domain, this.form.domain, true) ||
+      this.hasRejectedFieldValueChanged('nit', this.currentCompany.nit, this.form.nit) ||
+      this.hasRejectedFieldValueChanged('contactEmail', this.currentCompany.contactEmail, this.form.contactEmail, true)
+    );
+  }
+
+  get rejectedItemsSummary(): string {
+    return this.reviewItems
+      .filter(item => item.status === 'REJECTED')
+      .map(item => this.mapReviewItemLabel(item))
+      .filter((label, index, labels) => labels.indexOf(label) === index)
+      .join(', ');
   }
 
   getReviewComment(itemType: 'FIELD' | 'DOCUMENT', itemKey: string): string | null {
@@ -402,7 +444,7 @@ export class CompanyOnboardingComponent implements OnInit {
   }
 
   resubmitRejectedCompany(): void {
-    if (!this.currentCompany || !this.canResubmitRejectedCompany || this.isSaving) {
+    if (!this.currentCompany || !this.canSubmitReviewResubmission || this.isSaving) {
       return;
     }
 
@@ -443,6 +485,11 @@ export class CompanyOnboardingComponent implements OnInit {
 
   saveRejectedDraft(): void {
     if (!this.currentCompany || !this.isChangesRequestedCompany || this.isSavingRejectedDraft) {
+      return;
+    }
+
+    if (!this.canSaveRejectedDraft) {
+      this.uiToastService.error('No hay cambios nuevos para guardar en los campos observados.');
       return;
     }
 
@@ -661,15 +708,72 @@ export class CompanyOnboardingComponent implements OnInit {
       return;
     }
 
+    this.isReviewItemsLoading = true;
     this.companyService.listCompanyProfileReviewItems().subscribe({
       next: items => {
         this.reviewItems = items;
+        this.isReviewItemsLoading = false;
       },
       error: error => {
         this.reviewItems = [];
+        this.isReviewItemsLoading = false;
         this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos cargar los items de revision.'));
       }
     });
+  }
+
+  private mapReviewItemLabel(item: CompanyReviewItem): string {
+    if (item.itemType === 'FIELD') {
+      switch (item.itemKey) {
+        case 'companyName':
+          return 'Nombre de la empresa';
+        case 'domain':
+          return 'Dominio empresarial';
+        case 'nit':
+          return 'NIT';
+        case 'contactEmail':
+          return 'Correo de contacto';
+        default:
+          return item.itemKey;
+      }
+    }
+
+    switch (item.itemKey) {
+      case 'LEGAL_CERTIFICATE':
+        return 'Certificado legal';
+      case 'TAX_DOCUMENT':
+        return 'Documento tributario';
+      default:
+        return item.itemKey;
+    }
+  }
+
+  private hasRejectedFieldValueChanged(fieldKey: string, currentValue: string | null | undefined, nextValue: string | null | undefined, normalizeAsDomainOrEmail = false): boolean {
+    if (!this.isRejectedField(fieldKey)) {
+      return false;
+    }
+
+    const current = normalizeAsDomainOrEmail
+      ? this.normalizeComparableValue(currentValue)
+      : this.trimComparableValue(currentValue);
+    const next = normalizeAsDomainOrEmail
+      ? this.normalizeComparableValue(nextValue)
+      : this.trimComparableValue(nextValue);
+
+    return current !== next;
+  }
+
+  private trimComparableValue(value: string | null | undefined): string | null {
+    const trimmed = value?.trim();
+    return trimmed ? trimmed : null;
+  }
+
+  private normalizeComparableValue(value: string | null | undefined): string | null {
+    const trimmed = value?.trim();
+    if (!trimmed) {
+      return null;
+    }
+    return this.normalizeDomain(trimmed);
   }
 
   private sortAllowedEmails(items: CompanyAllowedEmail[]): CompanyAllowedEmail[] {
