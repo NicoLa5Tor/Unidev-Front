@@ -63,6 +63,19 @@ export class ProjectDetailDialogComponent {
     return this.project.statusCode;
   }
 
+  get quoteStatusLabel(): string {
+    if (!this.project) {
+      return 'Sin cotizacion';
+    }
+    if (this.project.quote?.available) {
+      return 'Rango listo';
+    }
+    if (this.project.estimationStatus === 'PENDING') {
+      return 'Cotizando';
+    }
+    return 'No disponible';
+  }
+
   close(): void {
     this.dialogRef.close(this.project);
   }
@@ -127,6 +140,32 @@ export class ProjectDetailDialogComponent {
     }
 
     return 'app-status-success';
+  }
+
+  quoteStatusTone(project: ProjectDetail | null): string {
+    if (!project) {
+      return 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)]';
+    }
+    if (project.estimationStatus === 'FAILED' || project.requirementsStatus === 'FAILED') {
+      return 'app-status-danger';
+    }
+    if (project.quote?.available) {
+      return 'app-status-success';
+    }
+    return 'app-status-warning';
+  }
+
+  formatMoney(amount: number | null | undefined, currency: string | null | undefined): string {
+    if (amount == null || !Number.isFinite(amount)) {
+      return 'Pendiente';
+    }
+
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: currency || 'COP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    }).format(amount);
   }
 
   private loadProject(): void {

@@ -41,8 +41,13 @@
           </p>
         </div>
 
-        <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--muted)]">
-          <strong class="text-[var(--text)]">Tipo:</strong> {{ currentProject.developmentTypeLabel || 'Sin tipo' }}
+        <div class="grid gap-3 md:grid-cols-2">
+          <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--muted)]">
+            <strong class="text-[var(--text)]">Tipo:</strong> {{ currentProject.developmentTypeLabel || 'Sin tipo' }}
+          </div>
+          <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--muted)]">
+            <strong class="text-[var(--text)]">Escenarios:</strong> {{ currentProject.levelEstimations.length || 0 }}
+          </div>
         </div>
       </div>
 
@@ -106,24 +111,117 @@
       </section>
 
       <section class="rounded-[28px] border border-[color:var(--panel-border)] bg-black/10 p-5">
-        <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-1)]">Resumen ejecutivo</p>
-        <h4 class="mt-2 text-lg font-semibold text-[var(--text)]">Lectura rapida</h4>
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-1)]">Cotizacion estimada</p>
+            <h4 class="mt-2 text-lg font-semibold text-[var(--text)]">Rango comercial</h4>
+          </div>
+          <div class="rounded-full border px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em]" [ngClass]="quoteStatusTone(currentProject)">
+            {{ quoteStatusLabel }}
+          </div>
+        </div>
         <div class="mt-4 space-y-3">
           <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
-            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Presupuesto</p>
-            <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ currentProject.budgetAmount ?? 'Sin presupuesto' }}</p>
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Tarifa base</p>
+            <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ formatMoney(currentProject.quote.hourlyRate, currentProject.quote.currency) }}</p>
           </div>
           <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
-            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Publicado</p>
-            <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ currentProject.publishedAt || 'Aun no publicado' }}</p>
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Horas base</p>
+            <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ currentProject.quote.baseHours ?? currentProject.totalProjectHours ?? 'Pendiente' }}</p>
           </div>
           <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
-            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Estado final</p>
-            <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ currentProject.statusCode }}</p>
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Precio minimo</p>
+            <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ formatMoney(currentProject.quote.minAmount, currentProject.quote.currency) }}</p>
           </div>
+          <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Precio maximo</p>
+            <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ formatMoney(currentProject.quote.maxAmount, currentProject.quote.currency) }}</p>
+          </div>
+        </div>
+
+        <div class="mt-4 rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4 text-sm text-[var(--muted)]">
+          <p>
+            {{
+              currentProject.quote.available
+                ? ('Rango principal calculado con ' + (currentProject.quote.baseHours ?? currentProject.totalProjectHours ?? 0) + ' horas y una apertura fija del ' + (currentProject.quote.rangePercentage ?? 20) + '%.')
+                : currentProject.quote.error
+                  ? currentProject.quote.error
+                  : currentProject.estimationStatus === 'PENDING'
+                    ? 'La cotizacion aparecera cuando la estimacion termine.'
+                    : 'Todavia no hay una cotizacion disponible para este proyecto.'
+            }}
+          </p>
         </div>
       </section>
     </div>
+
+    <section class="rounded-[28px] border border-[color:var(--panel-border)] bg-black/10 p-5">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-3)]">Escenarios por nivel</p>
+          <h4 class="mt-2 text-lg font-semibold text-[var(--text)]">Comparativo de tiempos y rango</h4>
+          <p class="mt-2 text-sm leading-6 text-[var(--muted)]">
+            El agente compara cada nivel activo asumiendo apoyo de IA por defecto. Esto te deja ver cuánto cambia el tiempo y el rango comercial por nivel.
+          </p>
+        </div>
+
+        <div class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel)] px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+          {{ currentProject.levelEstimations.length }} escenarios
+        </div>
+      </div>
+
+      <div *ngIf="!currentProject.levelEstimations.length" class="mt-5 rounded-[20px] border border-dashed border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-5 text-sm leading-6 text-[var(--muted)]">
+        Todavia no hay escenarios comparativos por nivel para este proyecto.
+      </div>
+
+      <div *ngIf="currentProject.levelEstimations.length" class="mt-5 grid gap-4 xl:grid-cols-3">
+        <article *ngFor="let levelEstimation of currentProject.levelEstimations" class="rounded-[24px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-4">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <p class="font-tech text-xs uppercase tracking-[0.18em] text-[var(--accent-1)]">{{ levelEstimation.levelCode }}</p>
+              <h5 class="mt-2 text-lg font-semibold text-[var(--text)]">{{ levelEstimation.levelLabel }}</h5>
+            </div>
+            <div
+              class="rounded-full border px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em]"
+              [ngClass]="levelEstimation.levelCode === 'JUNIOR' ? 'app-status-info' : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)]'"
+            >
+              {{ levelEstimation.levelCode === 'JUNIOR' ? 'Baseline' : 'Escenario' }}
+            </div>
+          </div>
+
+          <div class="mt-4 grid gap-3 sm:grid-cols-2">
+            <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3">
+              <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Complejidad</p>
+              <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ levelEstimation.generalComplexity || 'Pendiente' }}</p>
+            </div>
+            <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3">
+              <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Horas</p>
+              <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ levelEstimation.totalProjectHours ?? 'Pendiente' }}</p>
+            </div>
+            <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3">
+              <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Tarifa</p>
+              <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ formatMoney(levelEstimation.hourlyRate, levelEstimation.currency) }}</p>
+            </div>
+            <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3">
+              <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Base</p>
+              <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ formatMoney(levelEstimation.baseAmount, levelEstimation.currency) }}</p>
+            </div>
+            <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3">
+              <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Minimo</p>
+              <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ formatMoney(levelEstimation.minAmount, levelEstimation.currency) }}</p>
+            </div>
+            <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3">
+              <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Maximo</p>
+              <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ formatMoney(levelEstimation.maxAmount, levelEstimation.currency) }}</p>
+            </div>
+          </div>
+
+          <div class="mt-4 rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3 text-sm leading-6 text-[var(--muted)]">
+            {{ levelEstimation.note || 'Sin nota adicional para este escenario.' }}
+          </div>
+        </article>
+      </div>
+    </section>
 
     <div *ngIf="currentProject.requirementsError || currentProject.estimationError" class="grid gap-3 lg:grid-cols-2">
       <div *ngIf="currentProject.requirementsError" class="app-status-danger rounded-[20px] border p-4 text-sm">

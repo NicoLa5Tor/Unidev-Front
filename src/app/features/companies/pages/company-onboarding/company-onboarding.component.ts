@@ -1117,6 +1117,7 @@ export class CompanyOnboardingComponent implements OnInit {
       detectedRisks: [],
       assumptions: [],
       teamWarnings: [],
+      levelEstimations: [],
       requirements: [],
       modules: []
     };
@@ -1144,7 +1145,8 @@ export class CompanyOnboardingComponent implements OnInit {
       requirementsStatus: project.requirementsStatus,
       estimationStatus: project.estimationStatus,
       requirementsError: project.requirementsError,
-      estimationError: project.estimationError
+      estimationError: project.estimationError,
+      quote: project.quote
     };
   }
 

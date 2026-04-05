@@ -1,0 +1,393 @@
+<app-dashboard-shell
+  eyebrow="Consola administrativa"
+  title="Pricing de proyectos"
+  avatarLabel="PR"
+  [activeTab]="activeTab"
+  [navItems]="navItems"
+  (tabChange)="setActiveTab($event)"
+>
+  <button
+    dashboard-header-actions
+    class="rounded-full border border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/15 px-3 py-1 font-tech text-[var(--accent-1)]"
+    (click)="openCreateEditor()"
+  >
+    Nueva tarifa
+  </button>
+
+  <button
+    dashboard-header-actions
+    class="rounded-full border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/15 px-3 py-1 font-tech text-[var(--accent-2)]"
+    (click)="openCreateLevelEditor()"
+  >
+    Nuevo nivel
+  </button>
+
+  <a
+    dashboard-header-actions
+    routerLink="/admin/users"
+    class="rounded-full border border-[color:var(--accent-3)]/35 bg-[var(--accent-3)]/10 px-3 py-1 font-tech text-[var(--accent-3)]"
+  >
+    Usuarios
+  </a>
+
+  <a
+    dashboard-header-actions-mobile
+    class="rounded-full border border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/15 px-3 py-1 font-tech text-[var(--accent-1)]"
+    (click)="openCreateEditor()"
+  >
+    Tarifa
+  </a>
+
+  <a
+    dashboard-header-actions-mobile
+    class="rounded-full border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/15 px-3 py-1 font-tech text-[var(--accent-2)]"
+    (click)="openCreateLevelEditor()"
+  >
+    Nivel
+  </a>
+
+  <section *ngIf="activeTab === 'rates'" class="space-y-6">
+    <div class="grid gap-4 md:grid-cols-3">
+      <article class="rounded-3xl border border-[color:var(--accent-3)]/20 bg-[var(--panel)] p-5 shadow-[var(--shadow)]">
+        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-3)]">Tarifas</p>
+        <h2 class="mt-3 text-4xl font-cyber text-[var(--text)]">{{ rates.length }}</h2>
+        <p class="mt-2 text-sm text-[var(--muted)]">Historico de tarifas configuradas por nivel.</p>
+      </article>
+
+      <article class="rounded-3xl border border-[color:var(--accent-4)]/20 bg-[var(--panel)] p-5 shadow-[var(--shadow)]">
+        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-4)]">Activas</p>
+        <h2 class="mt-3 text-4xl font-cyber text-[var(--text)]">{{ activeRatesCount }}</h2>
+        <p class="mt-2 text-sm text-[var(--muted)]">Debe haber maximo una activa por cada nivel.</p>
+      </article>
+
+      <article class="rounded-3xl border border-[color:var(--accent-1)]/20 bg-[var(--panel)] p-5 shadow-[var(--shadow)]">
+        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-1)]">Monedas</p>
+        <h2 class="mt-3 text-4xl font-cyber text-[var(--text)]">{{ currenciesCount }}</h2>
+        <p class="mt-2 text-sm text-[var(--muted)]">Monedas registradas en el historial de tarifas.</p>
+      </article>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+      <div class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[var(--shadow)]">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-1)]">Biblioteca</p>
+            <h2 class="mt-2 text-2xl font-cyber text-[var(--text)]">Tarifas por nivel</h2>
+          </div>
+          <button
+            class="rounded-full border border-[color:var(--accent-3)]/35 bg-[var(--accent-3)]/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-[var(--accent-3)]"
+            (click)="refreshRates()"
+          >
+            Refrescar
+          </button>
+        </div>
+
+        <div *ngIf="isLoadingRates" class="mt-6 rounded-2xl border border-[color:var(--panel-border)] bg-black/10 p-5 text-sm text-[var(--muted)]">
+          Cargando tarifas...
+        </div>
+
+        <div *ngIf="!isLoadingRates" class="mt-6 space-y-3">
+          <button
+            *ngFor="let rate of rates"
+            class="w-full rounded-2xl border p-4 text-left transition hover:scale-[1.01]"
+            [ngClass]="selectedRate?.id === rate.id
+              ? 'border-[color:var(--accent-1)]/40 bg-[var(--accent-1)]/10'
+              : 'border-[color:var(--panel-border)] bg-black/10 hover:border-[color:var(--accent-3)]/30'"
+            (click)="selectRate(rate)"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 class="text-lg font-semibold text-[var(--text)]">{{ rate.levelDisplayName }}</h3>
+                <p class="text-sm text-[var(--muted)]">{{ rate.levelCode }} · {{ rate.currency }}</p>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span class="rounded-full border px-3 py-1 text-xs uppercase tracking-[0.2em]" [ngClass]="rate.active ? 'app-status-success' : 'app-status-danger'">
+                  {{ rate.active ? 'Activa' : 'Inactiva' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="mt-4 grid gap-3 md:grid-cols-2">
+              <div class="rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3">
+                <p class="text-[11px] uppercase tracking-[0.2em] text-[var(--muted)]">Tarifa por hora</p>
+                <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ formatMoney(rate.hourlyRate, rate.currency) }}</p>
+              </div>
+              <div class="rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3">
+                <p class="text-[11px] uppercase tracking-[0.2em] text-[var(--muted)]">Vigencia</p>
+                <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ rate.effectiveFrom | date:'dd/MM/yyyy HH:mm' }}</p>
+              </div>
+            </div>
+          </button>
+
+          <div *ngIf="!rates.length" class="rounded-2xl border border-dashed border-[color:var(--panel-border)] p-5 text-sm text-[var(--muted)]">
+            No hay tarifas registradas.
+          </div>
+        </div>
+      </div>
+
+      <aside class="rounded-3xl border border-[color:var(--accent-3)]/20 bg-[var(--panel)] p-6 shadow-[var(--shadow)]">
+        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-3)]">Detalle</p>
+        <ng-container *ngIf="selectedRate; else emptyRateSelection">
+          <h2 class="mt-2 text-2xl font-cyber text-[var(--text)]">{{ selectedRate.levelDisplayName }}</h2>
+          <div class="mt-5 space-y-3 text-sm text-[var(--muted)]">
+            <p><span class="text-[var(--text)]">Nivel:</span> {{ selectedRate.levelCode }}</p>
+            <p><span class="text-[var(--text)]">Moneda:</span> {{ selectedRate.currency }}</p>
+            <p><span class="text-[var(--text)]">Tarifa:</span> {{ formatMoney(selectedRate.hourlyRate, selectedRate.currency) }}</p>
+            <p><span class="text-[var(--text)]">Vigencia:</span> {{ selectedRate.effectiveFrom | date:'dd/MM/yyyy HH:mm' }}</p>
+            <p><span class="text-[var(--text)]">Estado:</span> {{ selectedRate.active ? 'Activa' : 'Inactiva' }}</p>
+            <p><span class="text-[var(--text)]">Nivel habilitado:</span> {{ selectedRate.levelActive ? 'Si' : 'No' }}</p>
+          </div>
+
+          <div class="mt-6 flex flex-wrap gap-3">
+            <button
+              class="rounded-xl border border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/15 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[var(--accent-1)]"
+              (click)="editRate(selectedRate)"
+            >
+              Editar tarifa
+            </button>
+          </div>
+        </ng-container>
+
+        <ng-template #emptyRateSelection>
+          <div class="mt-6 rounded-2xl border border-dashed border-[color:var(--panel-border)] p-5 text-sm text-[var(--muted)]">
+            Selecciona una tarifa para inspeccionarla o editarla.
+          </div>
+        </ng-template>
+      </aside>
+    </div>
+  </section>
+
+  <section *ngIf="activeTab === 'levels'" class="space-y-6">
+    <div class="grid gap-4 md:grid-cols-3">
+      <article class="rounded-3xl border border-[color:var(--accent-2)]/20 bg-[var(--panel)] p-5 shadow-[var(--shadow)]">
+        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-2)]">Niveles</p>
+        <h2 class="mt-3 text-4xl font-cyber text-[var(--text)]">{{ levels.length }}</h2>
+        <p class="mt-2 text-sm text-[var(--muted)]">Catalogo editable de seniorities para pricing.</p>
+      </article>
+
+      <article class="rounded-3xl border border-[color:var(--accent-4)]/20 bg-[var(--panel)] p-5 shadow-[var(--shadow)]">
+        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-4)]">Activos</p>
+        <h2 class="mt-3 text-4xl font-cyber text-[var(--text)]">{{ activeLevelsCount }}</h2>
+        <p class="mt-2 text-sm text-[var(--muted)]">Solo los niveles activos deben usarse para nuevas tarifas.</p>
+      </article>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+      <div class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[var(--shadow)]">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-2)]">Catalogo</p>
+            <h2 class="mt-2 text-2xl font-cyber text-[var(--text)]">Niveles disponibles</h2>
+          </div>
+          <button
+            class="rounded-full border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-[var(--accent-2)]"
+            (click)="refreshLevels()"
+          >
+            Refrescar
+          </button>
+        </div>
+
+        <div *ngIf="isLoadingLevels" class="mt-6 rounded-2xl border border-[color:var(--panel-border)] bg-black/10 p-5 text-sm text-[var(--muted)]">
+          Cargando niveles...
+        </div>
+
+        <div *ngIf="!isLoadingLevels" class="mt-6 space-y-3">
+          <button
+            *ngFor="let level of levels"
+            class="w-full rounded-2xl border p-4 text-left transition hover:scale-[1.01]"
+            [ngClass]="selectedLevel?.id === level.id
+              ? 'border-[color:var(--accent-2)]/40 bg-[var(--accent-2)]/10'
+              : 'border-[color:var(--panel-border)] bg-black/10 hover:border-[color:var(--accent-2)]/30'"
+            (click)="selectLevel(level)"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 class="text-lg font-semibold text-[var(--text)]">{{ level.displayName }}</h3>
+                <p class="text-sm text-[var(--muted)]">{{ level.code }}</p>
+              </div>
+              <span class="rounded-full border px-3 py-1 text-xs uppercase tracking-[0.2em]" [ngClass]="level.active ? 'app-status-success' : 'app-status-danger'">
+                {{ level.active ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
+            <p class="mt-3 text-sm text-[var(--muted)]">{{ level.description || 'Sin descripcion.' }}</p>
+          </button>
+
+          <div *ngIf="!levels.length" class="rounded-2xl border border-dashed border-[color:var(--panel-border)] p-5 text-sm text-[var(--muted)]">
+            No hay niveles registrados.
+          </div>
+        </div>
+      </div>
+
+      <aside class="rounded-3xl border border-[color:var(--accent-2)]/20 bg-[var(--panel)] p-6 shadow-[var(--shadow)]">
+        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-2)]">Detalle</p>
+        <ng-container *ngIf="selectedLevel; else emptyLevelSelection">
+          <h2 class="mt-2 text-2xl font-cyber text-[var(--text)]">{{ selectedLevel.displayName }}</h2>
+          <div class="mt-5 space-y-3 text-sm text-[var(--muted)]">
+            <p><span class="text-[var(--text)]">Codigo:</span> {{ selectedLevel.code }}</p>
+            <p><span class="text-[var(--text)]">Estado:</span> {{ selectedLevel.active ? 'Activo' : 'Inactivo' }}</p>
+            <p><span class="text-[var(--text)]">Descripcion:</span> {{ selectedLevel.description || 'Sin descripcion' }}</p>
+          </div>
+
+          <div class="mt-6 flex flex-wrap gap-3">
+            <button
+              class="rounded-xl border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/15 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[var(--accent-2)]"
+              (click)="editLevel(selectedLevel)"
+            >
+              Editar nivel
+            </button>
+          </div>
+        </ng-container>
+
+        <ng-template #emptyLevelSelection>
+          <div class="mt-6 rounded-2xl border border-dashed border-[color:var(--panel-border)] p-5 text-sm text-[var(--muted)]">
+            Selecciona un nivel para inspeccionarlo o editarlo.
+          </div>
+        </ng-template>
+      </aside>
+    </div>
+  </section>
+
+  <section *ngIf="activeTab === 'editor'" class="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+    <form class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[var(--shadow)]" (ngSubmit)="saveRate()">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-1)]">Editor</p>
+          <h2 class="mt-2 text-2xl font-cyber text-[var(--text)]">
+            {{ editorMode === 'edit' ? 'Editar tarifa por nivel' : 'Crear tarifa por nivel' }}
+          </h2>
+        </div>
+        <button
+          type="button"
+          class="rounded-full border border-[color:var(--panel-border)] bg-black/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-[var(--muted)]"
+          (click)="openCreateEditor()"
+        >
+          Limpiar
+        </button>
+      </div>
+
+      <div class="mt-6 grid gap-4 md:grid-cols-2">
+        <label class="space-y-2 text-sm text-[var(--muted)]">
+          <span>Nivel</span>
+          <select [(ngModel)]="editor.levelId" name="levelId" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none">
+            <option [ngValue]="null">Selecciona un nivel</option>
+            <option *ngFor="let level of availableLevelsForRate" [ngValue]="level.id">{{ level.displayName }} · {{ level.code }}</option>
+          </select>
+        </label>
+
+        <label class="space-y-2 text-sm text-[var(--muted)]">
+          <span>Moneda</span>
+          <input [(ngModel)]="editor.currency" name="currency" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none" />
+        </label>
+
+        <label class="space-y-2 text-sm text-[var(--muted)]">
+          <span>Tarifa por hora</span>
+          <input [(ngModel)]="editor.hourlyRate" name="hourlyRate" type="number" min="1" step="0.01" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-3)]/60 focus:outline-none" />
+        </label>
+
+        <div class="space-y-2 text-sm text-[var(--muted)]">
+          <span>Vigente desde</span>
+          <div class="rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)]">
+            {{ editorEffectiveFromLabel }}
+          </div>
+          <p class="text-xs text-[var(--muted)]">
+            Esta fecha la asigna el sistema cuando la tarifa queda registrada.
+          </p>
+        </div>
+
+        <label class="inline-flex items-center gap-3 text-sm text-[var(--muted)] md:col-span-2">
+          <input
+            type="checkbox"
+            [(ngModel)]="editor.active"
+            name="active"
+            class="h-4 w-4 rounded border-[color:var(--panel-border)] bg-black/10 text-[var(--accent-3)]"
+          />
+          <span>Dejar esta tarifa activa para el nivel seleccionado</span>
+        </label>
+      </div>
+
+      <div class="mt-6 flex flex-wrap gap-3">
+        <button
+          type="submit"
+          class="rounded-xl border border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/15 px-5 py-3 text-xs uppercase tracking-[0.2em] text-[var(--accent-1)]"
+          [disabled]="isSaving"
+        >
+          {{ isSaving ? 'Guardando...' : editorMode === 'edit' ? 'Actualizar tarifa' : 'Crear tarifa' }}
+        </button>
+      </div>
+    </form>
+
+    <aside class="rounded-3xl border border-[color:var(--accent-1)]/20 bg-[var(--panel)] p-6 shadow-[var(--shadow)]">
+      <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-1)]">Ayuda</p>
+      <div class="mt-4 space-y-4 text-sm text-[var(--muted)]">
+        <p>Cada tarifa pertenece obligatoriamente a un nivel de pricing.</p>
+        <p>El sistema apaga automaticamente la tarifa activa anterior solo dentro de ese mismo nivel.</p>
+        <p>La cotizacion actual sigue tomando la tarifa activa de <span class="text-[var(--text)]">JUNIOR</span> como base, porque la estimacion v1 sigue siendo de horas junior.</p>
+      </div>
+    </aside>
+  </section>
+
+  <section *ngIf="activeTab === 'level-editor'" class="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+    <form class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[var(--shadow)]" (ngSubmit)="saveLevel()">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-2)]">Editor</p>
+          <h2 class="mt-2 text-2xl font-cyber text-[var(--text)]">
+            {{ levelEditorMode === 'edit' ? 'Editar nivel' : 'Crear nivel' }}
+          </h2>
+        </div>
+        <button
+          type="button"
+          class="rounded-full border border-[color:var(--panel-border)] bg-black/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-[var(--muted)]"
+          (click)="openCreateLevelEditor()"
+        >
+          Limpiar
+        </button>
+      </div>
+
+      <div class="mt-6 grid gap-4 md:grid-cols-2">
+        <label class="space-y-2 text-sm text-[var(--muted)]">
+          <span>Codigo</span>
+          <input [(ngModel)]="levelEditor.code" name="levelCode" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-2)]/60 focus:outline-none" />
+        </label>
+
+        <label class="space-y-2 text-sm text-[var(--muted)]">
+          <span>Nombre visible</span>
+          <input [(ngModel)]="levelEditor.displayName" name="levelDisplayName" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-2)]/60 focus:outline-none" />
+        </label>
+
+        <label class="space-y-2 text-sm text-[var(--muted)] md:col-span-2">
+          <span>Descripcion</span>
+          <textarea [(ngModel)]="levelEditor.description" name="levelDescription" rows="4" class="w-full rounded-3xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-sm text-[var(--text)] focus:border-[color:var(--accent-2)]/60 focus:outline-none"></textarea>
+        </label>
+
+        <label class="inline-flex items-center gap-3 text-sm text-[var(--muted)] md:col-span-2">
+          <input
+            type="checkbox"
+            [(ngModel)]="levelEditor.active"
+            name="levelActive"
+            class="h-4 w-4 rounded border-[color:var(--panel-border)] bg-black/10 text-[var(--accent-2)]"
+          />
+          <span>Habilitar este nivel para nuevas tarifas</span>
+        </label>
+      </div>
+
+      <div class="mt-6 flex flex-wrap gap-3">
+        <button
+          type="submit"
+          class="rounded-xl border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/15 px-5 py-3 text-xs uppercase tracking-[0.2em] text-[var(--accent-2)]"
+          [disabled]="isSavingLevel"
+        >
+          {{ isSavingLevel ? 'Guardando...' : levelEditorMode === 'edit' ? 'Actualizar nivel' : 'Crear nivel' }}
+        </button>
+      </div>
+    </form>
+
+    <aside class="rounded-3xl border border-[color:var(--accent-2)]/20 bg-[var(--panel)] p-6 shadow-[var(--shadow)]">
+      <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-2)]">Ayuda</p>
+      <div class="mt-4 space-y-4 text-sm text-[var(--muted)]">
+        <p>Los niveles son el catalogo base del pricing. Por defecto arrancan en `JUNIOR`, `MIDDLE` y `SENIOR`.</p>
+        <p>Las tarifas ya no inventan su propio tipo: siempre cuelgan de uno de estos niveles.</p>
+      </div>
+    </aside>
+  </section>
+</app-dashboard-shell>

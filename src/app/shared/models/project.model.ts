@@ -13,6 +13,14 @@ export interface CreateProjectDto {
   budgetAmount?: number | null;
 }
 
+export interface ProjectPricingLevelOption {
+  id: number;
+  code: string;
+  displayName: string;
+  description: string | null;
+  active: boolean;
+}
+
 export interface ProjectDevelopmentTypeOption {
   id: number;
   code: string;
@@ -30,6 +38,35 @@ export interface UpdateProjectRequirementDto {
   hasExternalConnection: boolean;
   requiresVisualScreen: boolean;
   devNumber: number;
+}
+
+export interface ProjectQuote {
+  available: boolean;
+  currency: string | null;
+  baseHours: number | null;
+  hourlyRate: number | null;
+  baseAmount: number | null;
+  minAmount: number | null;
+  maxAmount: number | null;
+  rangePercentage: number | null;
+  calculatedAt: string | null;
+  error: string | null;
+}
+
+export interface ProjectLevelEstimation {
+  levelId: number;
+  levelCode: string;
+  levelLabel: string;
+  generalComplexity: string | null;
+  totalProjectHours: number | null;
+  currency: string | null;
+  hourlyRate: number | null;
+  baseAmount: number | null;
+  minAmount: number | null;
+  maxAmount: number | null;
+  rangePercentage: number | null;
+  calculatedAt: string | null;
+  note: string | null;
 }
 
 export interface Project {
@@ -54,6 +91,7 @@ export interface Project {
   estimationStatus: string;
   requirementsError: string | null;
   estimationError: string | null;
+  quote: ProjectQuote;
 }
 
 export interface ProjectRequirement {
@@ -87,6 +125,7 @@ export interface ProjectDetail extends Project {
   detectedRisks: string[];
   assumptions: string[];
   teamWarnings: string[];
+  levelEstimations: ProjectLevelEstimation[];
   requirements: ProjectRequirement[];
   modules: ProjectModule[];
 }

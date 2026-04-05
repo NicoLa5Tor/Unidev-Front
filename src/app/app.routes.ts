@@ -86,6 +86,19 @@ export const routes: Routes = [
     }
   },
   {
+    path: 'admin/project-pricing',
+    title: 'Pricing de proyectos | UniDev',
+    loadComponent: () =>
+      import('./features/admin/pages/admin-project-pricing/admin-project-pricing.component').then(
+        m => m.AdminProjectPricingComponent
+      ),
+    canActivate: [authGuard, roleGuard],
+    data: {
+      roles: ['ADMINISTRADORES'],
+      description: 'Administra las tarifas junior y la base comercial de cotizacion para proyectos.'
+    }
+  },
+  {
     path: 'companies',
     title: 'Empresas | UniDev',
     loadComponent: () =>
