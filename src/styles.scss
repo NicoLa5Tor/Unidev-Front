@@ -19,6 +19,7 @@
   --tracking-label: 0.08em;
   --bg: #0a0a0a;
   --panel: rgba(26, 26, 26, 0.86);
+  --panel-2: rgba(14, 18, 30, 0.88);
   --panel-border: rgba(168, 85, 247, 0.25);
   --text: #ffffff;
   --muted: #cbd5f5;
@@ -31,11 +32,24 @@
   --scroll-track: #1a1a1a;
   --scroll-thumb: #a855f7;
   --scroll-thumb-hover: #9333ea;
+  --status-success-text: #d1fae5;
+  --status-success-bg: rgba(16, 185, 129, 0.12);
+  --status-success-border: rgba(16, 185, 129, 0.35);
+  --status-warning-text: #fde68a;
+  --status-warning-bg: rgba(245, 158, 11, 0.12);
+  --status-warning-border: rgba(245, 158, 11, 0.35);
+  --status-danger-text: #fecdd3;
+  --status-danger-bg: rgba(244, 63, 94, 0.12);
+  --status-danger-border: rgba(244, 63, 94, 0.35);
+  --status-info-text: #bae6fd;
+  --status-info-bg: rgba(56, 189, 248, 0.12);
+  --status-info-border: rgba(56, 189, 248, 0.35);
 }
 
 body.theme-cyber {
   --bg: #0a0a0a;
   --panel: rgba(26, 26, 26, 0.86);
+  --panel-2: rgba(14, 18, 30, 0.88);
   --panel-border: rgba(168, 85, 247, 0.25);
   --text: #ffffff;
   --muted: #cbd5f5;
@@ -48,11 +62,24 @@ body.theme-cyber {
   --scroll-track: #1a1a1a;
   --scroll-thumb: #a855f7;
   --scroll-thumb-hover: #9333ea;
+  --status-success-text: #d1fae5;
+  --status-success-bg: rgba(16, 185, 129, 0.12);
+  --status-success-border: rgba(16, 185, 129, 0.35);
+  --status-warning-text: #fde68a;
+  --status-warning-bg: rgba(245, 158, 11, 0.12);
+  --status-warning-border: rgba(245, 158, 11, 0.35);
+  --status-danger-text: #fecdd3;
+  --status-danger-bg: rgba(244, 63, 94, 0.12);
+  --status-danger-border: rgba(244, 63, 94, 0.35);
+  --status-info-text: #bae6fd;
+  --status-info-bg: rgba(56, 189, 248, 0.12);
+  --status-info-border: rgba(56, 189, 248, 0.35);
 }
 
 body.theme-light {
   --bg: #f8fafc;
   --panel: rgba(255, 255, 255, 0.92);
+  --panel-2: rgba(241, 245, 249, 0.96);
   --panel-border: rgba(59, 130, 246, 0.2);
   --text: #0f172a;
   --muted: #475569;
@@ -65,11 +92,24 @@ body.theme-light {
   --scroll-track: #e2e8f0;
   --scroll-thumb: #94a3b8;
   --scroll-thumb-hover: #64748b;
+  --status-success-text: #166534;
+  --status-success-bg: rgba(34, 197, 94, 0.12);
+  --status-success-border: rgba(34, 197, 94, 0.3);
+  --status-warning-text: #92400e;
+  --status-warning-bg: rgba(245, 158, 11, 0.14);
+  --status-warning-border: rgba(245, 158, 11, 0.3);
+  --status-danger-text: #b91c1c;
+  --status-danger-bg: rgba(244, 63, 94, 0.12);
+  --status-danger-border: rgba(244, 63, 94, 0.28);
+  --status-info-text: #0f766e;
+  --status-info-bg: rgba(6, 182, 212, 0.12);
+  --status-info-border: rgba(6, 182, 212, 0.28);
 }
 
 body.theme-abyss {
   --bg: #050b1d;
   --panel: rgba(10, 15, 30, 0.9);
+  --panel-2: rgba(7, 16, 36, 0.92);
   --panel-border: rgba(56, 189, 248, 0.25);
   --text: #e2e8f0;
   --muted: #94a3b8;
@@ -82,6 +122,18 @@ body.theme-abyss {
   --scroll-track: #0f172a;
   --scroll-thumb: #38bdf8;
   --scroll-thumb-hover: #0ea5e9;
+  --status-success-text: #d1fae5;
+  --status-success-bg: rgba(16, 185, 129, 0.12);
+  --status-success-border: rgba(16, 185, 129, 0.35);
+  --status-warning-text: #fde68a;
+  --status-warning-bg: rgba(245, 158, 11, 0.12);
+  --status-warning-border: rgba(245, 158, 11, 0.35);
+  --status-danger-text: #fecdd3;
+  --status-danger-bg: rgba(244, 63, 94, 0.12);
+  --status-danger-border: rgba(244, 63, 94, 0.35);
+  --status-info-text: #bae6fd;
+  --status-info-bg: rgba(56, 189, 248, 0.12);
+  --status-info-border: rgba(56, 189, 248, 0.35);
 }
 
 /* Custom scrollbar for dark theme */
@@ -140,6 +192,46 @@ body.preloader-active {
 body.preloader-active .public-header-shell {
   opacity: 0;
   pointer-events: none;
+}
+
+.app-shell-dialog-panel .mat-mdc-dialog-surface,
+.app-shell-dialog-panel .mdc-dialog__surface,
+.project-detail-dialog-panel .mat-mdc-dialog-surface,
+.project-detail-dialog-panel .mdc-dialog__surface {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.cdk-overlay-backdrop.app-shell-dialog-backdrop,
+.cdk-overlay-backdrop.project-detail-dialog-backdrop {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(12px);
+}
+
+.app-status-success {
+  border-color: var(--status-success-border) !important;
+  background: var(--status-success-bg) !important;
+  color: var(--status-success-text) !important;
+}
+
+.app-status-warning {
+  border-color: var(--status-warning-border) !important;
+  background: var(--status-warning-bg) !important;
+  color: var(--status-warning-text) !important;
+}
+
+.app-status-danger {
+  border-color: var(--status-danger-border) !important;
+  background: var(--status-danger-bg) !important;
+  color: var(--status-danger-text) !important;
+}
+
+.app-status-info {
+  border-color: var(--status-info-border) !important;
+  background: var(--status-info-bg) !important;
+  color: var(--status-info-text) !important;
 }
 
 .btn-theme {

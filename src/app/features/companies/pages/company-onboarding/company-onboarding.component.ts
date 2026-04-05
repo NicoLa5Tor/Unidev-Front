@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -10,14 +11,18 @@ import { DashboardNavItem, DashboardShellComponent } from '../../../../shared/co
 import { UiToastService } from '../../../../shared/services/ui-toast.service';
 import { CompanyService } from '../../services/company.service';
 import { CompanyAccessService } from '../../services/company-access.service';
+import { ProjectService } from '../../services/project.service';
 import { Company, CompanyRegistrationDocument, CompanyReviewItem, CreateCompanyDto, UpdateCompanyProfileDto, UpdateRejectedCompanyDraftDto } from '../../../../shared/models/company.model';
+import { CreateProjectDto, Project, ProjectDetail, ProjectDevelopmentTypeOption } from '../../../../shared/models/project.model';
 import { SessionUser } from '../../../../shared/models/session-user.model';
 import { CompanyAllowedEmail } from '../../../../shared/models/company-access.model';
-import { CompanyFormModel } from './company-onboarding.types';
+import { ProjectDetailDialogComponent } from '../../components/project-detail-dialog/project-detail-dialog.component';
+import { CompanyFormModel, ProjectCreateFormModel } from './company-onboarding.types';
 
-type CompanyTab = 'status' | 'profile' | 'access';
+type CompanyTab = 'status' | 'profile' | 'projects' | 'access';
 type MessageState = { type: 'success' | 'error'; text: string } | null;
 type CreateField = 'companyName' | 'domain' | 'nit' | 'contactEmail';
+type ProjectCreateField = 'name' | 'description' | 'businessObjective' | 'targetUsers' | 'mainModules';
 type RegistrationDocumentType = 'LEGAL_CERTIFICATE' | 'TAX_DOCUMENT';
 
 @Component({
@@ -42,26 +47,36 @@ export class CompanyOnboardingComponent implements OnInit {
   isReviewItemsLoading = false;
   isResubmissionModalOpen = false;
   isSavingRejectedDraft = false;
+  isCreatingProject = false;
+  isProjectsLoading = false;
+  isProjectCreatePanelOpen = false;
   message: MessageState = null;
   createFieldErrors: Partial<Record<CreateField, string>> = {};
+  projectCreateErrors: Partial<Record<ProjectCreateField, string>> = {};
   sessionUser: SessionUser | null = null;
   currentCompany: Company | null = null;
   allowedEmails: CompanyAllowedEmail[] = [];
   registrationDocuments: CompanyRegistrationDocument[] = [];
   reviewItems: CompanyReviewItem[] = [];
+  projects: Project[] = [];
+  projectDevelopmentTypes: ProjectDevelopmentTypeOption[] = [];
+  selectedProject: ProjectDetail | null = null;
   allowedEmailInput = '';
   uploadingDocumentType: RegistrationDocumentType | null = null;
   private hasLoadedAccessData = false;
+  private readonly dialog = inject(MatDialog);
 
   readonly ownerNavItems: DashboardNavItem[] = [
     { id: 'status', label: 'Estado', accent: 'accent-3', mobileBarWidthClass: 'w-20' },
     { id: 'profile', label: 'Perfil', accent: 'accent-1', mobileBarWidthClass: 'w-20' },
+    { id: 'projects', label: 'Proyectos', accent: 'accent-4', mobileBarWidthClass: 'w-24' },
     { id: 'access', label: 'Correos', accent: 'accent-2', mobileBarWidthClass: 'w-20' }
   ];
 
   readonly memberNavItems: DashboardNavItem[] = [
     { id: 'status', label: 'Estado', accent: 'accent-3', mobileBarWidthClass: 'w-20' },
-    { id: 'profile', label: 'Perfil', accent: 'accent-1', mobileBarWidthClass: 'w-20' }
+    { id: 'profile', label: 'Perfil', accent: 'accent-1', mobileBarWidthClass: 'w-20' },
+    { id: 'projects', label: 'Proyectos', accent: 'accent-4', mobileBarWidthClass: 'w-24' }
   ];
 
   readonly form: CompanyFormModel = {
@@ -76,15 +91,31 @@ export class CompanyOnboardingComponent implements OnInit {
     address: ''
   };
 
+  readonly projectForm: ProjectCreateFormModel = {
+    name: '',
+    description: '',
+    businessObjective: '',
+    targetUsers: '',
+    mainModules: '',
+    integrations: '',
+    platforms: '',
+    technicalConstraints: '',
+    deliveryDeadline: '',
+    developmentTypeId: '',
+    budgetAmount: ''
+  };
+
   constructor(
     private readonly companyService: CompanyService,
     private readonly companyAccessService: CompanyAccessService,
+    private readonly projectService: ProjectService,
     private readonly userSessionService: UserSessionService,
     private readonly uiToastService: UiToastService
   ) {}
 
   ngOnInit(): void {
     this.loadViewData();
+    this.loadProjectDevelopmentTypes();
   }
 
   get isCompanyMemberView(): boolean {
@@ -117,6 +148,18 @@ export class CompanyOnboardingComponent implements OnInit {
 
   get hasEditableProfileFields(): boolean {
     return !!this.currentCompany;
+  }
+
+  get canCreateProjects(): boolean {
+    return !!this.currentCompany && this.isApprovedCompany;
+  }
+
+  get isProjectCreateDisabled(): boolean {
+    return !this.canCreateProjects || this.isCreatingProject;
+  }
+
+  get hasProjects(): boolean {
+    return this.projects.length > 0;
   }
 
   get companyDomain(): string {
@@ -161,13 +204,13 @@ export class CompanyOnboardingComponent implements OnInit {
   get companyStatusClass(): string {
     switch (this.currentCompany?.approvalStatus) {
       case 'APPROVED':
-        return 'border-emerald-400/35 bg-emerald-400/12 text-emerald-100';
+        return 'app-status-success';
       case 'REJECTED':
-        return 'border-rose-400/35 bg-rose-400/12 text-rose-100';
+        return 'app-status-danger';
       case 'CHANGES_REQUESTED':
-        return 'border-rose-400/35 bg-rose-400/12 text-rose-100';
+        return 'app-status-danger';
       case 'PENDING':
-        return 'border-amber-400/35 bg-amber-400/12 text-amber-100';
+        return 'app-status-warning';
       default:
         return 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)]';
     }
@@ -187,9 +230,9 @@ export class CompanyOnboardingComponent implements OnInit {
     switch (this.currentCompany?.ownerVerificationStatus) {
       case 'VERIFIED':
       case 'EMAIL_VERIFIED':
-        return 'text-emerald-200';
+        return 'text-[var(--status-success-text)]';
       default:
-        return 'text-amber-200';
+        return 'text-[var(--status-warning-text)]';
     }
   }
 
@@ -385,7 +428,7 @@ export class CompanyOnboardingComponent implements OnInit {
       this.activeTab = 'status';
       return;
     }
-    if (tabId === 'status' || tabId === 'profile' || tabId === 'access') {
+    if (tabId === 'status' || tabId === 'profile' || tabId === 'projects' || tabId === 'access') {
       this.activeTab = tabId;
       this.loadTabDataIfNeeded(tabId);
     }
@@ -471,6 +514,48 @@ export class CompanyOnboardingComponent implements OnInit {
       error: error => {
         this.isUpdatingProfile = false;
         this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos actualizar el perfil de la empresa.'));
+      }
+    });
+  }
+
+  createProject(): void {
+    if (!this.currentCompany || !this.canCreateProjects || this.isCreatingProject) {
+      return;
+    }
+
+    if (!this.validateProjectCreateForm()) {
+      this.uiToastService.error('Completa los campos obligatorios del proyecto.');
+      return;
+    }
+
+    const payload: CreateProjectDto = {
+      companyId: this.currentCompany.id,
+      name: this.projectForm.name.trim(),
+      description: this.projectForm.description.trim(),
+      businessObjective: this.projectForm.businessObjective.trim(),
+      targetUsers: this.projectForm.targetUsers.trim(),
+      mainModules: this.projectForm.mainModules.trim(),
+      integrations: this.toNullable(this.projectForm.integrations),
+      platforms: this.toNullable(this.projectForm.platforms),
+      technicalConstraints: this.toNullable(this.projectForm.technicalConstraints),
+      deliveryDeadline: this.toNullable(this.projectForm.deliveryDeadline),
+      developmentTypeId: this.toNullableNumber(this.projectForm.developmentTypeId),
+      budgetAmount: this.toNullableNumber(this.projectForm.budgetAmount)
+    };
+
+    this.isCreatingProject = true;
+    this.projectService.createProject(payload).subscribe({
+      next: project => {
+        this.isCreatingProject = false;
+        this.resetProjectForm();
+        this.isProjectCreatePanelOpen = false;
+        this.projects = [project, ...this.projects.filter(item => item.id !== project.id)];
+        this.openProject(project.id);
+        this.uiToastService.success(`Proyecto ${project.name} creado. La IA quedo procesando requerimientos y estimacion en segundo plano.`);
+      },
+      error: error => {
+        this.isCreatingProject = false;
+        this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos crear el proyecto.'));
       }
     });
   }
@@ -653,6 +738,37 @@ export class CompanyOnboardingComponent implements OnInit {
     });
   }
 
+  openProject(projectId: number): void {
+    const summary = this.projects.find(project => project.id === projectId);
+    if (!summary) {
+      return;
+    }
+
+    this.selectedProject = this.createProjectDetailShell(summary);
+    this.dialog
+      .open(ProjectDetailDialogComponent, {
+        width: '1180px',
+        maxWidth: '96vw',
+        maxHeight: '92vh',
+        panelClass: 'app-shell-dialog-panel',
+        backdropClass: 'app-shell-dialog-backdrop',
+        data: { projectId }
+      })
+      .afterClosed()
+      .subscribe((project: ProjectDetail | null | undefined) => {
+        if (!project) {
+          return;
+        }
+        this.selectedProject = project;
+        this.projects = this.projects.map(item => item.id === project.id ? this.toProjectSummary(project) : item);
+      }
+    );
+  }
+
+  toggleProjectCreatePanel(): void {
+    this.isProjectCreatePanelOpen = !this.isProjectCreatePanelOpen;
+  }
+
   private loadViewData(): void {
     this.isLoading = true;
     this.message = null;
@@ -715,6 +831,26 @@ export class CompanyOnboardingComponent implements OnInit {
       this.hasLoadedAccessData = true;
       this.loadAccessGroup();
     }
+    if (tab === 'projects') {
+      this.loadProjects();
+    }
+  }
+
+  private loadProjects(): void {
+    this.isProjectsLoading = true;
+    this.projectService.listProjects().subscribe({
+      next: projects => {
+        this.projects = [...projects].sort((a, b) => b.id - a.id);
+        this.isProjectsLoading = false;
+        if (!this.projects.some(project => project.id === this.selectedProject?.id)) {
+          this.selectedProject = null;
+        }
+      },
+      error: error => {
+        this.isProjectsLoading = false;
+        this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos cargar los proyectos de la empresa.'));
+      }
+    });
   }
 
   private loadRegistrationDocuments(): void {
@@ -836,6 +972,15 @@ export class CompanyOnboardingComponent implements OnInit {
     this.createFieldErrors = nextErrors;
   }
 
+  clearProjectFieldError(field: ProjectCreateField): void {
+    if (!this.projectCreateErrors[field]) {
+      return;
+    }
+    const nextErrors = { ...this.projectCreateErrors };
+    delete nextErrors[field];
+    this.projectCreateErrors = nextErrors;
+  }
+
   canEditProfileField(field: string): boolean {
     if (!this.currentCompany) {
       return false;
@@ -869,9 +1014,24 @@ export class CompanyOnboardingComponent implements OnInit {
     return value.trim().toLowerCase();
   }
 
-  private toNullable(value: string): string | null {
-    const trimmed = value.trim();
+  private toNullable(value: string | number | null | undefined): string | null {
+    if (value === null || value === undefined) {
+      return null;
+    }
+    const trimmed = String(value).trim();
     return trimmed ? trimmed : null;
+  }
+
+  private toNullableNumber(value: string | number | null | undefined): number | null {
+    if (value === null || value === undefined) {
+      return null;
+    }
+    const trimmed = String(value).trim();
+    if (!trimmed) {
+      return null;
+    }
+    const parsed = Number(trimmed);
+    return Number.isFinite(parsed) ? parsed : null;
   }
 
   private validateCreateForm(): boolean {
@@ -894,6 +1054,111 @@ export class CompanyOnboardingComponent implements OnInit {
 
     this.createFieldErrors = errors;
     return Object.keys(errors).length === 0;
+  }
+
+  private validateProjectCreateForm(): boolean {
+    const errors: Partial<Record<ProjectCreateField, string>> = {};
+
+    if (!this.projectForm.name.trim()) {
+      errors.name = 'El nombre del proyecto es obligatorio.';
+    }
+
+    if (!this.projectForm.description.trim()) {
+      errors.description = 'La descripcion es obligatoria para disparar requerimientos y estimacion.';
+    }
+
+    if (!this.projectForm.businessObjective.trim()) {
+      errors.businessObjective = 'Define el objetivo del proyecto.';
+    }
+
+    if (!this.projectForm.targetUsers.trim()) {
+      errors.targetUsers = 'Describe quienes usaran la solucion.';
+    }
+
+    if (!this.projectForm.mainModules.trim()) {
+      errors.mainModules = 'Lista los modulos o flujos principales.';
+    }
+
+    this.projectCreateErrors = errors;
+    return Object.keys(errors).length === 0;
+  }
+
+  private resetProjectForm(): void {
+    this.projectForm.name = '';
+    this.projectForm.description = '';
+    this.projectForm.businessObjective = '';
+    this.projectForm.targetUsers = '';
+    this.projectForm.mainModules = '';
+    this.projectForm.integrations = '';
+    this.projectForm.platforms = '';
+    this.projectForm.technicalConstraints = '';
+    this.projectForm.deliveryDeadline = '';
+    this.projectForm.developmentTypeId = '';
+    this.projectForm.budgetAmount = '';
+    this.projectCreateErrors = {};
+  }
+
+  private loadProjectDevelopmentTypes(): void {
+    this.projectService.listDevelopmentTypes().subscribe({
+      next: types => {
+        this.projectDevelopmentTypes = types;
+      },
+      error: error => {
+        this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos cargar los tipos de desarrollo.'));
+      }
+    });
+  }
+
+  private createProjectDetailShell(project: Project): ProjectDetail {
+    return {
+      ...project,
+      generalComplexity: null,
+      totalProjectHours: null,
+      detectedRisks: [],
+      assumptions: [],
+      teamWarnings: [],
+      requirements: [],
+      modules: []
+    };
+  }
+
+  private toProjectSummary(project: ProjectDetail): Project {
+    return {
+      id: project.id,
+      companyId: project.companyId,
+      name: project.name,
+      description: project.description,
+      businessObjective: project.businessObjective,
+      targetUsers: project.targetUsers,
+      mainModules: project.mainModules,
+      integrations: project.integrations,
+      platforms: project.platforms,
+      technicalConstraints: project.technicalConstraints,
+      deliveryDeadline: project.deliveryDeadline,
+      developmentTypeId: project.developmentTypeId,
+      developmentTypeCode: project.developmentTypeCode,
+      developmentTypeLabel: project.developmentTypeLabel,
+      budgetAmount: project.budgetAmount,
+      statusCode: project.statusCode,
+      publishedAt: project.publishedAt,
+      requirementsStatus: project.requirementsStatus,
+      estimationStatus: project.estimationStatus,
+      requirementsError: project.requirementsError,
+      estimationError: project.estimationError
+    };
+  }
+
+  projectStatusTone(project: Project | ProjectDetail | null): string {
+    if (!project) {
+      return 'text-[var(--muted)] border-[color:var(--panel-border)] bg-[var(--panel-2)]';
+    }
+    if (project.estimationStatus === 'FAILED' || project.requirementsStatus === 'FAILED') {
+      return 'app-status-danger';
+    }
+    if (project.estimationStatus === 'PENDING' || project.requirementsStatus === 'PENDING') {
+      return 'app-status-warning';
+    }
+    return 'app-status-success';
   }
 
   private applyCreateFieldErrorsFromResponse(error: unknown): boolean {

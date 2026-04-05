@@ -56,7 +56,7 @@
                     *ngIf="member.status !== 'REMOVED'"
                     type="button"
                     (click)="removeEmail.emit(member)"
-                    class="rounded-full border border-rose-400/30 bg-rose-400/10 px-4 py-2 text-xs uppercase tracking-[0.2em] text-rose-200"
+                    class="app-status-danger rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em]"
                   >
                     Retirar
                   </button>
@@ -68,7 +68,7 @@
       </ng-container>
 
       <ng-template #pendingApproval>
-        <div class="rounded-3xl border border-amber-400/25 bg-amber-400/10 p-6 text-sm text-amber-100">
+        <div class="app-status-warning rounded-3xl border p-6 text-sm">
           La empresa aun no esta aprobada. Cuando pase a `APPROVED`, este panel habilita la lista de correos del dominio {{ companyDomain }}.
         </div>
       </ng-template>

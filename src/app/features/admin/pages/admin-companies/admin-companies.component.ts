@@ -275,13 +275,13 @@ export class AdminCompaniesComponent implements OnInit {
   companyStatusClass(status: string): string {
     switch (status) {
       case 'APPROVED':
-        return 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200';
+        return 'app-status-success';
       case 'CHANGES_REQUESTED':
         return 'border-[color:var(--accent-1)]/30 bg-[var(--accent-1)]/10 text-[var(--accent-1)]';
       case 'REJECTED':
-        return 'border-rose-400/30 bg-rose-400/10 text-rose-200';
+        return 'app-status-danger';
       case 'PENDING':
-        return 'border-amber-400/30 bg-amber-400/10 text-amber-200';
+        return 'app-status-warning';
       default:
         return 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)]';
     }
@@ -309,20 +309,20 @@ export class AdminCompaniesComponent implements OnInit {
   reviewItemStatusClass(status: CompanyReviewItem['status']): string {
     switch (status) {
       case 'APPROVED':
-        return 'text-emerald-200';
+        return 'text-[var(--status-success-text)]';
       case 'REJECTED':
-        return 'text-rose-200';
+        return 'text-[var(--status-danger-text)]';
       default:
-        return 'text-amber-200';
+        return 'text-[var(--status-warning-text)]';
     }
   }
 
   reviewItemSurfaceClass(status: CompanyReviewItem['status']): string {
     switch (status) {
       case 'APPROVED':
-        return 'border-emerald-400/20 bg-emerald-500/5';
+        return 'app-status-success';
       case 'REJECTED':
-        return 'border-rose-400/20 bg-rose-500/5';
+        return 'app-status-danger';
       default:
         return 'border-[color:var(--panel-border)] bg-[var(--panel-2)]';
     }

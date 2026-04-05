@@ -1,0 +1,283 @@
+<div class="project-detail-dialog">
+  <div class="flex items-start justify-between gap-4">
+    <div class="space-y-2">
+      <p class="font-tech text-xs uppercase tracking-[0.24em] text-[var(--accent-4)]">Detalle del proyecto</p>
+      <h3 class="text-2xl font-semibold text-[var(--text)]">{{ project?.name || 'Proyecto' }}</h3>
+      <p class="max-w-3xl text-sm leading-6 text-[var(--muted)]">
+        {{ project?.description || 'Sin descripcion cargada.' }}
+      </p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <div
+        *ngIf="project"
+        class="rounded-full border px-3 py-2 font-tech text-xs uppercase tracking-[0.18em]"
+        [ngClass]="projectStatusTone(project)"
+      >
+        {{ statusLabel }}
+      </div>
+      <button
+        type="button"
+        class="rounded-full border border-[color:var(--panel-border)] bg-black/10 px-3 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--muted)] transition hover:bg-black/20"
+        (click)="close()"
+      >
+        Cerrar
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="mt-6 rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4 text-sm text-[var(--muted)]">
+    Cargando detalle del proyecto...
+  </div>
+
+  <div *ngIf="!isLoading && project as currentProject" class="mt-6 space-y-6">
+    <section class="rounded-[28px] border border-[color:var(--panel-border)] bg-black/10 p-5">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-3)]">Estado del proyecto</p>
+          <h4 class="mt-2 text-lg font-semibold text-[var(--text)]">Pipeline actual</h4>
+          <p class="mt-3 text-sm leading-6 text-[var(--muted)]">
+            Aqui se concentra el estado del pipeline antes de revisar requerimientos, horas y salida del modelo.
+          </p>
+        </div>
+
+        <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--muted)]">
+          <strong class="text-[var(--text)]">Tipo:</strong> {{ currentProject.developmentTypeLabel || 'Sin tipo' }}
+        </div>
+      </div>
+
+      <div class="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
+          <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Requirements</p>
+          <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ currentProject.requirementsStatus }}</p>
+        </div>
+        <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
+          <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Estimation</p>
+          <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ currentProject.estimationStatus }}</p>
+        </div>
+        <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
+          <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Complejidad</p>
+          <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ currentProject.generalComplexity || 'Pendiente' }}</p>
+        </div>
+        <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
+          <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Horas totales</p>
+          <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ currentProject.totalProjectHours ?? 'Pendiente' }}</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
+      <section class="rounded-[28px] border border-[color:var(--panel-border)] bg-black/10 p-5">
+        <div>
+          <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-2)]">Brief guardado</p>
+          <h4 class="mt-2 text-lg font-semibold text-[var(--text)]">Contexto original del proyecto</h4>
+        </div>
+
+        <div class="mt-5 grid gap-3 md:grid-cols-2">
+          <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-4">
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Objetivo</p>
+            <p class="mt-2 text-sm leading-6 text-[var(--text)]">{{ currentProject.businessObjective || 'Sin dato' }}</p>
+          </div>
+          <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-4">
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Usuarios objetivo</p>
+            <p class="mt-2 text-sm leading-6 text-[var(--text)]">{{ currentProject.targetUsers || 'Sin dato' }}</p>
+          </div>
+          <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-4">
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Modulos principales</p>
+            <p class="mt-2 whitespace-pre-line text-sm leading-6 text-[var(--text)]">{{ currentProject.mainModules || 'Sin dato' }}</p>
+          </div>
+          <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-4">
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Integraciones</p>
+            <p class="mt-2 text-sm leading-6 text-[var(--text)]">{{ currentProject.integrations || 'Sin dato' }}</p>
+          </div>
+          <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-4">
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Plataformas</p>
+            <p class="mt-2 text-sm leading-6 text-[var(--text)]">{{ currentProject.platforms || 'Sin dato' }}</p>
+          </div>
+          <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-4">
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Fecha o urgencia</p>
+            <p class="mt-2 text-sm leading-6 text-[var(--text)]">{{ currentProject.deliveryDeadline || 'Sin dato' }}</p>
+          </div>
+          <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-4 md:col-span-2">
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Restricciones</p>
+            <p class="mt-2 text-sm leading-6 text-[var(--text)]">{{ currentProject.technicalConstraints || 'Sin dato' }}</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-[28px] border border-[color:var(--panel-border)] bg-black/10 p-5">
+        <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-1)]">Resumen ejecutivo</p>
+        <h4 class="mt-2 text-lg font-semibold text-[var(--text)]">Lectura rapida</h4>
+        <div class="mt-4 space-y-3">
+          <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Presupuesto</p>
+            <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ currentProject.budgetAmount ?? 'Sin presupuesto' }}</p>
+          </div>
+          <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Publicado</p>
+            <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ currentProject.publishedAt || 'Aun no publicado' }}</p>
+          </div>
+          <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Estado final</p>
+            <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ currentProject.statusCode }}</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div *ngIf="currentProject.requirementsError || currentProject.estimationError" class="grid gap-3 lg:grid-cols-2">
+      <div *ngIf="currentProject.requirementsError" class="app-status-danger rounded-[20px] border p-4 text-sm">
+        <p class="font-tech text-[11px] uppercase tracking-[0.18em]">Error en requirements</p>
+        <p class="mt-2 leading-6">{{ currentProject.requirementsError }}</p>
+      </div>
+      <div *ngIf="currentProject.estimationError" class="app-status-danger rounded-[20px] border p-4 text-sm">
+        <p class="font-tech text-[11px] uppercase tracking-[0.18em]">Error en estimation</p>
+        <p class="mt-2 leading-6">{{ currentProject.estimationError }}</p>
+      </div>
+    </div>
+
+    <section class="rounded-[28px] border border-[color:var(--panel-border)] bg-black/10 p-5">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-1)]">Requerimientos</p>
+          <h4 class="mt-2 text-lg font-semibold text-[var(--text)]">Items editables</h4>
+          <p class="mt-2 text-sm leading-6 text-[var(--muted)]">
+            Puedes corregir cualquier requerimiento. Al guardar uno, se limpia la estimacion anterior y se dispara una nueva reestimacion del proyecto.
+          </p>
+        </div>
+        <div class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel)] px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+          {{ requirements.length }} items
+        </div>
+      </div>
+
+      <div class="mt-5 space-y-4">
+        <div *ngFor="let requirement of requirements" class="rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-4">
+          <div class="grid gap-4 md:grid-cols-2">
+            <label class="space-y-2 md:col-span-2">
+              <span class="block text-xs font-tech uppercase tracking-[0.18em] text-[var(--muted)]">Titulo</span>
+              <input [ngModel]="getRequirementDraft(requirement).title" (ngModelChange)="getRequirementDraft(requirement).title = $event" [ngModelOptions]="{ standalone: true }" type="text" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]" />
+            </label>
+
+            <label class="space-y-2 md:col-span-2">
+              <span class="block text-xs font-tech uppercase tracking-[0.18em] text-[var(--muted)]">Descripcion</span>
+              <textarea [ngModel]="getRequirementDraft(requirement).description" (ngModelChange)="getRequirementDraft(requirement).description = $event" [ngModelOptions]="{ standalone: true }" rows="3" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]"></textarea>
+            </label>
+
+            <label class="space-y-2">
+              <span class="block text-xs font-tech uppercase tracking-[0.18em] text-[var(--muted)]">Prioridad</span>
+              <select [ngModel]="getRequirementDraft(requirement).priority" (ngModelChange)="getRequirementDraft(requirement).priority = $event" [ngModelOptions]="{ standalone: true }" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]">
+                <option value="">Sin prioridad</option>
+                <option value="alta">Alta</option>
+                <option value="media">Media</option>
+                <option value="baja">Baja</option>
+              </select>
+            </label>
+
+            <label class="space-y-2">
+              <span class="block text-xs font-tech uppercase tracking-[0.18em] text-[var(--muted)]">Usuario involucrado</span>
+              <input [ngModel]="getRequirementDraft(requirement).involvedUser" (ngModelChange)="getRequirementDraft(requirement).involvedUser = $event" [ngModelOptions]="{ standalone: true }" type="text" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]" />
+            </label>
+
+            <label class="space-y-2">
+              <span class="block text-xs font-tech uppercase tracking-[0.18em] text-[var(--muted)]">Juniors asignados</span>
+              <input [ngModel]="getRequirementDraft(requirement).devNumber" (ngModelChange)="getRequirementDraft(requirement).devNumber = $event" [ngModelOptions]="{ standalone: true }" type="number" min="1" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]" />
+            </label>
+
+            <div class="space-y-2">
+              <span class="block text-xs font-tech uppercase tracking-[0.18em] text-[var(--muted)]">Flags</span>
+              <div class="flex flex-wrap gap-3 rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)]">
+                <label class="inline-flex items-center gap-2">
+                  <input type="checkbox" [checked]="getRequirementDraft(requirement).hasExternalConnection" (change)="getRequirementDraft(requirement).hasExternalConnection = $any($event.target).checked" />
+                  Integracion externa
+                </label>
+                <label class="inline-flex items-center gap-2">
+                  <input type="checkbox" [checked]="getRequirementDraft(requirement).requiresVisualScreen" (change)="getRequirementDraft(requirement).requiresVisualScreen = $any($event.target).checked" />
+                  Pantalla visual
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+            <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--muted)]">
+              <p><span class="font-semibold text-[var(--text)]">Horas estimadas:</span> {{ requirement.estimatedHours ?? 'Pendiente' }}</p>
+              <p class="mt-2 leading-6"><span class="font-semibold text-[var(--text)]">Razon:</span> {{ requirement.reason || 'Todavia no hay razon generada para este requerimiento.' }}</p>
+            </div>
+
+            <button type="button" [disabled]="updatingRequirementId === requirement.id" class="inline-flex items-center justify-center rounded-full bg-[var(--accent-1)] px-5 py-3 font-tech text-sm uppercase tracking-[0.22em] text-[var(--bg)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60" (click)="saveRequirement(requirement)">
+              {{ updatingRequirementId === requirement.id ? 'Guardando...' : 'Guardar cambio' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid gap-5 xl:grid-cols-[minmax(0,1.08fr)_minmax(320px,0.92fr)]">
+      <section class="rounded-[28px] border border-[color:var(--panel-border)] bg-black/10 p-5">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-4)]">Modulos estimados</p>
+            <h4 class="mt-2 text-lg font-semibold text-[var(--text)]">Salida actual del modelo</h4>
+          </div>
+          <div class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel)] px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+            {{ currentProject.modules.length }} modulos
+          </div>
+        </div>
+
+        <div *ngIf="!currentProject.modules.length" class="mt-5 rounded-[20px] border border-dashed border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-5 text-sm leading-6 text-[var(--muted)]">
+          Todavia no hay modulos estimados para este proyecto.
+        </div>
+
+        <div *ngIf="currentProject.modules.length" class="mt-5 space-y-3">
+          <div *ngFor="let module of currentProject.modules" class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <p class="text-base font-semibold text-[var(--text)]">{{ module.name }}</p>
+                <p class="mt-1 text-sm text-[var(--muted)]">Complejidad: {{ module.complexity || 'Sin definir' }}</p>
+              </div>
+              <div class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-3 py-1 text-xs text-[var(--text)]">
+                {{ module.hoursJuniorDev ?? 'Pendiente' }} h
+              </div>
+            </div>
+            <p class="mt-3 text-sm leading-6 text-[var(--muted)]">{{ module.complexityReason || 'Sin razon de complejidad.' }}</p>
+            <p class="mt-3 text-sm text-[var(--muted)]">
+              Integraciones:
+              <span class="text-[var(--text)]">{{ module.integrations.length ? module.integrations.join(', ') : 'Ninguna' }}</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div class="space-y-5">
+        <section class="rounded-[28px] border border-[color:var(--panel-border)] bg-black/10 p-5">
+          <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-3)]">Riesgos detectados</p>
+          <ul *ngIf="currentProject.detectedRisks.length" class="mt-4 space-y-2 text-sm leading-6 text-[var(--muted)]">
+            <li *ngFor="let risk of currentProject.detectedRisks" class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3">{{ risk }}</li>
+          </ul>
+          <p *ngIf="!currentProject.detectedRisks.length" class="mt-4 text-sm text-[var(--muted)]">Sin riesgos detectados.</p>
+        </section>
+
+        <section class="rounded-[28px] border border-[color:var(--panel-border)] bg-black/10 p-5">
+          <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-2)]">Supuestos y advertencias</p>
+          <div class="mt-4 space-y-4">
+            <div>
+              <p class="text-sm font-semibold text-[var(--text)]">Supuestos</p>
+              <ul *ngIf="currentProject.assumptions.length" class="mt-2 space-y-2 text-sm leading-6 text-[var(--muted)]">
+                <li *ngFor="let assumption of currentProject.assumptions" class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3">{{ assumption }}</li>
+              </ul>
+              <p *ngIf="!currentProject.assumptions.length" class="mt-2 text-sm text-[var(--muted)]">Sin supuestos cargados.</p>
+            </div>
+
+            <div>
+              <p class="text-sm font-semibold text-[var(--text)]">Advertencias del equipo</p>
+              <ul *ngIf="currentProject.teamWarnings.length" class="mt-2 space-y-2 text-sm leading-6 text-[var(--muted)]">
+                <li *ngFor="let warning of currentProject.teamWarnings" class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3">{{ warning }}</li>
+              </ul>
+              <p *ngIf="!currentProject.teamWarnings.length" class="mt-2 text-sm text-[var(--muted)]">Sin advertencias cargadas.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>

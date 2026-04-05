@@ -1,0 +1,17 @@
+.project-detail-dialog {
+  max-height: calc(92vh - 24px);
+  overflow-y: auto;
+  border: 1px solid var(--panel-border);
+  border-radius: 32px;
+  background: var(--panel);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+@media (max-width: 640px) {
+  .project-detail-dialog {
+    max-height: calc(92vh - 12px);
+    border-radius: 24px;
+    padding: 1rem;
+  }
+}

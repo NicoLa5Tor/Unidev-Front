@@ -58,8 +58,8 @@
     *ngIf="message"
     class="rounded-3xl border px-4 py-3 text-sm shadow-[var(--shadow)]"
     [ngClass]="message.type === 'success'
-      ? 'border-[color:var(--accent-4)]/30 bg-[var(--accent-4)]/10 text-[var(--text)]'
-      : 'border-rose-400/30 bg-rose-500/10 text-rose-100'"
+      ? 'app-status-success'
+      : 'app-status-danger'"
   >
     {{ message.text }}
   </div>
@@ -124,7 +124,7 @@
             <button
               type="button"
               class="rounded-full border px-3 py-2 text-[11px] uppercase tracking-[0.18em] transition"
-              [ngClass]="statusFilter === 'PENDING' ? 'border-amber-400/35 bg-amber-400/10 text-amber-200' : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)]'"
+              [ngClass]="statusFilter === 'PENDING' ? 'app-status-warning' : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)]'"
               (click)="setStatusFilter('PENDING')"
             >
               Pendientes
@@ -140,7 +140,7 @@
             <button
               type="button"
               class="rounded-full border px-3 py-2 text-[11px] uppercase tracking-[0.18em] transition"
-              [ngClass]="statusFilter === 'REJECTED' ? 'border-rose-400/35 bg-rose-400/10 text-rose-200' : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)]'"
+              [ngClass]="statusFilter === 'REJECTED' ? 'app-status-danger' : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)]'"
               (click)="setStatusFilter('REJECTED')"
             >
               Rechazadas
@@ -148,7 +148,7 @@
             <button
               type="button"
               class="rounded-full border px-3 py-2 text-[11px] uppercase tracking-[0.18em] transition"
-              [ngClass]="statusFilter === 'APPROVED' ? 'border-emerald-400/35 bg-emerald-400/10 text-emerald-200' : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)]'"
+              [ngClass]="statusFilter === 'APPROVED' ? 'app-status-success' : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)]'"
               (click)="setStatusFilter('APPROVED')"
             >
               Aprobadas
@@ -278,9 +278,9 @@
                   <h3 class="mt-2 text-lg font-semibold text-[var(--text)]">Checklist administrativo</h3>
                 </div>
                 <div class="hidden flex-wrap gap-2 md:flex">
-                  <span class="rounded-full border border-emerald-400/20 bg-emerald-500/8 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-emerald-200">{{ selectedApprovedItemsCount }} ok</span>
-                  <span class="rounded-full border border-rose-400/20 bg-rose-500/8 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-rose-200">{{ selectedRejectedItemsCount }} obs</span>
-                  <span class="rounded-full border border-amber-400/20 bg-amber-500/8 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-amber-200">{{ selectedPendingItemsCount }} pendientes</span>
+                  <span class="app-status-success rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.2em]">{{ selectedApprovedItemsCount }} ok</span>
+                  <span class="app-status-danger rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.2em]">{{ selectedRejectedItemsCount }} obs</span>
+                  <span class="app-status-warning rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.2em]">{{ selectedPendingItemsCount }} pendientes</span>
                 </div>
               </div>
 
@@ -331,7 +331,7 @@
                         type="button"
                         class="rounded-xl border px-3 py-2 text-[11px] uppercase tracking-[0.18em]"
                         [ngClass]="item.status === 'APPROVED'
-                          ? 'border-emerald-400/35 bg-emerald-500/10 text-emerald-200'
+                          ? 'app-status-success'
                           : 'border-[color:var(--panel-border)] bg-[var(--panel)] text-[var(--muted)]'"
                         (click)="setReviewStatus(item, 'APPROVED')"
                       >
@@ -341,7 +341,7 @@
                         type="button"
                         class="rounded-xl border px-3 py-2 text-[11px] uppercase tracking-[0.18em]"
                         [ngClass]="item.status === 'REJECTED'
-                          ? 'border-rose-400/35 bg-rose-500/10 text-rose-200'
+                          ? 'app-status-danger'
                           : 'border-[color:var(--panel-border)] bg-[var(--panel)] text-[var(--muted)]'"
                         (click)="setReviewStatus(item, 'REJECTED')"
                       >

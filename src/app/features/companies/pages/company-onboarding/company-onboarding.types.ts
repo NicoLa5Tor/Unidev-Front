@@ -9,3 +9,17 @@ export interface CompanyFormModel {
   description: string;
   address: string;
 }
+
+export interface ProjectCreateFormModel {
+  name: string;
+  description: string;
+  businessObjective: string;
+  targetUsers: string;
+  mainModules: string;
+  integrations: string;
+  platforms: string;
+  technicalConstraints: string;
+  deliveryDeadline: string;
+  developmentTypeId: string;
+  budgetAmount: string;
+}

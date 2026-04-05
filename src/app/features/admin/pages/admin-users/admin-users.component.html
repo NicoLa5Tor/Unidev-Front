@@ -58,8 +58,8 @@
     *ngIf="message"
     class="rounded-3xl border px-4 py-3 text-sm shadow-[var(--shadow)]"
     [ngClass]="message.type === 'success'
-      ? 'border-[color:var(--accent-4)]/30 bg-[var(--accent-4)]/10 text-[var(--text)]'
-      : 'border-rose-400/30 bg-rose-500/10 text-rose-100'"
+      ? 'app-status-success'
+      : 'app-status-danger'"
   >
     {{ message.text }}
   </div>
@@ -193,7 +193,7 @@
             Editar
           </button>
           <button
-            class="rounded-xl border border-rose-400/35 bg-rose-500/10 px-4 py-2 text-xs uppercase tracking-[0.2em] text-rose-200"
+            class="app-status-danger rounded-xl border px-4 py-2 text-xs uppercase tracking-[0.2em]"
             (click)="deleteSelectedUser()"
           >
             Eliminar
@@ -288,7 +288,7 @@
         <button
           *ngIf="editorMode === 'edit'"
           type="button"
-          class="rounded-xl border border-rose-400/35 bg-rose-500/10 px-5 py-3 text-xs uppercase tracking-[0.2em] text-rose-200"
+          class="app-status-danger rounded-xl border px-5 py-3 text-xs uppercase tracking-[0.2em]"
           [disabled]="isSaving"
           (click)="deleteSelectedUser()"
         >

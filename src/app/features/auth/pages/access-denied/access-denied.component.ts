@@ -23,7 +23,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
               {{ description }}
             </p>
 
-            <p *ngIf="technicalDetail" class="mt-4 rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
+            <p *ngIf="technicalDetail" class="app-status-danger mt-4 rounded-2xl border px-4 py-3 text-sm">
               {{ technicalDetail }}
             </p>
           </div>
