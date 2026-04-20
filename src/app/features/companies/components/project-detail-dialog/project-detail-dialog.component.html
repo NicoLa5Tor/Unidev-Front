@@ -17,6 +17,15 @@
         {{ statusLabel }}
       </div>
       <button
+        *ngIf="project"
+        type="button"
+        [disabled]="retryingAi"
+        class="rounded-full border border-[color:var(--accent-2)] bg-[color:color-mix(in srgb,var(--accent-2) 12%,transparent)] px-3 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--accent-2)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+        (click)="retryAiPipeline()"
+      >
+        {{ retryingAi ? 'Reintentando...' : 'Reintentar IA' }}
+      </button>
+      <button
         type="button"
         class="rounded-full border border-[color:var(--panel-border)] bg-black/10 px-3 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--muted)] transition hover:bg-black/20"
         (click)="close()"
@@ -122,11 +131,11 @@
         </div>
         <div class="mt-4 space-y-3">
           <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
-            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Tarifa base</p>
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Tarifa escenario base junior</p>
             <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ formatMoney(currentProject.quote.hourlyRate, currentProject.quote.currency) }}</p>
           </div>
           <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
-            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Horas base</p>
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Horas escenario base junior</p>
             <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ currentProject.quote.baseHours ?? currentProject.totalProjectHours ?? 'Pendiente' }}</p>
           </div>
           <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
@@ -143,7 +152,7 @@
           <p>
             {{
               currentProject.quote.available
-                ? ('Rango principal calculado con ' + (currentProject.quote.baseHours ?? currentProject.totalProjectHours ?? 0) + ' horas y una apertura fija del ' + (currentProject.quote.rangePercentage ?? 20) + '%.')
+                ? ('Rango principal calculado con el escenario base junior de ' + (currentProject.quote.baseHours ?? currentProject.totalProjectHours ?? 0) + ' horas y una apertura fija del ' + (currentProject.quote.rangePercentage ?? 20) + '%.')
                 : currentProject.quote.error
                   ? currentProject.quote.error
                   : currentProject.estimationStatus === 'PENDING'
@@ -185,7 +194,7 @@
               class="rounded-full border px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em]"
               [ngClass]="levelEstimation.levelCode === 'JUNIOR' ? 'app-status-info' : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)]'"
             >
-              {{ levelEstimation.levelCode === 'JUNIOR' ? 'Baseline' : 'Escenario' }}
+              {{ levelEstimation.levelCode === 'JUNIOR' ? 'Base junior' : 'Escenario derivado' }}
             </div>
           </div>
 
@@ -197,6 +206,10 @@
             <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3">
               <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Horas</p>
               <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ levelEstimation.totalProjectHours ?? 'Pendiente' }}</p>
+            </div>
+            <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3">
+              <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Productividad</p>
+              <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ levelEstimation.productivityPercentage ?? '100' }}%</p>
             </div>
             <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3">
               <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Tarifa</p>
@@ -244,13 +257,59 @@
           </p>
         </div>
         <div class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel)] px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
-          {{ requirements.length }} items
+          {{ activeRequirementsCount }} activos · {{ requirements.length }} total
         </div>
       </div>
 
       <div class="mt-5 space-y-4">
-        <div *ngFor="let requirement of requirements" class="rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-4">
-          <div class="grid gap-4 md:grid-cols-2">
+        <div
+          *ngFor="let requirement of requirements"
+          class="rounded-[24px] border p-5 transition"
+          [ngClass]="requirement.active
+            ? 'border-[color:var(--panel-border)] bg-[var(--panel)]'
+            : 'border-[color:color-mix(in srgb,var(--panel-border) 70%,transparent)] bg-[color:color-mix(in srgb,var(--panel) 82%,black)] opacity-80'">
+          <div class="flex flex-col gap-4 border-b border-[color:var(--panel-border)] pb-4 lg:flex-row lg:items-start lg:justify-between">
+            <div class="space-y-2">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-1)]">Requerimiento {{ requirement.id }}</span>
+                <span class="rounded-full border px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em]" [ngClass]="requirement.active ? 'app-status-success' : 'app-status-warning'">
+                  {{ requirement.active ? 'Activo' : 'Excluido del estimado' }}
+                </span>
+              </div>
+              <p class="max-w-2xl text-sm leading-6 text-[var(--muted)]">
+                {{ requirement.active
+                  ? 'Edita este item, conversa con la IA y guarda cambios para recalcular el proyecto.'
+                  : 'Este item queda fuera de la estimacion y de la publicacion mientras siga deshabilitado.' }}
+              </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                [disabled]="updatingRequirementId === requirement.id"
+                class="rounded-full border px-4 py-2 font-tech text-[11px] uppercase tracking-[0.18em] transition disabled:cursor-not-allowed disabled:opacity-60"
+                [ngClass]="requirement.active
+                  ? 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)] hover:border-[color:var(--accent-4)] hover:text-[var(--text)]'
+                  : 'border-[color:var(--accent-3)] bg-[color:color-mix(in srgb,var(--accent-3) 12%,transparent)] text-[var(--accent-3)] hover:brightness-110'"
+                (click)="toggleRequirementActivation(requirement, !requirement.active)">
+                {{
+                  updatingRequirementId === requirement.id
+                    ? 'Actualizando...'
+                    : (requirement.active ? 'Deshabilitar requerimiento' : 'Reactivar requerimiento')
+                }}
+              </button>
+
+              <button
+                type="button"
+                [disabled]="updatingRequirementId === requirement.id"
+                class="inline-flex items-center justify-center rounded-full bg-[var(--accent-1)] px-5 py-3 font-tech text-sm uppercase tracking-[0.22em] text-[var(--bg)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                (click)="saveRequirement(requirement)">
+                {{ updatingRequirementId === requirement.id ? 'Guardando...' : 'Guardar cambios' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-5 grid gap-4 md:grid-cols-2">
             <label class="space-y-2 md:col-span-2">
               <span class="block text-xs font-tech uppercase tracking-[0.18em] text-[var(--muted)]">Titulo</span>
               <input [ngModel]="getRequirementDraft(requirement).title" (ngModelChange)="getRequirementDraft(requirement).title = $event" [ngModelOptions]="{ standalone: true }" type="text" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]" />
@@ -296,15 +355,72 @@
             </div>
           </div>
 
-          <div class="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-            <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--muted)]">
-              <p><span class="font-semibold text-[var(--text)]">Horas estimadas:</span> {{ requirement.estimatedHours ?? 'Pendiente' }}</p>
-              <p class="mt-2 leading-6"><span class="font-semibold text-[var(--text)]">Razon:</span> {{ requirement.reason || 'Todavia no hay razon generada para este requerimiento.' }}</p>
+          <div class="mt-5 grid gap-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+            <div class="rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
+              <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-4)]">Lectura del estimado</p>
+              <div class="mt-4 grid gap-3 md:grid-cols-2">
+                <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3">
+                  <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Horas base</p>
+                  <p class="mt-2 text-xl font-semibold text-[var(--text)]">{{ requirement.active ? (requirement.estimatedHours ?? 'Pendiente') : 'Excluido' }}</p>
+                </div>
+                <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3">
+                  <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Estado del item</p>
+                  <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ requirement.active ? 'Entra al baseline y a los escenarios derivados' : 'Fuera del calculo actual' }}</p>
+                </div>
+              </div>
+              <div class="mt-3 rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-sm text-[var(--muted)]">
+                <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Razon</p>
+                <p class="mt-2 leading-6">{{ requirement.reason || 'Todavia no hay razon generada para este requerimiento.' }}</p>
+              </div>
             </div>
 
-            <button type="button" [disabled]="updatingRequirementId === requirement.id" class="inline-flex items-center justify-center rounded-full bg-[var(--accent-1)] px-5 py-3 font-tech text-sm uppercase tracking-[0.22em] text-[var(--bg)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60" (click)="saveRequirement(requirement)">
-              {{ updatingRequirementId === requirement.id ? 'Guardando...' : 'Guardar cambio' }}
-            </button>
+            <div class="rounded-[22px] border border-[color:var(--panel-border)] bg-black/10 p-4">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-2)]">Asistente IA</p>
+                  <p class="mt-2 text-sm leading-6 text-[var(--muted)]">
+                    Conversa este item en un modal dedicado. Ahí queda el hilo, la propuesta y la aplicación final sin ensuciar esta vista.
+                  </p>
+                </div>
+                <button
+                  *ngIf="requirement.active"
+                  type="button"
+                  class="inline-flex items-center justify-center rounded-full border border-[color:var(--accent-2)] bg-[color:color-mix(in srgb,var(--accent-2) 16%,transparent)] px-4 py-2 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-2)] transition hover:brightness-110"
+                  (click)="openRequirementAssistant(requirement)">
+                  Abrir chat IA
+                </button>
+              </div>
+
+              <div *ngIf="!requirement.active" class="mt-4 rounded-[18px] border border-dashed border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-4 text-sm leading-6 text-[var(--muted)]">
+                Reactiva este requerimiento si quieres volver a conversar con la IA o incluirlo en la estimacion.
+              </div>
+
+              <ng-container *ngIf="requirement.active">
+                <div class="mt-4 grid gap-3 md:grid-cols-2">
+                  <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3">
+                    <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Estado del hilo</p>
+                    <p class="mt-2 text-sm font-semibold text-[var(--text)]">
+                      {{ requirement.assistantMessages.length ? (requirement.assistantMessages.length + ' mensaje' + (requirement.assistantMessages.length === 1 ? '' : 's')) : 'Sin conversación todavía' }}
+                    </p>
+                  </div>
+                  <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3">
+                    <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Propuesta IA</p>
+                    <p class="mt-2 text-sm font-semibold text-[var(--text)]">
+                      {{ requirement.assistantSuggestion ? 'Lista para revisar' : 'Sin propuesta generada' }}
+                    </p>
+                  </div>
+                </div>
+
+                <div *ngIf="requirement.assistantSuggestion" class="mt-3 rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-sm text-[var(--muted)]">
+                  <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Ultima lectura rápida</p>
+                  <p class="mt-2 leading-6">{{ requirement.assistantSuggestion.summary || 'La IA dejó una propuesta, pero sin resumen adicional.' }}</p>
+                </div>
+
+                <div *ngIf="!requirement.assistantSuggestion" class="mt-3 rounded-[18px] border border-dashed border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-4 text-sm leading-6 text-[var(--muted)]">
+                  Todavía no hay propuesta sugerida para este requerimiento. Abre el chat IA para conversarlo.
+                </div>
+              </ng-container>
+            </div>
           </div>
         </div>
       </div>

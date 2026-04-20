@@ -1,0 +1,247 @@
+:host {
+  display: block;
+}
+
+.requirement-assistant-dialog {
+  position: relative;
+  width: min(920px, 92vw);
+  max-height: calc(92vh - 24px);
+  overflow: auto;
+  padding: clamp(1.1rem, 2vw, 1.5rem);
+  border: 1px solid var(--panel-border);
+  border-radius: 30px;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  box-shadow: var(--shadow);
+}
+
+.requirement-assistant-dialog__glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--accent-2) 22%, transparent), transparent 38%),
+    radial-gradient(circle at bottom left, color-mix(in srgb, var(--accent-3) 16%, transparent), transparent 36%);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.requirement-assistant-dialog__header,
+.requirement-assistant-dialog__body {
+  position: relative;
+  z-index: 1;
+}
+
+.requirement-assistant-dialog__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.requirement-assistant-dialog__eyebrow,
+.requirement-assistant-dialog__label,
+.requirement-assistant-dialog__tile-label,
+.requirement-assistant-dialog__message-role {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.requirement-assistant-dialog__eyebrow {
+  color: var(--accent-2);
+}
+
+.requirement-assistant-dialog h3 {
+  margin: 0.45rem 0 0;
+  color: var(--text);
+  font-size: clamp(1.25rem, 2.6vw, 1.8rem);
+  line-height: 1.1;
+}
+
+.requirement-assistant-dialog__support,
+.requirement-assistant-dialog__summary,
+.requirement-assistant-dialog__hint,
+.requirement-assistant-dialog__message-content,
+.requirement-assistant-dialog__tile p:last-child,
+.requirement-assistant-dialog__inactive {
+  margin: 0.45rem 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.requirement-assistant-dialog__close,
+.requirement-assistant-dialog__apply,
+.requirement-assistant-dialog__send {
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  padding: 0.8rem 1.15rem;
+  background: color-mix(in srgb, var(--panel-2) 90%, transparent);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: 160ms ease;
+}
+
+.requirement-assistant-dialog__close:hover,
+.requirement-assistant-dialog__apply:hover,
+.requirement-assistant-dialog__send:hover {
+  filter: brightness(1.08);
+}
+
+.requirement-assistant-dialog__apply,
+.requirement-assistant-dialog__send {
+  border-color: color-mix(in srgb, var(--accent-2) 55%, var(--panel-border));
+  background: color-mix(in srgb, var(--accent-2) 16%, transparent);
+}
+
+.requirement-assistant-dialog__close:disabled,
+.requirement-assistant-dialog__apply:disabled,
+.requirement-assistant-dialog__send:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  filter: none;
+}
+
+.requirement-assistant-dialog__body {
+  display: grid;
+  gap: 1rem;
+}
+
+.requirement-assistant-dialog__panel,
+.requirement-assistant-dialog__composer,
+.requirement-assistant-dialog__inactive {
+  border: 1px solid var(--panel-border);
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--panel-2) 86%, transparent);
+  padding: 1rem;
+}
+
+.requirement-assistant-dialog__section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.requirement-assistant-dialog__meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.requirement-assistant-dialog__meta span {
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--panel-border);
+  background: color-mix(in srgb, var(--panel) 85%, transparent);
+  color: var(--text);
+  font-size: 0.84rem;
+}
+
+.requirement-assistant-dialog__messages {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.requirement-assistant-dialog__message,
+.requirement-assistant-dialog__empty,
+.requirement-assistant-dialog__tile {
+  border: 1px solid var(--panel-border);
+  border-radius: 20px;
+  padding: 0.95rem 1rem;
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+}
+
+.requirement-assistant-dialog__message.is-assistant {
+  border-color: color-mix(in srgb, var(--accent-2) 45%, var(--panel-border));
+  background: color-mix(in srgb, var(--accent-2) 10%, var(--panel));
+}
+
+.requirement-assistant-dialog__message-role {
+  color: var(--accent-3);
+}
+
+.requirement-assistant-dialog__message.is-assistant .requirement-assistant-dialog__message-role {
+  color: var(--accent-2);
+}
+
+.requirement-assistant-dialog__message-content,
+.requirement-assistant-dialog__tile p:last-child {
+  white-space: pre-line;
+  color: var(--text);
+}
+
+.requirement-assistant-dialog__suggestion-grid {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.requirement-assistant-dialog__tile.is-wide {
+  grid-column: 1 / -1;
+}
+
+.requirement-assistant-dialog__tile-label {
+  color: var(--muted);
+}
+
+.requirement-assistant-dialog__composer textarea {
+  width: 100%;
+  min-height: 110px;
+  resize: vertical;
+  border: 1px solid var(--panel-border);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  color: var(--text);
+  padding: 0.95rem 1rem;
+  outline: none;
+  transition: border-color 160ms ease;
+}
+
+.requirement-assistant-dialog__composer textarea:focus {
+  border-color: var(--accent-2);
+}
+
+.requirement-assistant-dialog__composer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.95rem;
+}
+
+.requirement-assistant-dialog__hint {
+  max-width: 520px;
+}
+
+@media (max-width: 720px) {
+  .requirement-assistant-dialog {
+    max-height: calc(92vh - 10px);
+    padding: 1rem;
+    border-radius: 24px;
+  }
+
+  .requirement-assistant-dialog__header,
+  .requirement-assistant-dialog__section-head,
+  .requirement-assistant-dialog__composer-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .requirement-assistant-dialog__meta,
+  .requirement-assistant-dialog__close,
+  .requirement-assistant-dialog__apply,
+  .requirement-assistant-dialog__send {
+    width: 100%;
+  }
+
+  .requirement-assistant-dialog__suggestion-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,113 @@
+<div class="requirement-assistant-dialog">
+  <div class="requirement-assistant-dialog__glow" aria-hidden="true"></div>
+
+  <div class="requirement-assistant-dialog__header">
+    <div>
+      <p class="requirement-assistant-dialog__eyebrow">Asistente IA</p>
+      <h3>{{ requirement.title || ('Requerimiento ' + requirement.id) }}</h3>
+      <p class="requirement-assistant-dialog__support">
+        Conversa sobre este item, revisa la propuesta y aplícala solo cuando te sirva.
+      </p>
+    </div>
+
+    <button type="button" class="requirement-assistant-dialog__close" (click)="close()">Cerrar</button>
+  </div>
+
+  <div *ngIf="!requirement.active" class="requirement-assistant-dialog__inactive">
+    Este requerimiento está deshabilitado. Reactívalo desde el detalle del proyecto si quieres volver a conversar con la IA.
+  </div>
+
+  <div *ngIf="requirement.active" class="requirement-assistant-dialog__body">
+    <section class="requirement-assistant-dialog__panel">
+      <div class="requirement-assistant-dialog__section-head">
+        <div>
+          <p class="requirement-assistant-dialog__label">Contexto actual</p>
+          <p class="requirement-assistant-dialog__summary">{{ requirement.description || 'Sin descripción cargada.' }}</p>
+        </div>
+        <div class="requirement-assistant-dialog__meta">
+          <span>{{ requirement.priority || 'Sin prioridad' }}</span>
+          <span>{{ requirement.devNumber || 1 }} dev</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="requirement-assistant-dialog__panel">
+      <div class="requirement-assistant-dialog__section-head">
+        <div>
+          <p class="requirement-assistant-dialog__label">Conversación</p>
+          <p class="requirement-assistant-dialog__summary">Aquí queda el hilo de este requerimiento, no del proyecto completo.</p>
+        </div>
+      </div>
+
+      <div class="requirement-assistant-dialog__messages">
+        <div *ngFor="let message of messages; trackBy: trackMessage"
+             class="requirement-assistant-dialog__message"
+             [ngClass]="message.role === 'USER' ? 'is-user' : 'is-assistant'">
+          <p class="requirement-assistant-dialog__message-role">
+            {{ message.role === 'USER' ? 'Tu mensaje' : 'Respuesta IA' }}
+          </p>
+          <p class="requirement-assistant-dialog__message-content">{{ message.content }}</p>
+        </div>
+
+        <div *ngIf="!messages.length" class="requirement-assistant-dialog__empty">
+          Todavía no has conversado con la IA sobre este requerimiento.
+        </div>
+      </div>
+    </section>
+
+    <section *ngIf="requirement.assistantSuggestion" class="requirement-assistant-dialog__panel">
+      <div class="requirement-assistant-dialog__section-head">
+        <div>
+          <p class="requirement-assistant-dialog__label">Propuesta actual</p>
+          <p class="requirement-assistant-dialog__summary">
+            {{ requirement.assistantSuggestion.summary || 'La IA dejó una propuesta sin resumen adicional.' }}
+          </p>
+        </div>
+        <button
+          type="button"
+          [disabled]="!canApplySuggestion"
+          class="requirement-assistant-dialog__apply"
+          (click)="applySuggestion()">
+          {{ applying ? 'Aplicando...' : 'Aplicar propuesta IA' }}
+        </button>
+      </div>
+
+      <div class="requirement-assistant-dialog__suggestion-grid">
+        <div class="requirement-assistant-dialog__tile">
+          <p class="requirement-assistant-dialog__tile-label">Título</p>
+          <p>{{ requirement.assistantSuggestion.title || 'Sin título' }}</p>
+        </div>
+        <div class="requirement-assistant-dialog__tile">
+          <p class="requirement-assistant-dialog__tile-label">Parámetros</p>
+          <p>
+            {{ requirement.assistantSuggestion.priority || 'Sin prioridad' }} ·
+            {{ requirement.assistantSuggestion.involvedUser || 'Sin actor' }} ·
+            {{ requirement.assistantSuggestion.devNumber || 1 }} dev
+          </p>
+        </div>
+        <div class="requirement-assistant-dialog__tile is-wide">
+          <p class="requirement-assistant-dialog__tile-label">Descripción propuesta</p>
+          <p>{{ requirement.assistantSuggestion.description || 'Sin descripción sugerida.' }}</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="requirement-assistant-dialog__composer">
+      <textarea
+        [(ngModel)]="prompt"
+        [ngModelOptions]="{ standalone: true }"
+        rows="4"
+        placeholder="Ejemplo: simplifica este requerimiento para un MVP y deja claro qué queda dentro y qué queda fuera."
+      ></textarea>
+
+      <div class="requirement-assistant-dialog__composer-actions">
+        <p class="requirement-assistant-dialog__hint">
+          Habla del alcance, simplifica, pide separar pasos o corrige supuestos concretos.
+        </p>
+        <button type="button" [disabled]="sending || !prompt.trim()" class="requirement-assistant-dialog__send" (click)="send()">
+          {{ sending ? 'Consultando...' : 'Preguntar a la IA' }}
+        </button>
+      </div>
+    </section>
+  </div>
+</div>

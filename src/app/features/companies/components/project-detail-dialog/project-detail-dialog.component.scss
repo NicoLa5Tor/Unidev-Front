@@ -8,6 +8,10 @@
   box-shadow: var(--shadow);
 }
 
+.project-detail-dialog input[type='checkbox'] {
+  accent-color: var(--accent-2);
+}
+
 @media (max-width: 640px) {
   .project-detail-dialog {
     max-height: calc(92vh - 12px);

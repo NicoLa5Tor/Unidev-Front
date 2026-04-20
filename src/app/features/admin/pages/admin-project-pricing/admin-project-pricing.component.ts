@@ -30,6 +30,7 @@ interface PricingLevelEditorModel {
   displayName: string;
   description: string;
   active: boolean;
+  productivityPercentage: string;
 }
 
 @Component({
@@ -49,7 +50,7 @@ export class AdminProjectPricingComponent implements OnInit {
   selectedRate: ProjectPricingRate | null = null;
   selectedLevel: ProjectPricingLevel | null = null;
   editorMode: 'create' | 'edit' = 'create';
-  levelEditorMode: 'create' | 'edit' = 'create';
+  levelEditorMode: 'edit' = 'edit';
 
   readonly navItems: DashboardNavItem[] = [
     { id: 'rates', label: 'Tarifas', accent: 'accent-3', mobileBarWidthClass: 'w-24' },
@@ -126,8 +127,11 @@ export class AdminProjectPricingComponent implements OnInit {
     this.pricingRateService.getPricingLevels(false).subscribe({
       next: levels => {
         this.levels = levels;
+        this.selectedLevel = this.selectedLevel
+          ? levels.find(level => level.id === this.selectedLevel?.id) ?? null
+          : (levels[0] ?? null);
         if (this.selectedLevel) {
-          this.selectedLevel = levels.find(level => level.id === this.selectedLevel?.id) ?? null;
+          this.patchLevelEditor(this.selectedLevel);
         }
         this.isLoadingLevels = false;
       },
@@ -144,6 +148,20 @@ export class AdminProjectPricingComponent implements OnInit {
 
   selectLevel(level: ProjectPricingLevel): void {
     this.selectedLevel = level;
+    this.patchLevelEditor(level);
+  }
+
+  selectLevelFromEditor(levelId: number | null): void {
+    if (levelId == null) {
+      return;
+    }
+
+    const level = this.levels.find(item => item.id === levelId);
+    if (!level) {
+      return;
+    }
+
+    this.selectLevel(level);
   }
 
   openCreateEditor(): void {
@@ -151,13 +169,6 @@ export class AdminProjectPricingComponent implements OnInit {
     this.editor = this.createEmptyEditor();
     this.selectedRate = null;
     this.activeTab = 'editor';
-  }
-
-  openCreateLevelEditor(): void {
-    this.levelEditorMode = 'create';
-    this.levelEditor = this.createEmptyLevelEditor();
-    this.selectedLevel = null;
-    this.activeTab = 'level-editor';
   }
 
   editRate(rate: ProjectPricingRate): void {
@@ -176,14 +187,7 @@ export class AdminProjectPricingComponent implements OnInit {
 
   editLevel(level: ProjectPricingLevel): void {
     this.selectedLevel = level;
-    this.levelEditorMode = 'edit';
-    this.levelEditor = {
-      id: level.id,
-      code: level.code,
-      displayName: level.displayName,
-      description: level.description ?? '',
-      active: level.active
-    };
+    this.patchLevelEditor(level);
     this.activeTab = 'level-editor';
   }
 
@@ -243,32 +247,31 @@ export class AdminProjectPricingComponent implements OnInit {
       return;
     }
 
+    const productivityPercentage = Number(this.levelEditor.productivityPercentage);
+    if (!Number.isFinite(productivityPercentage) || productivityPercentage <= 0) {
+      this.uiToastService.error('La productividad debe ser mayor a 0.');
+      return;
+    }
+    if (!this.levelEditor.id) {
+      this.uiToastService.error('Selecciona un nivel existente antes de editarlo.');
+      return;
+    }
+
     this.isSavingLevel = true;
-    const isEditing = this.levelEditorMode === 'edit' && !!this.levelEditor.id;
     const payload: ProjectPricingLevelPayload = {
       code: this.levelEditor.code.trim().toUpperCase(),
       displayName: this.levelEditor.displayName.trim(),
       description: this.levelEditor.description.trim() ? this.levelEditor.description.trim() : null,
-      active: this.levelEditor.active
+      active: this.levelEditor.active,
+      productivityPercentage
     };
 
-    const request$ = isEditing
-      ? this.pricingRateService.updatePricingLevel(this.levelEditor.id!, payload)
-      : this.pricingRateService.createPricingLevel(payload);
-
-    request$.subscribe({
+    this.pricingRateService.updatePricingLevel(this.levelEditor.id, payload).subscribe({
       next: level => {
         this.selectedLevel = level;
-        this.levelEditorMode = 'edit';
-        this.levelEditor = {
-          id: level.id,
-          code: level.code,
-          displayName: level.displayName,
-          description: level.description ?? '',
-          active: level.active
-        };
+        this.patchLevelEditor(level);
         this.isSavingLevel = false;
-        this.uiToastService.success(isEditing ? 'Nivel actualizado correctamente.' : 'Nivel creado correctamente.');
+        this.uiToastService.success('Nivel actualizado correctamente.');
         this.activeTab = 'levels';
         this.refreshLevels();
       },
@@ -309,7 +312,19 @@ export class AdminProjectPricingComponent implements OnInit {
       code: '',
       displayName: '',
       description: '',
-      active: true
+      active: true,
+      productivityPercentage: '100'
+    };
+  }
+
+  private patchLevelEditor(level: ProjectPricingLevel): void {
+    this.levelEditor = {
+      id: level.id,
+      code: level.code,
+      displayName: level.displayName,
+      description: level.description ?? '',
+      active: level.active,
+      productivityPercentage: String(level.productivityPercentage ?? '')
     };
   }
 

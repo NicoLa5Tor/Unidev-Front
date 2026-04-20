@@ -19,6 +19,7 @@ export interface ProjectPricingLevelOption {
   displayName: string;
   description: string | null;
   active: boolean;
+  productivityPercentage?: number | null;
 }
 
 export interface ProjectDevelopmentTypeOption {
@@ -37,7 +38,31 @@ export interface UpdateProjectRequirementDto {
   involvedUser: string | null;
   hasExternalConnection: boolean;
   requiresVisualScreen: boolean;
+  active: boolean;
   devNumber: number;
+}
+
+export interface ProjectRequirementAssistantMessageDto {
+  message: string;
+}
+
+export interface ProjectRequirementAssistantMessage {
+  id: number;
+  role: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface ProjectRequirementAssistantSuggestion {
+  title: string | null;
+  description: string | null;
+  priority: string | null;
+  involvedUser: string | null;
+  hasExternalConnection: boolean | null;
+  requiresVisualScreen: boolean | null;
+  devNumber: number | null;
+  summary: string | null;
+  updatedAt: string | null;
 }
 
 export interface ProjectQuote {
@@ -57,6 +82,7 @@ export interface ProjectLevelEstimation {
   levelId: number;
   levelCode: string;
   levelLabel: string;
+  productivityPercentage: number | null;
   generalComplexity: string | null;
   totalProjectHours: number | null;
   currency: string | null;
@@ -102,9 +128,12 @@ export interface ProjectRequirement {
   involvedUser: string | null;
   hasExternalConnection: boolean;
   requiresVisualScreen: boolean;
+  active: boolean;
   devNumber: number | null;
   estimatedHours: number | null;
   reason: string | null;
+  assistantSuggestion: ProjectRequirementAssistantSuggestion | null;
+  assistantMessages: ProjectRequirementAssistantMessage[];
 }
 
 export interface ProjectModule {

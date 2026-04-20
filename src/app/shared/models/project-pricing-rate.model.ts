@@ -4,6 +4,9 @@ export interface ProjectPricingLevel {
   displayName: string;
   description: string | null;
   active: boolean;
+  productivityPercentage: number;
+  updatedAt: string | null;
+  updatedBy: string | null;
 }
 
 export interface ProjectPricingLevelPayload {
@@ -11,6 +14,7 @@ export interface ProjectPricingLevelPayload {
   displayName: string;
   description: string | null;
   active: boolean;
+  productivityPercentage: number;
 }
 
 export interface ProjectPricingRate {

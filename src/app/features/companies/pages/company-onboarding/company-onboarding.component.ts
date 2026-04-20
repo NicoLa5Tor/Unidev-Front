@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { of } from 'rxjs';
@@ -35,7 +35,8 @@ type RegistrationDocumentType = 'LEGAL_CERTIFICATE' | 'TAX_DOCUMENT';
   ],
   templateUrl: './company-onboarding.component.html'
 })
-export class CompanyOnboardingComponent implements OnInit {
+export class CompanyOnboardingComponent implements OnInit, OnDestroy {
+  private static readonly PROJECTS_POLL_INTERVAL_MS = 3000;
   activeTab: CompanyTab = 'status';
   isLoading = false;
   isSaving = false;
@@ -65,6 +66,7 @@ export class CompanyOnboardingComponent implements OnInit {
   uploadingDocumentType: RegistrationDocumentType | null = null;
   private hasLoadedAccessData = false;
   private readonly dialog = inject(MatDialog);
+  private projectsPollHandle: ReturnType<typeof setTimeout> | null = null;
 
   readonly ownerNavItems: DashboardNavItem[] = [
     { id: 'status', label: 'Estado', accent: 'accent-3', mobileBarWidthClass: 'w-20' },
@@ -118,6 +120,10 @@ export class CompanyOnboardingComponent implements OnInit {
     this.loadProjectDevelopmentTypes();
   }
 
+  ngOnDestroy(): void {
+    this.stopProjectsPolling();
+  }
+
   get isCompanyMemberView(): boolean {
     return this.sessionUser?.roleName === 'USUARIOS_EMPRESA';
   }
@@ -160,6 +166,14 @@ export class CompanyOnboardingComponent implements OnInit {
 
   get hasProjects(): boolean {
     return this.projects.length > 0;
+  }
+
+  get pendingProjectsCount(): number {
+    return this.projects.filter(project => project.estimationStatus === 'PENDING' || project.requirementsStatus === 'PENDING').length;
+  }
+
+  get hasPendingProjects(): boolean {
+    return this.pendingProjectsCount > 0;
   }
 
   get companyDomain(): string {
@@ -550,6 +564,7 @@ export class CompanyOnboardingComponent implements OnInit {
         this.resetProjectForm();
         this.isProjectCreatePanelOpen = false;
         this.projects = [project, ...this.projects.filter(item => item.id !== project.id)];
+        this.syncProjectsPolling();
         this.openProject(project.id);
         this.uiToastService.success(`Proyecto ${project.name} creado. La IA quedo procesando requerimientos y estimacion en segundo plano.`);
       },
@@ -757,10 +772,12 @@ export class CompanyOnboardingComponent implements OnInit {
       .afterClosed()
       .subscribe((project: ProjectDetail | null | undefined) => {
         if (!project) {
+          this.loadProjects(false);
           return;
         }
         this.selectedProject = project;
         this.projects = this.projects.map(item => item.id === project.id ? this.toProjectSummary(project) : item);
+        this.syncProjectsPolling();
       }
     );
   }
@@ -833,11 +850,15 @@ export class CompanyOnboardingComponent implements OnInit {
     }
     if (tab === 'projects') {
       this.loadProjects();
+      return;
     }
+    this.stopProjectsPolling();
   }
 
-  private loadProjects(): void {
-    this.isProjectsLoading = true;
+  private loadProjects(showLoader = true): void {
+    if (showLoader) {
+      this.isProjectsLoading = true;
+    }
     this.projectService.listProjects().subscribe({
       next: projects => {
         this.projects = [...projects].sort((a, b) => b.id - a.id);
@@ -845,9 +866,11 @@ export class CompanyOnboardingComponent implements OnInit {
         if (!this.projects.some(project => project.id === this.selectedProject?.id)) {
           this.selectedProject = null;
         }
+        this.syncProjectsPolling();
       },
       error: error => {
         this.isProjectsLoading = false;
+        this.stopProjectsPolling();
         this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos cargar los proyectos de la empresa.'));
       }
     });
@@ -1161,6 +1184,28 @@ export class CompanyOnboardingComponent implements OnInit {
       return 'app-status-warning';
     }
     return 'app-status-success';
+  }
+
+  private syncProjectsPolling(): void {
+    if (this.activeTab !== 'projects' || !this.hasPendingProjects) {
+      this.stopProjectsPolling();
+      return;
+    }
+    this.scheduleProjectsPoll();
+  }
+
+  private scheduleProjectsPoll(): void {
+    this.stopProjectsPolling();
+    this.projectsPollHandle = setTimeout(() => {
+      this.loadProjects(false);
+    }, CompanyOnboardingComponent.PROJECTS_POLL_INTERVAL_MS);
+  }
+
+  private stopProjectsPolling(): void {
+    if (this.projectsPollHandle) {
+      clearTimeout(this.projectsPollHandle);
+      this.projectsPollHandle = null;
+    }
   }
 
   private applyCreateFieldErrorsFromResponse(error: unknown): boolean {

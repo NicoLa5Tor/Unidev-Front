@@ -6,6 +6,7 @@ import {
   CreateProjectDto,
   Project,
   ProjectDetail,
+  ProjectRequirementAssistantMessageDto,
   ProjectDevelopmentTypeOption,
   UpdateProjectRequirementDto
 } from '../../../shared/models/project.model';
@@ -37,4 +38,17 @@ export class ProjectService {
   updateRequirement(projectId: number, requirementId: number, payload: UpdateProjectRequirementDto) {
     return this.http.put<ProjectDetail>(`${this.projectsUrl}/${projectId}/requirements/${requirementId}`, payload);
   }
+
+  sendRequirementAssistantMessage(projectId: number, requirementId: number, payload: ProjectRequirementAssistantMessageDto) {
+    return this.http.post<ProjectDetail>(`${this.projectsUrl}/${projectId}/requirements/${requirementId}/assistant/messages`, payload);
+  }
+
+  applyRequirementAssistantSuggestion(projectId: number, requirementId: number) {
+    return this.http.post<ProjectDetail>(`${this.projectsUrl}/${projectId}/requirements/${requirementId}/assistant/apply`, {});
+  }
+
+  retryAi(projectId: number) {
+    return this.http.post<ProjectDetail>(`${this.projectsUrl}/${projectId}/retry-ai`, {});
+  }
+
 }

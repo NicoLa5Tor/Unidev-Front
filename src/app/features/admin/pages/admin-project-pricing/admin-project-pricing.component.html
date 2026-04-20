@@ -14,14 +14,6 @@
     Nueva tarifa
   </button>
 
-  <button
-    dashboard-header-actions
-    class="rounded-full border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/15 px-3 py-1 font-tech text-[var(--accent-2)]"
-    (click)="openCreateLevelEditor()"
-  >
-    Nuevo nivel
-  </button>
-
   <a
     dashboard-header-actions
     routerLink="/admin/users"
@@ -36,14 +28,6 @@
     (click)="openCreateEditor()"
   >
     Tarifa
-  </a>
-
-  <a
-    dashboard-header-actions-mobile
-    class="rounded-full border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/15 px-3 py-1 font-tech text-[var(--accent-2)]"
-    (click)="openCreateLevelEditor()"
-  >
-    Nivel
   </a>
 
   <section *ngIf="activeTab === 'rates'" class="space-y-6">
@@ -225,7 +209,10 @@
           <div class="mt-5 space-y-3 text-sm text-[var(--muted)]">
             <p><span class="text-[var(--text)]">Codigo:</span> {{ selectedLevel.code }}</p>
             <p><span class="text-[var(--text)]">Estado:</span> {{ selectedLevel.active ? 'Activo' : 'Inactivo' }}</p>
+            <p><span class="text-[var(--text)]">Productividad:</span> {{ selectedLevel.productivityPercentage }}%</p>
             <p><span class="text-[var(--text)]">Descripcion:</span> {{ selectedLevel.description || 'Sin descripcion' }}</p>
+            <p><span class="text-[var(--text)]">Actualizado:</span> {{ selectedLevel.updatedAt ? (selectedLevel.updatedAt | date:'dd/MM/yyyy HH:mm') : 'Sin registro' }}</p>
+            <p><span class="text-[var(--text)]">Actualizado por:</span> {{ selectedLevel.updatedBy || 'Sin registro' }}</p>
           </div>
 
           <div class="mt-6 flex flex-wrap gap-3">
@@ -233,7 +220,7 @@
               class="rounded-xl border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/15 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[var(--accent-2)]"
               (click)="editLevel(selectedLevel)"
             >
-              Editar nivel
+              Ajustar productividad
             </button>
           </div>
         </ng-container>
@@ -332,19 +319,26 @@
         <div>
           <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-2)]">Editor</p>
           <h2 class="mt-2 text-2xl font-cyber text-[var(--text)]">
-            {{ levelEditorMode === 'edit' ? 'Editar nivel' : 'Crear nivel' }}
+            Editar nivel existente
           </h2>
         </div>
-        <button
-          type="button"
-          class="rounded-full border border-[color:var(--panel-border)] bg-black/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-[var(--muted)]"
-          (click)="openCreateLevelEditor()"
-        >
-          Limpiar
-        </button>
       </div>
 
       <div class="mt-6 grid gap-4 md:grid-cols-2">
+        <label class="space-y-2 text-sm text-[var(--muted)] md:col-span-2">
+          <span>Nivel existente</span>
+          <select
+            [ngModel]="selectedLevel?.id ?? null"
+            (ngModelChange)="selectLevelFromEditor($event)"
+            [ngModelOptions]="{ standalone: true }"
+            class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-2)]/60 focus:outline-none"
+          >
+            <option [ngValue]="null">Selecciona un nivel</option>
+            <option *ngFor="let level of levels" [ngValue]="level.id">{{ level.displayName }} · {{ level.code }}</option>
+          </select>
+          <p class="text-xs text-[var(--muted)]">Este listado se consume desde la base de datos igual que el selector de tarifas.</p>
+        </label>
+
         <label class="space-y-2 text-sm text-[var(--muted)]">
           <span>Codigo</span>
           <input [(ngModel)]="levelEditor.code" name="levelCode" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-2)]/60 focus:outline-none" />
@@ -358,6 +352,11 @@
         <label class="space-y-2 text-sm text-[var(--muted)] md:col-span-2">
           <span>Descripcion</span>
           <textarea [(ngModel)]="levelEditor.description" name="levelDescription" rows="4" class="w-full rounded-3xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-sm text-[var(--text)] focus:border-[color:var(--accent-2)]/60 focus:outline-none"></textarea>
+        </label>
+
+        <label class="space-y-2 text-sm text-[var(--muted)]">
+          <span>Productividad (%)</span>
+          <input [(ngModel)]="levelEditor.productivityPercentage" name="levelProductivityPercentage" type="number" min="1" step="0.01" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-2)]/60 focus:outline-none" />
         </label>
 
         <label class="inline-flex items-center gap-3 text-sm text-[var(--muted)] md:col-span-2">
@@ -377,7 +376,7 @@
           class="rounded-xl border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/15 px-5 py-3 text-xs uppercase tracking-[0.2em] text-[var(--accent-2)]"
           [disabled]="isSavingLevel"
         >
-          {{ isSavingLevel ? 'Guardando...' : levelEditorMode === 'edit' ? 'Actualizar nivel' : 'Crear nivel' }}
+          {{ isSavingLevel ? 'Guardando...' : 'Actualizar nivel' }}
         </button>
       </div>
     </form>
@@ -386,7 +385,8 @@
       <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-2)]">Ayuda</p>
       <div class="mt-4 space-y-4 text-sm text-[var(--muted)]">
         <p>Los niveles son el catalogo base del pricing. Por defecto arrancan en `JUNIOR`, `MIDDLE` y `SENIOR`.</p>
-        <p>Las tarifas ya no inventan su propio tipo: siempre cuelgan de uno de estos niveles.</p>
+        <p>Las tarifas ya no inventan su propio tipo: siempre cuelgan de uno de estos niveles ya existentes.</p>
+        <p>La productividad 100% representa el baseline. Un valor mayor reduce las horas calculadas para ese nivel.</p>
       </div>
     </aside>
   </section>
