@@ -6,7 +6,8 @@ export const environment = {
   features: {
     enableAnalytics: false,
     enableNotifications: true,
-    enableOfflineMode: false
+    enableOfflineMode: false,
+    enableProjectFormExamples: true
   },
   unicornEmbed: {
     scriptUrl:

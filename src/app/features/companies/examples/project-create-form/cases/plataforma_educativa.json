@@ -1,0 +1,14 @@
+{
+  "name": "Plataforma educativa con cursos, evaluaciones y panel docente",
+  "businessObjective": "Digitalizar la oferta academica, permitir seguimiento del aprendizaje y reducir procesos manuales de publicacion de contenidos y evaluaciones.",
+  "targetUsers": "Estudiantes, docentes, coordinadores academicos y administradores.",
+  "mainModules": "Catalogo de cursos, lecciones, evaluaciones, progreso, panel docente, roles, inscripciones, notificaciones y reportes academicos.",
+  "integrations": "Correo, video embebido o plataforma de streaming, pagos opcionales para cursos premium.",
+  "platforms": "Web, panel docente web, acceso responsive para estudiantes.",
+  "deliveryDeadline": "Lanzamiento piloto en 12 semanas con 3 cursos iniciales.",
+  "technicalConstraints": "Debe soportar contenido multimedia, progreso por usuario, permisos por rol y evaluaciones con resultados historicos.",
+  "description": "El proyecto requiere una plataforma donde los estudiantes puedan inscribirse en cursos, consumir lecciones, presentar evaluaciones y ver su progreso. Los docentes deben gestionar contenido, publicar materiales y revisar resultados. La coordinacion academica necesita indicadores, control de grupos y trazabilidad de actividad. Debe existir una experiencia clara para estudiantes y una operacion interna util para el equipo academico.",
+  "budgetAmount": "70000000",
+  "developmentTypeSuggestedCode": "HIBRIDO",
+  "developmentTypeSuggestedLabel": "Hibrido"
+}

@@ -1,0 +1,14 @@
+{
+  "name": "ERP interno para inventario, compras y reportes",
+  "businessObjective": "Ordenar la operacion interna, controlar inventario y mejorar la trazabilidad de compras, movimientos y reportes gerenciales.",
+  "targetUsers": "Administradores, personal de compras, almacenistas, coordinadores operativos y gerencia.",
+  "mainModules": "Inventario, compras, proveedores, movimientos, aprobaciones, reportes, roles y permisos, alertas de stock y panel administrativo.",
+  "integrations": "ERP legado o importacion por archivos, correo, exportacion a Excel o PDF.",
+  "platforms": "Web interna, panel administrativo corporativo.",
+  "deliveryDeadline": "Primera fase en 10 semanas con modulos criticos de inventario y compras.",
+  "technicalConstraints": "Debe manejar permisos por rol, historicos auditables, importacion de datos inicial y reglas de aprobacion sin perder trazabilidad.",
+  "description": "Se necesita una plataforma interna para controlar productos, stock, entradas, salidas, ordenes de compra, proveedores y aprobaciones de movimientos. La gerencia debe consultar reportes por periodo, categoria y sede. El sistema debe guardar trazabilidad de cambios, manejar roles, generar alertas por faltantes y permitir carga inicial o sincronizacion parcial con fuentes externas.",
+  "budgetAmount": "65000000",
+  "developmentTypeSuggestedCode": "WEB",
+  "developmentTypeSuggestedLabel": "Web"
+}

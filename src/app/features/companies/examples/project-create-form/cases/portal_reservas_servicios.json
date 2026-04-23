@@ -1,0 +1,14 @@
+{
+  "name": "Portal de reservas para agenda de servicios",
+  "businessObjective": "Automatizar la toma de reservas, reducir llamadas manuales y mejorar la ocupacion de la agenda.",
+  "targetUsers": "Clientes finales, recepcionistas, administradores de agenda y coordinadores operativos.",
+  "mainModules": "Agenda publica, seleccion de servicio, disponibilidad, reserva, recordatorios, calendario interno, reasignacion de citas, reportes de ocupacion y panel admin.",
+  "integrations": "Correo, WhatsApp, calendario externo opcional, pasarela de pago para abonos.",
+  "platforms": "Web publica, panel interno web responsive.",
+  "deliveryDeadline": "Salida en 6 semanas para iniciar pruebas con una sede principal.",
+  "technicalConstraints": "Debe manejar zonas horarias simples, evitar dobles reservas y permitir configuracion flexible de horarios por sede o profesional.",
+  "description": "El sistema debe permitir que los clientes consulten disponibilidad real, reserven un servicio, reciban confirmacion y puedan reprogramar bajo ciertas reglas. Internamente el personal debe ver la agenda por dia, mover reservas, bloquear horarios, configurar servicios y revisar indicadores de ocupacion. Debe contemplar estados de cita, recordatorios, cupos y reglas minimas para evitar solapamientos.",
+  "budgetAmount": "22000000",
+  "developmentTypeSuggestedCode": "WEB",
+  "developmentTypeSuggestedLabel": "Web"
+}

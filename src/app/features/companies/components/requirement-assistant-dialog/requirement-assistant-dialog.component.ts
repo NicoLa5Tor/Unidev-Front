@@ -14,6 +14,7 @@ import { UiToastService } from '../../../../shared/services/ui-toast.service';
 export interface RequirementAssistantDialogData {
   projectId: number;
   requirement: ProjectRequirement;
+  requirementIndex?: number;
 }
 
 @Component({
@@ -44,6 +45,11 @@ export class RequirementAssistantDialogComponent {
 
   get messages(): ProjectRequirementAssistantMessage[] {
     return this.requirement.assistantMessages ?? [];
+  }
+
+  get requirementDisplayLabel(): string {
+    const index = this.data.requirementIndex ?? -1;
+    return index >= 0 ? `Requerimiento ${index + 1}` : 'Requerimiento';
   }
 
   close(): void {

@@ -1,0 +1,14 @@
+{
+  "name": "Landing comercial editable para captacion de clientes",
+  "businessObjective": "Captar clientes potenciales, mostrar propuesta de valor clara y permitir que el equipo comercial actualice contenido sin depender de desarrollo.",
+  "targetUsers": "Clientes finales, visitantes nuevos, equipo comercial y administrador de marketing.",
+  "mainModules": "Landing publica, formulario de contacto, secciones de servicios, testimonios, preguntas frecuentes, panel admin para editar textos, imagenes y orden de bloques.",
+  "integrations": "WhatsApp, correo transaccional, Google Maps embebido, formulario de contacto.",
+  "platforms": "Web publica, panel admin web responsive.",
+  "deliveryDeadline": "Primera version en 4 semanas con salida comercial inmediata.",
+  "technicalConstraints": "Debe cargar rapido en mobile, permitir edicion simple de contenido y evitar dependencias complejas de terceros.",
+  "description": "El proyecto consiste en una landing comercial para mostrar servicios de la empresa, beneficios, preguntas frecuentes, ubicacion y formularios de contacto. El equipo interno debe poder editar titulos, textos, imagenes, banners, testimonios y llamadas a la accion desde un panel administrativo sencillo. El sitio debe estar optimizado para mobile, incluir seguimiento basico de conversiones y permitir publicar cambios sin intervencion tecnica.",
+  "budgetAmount": "12000000",
+  "developmentTypeSuggestedCode": "WEB",
+  "developmentTypeSuggestedLabel": "Web"
+}

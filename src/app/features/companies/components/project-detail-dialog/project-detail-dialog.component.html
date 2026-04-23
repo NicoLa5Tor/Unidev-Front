@@ -251,9 +251,9 @@
       <div class="flex items-start justify-between gap-4">
         <div>
           <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-1)]">Requerimientos</p>
-          <h4 class="mt-2 text-lg font-semibold text-[var(--text)]">Items editables</h4>
+          <h4 class="mt-2 text-lg font-semibold text-[var(--text)]">Items generados por IA</h4>
           <p class="mt-2 text-sm leading-6 text-[var(--muted)]">
-            Puedes corregir cualquier requerimiento. Al guardar uno, se limpia la estimacion anterior y se dispara una nueva reestimacion del proyecto.
+            Aquí solo revisas el resultado, activas o excluyes items y conversas con la IA. El contenido del requerimiento se ajusta desde el asistente, no por edición manual directa.
           </p>
         </div>
         <div class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel)] px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
@@ -268,22 +268,50 @@
           [ngClass]="requirement.active
             ? 'border-[color:var(--panel-border)] bg-[var(--panel)]'
             : 'border-[color:color-mix(in srgb,var(--panel-border) 70%,transparent)] bg-[color:color-mix(in srgb,var(--panel) 82%,black)] opacity-80'">
-          <div class="flex flex-col gap-4 border-b border-[color:var(--panel-border)] pb-4 lg:flex-row lg:items-start lg:justify-between">
-            <div class="space-y-2">
-              <div class="flex flex-wrap items-center gap-2">
-                <span class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-1)]">Requerimiento {{ requirement.id }}</span>
-                <span class="rounded-full border px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em]" [ngClass]="requirement.active ? 'app-status-success' : 'app-status-warning'">
-                  {{ requirement.active ? 'Activo' : 'Excluido del estimado' }}
-                </span>
-              </div>
-              <p class="max-w-2xl text-sm leading-6 text-[var(--muted)]">
-                {{ requirement.active
-                  ? 'Edita este item, conversa con la IA y guarda cambios para recalcular el proyecto.'
-                  : 'Este item queda fuera de la estimacion y de la publicacion mientras siga deshabilitado.' }}
-              </p>
-            </div>
+          <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <button
+              type="button"
+              class="min-w-0 flex-1 text-left"
+              (click)="toggleRequirementExpansion(requirement)"
+            >
+              <div class="space-y-3">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-1)]">{{ requirementLabel(requirement) }}</span>
+                  <span class="rounded-full border px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em]" [ngClass]="requirement.active ? 'app-status-success' : 'app-status-warning'">
+                    {{ requirement.active ? 'Activo' : 'Excluido del estimado' }}
+                  </span>
+                  <span class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+                    {{ isRequirementExpanded(requirement) ? 'Ocultar' : 'Ver detalle' }}
+                  </span>
+                </div>
 
-            <div class="flex flex-wrap items-center gap-3">
+                <div class="space-y-2">
+                  <p class="text-base font-semibold text-[var(--text)]">{{ requirement.title || 'Sin titulo' }}</p>
+                  <p class="max-w-3xl text-sm leading-6 text-[var(--muted)]">
+                    {{ requirement.description || 'Sin descripcion generada.' }}
+                  </p>
+                </div>
+
+                <div class="grid gap-3 md:grid-cols-3">
+                  <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3">
+                    <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Horas base</p>
+                    <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ requirement.active ? (requirement.estimatedHours ?? 'Pendiente') : 'Excluido' }}</p>
+                  </div>
+                  <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3">
+                    <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Prioridad</p>
+                    <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ requirement.priority || 'Sin prioridad' }}</p>
+                  </div>
+                  <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3">
+                    <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Asistente IA</p>
+                    <p class="mt-2 text-sm font-semibold text-[var(--text)]">
+                      {{ requirement.assistantSuggestion ? 'Propuesta lista' : (requirement.assistantMessages.length ? 'Hilo activo' : 'Sin actividad') }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </button>
+
+            <div class="flex flex-wrap items-center gap-3 lg:pl-4">
               <button
                 type="button"
                 [disabled]="updatingRequirementId === requirement.id"
@@ -298,59 +326,55 @@
                     : (requirement.active ? 'Deshabilitar requerimiento' : 'Reactivar requerimiento')
                 }}
               </button>
-
-              <button
-                type="button"
-                [disabled]="updatingRequirementId === requirement.id"
-                class="inline-flex items-center justify-center rounded-full bg-[var(--accent-1)] px-5 py-3 font-tech text-sm uppercase tracking-[0.22em] text-[var(--bg)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-                (click)="saveRequirement(requirement)">
-                {{ updatingRequirementId === requirement.id ? 'Guardando...' : 'Guardar cambios' }}
-              </button>
             </div>
           </div>
 
-          <div class="mt-5 grid gap-4 md:grid-cols-2">
-            <label class="space-y-2 md:col-span-2">
+          <div *ngIf="isRequirementExpanded(requirement)" class="mt-5 border-t border-[color:var(--panel-border)] pt-5">
+          <div class="grid gap-4 md:grid-cols-2">
+            <div class="space-y-2 md:col-span-2">
               <span class="block text-xs font-tech uppercase tracking-[0.18em] text-[var(--muted)]">Titulo</span>
-              <input [ngModel]="getRequirementDraft(requirement).title" (ngModelChange)="getRequirementDraft(requirement).title = $event" [ngModelOptions]="{ standalone: true }" type="text" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]" />
-            </label>
+              <div class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)]">
+                {{ requirement.title || 'Sin titulo' }}
+              </div>
+            </div>
 
-            <label class="space-y-2 md:col-span-2">
+            <div class="space-y-2 md:col-span-2">
               <span class="block text-xs font-tech uppercase tracking-[0.18em] text-[var(--muted)]">Descripcion</span>
-              <textarea [ngModel]="getRequirementDraft(requirement).description" (ngModelChange)="getRequirementDraft(requirement).description = $event" [ngModelOptions]="{ standalone: true }" rows="3" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]"></textarea>
-            </label>
+              <div class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm leading-6 text-[var(--text)]">
+                {{ requirement.description || 'Sin descripcion' }}
+              </div>
+            </div>
 
-            <label class="space-y-2">
+            <div class="space-y-2">
               <span class="block text-xs font-tech uppercase tracking-[0.18em] text-[var(--muted)]">Prioridad</span>
-              <select [ngModel]="getRequirementDraft(requirement).priority" (ngModelChange)="getRequirementDraft(requirement).priority = $event" [ngModelOptions]="{ standalone: true }" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]">
-                <option value="">Sin prioridad</option>
-                <option value="alta">Alta</option>
-                <option value="media">Media</option>
-                <option value="baja">Baja</option>
-              </select>
-            </label>
+              <div class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)]">
+                {{ requirement.priority || 'Sin prioridad' }}
+              </div>
+            </div>
 
-            <label class="space-y-2">
+            <div class="space-y-2">
               <span class="block text-xs font-tech uppercase tracking-[0.18em] text-[var(--muted)]">Usuario involucrado</span>
-              <input [ngModel]="getRequirementDraft(requirement).involvedUser" (ngModelChange)="getRequirementDraft(requirement).involvedUser = $event" [ngModelOptions]="{ standalone: true }" type="text" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]" />
-            </label>
+              <div class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)]">
+                {{ requirement.involvedUser || 'Sin actor definido' }}
+              </div>
+            </div>
 
-            <label class="space-y-2">
-              <span class="block text-xs font-tech uppercase tracking-[0.18em] text-[var(--muted)]">Juniors asignados</span>
-              <input [ngModel]="getRequirementDraft(requirement).devNumber" (ngModelChange)="getRequirementDraft(requirement).devNumber = $event" [ngModelOptions]="{ standalone: true }" type="number" min="1" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] outline-none transition focus:border-[color:var(--accent-2)]" />
-            </label>
+            <div class="space-y-2">
+              <span class="block text-xs font-tech uppercase tracking-[0.18em] text-[var(--muted)]">Developers asignados</span>
+              <div class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)]">
+                {{ requirement.devNumber || 1 }}
+              </div>
+            </div>
 
             <div class="space-y-2">
               <span class="block text-xs font-tech uppercase tracking-[0.18em] text-[var(--muted)]">Flags</span>
               <div class="flex flex-wrap gap-3 rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)]">
-                <label class="inline-flex items-center gap-2">
-                  <input type="checkbox" [checked]="getRequirementDraft(requirement).hasExternalConnection" (change)="getRequirementDraft(requirement).hasExternalConnection = $any($event.target).checked" />
-                  Integracion externa
-                </label>
-                <label class="inline-flex items-center gap-2">
-                  <input type="checkbox" [checked]="getRequirementDraft(requirement).requiresVisualScreen" (change)="getRequirementDraft(requirement).requiresVisualScreen = $any($event.target).checked" />
-                  Pantalla visual
-                </label>
+                <span class="rounded-full border border-[color:var(--panel-border)] px-3 py-1">
+                  {{ requirement.hasExternalConnection ? 'Integracion externa' : 'Sin integracion externa' }}
+                </span>
+                <span class="rounded-full border border-[color:var(--panel-border)] px-3 py-1">
+                  {{ requirement.requiresVisualScreen ? 'Pantalla visual' : 'Sin pantalla visual' }}
+                </span>
               </div>
             </div>
           </div>
@@ -421,6 +445,7 @@
                 </div>
               </ng-container>
             </div>
+          </div>
           </div>
         </div>
       </div>

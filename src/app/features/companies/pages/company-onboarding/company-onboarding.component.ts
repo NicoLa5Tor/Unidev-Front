@@ -18,6 +18,8 @@ import { SessionUser } from '../../../../shared/models/session-user.model';
 import { CompanyAllowedEmail } from '../../../../shared/models/company-access.model';
 import { ProjectDetailDialogComponent } from '../../components/project-detail-dialog/project-detail-dialog.component';
 import { CompanyFormModel, ProjectCreateFormModel } from './company-onboarding.types';
+import { environment } from '../../../../../environments/environment';
+import { PROJECT_CREATE_FORM_EXAMPLES, ProjectCreateFormExample } from '../../examples/project-create-form/project-create-form-examples';
 
 type CompanyTab = 'status' | 'profile' | 'projects' | 'access';
 type MessageState = { type: 'success' | 'error'; text: string } | null;
@@ -54,6 +56,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   message: MessageState = null;
   createFieldErrors: Partial<Record<CreateField, string>> = {};
   projectCreateErrors: Partial<Record<ProjectCreateField, string>> = {};
+  projectFormExampleId = '';
   sessionUser: SessionUser | null = null;
   currentCompany: Company | null = null;
   allowedEmails: CompanyAllowedEmail[] = [];
@@ -106,6 +109,8 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     developmentTypeId: '',
     budgetAmount: ''
   };
+  readonly projectFormExamplesEnabled = !!environment.features.enableProjectFormExamples;
+  readonly projectFormExamples: ProjectCreateFormExample[] = PROJECT_CREATE_FORM_EXAMPLES;
 
   constructor(
     private readonly companyService: CompanyService,
@@ -174,6 +179,10 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
 
   get hasPendingProjects(): boolean {
     return this.pendingProjectsCount > 0;
+  }
+
+  get selectedProjectFormExample(): ProjectCreateFormExample | null {
+    return this.projectFormExamples.find(example => example.id === this.projectFormExampleId) ?? null;
   }
 
   get companyDomain(): string {
@@ -786,6 +795,34 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     this.isProjectCreatePanelOpen = !this.isProjectCreatePanelOpen;
   }
 
+  applyProjectFormExample(exampleId: string): void {
+    this.projectFormExampleId = exampleId;
+    const example = this.selectedProjectFormExample;
+    if (!example) {
+      return;
+    }
+
+    this.projectForm.name = example.values.name;
+    this.projectForm.businessObjective = example.values.businessObjective;
+    this.projectForm.targetUsers = example.values.targetUsers;
+    this.projectForm.mainModules = example.values.mainModules;
+    this.projectForm.integrations = example.values.integrations;
+    this.projectForm.platforms = example.values.platforms;
+    this.projectForm.deliveryDeadline = example.values.deliveryDeadline;
+    this.projectForm.technicalConstraints = example.values.technicalConstraints;
+    this.projectForm.description = example.values.description;
+    this.projectForm.budgetAmount = example.values.budgetAmount;
+
+    const matchedType = this.projectDevelopmentTypes.find(type =>
+      type.code?.trim().toUpperCase() === example.values.developmentTypeSuggestedCode
+      || type.displayName?.trim().toUpperCase() === example.values.developmentTypeSuggestedLabel.toUpperCase()
+    );
+
+    this.projectForm.developmentTypeId = matchedType ? String(matchedType.id) : '';
+    this.projectCreateErrors = {};
+    this.uiToastService.success(`Ejemplo cargado: ${example.label}`);
+  }
+
   private loadViewData(): void {
     this.isLoading = true;
     this.message = null;
@@ -1118,6 +1155,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     this.projectForm.deliveryDeadline = '';
     this.projectForm.developmentTypeId = '';
     this.projectForm.budgetAmount = '';
+    this.projectFormExampleId = '';
     this.projectCreateErrors = {};
   }
 

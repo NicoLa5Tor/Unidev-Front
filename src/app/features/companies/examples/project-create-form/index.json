@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "description": "Ejemplos para llenar el formulario de creacion de proyectos del panel de empresa.",
+  "examples": [
+    {
+      "id": "landing_admin_contenido",
+      "label": "Landing editable con panel admin",
+      "path": "cases/landing_admin_contenido.json"
+    },
+    {
+      "id": "ecommerce_pedidos_pagos",
+      "label": "Ecommerce con pagos y pedidos",
+      "path": "cases/ecommerce_pedidos_pagos.json"
+    },
+    {
+      "id": "portal_reservas_servicios",
+      "label": "Portal de reservas y agenda",
+      "path": "cases/portal_reservas_servicios.json"
+    },
+    {
+      "id": "erp_operacion_interna",
+      "label": "ERP operativo interno",
+      "path": "cases/erp_operacion_interna.json"
+    },
+    {
+      "id": "plataforma_educativa",
+      "label": "Plataforma educativa con paneles",
+      "path": "cases/plataforma_educativa.json"
+    },
+    {
+      "id": "mesa_ayuda_clientes",
+      "label": "Portal de soporte y tickets",
+      "path": "cases/mesa_ayuda_clientes.json"
+    }
+  ]
+}

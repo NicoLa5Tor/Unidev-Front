@@ -1,0 +1,14 @@
+{
+  "name": "Portal de soporte con tickets y seguimiento al cliente",
+  "businessObjective": "Centralizar solicitudes de soporte, mejorar tiempos de respuesta y dar trazabilidad al estado de cada caso.",
+  "targetUsers": "Clientes finales, agentes de soporte, supervisores y administradores.",
+  "mainModules": "Creacion de tickets, bandeja de soporte, estados, prioridades, comentarios, archivos adjuntos, base de conocimiento y reportes de atencion.",
+  "integrations": "Correo, WhatsApp, carga de archivos, notificaciones internas.",
+  "platforms": "Web publica para clientes, panel interno web para agentes y supervisores.",
+  "deliveryDeadline": "Version operativa en 6 semanas con equipo de soporte inicial.",
+  "technicalConstraints": "Debe permitir adjuntos, historial completo del caso, filtros por estado y prioridad, y notificaciones claras para cliente y agente.",
+  "description": "Se necesita un portal donde los clientes puedan registrar incidencias, consultar el estado del caso y responder a solicitudes del equipo de soporte. Internamente los agentes deben clasificar, priorizar, reasignar y resolver tickets con trazabilidad completa. El sistema debe manejar comentarios, adjuntos, estados, acuerdos de respuesta simples y reportes de volumen, tiempos y tipos de incidencia.",
+  "budgetAmount": "28000000",
+  "developmentTypeSuggestedCode": "WEB",
+  "developmentTypeSuggestedLabel": "Web"
+}

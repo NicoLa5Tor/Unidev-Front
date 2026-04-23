@@ -1,0 +1,14 @@
+{
+  "name": "Tienda online con pedidos, pagos y panel de operacion",
+  "businessObjective": "Vender productos en linea, centralizar pedidos y reducir trabajo manual del equipo comercial y logistico.",
+  "targetUsers": "Clientes finales, operadores internos, administradores de catalogo, personal de soporte y coordinadores logisticos.",
+  "mainModules": "Catalogo, detalle de producto, carrito, checkout, pagos, estados de pedido, panel admin, gestion de clientes, promociones y reportes basicos.",
+  "integrations": "Pasarela de pagos, correo transaccional, WhatsApp, operador logistico o integracion de envios, Google Analytics.",
+  "platforms": "Web publica para clientes, panel admin web para operacion interna.",
+  "deliveryDeadline": "MVP comercial en 8 semanas y estabilizacion operativa en 10 semanas.",
+  "technicalConstraints": "Debe soportar inventario basico, validaciones de pago, seguimiento de pedidos y control de estados sin caidas en momentos de alta demanda.",
+  "description": "Se requiere una tienda online donde el cliente pueda navegar productos, filtrar categorias, agregar productos al carrito, pagar y consultar el estado del pedido. Internamente la empresa debe administrar catalogo, stock, clientes, descuentos y pedidos desde un panel administrativo. El flujo debe incluir confirmaciones por correo, manejo de errores de pago, control de estados, historial de pedidos y reportes simples de ventas y conversiones.",
+  "budgetAmount": "45000000",
+  "developmentTypeSuggestedCode": "WEB",
+  "developmentTypeSuggestedLabel": "Web"
+}
