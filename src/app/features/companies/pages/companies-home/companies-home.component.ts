@@ -433,6 +433,8 @@ export class CompaniesHomeComponent implements AfterViewInit, OnDestroy {
       fieldErrors.domain = this.organizationType === 'UNIVERSITY'
         ? 'Escribe el dominio institucional.'
         : 'Escribe el dominio empresarial.';
+    } else if (this.organizationType === 'UNIVERSITY' && !this.isValidUniversityDomain(domain)) {
+      fieldErrors.domain = 'El dominio institucional debe ser academico, por ejemplo .edu.co.';
     }
 
     if (!nit) {
@@ -488,6 +490,14 @@ export class CompaniesHomeComponent implements AfterViewInit, OnDestroy {
 
   private isValidEmail(value: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+  }
+
+  protected isValidUniversityDomain(value: string): boolean {
+    const normalized = this.normalizeDomain(value);
+    if (!normalized) {
+      return false;
+    }
+    return /\.edu\.co$/i.test(normalized);
   }
 
   private applyOtpFlow(action: string, message: string): void {

@@ -109,6 +109,7 @@ export class CallbackComponent implements OnInit {
       await this.exchangeAuthorizationCode(code, codeVerifier);
       this.statusMessage = 'Recuperando tu sesión...';
       const sessionUser = await this.fetchCurrentUser();
+      this.assertValidSession(sessionUser);
 
       this.error = '';
       this.statusMessage = 'Redirigiendo a tu panel...';
@@ -183,6 +184,18 @@ export class CallbackComponent implements OnInit {
     return await firstValueFrom(this.userSessionService.loadCurrentUser(true));
   }
 
+  private assertValidSession(sessionUser: { roleName?: string } | null): asserts sessionUser is { roleName: string } {
+    if (!sessionUser) {
+      throw new Error('No se pudo recuperar la sesión del usuario autenticado.');
+    }
+
+    if (!sessionUser.roleName || !this.roleRedirects[sessionUser.roleName]) {
+      throw new Error('La sesión se creó, pero no tiene un rol válido para entrar a la plataforma.');
+    }
+
+    this.clearMicrosoftBypass();
+  }
+
   private redirectByRole(roleName?: string): void {
     const target = (roleName && this.roleRedirects[roleName]) || '/';
     setTimeout(() => {
@@ -212,6 +225,14 @@ export class CallbackComponent implements OnInit {
     }
 
     window.localStorage.setItem('microsoft-bypass', 'true');
+  }
+
+  private clearMicrosoftBypass(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.localStorage.removeItem('microsoft-bypass');
   }
 
   private shouldBypassMicrosoftDialog(error: unknown): boolean {

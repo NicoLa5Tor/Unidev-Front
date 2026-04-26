@@ -87,7 +87,6 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   readonly ownerUniversityNavItems: DashboardNavItem[] = [
     { id: 'status', label: 'Campus', accent: 'accent-3', mobileBarWidthClass: 'w-20' },
     { id: 'profile', label: 'Perfil', accent: 'accent-1', mobileBarWidthClass: 'w-20' },
-    { id: 'projects', label: 'Convocatorias', accent: 'accent-4', mobileBarWidthClass: 'w-28' },
     { id: 'access', label: 'Admins', accent: 'accent-2', mobileBarWidthClass: 'w-20' }
   ];
 
@@ -99,8 +98,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
 
   readonly memberUniversityNavItems: DashboardNavItem[] = [
     { id: 'status', label: 'Campus', accent: 'accent-3', mobileBarWidthClass: 'w-20' },
-    { id: 'profile', label: 'Perfil', accent: 'accent-1', mobileBarWidthClass: 'w-20' },
-    { id: 'projects', label: 'Equipos', accent: 'accent-4', mobileBarWidthClass: 'w-20' }
+    { id: 'profile', label: 'Perfil', accent: 'accent-1', mobileBarWidthClass: 'w-20' }
   ];
 
   readonly form: CompanyFormModel = {
@@ -141,7 +139,9 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadViewData();
-    this.loadProjectDevelopmentTypes();
+    if (this.organizationType !== 'UNIVERSITY') {
+      this.loadProjectDevelopmentTypes();
+    }
   }
 
   ngOnDestroy(): void {
@@ -207,7 +207,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   }
 
   get canCreateProjects(): boolean {
-    return !!this.currentCompany && this.isApprovedCompany;
+    return this.organizationType !== 'UNIVERSITY' && !!this.currentCompany && this.isApprovedCompany;
   }
 
   get isProjectCreateDisabled(): boolean {
@@ -515,6 +515,10 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   }
 
   setActiveTab(tabId: string): void {
+    if (this.organizationType === 'UNIVERSITY' && tabId === 'projects') {
+      this.activeTab = 'status';
+      return;
+    }
     if (this.isCompanyMemberView && tabId === 'access') {
       this.activeTab = 'status';
       return;
@@ -611,6 +615,10 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   }
 
   createProject(): void {
+    if (this.organizationType === 'UNIVERSITY') {
+      this.uiToastService.error('Una universidad no puede crear proyectos desde este panel.');
+      return;
+    }
     if (!this.currentCompany || !this.canCreateProjects || this.isCreatingProject) {
       return;
     }
@@ -832,6 +840,9 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   }
 
   openProject(projectId: number): void {
+    if (this.organizationType === 'UNIVERSITY') {
+      return;
+    }
     const summary = this.projects.find(project => project.id === projectId);
     if (!summary) {
       return;
@@ -974,6 +985,9 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   }
 
   private loadTabDataIfNeeded(tab: CompanyTab): void {
+    if (this.organizationType === 'UNIVERSITY' && tab === 'projects') {
+      return;
+    }
     if (this.isCompanyMemberView && tab === 'access') {
       return;
     }
@@ -992,6 +1006,12 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   }
 
   private loadProjects(showLoader = true): void {
+    if (this.organizationType === 'UNIVERSITY') {
+      this.projects = [];
+      this.isProjectsLoading = false;
+      this.stopProjectsPolling();
+      return;
+    }
     if (showLoader) {
       this.isProjectsLoading = true;
     }

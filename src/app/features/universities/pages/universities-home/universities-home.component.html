@@ -253,6 +253,9 @@
             <div class="u-doc__info">
               <strong>Acreditación institucional</strong>
               <span>Certificado legal vigente</span>
+              <span *ngIf="getDocument('LEGAL_CERTIFICATE') as legalDocument" class="u-doc__status">
+                {{ legalDocument.fileName }}
+              </span>
             </div>
             <input type="file" accept=".pdf,.png,.jpg,.jpeg" (change)="uploadDocument($event, 'LEGAL_CERTIFICATE')" />
             <div class="u-doc__cta">Subir</div>
@@ -269,6 +272,9 @@
             <div class="u-doc__info">
               <strong>Documento tributario</strong>
               <span>RUT o equivalente</span>
+              <span *ngIf="getDocument('TAX_DOCUMENT') as taxDocument" class="u-doc__status">
+                {{ taxDocument.fileName }}
+              </span>
             </div>
             <input type="file" accept=".pdf,.png,.jpg,.jpeg" (change)="uploadDocument($event, 'TAX_DOCUMENT')" />
             <div class="u-doc__cta">Subir</div>

@@ -544,9 +544,17 @@ $text-dim: #8ba3c0;
     }
 
     span {
+      display: block;
       font-size: 0.75rem;
       color: $muted;
     }
+  }
+
+  &__status {
+    margin-top: 0.45rem;
+    color: #a7f3d0 !important;
+    line-height: 1.35;
+    word-break: break-word;
   }
 
   &__cta {
