@@ -19,14 +19,14 @@
       <nav class="hidden md:flex items-center space-x-8">
         <ul class="flex items-center space-x-6">
           <li *ngFor="let item of navItems">
-            <a
-              [routerLink]="item.route"
-              [fragment]="item.fragment || undefined"
+            <button
+              type="button"
+              (click)="navigate(item)"
               [class]="isActive(item) ? 'text-purple-400 border-b-2 border-purple-400 pb-1' : 'text-gray-300 hover:text-white transition-colors'"
               class="font-medium"
             >
               {{ item.label }}
-            </a>
+            </button>
           </li>
         </ul>
         
@@ -52,16 +52,15 @@
       <!-- Mobile Menu -->
       <div *ngIf="isMenuOpen" class="md:hidden py-4 border-t border-gray-700">
       <nav class="space-y-4">
-        <a
+        <button
+          type="button"
           *ngFor="let item of navItems"
-          [routerLink]="item.route"
-          [fragment]="item.fragment || undefined"
-          (click)="closeMenu()"
+          (click)="navigate(item); closeMenu()"
           [class]="isActive(item) ? 'text-purple-400' : 'text-gray-300'"
           class="block py-2 hover:text-white transition-colors"
         >
           {{ item.label }}
-        </a>
+        </button>
         <div class="pt-4">
           <a routerLink="/login" class="gradient-button gradient-button--filled w-full">
             <span class="gradient-text gradient-text--opaque">Login</span>

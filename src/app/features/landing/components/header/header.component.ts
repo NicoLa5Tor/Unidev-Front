@@ -22,6 +22,7 @@ export class HeaderComponent implements OnDestroy {
     { label: 'Inicio', route: '/', fragment: 'home' },
     { label: 'Pricing', route: '/pricing' },
     { label: 'Empresas', route: '/companies' },
+    { label: 'Universidades', route: '/universities' },
     { label: 'Estudiantes', route: '/', fragment: 'students' },
     { label: 'Contacto', route: '/', fragment: 'contact' }
   ];
@@ -42,6 +43,12 @@ export class HeaderComponent implements OnDestroy {
 
   toggleMenu(): void {
     this.isMenuOpen = !this.isMenuOpen;
+  }
+
+  navigate(item: HeaderNavItem): void {
+    void this.router.navigate([item.route], {
+      fragment: item.fragment
+    });
   }
 
   closeMenu(): void {

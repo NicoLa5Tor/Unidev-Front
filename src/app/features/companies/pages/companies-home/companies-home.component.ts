@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, NgZone, OnDestroy, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin, Observable, of, switchMap, tap } from 'rxjs';
 
 import { CompanyService } from '../../services/company.service';
@@ -43,7 +43,7 @@ export class CompaniesHomeComponent implements AfterViewInit, OnDestroy {
   private readonly localDocumentUrls: Partial<Record<CompanyRegistrationDocument['documentType'], string>> = {};
   private readonly pendingDocumentFiles: Partial<Record<RegistrationDocumentType, File>> = {};
   message: { type: 'success' | 'error'; text: string } | null = null;
-  readonly steps = [
+  private readonly companySteps = [
     {
       title: 'Solicita el alta de tu empresa',
       description: 'Registra la empresa y el correo del administrador que luego recibira la decision.'
@@ -58,10 +58,31 @@ export class CompaniesHomeComponent implements AfterViewInit, OnDestroy {
     }
   ];
 
-  readonly highlights = [
+  private readonly universitySteps = [
+    {
+      title: 'Registra la universidad',
+      description: 'Da de alta la institucion, el dominio academico y el correo administrativo principal.'
+    },
+    {
+      title: 'Validacion institucional',
+      description: 'UniDev revisa la universidad y deja lista la base administrativa antes de abrir acceso estudiantil.'
+    },
+    {
+      title: 'Activa admins y comunidad',
+      description: 'Despues podras cargar correos administrativos y preparar el acceso institucional por dominio.'
+    }
+  ];
+
+  private readonly companyHighlights = [
     'Registro empresarial con aprobacion manual',
     'Validacion posterior del administrador real por proveedor',
     'Control posterior de accesos por lista blanca'
+  ];
+
+  private readonly universityHighlights = [
+    'Alta institucional separada del flujo empresarial',
+    'Preparado para admins universitarios y acceso por dominio',
+    'Base para perfiles estudiantiles y equipos entre campus'
   ];
 
   readonly form = {
@@ -86,10 +107,81 @@ export class CompaniesHomeComponent implements AfterViewInit, OnDestroy {
   constructor(
     private readonly companyService: CompanyService,
     private readonly router: Router,
+    private readonly route: ActivatedRoute,
     private readonly scriptLoader: ScriptLoaderService,
     private readonly ngZone: NgZone,
     private readonly toast: UiToastService
   ) {}
+
+  get organizationType(): 'COMPANY' | 'UNIVERSITY' {
+    return this.route.snapshot.data['organizationType'] === 'UNIVERSITY' ? 'UNIVERSITY' : 'COMPANY';
+  }
+
+  get organizationLabel(): string {
+    return this.organizationType === 'UNIVERSITY' ? 'universidad' : 'empresa';
+  }
+
+  get organizationTitle(): string {
+    return this.organizationType === 'UNIVERSITY' ? 'Universidades' : 'Empresas';
+  }
+
+  get organizationLabelPlural(): string {
+    return this.organizationType === 'UNIVERSITY' ? 'universidades' : 'empresas';
+  }
+
+  get steps(): Array<{ title: string; description: string }> {
+    return this.organizationType === 'UNIVERSITY' ? this.universitySteps : this.companySteps;
+  }
+
+  get highlights(): string[] {
+    return this.organizationType === 'UNIVERSITY' ? this.universityHighlights : this.companyHighlights;
+  }
+
+  get pageEyebrow(): string {
+    return this.organizationType === 'UNIVERSITY' ? 'Programa campus' : 'Solicitud empresarial';
+  }
+
+  get pageStatusLabel(): string {
+    return this.organizationType === 'UNIVERSITY' ? 'Revision academia' : 'Pendiente admin';
+  }
+
+  get pageDescription(): string {
+    return this.organizationType === 'UNIVERSITY'
+      ? 'Valida el correo administrativo, registra la universidad y deja listo el dominio institucional para futuros accesos de estudiantes y staff.'
+      : 'Primero valida el correo del administrador con un OTP. Solo despues se habilita el formulario institucional.';
+  }
+
+  get heroPill(): string {
+    return this.organizationType === 'UNIVERSITY' ? 'Universidades' : 'Empresas';
+  }
+
+  get heroTitle(): string {
+    return this.organizationType === 'UNIVERSITY'
+      ? 'Activa el frente universitario con un onboarding propio y listo para campus.'
+      : 'Solicita el alta de tu empresa sin perderte en pasos innecesarios.';
+  }
+
+  get heroCopy(): string {
+    return this.organizationType === 'UNIVERSITY'
+      ? 'Esta pantalla no deberia parecer un clon del alta empresarial. Aqui registras la universidad, dejas trazado el dominio academico y preparas la futura capa de admins, estudiantes y equipos.'
+      : 'Esta pantalla ya es el punto de entrada real para registrar la empresa. Envias la solicitud, queda en estado pendiente y luego un administrador la aprueba antes de habilitar accesos y operacion.';
+  }
+
+  get loginCtaLabel(): string {
+    return this.organizationType === 'UNIVERSITY' ? 'Iniciar como universidad' : 'Iniciar como empresa';
+  }
+
+  get registrationStepLabel(): string {
+    return this.organizationType === 'UNIVERSITY' ? 'Universidad' : 'Empresa';
+  }
+
+  get adminEmailLabel(): string {
+    return this.organizationType === 'UNIVERSITY' ? 'correo administrativo principal' : 'correo del administrador';
+  }
+
+  get identifierLabel(): string {
+    return this.organizationType === 'UNIVERSITY' ? 'NIT o identificador institucional' : 'NIT';
+  }
 
   async ngAfterViewInit(): Promise<void> {
     if (typeof window === 'undefined') {
@@ -207,6 +299,7 @@ export class CompaniesHomeComponent implements AfterViewInit, OnDestroy {
         contactPhone: this.toNullable(this.form.contactPhone),
         website: this.toNullable(this.form.website),
         domain: this.normalizeDomain(this.form.domain),
+        organizationType: this.organizationType,
         description: this.toNullable(this.form.description),
         address: this.toNullable(this.form.address),
         onboardingCompleted: false,
@@ -218,7 +311,9 @@ export class CompaniesHomeComponent implements AfterViewInit, OnDestroy {
     ).subscribe({
       next: () => {
         this.isSubmitting = false;
-        const successMessage = 'Solicitud enviada. Un administrador debe aprobar la empresa antes de habilitarla.';
+        const successMessage = this.organizationType === 'UNIVERSITY'
+          ? 'Solicitud enviada. Un administrador debe aprobar la universidad antes de habilitarla.'
+          : 'Solicitud enviada. Un administrador debe aprobar la empresa antes de habilitarla.';
         this.message = { type: 'success', text: successMessage };
         this.toast.success(successMessage);
         this.resetForm();
@@ -329,19 +424,27 @@ export class CompaniesHomeComponent implements AfterViewInit, OnDestroy {
     const contactEmail = this.form.contactEmail.trim().toLowerCase();
 
     if (!companyName) {
-      fieldErrors.companyName = 'Escribe el nombre de la empresa.';
+      fieldErrors.companyName = this.organizationType === 'UNIVERSITY'
+        ? 'Escribe el nombre de la universidad.'
+        : 'Escribe el nombre de la empresa.';
     }
 
     if (!domain) {
-      fieldErrors.domain = 'Escribe el dominio empresarial.';
+      fieldErrors.domain = this.organizationType === 'UNIVERSITY'
+        ? 'Escribe el dominio institucional.'
+        : 'Escribe el dominio empresarial.';
     }
 
     if (!nit) {
-      fieldErrors.nit = 'Escribe el NIT de la empresa.';
+      fieldErrors.nit = this.organizationType === 'UNIVERSITY'
+        ? 'Escribe el identificador institucional.'
+        : 'Escribe el NIT de la empresa.';
     }
 
     if (!contactEmail) {
-      fieldErrors.contactEmail = 'Falta el correo del administrador.';
+      fieldErrors.contactEmail = this.organizationType === 'UNIVERSITY'
+        ? 'Falta el correo administrativo principal.'
+        : 'Falta el correo del administrador.';
     } else if (!this.isValidEmail(contactEmail)) {
       fieldErrors.contactEmail = 'Escribe un correo valido.';
     } else if (this.verifiedEmail && contactEmail !== this.verifiedEmail.toLowerCase()) {
@@ -351,7 +454,9 @@ export class CompaniesHomeComponent implements AfterViewInit, OnDestroy {
     this.companyFieldErrors = fieldErrors;
 
     if (!this.hasDocument('LEGAL_CERTIFICATE') || !this.hasDocument('TAX_DOCUMENT')) {
-      this.companyDocumentsError = 'Debes subir el certificado legal y el documento tributario antes de enviar.';
+      this.companyDocumentsError = this.organizationType === 'UNIVERSITY'
+        ? 'Debes subir la acreditacion legal y el documento tributario o equivalente institucional antes de enviar.'
+        : 'Debes subir el certificado legal y el documento tributario antes de enviar.';
     }
 
     return Object.keys(fieldErrors).length === 0 && !this.companyDocumentsError;

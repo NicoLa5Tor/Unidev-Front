@@ -66,6 +66,8 @@ export class CallbackComponent implements OnInit {
     ADMINISTRADORES: '/admin/users',
     EMPRESAS: '/companies/onboarding',
     USUARIOS_EMPRESA: '/company/workspace',
+    UNIVERSIDADES: '/universities/onboarding',
+    USUARIOS_UNIVERSIDAD: '/university/workspace',
     USUARIOS: '/users'
   };
   private isBypassRedirect = false;

@@ -1,5 +1,13 @@
 <section class="pricing-page">
   <main class="pricing-shell">
+
+    <!-- ── BETA BANNER ── -->
+    <div class="beta-banner" aria-label="Estado beta">
+      <div class="beta-banner__dot" aria-hidden="true"></div>
+      <span>Software en <strong>beta abierta</strong> — acceso completamente gratuito hasta el lanzamiento oficial</span>
+      <span class="beta-banner__tag">BETA</span>
+    </div>
+
     <section class="cards" #cardsContainer aria-label="Planes disponibles">
       <div class="cards__inner">
         <article
@@ -10,11 +18,24 @@
         >
           <p class="card__eyebrow">{{ plan.kicker }}</p>
           <h2 class="card__heading">{{ plan.name }}</h2>
-          <p class="card__price">{{ plan.price }}</p>
-          <p class="card__period">{{ plan.period }}</p>
+
+          <!-- Price block with strikethrough -->
+          <div class="card__price-block">
+            <p class="card__price card__price--strike">{{ plan.price }}</p>
+            <div class="card__free-badge">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <polyline points="3,8 7,12 13,4"/>
+              </svg>
+              Gratis ahora
+            </div>
+          </div>
+
+          <p class="card__period">{{ plan.period }} <span class="card__period-note">· durante el periodo beta</span></p>
+
           <ul role="list" class="card__bullets flow">
             <li *ngFor="let feature of plan.features">{{ feature }}</li>
           </ul>
+
           <a [href]="plan.href" class="card__cta cta">{{ plan.cta }}</a>
         </article>
       </div>
@@ -31,5 +52,10 @@
         </article>
       </div>
     </section>
+
+    <p class="pricing-note">
+      Los precios mostrados corresponden a la tarifa que aplicará al cierre del periodo beta. Por ahora, todo es gratuito.
+    </p>
+
   </main>
 </section>

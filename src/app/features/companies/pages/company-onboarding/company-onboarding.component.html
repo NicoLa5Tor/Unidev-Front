@@ -1,7 +1,7 @@
-<section class="bg-[var(--bg)]">
+<section class="company-onboarding-shell bg-[var(--bg)]" [class.company-onboarding-shell--university]="organizationType === 'UNIVERSITY'">
   <app-dashboard-shell
     [title]="dashboardTitle"
-    eyebrow="Panel de empresa"
+    [eyebrow]="dashboardEyebrow"
     [avatarLabel]="dashboardAvatarLabel"
     [avatarImageUrl]="dashboardAvatarImageUrl"
     [activeTab]="activeTab"
@@ -36,11 +36,27 @@
     </button>
 
     <div
+      *ngIf="organizationType === 'UNIVERSITY'"
+      dashboard-header-actions
+      class="company-onboarding-shell__badge"
+    >
+      Campus
+    </div>
+
+    <div
       *ngIf="companyDomain"
       dashboard-header-actions-mobile
       class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-3 py-1 font-tech text-[var(--muted)]"
     >
       {{ companyDomain }}
+    </div>
+
+    <div
+      *ngIf="organizationType === 'UNIVERSITY'"
+      dashboard-header-actions-mobile
+      class="company-onboarding-shell__badge"
+    >
+      Campus
     </div>
 
     <div
@@ -59,7 +75,7 @@
         </div>
 
         <div *ngIf="isLoading" class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel-2)]/70 p-8 text-sm text-[var(--muted)]">
-          Cargando panel de empresa...
+          Cargando panel de {{ organizationLabel }}...
         </div>
 
         <ng-container *ngIf="!isLoading">
@@ -71,7 +87,7 @@
               <p class="font-tech text-xs uppercase tracking-[0.28em] text-[var(--muted)]">Estado operativo</p>
               <h2 class="text-2xl font-semibold text-[var(--text)] sm:text-3xl">Resumen de activacion</h2>
               <p class="max-w-2xl text-sm leading-6 text-[var(--muted)]">
-                Estado actual de la empresa, progreso del perfil y acceso corporativo habilitado en un solo lugar.
+                Estado actual de la {{ organizationLabel }}, progreso del perfil y acceso habilitado en un solo lugar.
               </p>
             </div>
 

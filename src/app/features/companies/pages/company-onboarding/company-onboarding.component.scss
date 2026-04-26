@@ -1,0 +1,42 @@
+:host {
+  display: block;
+}
+
+.company-onboarding-shell--university {
+  position: relative;
+}
+
+.company-onboarding-shell--university::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(45, 212, 191, 0.12), transparent 24rem),
+    radial-gradient(circle at 88% 14%, rgba(250, 204, 21, 0.1), transparent 22rem),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: auto, auto, 3.4rem 3.4rem, 3.4rem 3.4rem;
+  opacity: 0.8;
+}
+
+.company-onboarding-shell--university :is(section, article, aside)[class*='rounded-'] {
+  position: relative;
+}
+
+.company-onboarding-shell--university :is(section, article, aside)[class*='rounded-'][class*='border'] {
+  border-color: rgba(45, 212, 191, 0.18) !important;
+  box-shadow: inset 0 0 0 1px rgba(250, 204, 21, 0.04);
+}
+
+.company-onboarding-shell__badge {
+  border-radius: 9999px;
+  border: 1px solid rgba(45, 212, 191, 0.28);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(17, 24, 39, 0.88));
+  padding: 0.25rem 0.85rem;
+  font-family: var(--font-tech);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #d1fae5;
+}

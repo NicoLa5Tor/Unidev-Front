@@ -1,323 +1,349 @@
-<section class="companies-home min-h-screen bg-transparent text-white">
-  <div class="companies-home__aurora companies-home__aurora--violet" aria-hidden="true"></div>
-  <div class="companies-home__aurora companies-home__aurora--cyan" aria-hidden="true"></div>
-  <div class="companies-home__grid" aria-hidden="true"></div>
+<section class="ch" [class.ch--university]="organizationType === 'UNIVERSITY'">
 
-  <main class="companies-home__layout mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-16">
-    <section class="companies-home__surface rounded-[1.75rem] px-4 py-5 sm:px-5 sm:py-6">
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+  <!-- ── BACKGROUND LAYER ── -->
+  <div class="ch-bg" aria-hidden="true">
+    <div class="ch-bg__orb ch-bg__orb--a"></div>
+    <div class="ch-bg__orb ch-bg__orb--b"></div>
+    <div class="ch-bg__grid"></div>
+  </div>
+
+  <main class="ch-layout">
+
+    <!-- ══════════════════════════════════
+         FLOW STEPS TRACK
+    ══════════════════════════════════ -->
+    <section class="ch-track-section">
+      <header class="ch-track-section__header">
         <div>
-          <p class="font-mono text-[11px] uppercase tracking-[0.35em] text-fuchsia-200">Flujo</p>
-          <h2 class="mt-2 text-xl font-semibold text-white sm:text-2xl">Asi funciona el alta de empresa</h2>
+          <p class="ch-eyebrow">{{ pageEyebrow }}</p>
+          <h2 class="ch-track-section__title">Así funciona el alta de {{ organizationLabel }}</h2>
         </div>
-        <p class="max-w-xl text-sm leading-6 text-slate-300">
-          Desliza las etapas. Primero registras la empresa, luego administracion decide y despues se habilitan accesos.
+        <p class="ch-track-section__desc">
+          {{ organizationType === 'UNIVERSITY'
+            ? 'Desliza las etapas. Primero registras la universidad, luego administración valida y después quedan listos los accesos institucionales.'
+            : 'Desliza las etapas. Primero registras la empresa, luego administración decide y después se habilitan accesos.' }}
         </p>
-      </div>
+      </header>
 
-      <div class="mt-5 -mx-4 overflow-x-auto px-4 pb-2 sm:-mx-5 sm:px-5 companies-home__flow-track" #flowTrack>
-        <div class="flex min-w-full snap-x snap-mandatory gap-4">
-          <article
-            *ngFor="let step of steps; let index = index"
-            #flowStepCard
-            class="companies-home__flow-card min-w-[85%] snap-start rounded-[1.5rem] border border-white/10 bg-gradient-to-br from-slate-950/80 via-slate-900/75 to-cyan-950/30 p-4 shadow-[0_14px_40px_rgba(3,7,18,0.22)] sm:min-w-[340px] sm:flex-1 sm:p-5"
-          >
-            <div class="flex items-start gap-3 sm:gap-4">
-              <span class="companies-home__step-index flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-cyan-300/12 text-sm font-semibold text-cyan-200">
-                {{ index + 1 }}
-              </span>
-              <div>
-                <h3 class="text-base font-semibold text-white sm:text-lg">{{ step.title }}</h3>
-                <p class="mt-2 text-sm leading-6 text-slate-300 sm:leading-7">{{ step.description }}</p>
-              </div>
-            </div>
-          </article>
-        </div>
+      <div class="ch-track" #flowTrack>
+        <article
+          #flowStepCard
+          *ngFor="let step of steps; let index = index"
+          class="ch-step-card"
+        >
+          <div class="ch-step-card__num">{{ index + 1 }}</div>
+          <div class="ch-step-card__body">
+            <h3 class="ch-step-card__title">{{ step.title }}</h3>
+            <p class="ch-step-card__desc">{{ step.description }}</p>
+          </div>
+        </article>
       </div>
     </section>
 
-    <section class="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-8">
-      <aside class="order-1 space-y-5 lg:order-2 lg:sticky lg:top-28">
-        <form class="companies-home__form rounded-[1.75rem] p-5 sm:p-6 lg:p-8" (ngSubmit)="submit()">
-          <div class="flex flex-wrap items-start justify-between gap-3">
+    <!-- ══════════════════════════════════
+         MAIN GRID (hero + form)
+    ══════════════════════════════════ -->
+    <div class="ch-grid">
+
+      <!-- ── HERO ── -->
+      <article class="ch-hero">
+        <p class="ch-eyebrow">{{ heroPill }}</p>
+        <h1 class="ch-hero__title">{{ heroTitle }}</h1>
+        <p class="ch-hero__copy">{{ heroCopy }}</p>
+
+        <div class="ch-hero__actions">
+          <a routerLink="/login" class="ch-btn ch-btn--primary">{{ loginCtaLabel }}</a>
+        </div>
+
+        <div *ngIf="organizationType === 'UNIVERSITY'" class="ch-university-cards">
+          <div class="ch-university-card">
+            <p class="ch-university-card__label">Gobierno</p>
+            <p class="ch-university-card__text">El alta queda pensada para administración institucional, no para operación comercial.</p>
+          </div>
+          <div class="ch-university-card">
+            <p class="ch-university-card__label ch-university-card__label--amber">Comunidad</p>
+            <p class="ch-university-card__text">Esta base prepara el futuro acceso de estudiantes, perfiles personales y equipos entre universidades.</p>
+          </div>
+        </div>
+
+        <ul class="ch-highlights" role="list">
+          <li *ngFor="let highlight of highlights" class="ch-highlight">
+            <span class="ch-highlight__dot" aria-hidden="true"></span>
+            <span>{{ highlight }}</span>
+          </li>
+        </ul>
+      </article>
+
+      <!-- ── FORM ── -->
+      <aside class="ch-form-aside">
+        <form class="ch-form" (ngSubmit)="submit()">
+
+          <!-- Form header -->
+          <div class="ch-form__header">
             <div>
-              <p class="font-mono text-[11px] uppercase tracking-[0.35em] text-fuchsia-200">Solicitud</p>
-              <h2 class="mt-3 text-2xl font-semibold text-white sm:text-3xl">Crea tu empresa</h2>
+              <p class="ch-eyebrow">{{ pageEyebrow }}</p>
+              <h2 class="ch-form__title">Crea tu {{ organizationLabel }}</h2>
             </div>
-            <span class="companies-home__status rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-amber-100">
-              Pendiente admin
-            </span>
+            <span class="ch-status-badge">{{ pageStatusLabel }}</span>
           </div>
 
-          <p class="mt-3 text-sm leading-6 text-slate-300 sm:text-[15px] sm:leading-7">
-            Primero valida el correo del administrador con un OTP. Solo despues se habilita el formulario de empresa.
-          </p>
+          <p class="ch-form__desc">{{ pageDescription }}</p>
 
-          <div class="mt-5 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-300">
-            <span class="rounded-full px-3 py-1" [ngClass]="registrationStep === 'email' ? 'bg-cyan-300/15 text-cyan-100 border border-cyan-300/30' : 'border border-white/10 bg-white/5'">Correo</span>
-            <span class="rounded-full px-3 py-1" [ngClass]="registrationStep === 'otp' ? 'bg-cyan-300/15 text-cyan-100 border border-cyan-300/30' : 'border border-white/10 bg-white/5'">OTP</span>
-            <span class="rounded-full px-3 py-1" [ngClass]="registrationStep === 'company' ? 'bg-cyan-300/15 text-cyan-100 border border-cyan-300/30' : 'border border-white/10 bg-white/5'">Empresa</span>
+          <!-- University pills -->
+          <div *ngIf="organizationType === 'UNIVERSITY'" class="ch-campus-pills">
+            <span class="ch-campus-pill">Dominio institucional</span>
+            <span class="ch-campus-pill">Correos administrativos</span>
+            <span class="ch-campus-pill">Base para estudiantes</span>
           </div>
 
-          <div class="mt-6 grid gap-4 sm:grid-cols-2" *ngIf="registrationStep === 'email'">
-            <label class="block sm:col-span-2">
-              <span class="mb-2 block text-[11px] uppercase tracking-[0.24em] text-slate-400">Correo del administrador</span>
-              <input [(ngModel)]="form.email" name="email" type="email" placeholder="admin@empresa.com" class="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-cyan-300/50 focus:outline-none" />
+          <!-- Step indicators -->
+          <div class="ch-steps" aria-label="Pasos del registro">
+            <span class="ch-step-dot" [class.ch-step-dot--active]="registrationStep === 'email'">Correo</span>
+            <span class="ch-step-dot__line" aria-hidden="true"></span>
+            <span class="ch-step-dot" [class.ch-step-dot--active]="registrationStep === 'otp'">OTP</span>
+            <span class="ch-step-dot__line" aria-hidden="true"></span>
+            <span class="ch-step-dot" [class.ch-step-dot--active]="registrationStep === 'company'">{{ registrationStepLabel }}</span>
+          </div>
+
+          <!-- ── STEP: EMAIL ── -->
+          <div *ngIf="registrationStep === 'email'" class="ch-fields">
+            <label class="ch-field ch-field--full">
+              <span class="ch-label">{{ adminEmailLabel }}</span>
+              <input
+                [(ngModel)]="form.email"
+                name="email"
+                type="email"
+                placeholder="admin@empresa.com"
+                class="ch-input"
+              />
             </label>
-
-            <label class="block sm:col-span-2">
-              <span class="mb-2 block text-[11px] uppercase tracking-[0.24em] text-slate-400">Confirmar correo</span>
-              <input [(ngModel)]="form.confirmEmail" name="confirmEmail" type="email" placeholder="admin@empresa.com" class="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-cyan-300/50 focus:outline-none" />
-            </label>
-          </div>
-
-          <div class="mt-6 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end" *ngIf="registrationStep === 'otp'">
-            <label class="block">
-              <span class="mb-2 block text-[11px] uppercase tracking-[0.24em] text-slate-400">Codigo OTP</span>
-              <input [(ngModel)]="form.otpCode" name="otpCode" inputmode="numeric" maxlength="6" placeholder="123456" class="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm tracking-[0.3em] text-white placeholder:text-slate-500 focus:border-cyan-300/50 focus:outline-none" />
+            <label class="ch-field ch-field--full">
+              <span class="ch-label">Confirmar correo</span>
+              <input
+                [(ngModel)]="form.confirmEmail"
+                name="confirmEmail"
+                type="email"
+                placeholder="admin@empresa.com"
+                class="ch-input"
+              />
             </label>
 
             <button
               type="button"
-              (click)="backToEmail()"
-              class="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-100 sm:w-auto"
+              (click)="requestOtp()"
+              [disabled]="isRequestingOtp"
+              class="ch-btn ch-btn--primary ch-btn--full"
             >
-              Cambiar correo
+              {{ isRequestingOtp ? 'Enviando OTP…' : 'Enviar código OTP' }}
             </button>
           </div>
 
-          <div class="mt-6 grid gap-4 sm:grid-cols-2" *ngIf="registrationStep === 'company'">
-            <label class="block sm:col-span-2">
-              <span class="mb-2 block text-[11px] uppercase tracking-[0.24em] text-slate-400">Nombre de empresa</span>
+          <!-- ── STEP: OTP ── -->
+          <div *ngIf="registrationStep === 'otp'" class="ch-fields">
+            <div class="ch-otp-hint">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <rect x="2" y="5" width="16" height="11" rx="2"/>
+                <polyline points="2,5 10,12 18,5"/>
+              </svg>
+              Código enviado a <strong>{{ form.email }}</strong>
+            </div>
+
+            <label class="ch-field ch-field--full">
+              <span class="ch-label">Código OTP</span>
+              <input
+                [(ngModel)]="form.otpCode"
+                name="otpCode"
+                inputmode="numeric"
+                maxlength="6"
+                placeholder="_ _ _ _ _ _"
+                class="ch-input ch-input--otp"
+              />
+            </label>
+
+            <div class="ch-row">
+              <button type="button" (click)="backToEmail()" class="ch-btn ch-btn--ghost">← Cambiar correo</button>
+              <button
+                type="button"
+                (click)="verifyOtp()"
+                [disabled]="isVerifyingOtp"
+                class="ch-btn ch-btn--primary ch-btn--grow"
+              >
+                {{ isVerifyingOtp ? 'Validando…' : 'Validar código' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- ── STEP: COMPANY ── -->
+          <div *ngIf="registrationStep === 'company'" class="ch-fields">
+            <label class="ch-field ch-field--full">
+              <span class="ch-label">Nombre de {{ organizationLabel }}</span>
               <input
                 [(ngModel)]="form.companyName"
                 (ngModelChange)="clearCompanyFieldError('companyName')"
                 name="companyName"
-                placeholder="Acme Studio SAS"
-                class="w-full rounded-2xl border bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none"
-                [ngClass]="hasCompanyFieldError('companyName') ? 'border-rose-400/60 focus:border-rose-400/70' : 'border-white/10 focus:border-cyan-300/50'"
+                [placeholder]="organizationType === 'UNIVERSITY' ? 'Universidad Ejemplo' : 'Acme Studio SAS'"
+                class="ch-input"
+                [class.ch-input--error]="hasCompanyFieldError('companyName')"
               />
-              <p *ngIf="getCompanyFieldError('companyName') as error" class="mt-2 text-xs text-rose-200">{{ error }}</p>
+              <p *ngIf="getCompanyFieldError('companyName') as err" class="ch-field-error">{{ err }}</p>
             </label>
 
-            <label class="block">
-              <span class="mb-2 block text-[11px] uppercase tracking-[0.24em] text-slate-400">Dominio</span>
+            <label class="ch-field">
+              <span class="ch-label">Dominio</span>
               <input
                 [(ngModel)]="form.domain"
                 (ngModelChange)="clearCompanyFieldError('domain')"
                 name="domain"
                 placeholder="empresa.com"
-                class="w-full rounded-2xl border bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none"
-                [ngClass]="hasCompanyFieldError('domain') ? 'border-rose-400/60 focus:border-rose-400/70' : 'border-white/10 focus:border-cyan-300/50'"
+                class="ch-input"
+                [class.ch-input--error]="hasCompanyFieldError('domain')"
               />
-              <p *ngIf="getCompanyFieldError('domain') as error" class="mt-2 text-xs text-rose-200">{{ error }}</p>
+              <p *ngIf="getCompanyFieldError('domain') as err" class="ch-field-error">{{ err }}</p>
             </label>
 
-            <label class="block">
-              <span class="mb-2 block text-[11px] uppercase tracking-[0.24em] text-slate-400">Correo del administrador</span>
-              <input
-                [(ngModel)]="form.contactEmail"
-                name="contactEmail"
-                type="email"
-                readonly
-                class="w-full rounded-2xl border bg-slate-950/90 px-4 py-3 text-sm placeholder:text-slate-500 focus:outline-none"
-                [ngClass]="hasCompanyFieldError('contactEmail') ? 'border-rose-400/60 text-rose-100' : 'border-cyan-300/20 text-cyan-100'"
-              />
-              <p *ngIf="getCompanyFieldError('contactEmail') as error" class="mt-2 text-xs text-rose-200">{{ error }}</p>
-            </label>
-
-            <label class="block">
-              <span class="mb-2 block text-[11px] uppercase tracking-[0.24em] text-slate-400">NIT</span>
+            <label class="ch-field">
+              <span class="ch-label">{{ identifierLabel }}</span>
               <input
                 [(ngModel)]="form.nit"
                 (ngModelChange)="clearCompanyFieldError('nit')"
                 name="nit"
                 placeholder="900123456-7"
-                class="w-full rounded-2xl border bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none"
-                [ngClass]="hasCompanyFieldError('nit') ? 'border-rose-400/60 focus:border-rose-400/70' : 'border-white/10 focus:border-cyan-300/50'"
+                class="ch-input"
+                [class.ch-input--error]="hasCompanyFieldError('nit')"
               />
-              <p *ngIf="getCompanyFieldError('nit') as error" class="mt-2 text-xs text-rose-200">{{ error }}</p>
+              <p *ngIf="getCompanyFieldError('nit') as err" class="ch-field-error">{{ err }}</p>
             </label>
 
-            <div class="sm:col-span-2 grid gap-4 lg:grid-cols-2">
-              <div
-                class="rounded-3xl border bg-slate-950/55 p-4"
-                [ngClass]="companyDocumentsError ? 'border-rose-400/35' : 'border-white/10'"
-              >
-                <div class="flex items-start justify-between gap-3">
-                  <p class="text-[11px] uppercase tracking-[0.24em] text-slate-400">Certificado legal</p>
+            <label class="ch-field ch-field--full">
+              <span class="ch-label">{{ adminEmailLabel }} <span class="ch-label__readonly">(solo lectura)</span></span>
+              <input
+                [(ngModel)]="form.contactEmail"
+                name="contactEmail"
+                type="email"
+                readonly
+                class="ch-input ch-input--readonly"
+                [class.ch-input--error]="hasCompanyFieldError('contactEmail')"
+              />
+              <p *ngIf="getCompanyFieldError('contactEmail') as err" class="ch-field-error">{{ err }}</p>
+            </label>
+
+            <!-- Documents -->
+            <div class="ch-docs">
+              <!-- Legal -->
+              <div class="ch-doc" [class.ch-doc--error]="!!companyDocumentsError">
+                <div class="ch-doc__top">
+                  <p class="ch-label">
+                    {{ organizationType === 'UNIVERSITY' ? 'Acreditación institucional' : 'Certificado legal' }}
+                  </p>
                   <button
                     type="button"
                     (click)="openDocumentHelp('LEGAL_CERTIFICATE')"
-                    class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-cyan-300/25 bg-cyan-300/10 text-xs font-semibold text-cyan-100 transition hover:bg-cyan-300/15"
-                    aria-label="Mas informacion sobre certificado legal"
-                  >
-                    i
-                  </button>
+                    class="ch-doc__help"
+                    aria-label="Más información"
+                  >?</button>
                 </div>
-                <div class="mt-4 flex flex-col items-start gap-3">
-                  <label class="inline-flex cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-100">
-                    <input type="file" accept=".pdf,.png,.jpg,.jpeg" class="hidden" (change)="uploadDocument($event, 'LEGAL_CERTIFICATE')" />
-                    {{ isUploadingLegal ? 'Cargando...' : 'Subir archivo' }}
+                <div class="ch-doc__actions">
+                  <label class="ch-doc__upload">
+                    <input type="file" accept=".pdf,.png,.jpg,.jpeg" class="ch-doc__input" (change)="uploadDocument($event, 'LEGAL_CERTIFICATE')" />
+                    {{ isUploadingLegal ? 'Cargando…' : 'Subir archivo' }}
                   </label>
                   <button
-                    *ngIf="getDocument('LEGAL_CERTIFICATE') as legalDocument"
+                    *ngIf="getDocument('LEGAL_CERTIFICATE') as legalDoc"
                     type="button"
-                    (click)="downloadDocument(legalDocument)"
-                    [title]="legalDocument.fileName"
-                    class="flex w-full min-w-0 items-center gap-3 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-4 py-2.5 text-left text-cyan-100"
+                    (click)="downloadDocument(legalDoc)"
+                    [title]="legalDoc.fileName"
+                    class="ch-doc__file"
                   >
-                    <span class="shrink-0 text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200">Ver</span>
-                    <span class="min-w-0 truncate text-xs font-medium normal-case tracking-normal text-cyan-50">
-                      {{ legalDocument.fileName }}
-                    </span>
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 2v8m0 0l-3-3m3 3l3-3"/><rect x="2" y="11" width="12" height="3" rx="1"/></svg>
+                    <span class="ch-doc__filename">{{ legalDoc.fileName }}</span>
                   </button>
                 </div>
               </div>
 
-              <div
-                class="rounded-3xl border bg-slate-950/55 p-4"
-                [ngClass]="companyDocumentsError ? 'border-rose-400/35' : 'border-white/10'"
-              >
-                <div class="flex items-start justify-between gap-3">
-                  <p class="text-[11px] uppercase tracking-[0.24em] text-slate-400">Documento tributario</p>
+              <!-- Tax -->
+              <div class="ch-doc" [class.ch-doc--error]="!!companyDocumentsError">
+                <div class="ch-doc__top">
+                  <p class="ch-label">
+                    {{ organizationType === 'UNIVERSITY' ? 'Documento tributario o equivalente' : 'Documento tributario' }}
+                  </p>
                   <button
                     type="button"
                     (click)="openDocumentHelp('TAX_DOCUMENT')"
-                    class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-cyan-300/25 bg-cyan-300/10 text-xs font-semibold text-cyan-100 transition hover:bg-cyan-300/15"
-                    aria-label="Mas informacion sobre documento tributario"
-                  >
-                    i
-                  </button>
+                    class="ch-doc__help"
+                    aria-label="Más información"
+                  >?</button>
                 </div>
-                <div class="mt-4 flex flex-col items-start gap-3">
-                  <label class="inline-flex cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-100">
-                    <input type="file" accept=".pdf,.png,.jpg,.jpeg" class="hidden" (change)="uploadDocument($event, 'TAX_DOCUMENT')" />
-                    {{ isUploadingTax ? 'Cargando...' : 'Subir archivo' }}
+                <div class="ch-doc__actions">
+                  <label class="ch-doc__upload">
+                    <input type="file" accept=".pdf,.png,.jpg,.jpeg" class="ch-doc__input" (change)="uploadDocument($event, 'TAX_DOCUMENT')" />
+                    {{ isUploadingTax ? 'Cargando…' : 'Subir archivo' }}
                   </label>
                   <button
-                    *ngIf="getDocument('TAX_DOCUMENT') as taxDocument"
+                    *ngIf="getDocument('TAX_DOCUMENT') as taxDoc"
                     type="button"
-                    (click)="downloadDocument(taxDocument)"
-                    [title]="taxDocument.fileName"
-                    class="flex w-full min-w-0 items-center gap-3 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-4 py-2.5 text-left text-cyan-100"
+                    (click)="downloadDocument(taxDoc)"
+                    [title]="taxDoc.fileName"
+                    class="ch-doc__file"
                   >
-                    <span class="shrink-0 text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200">Ver</span>
-                    <span class="min-w-0 truncate text-xs font-medium normal-case tracking-normal text-cyan-50">
-                      {{ taxDocument.fileName }}
-                    </span>
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 2v8m0 0l-3-3m3 3l3-3"/><rect x="2" y="11" width="12" height="3" rx="1"/></svg>
+                    <span class="ch-doc__filename">{{ taxDoc.fileName }}</span>
                   </button>
                 </div>
               </div>
             </div>
 
-            <p *ngIf="companyDocumentsError" class="sm:col-span-2 text-xs text-rose-200">
+            <p *ngIf="companyDocumentsError" class="ch-error">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="5" x2="8" y2="9"/><circle cx="8" cy="11.5" r="0.5" fill="currentColor"/></svg>
               {{ companyDocumentsError }}
             </p>
+
+            <button
+              type="submit"
+              [disabled]="isSubmitting"
+              class="ch-btn ch-btn--primary ch-btn--full"
+            >
+              {{ isSubmitting ? 'Enviando…' : 'Enviar solicitud' }}
+            </button>
           </div>
-
-          <button
-            *ngIf="registrationStep === 'email'"
-            type="button"
-            (click)="requestOtp()"
-            [disabled]="isRequestingOtp"
-            class="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 px-6 py-3 text-sm font-semibold uppercase tracking-[0.24em] text-slate-950 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {{ isRequestingOtp ? 'Enviando OTP...' : 'Enviar codigo OTP' }}
-          </button>
-
-          <button
-            *ngIf="registrationStep === 'otp'"
-            type="button"
-            (click)="verifyOtp()"
-            [disabled]="isVerifyingOtp"
-            class="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 px-6 py-3 text-sm font-semibold uppercase tracking-[0.24em] text-slate-950 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {{ isVerifyingOtp ? 'Validando...' : 'Validar codigo' }}
-          </button>
-
-          <button
-            *ngIf="registrationStep === 'company'"
-            type="submit"
-            [disabled]="isSubmitting"
-            class="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 px-6 py-3 text-sm font-semibold uppercase tracking-[0.24em] text-slate-950 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {{ isSubmitting ? 'Enviando...' : 'Enviar solicitud' }}
-          </button>
         </form>
       </aside>
+    </div>
+  </main>
 
-      <div
-        *ngIf="activeDocumentHelp as help"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 px-4 backdrop-blur-sm"
-        (click)="closeDocumentHelp()"
-      >
-        <div
-          class="w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-950/95 p-6 shadow-[0_24px_80px_rgba(3,7,18,0.45)]"
-          (click)="$event.stopPropagation()"
-        >
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <p class="text-[11px] uppercase tracking-[0.24em] text-cyan-300">Documento requerido</p>
-              <h3 class="mt-2 text-2xl font-semibold text-white">{{ help.title }}</h3>
-            </div>
-            <button
-              type="button"
-              (click)="closeDocumentHelp()"
-              class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-sm text-slate-200 transition hover:bg-white/10"
-              aria-label="Cerrar ayuda"
-            >
-              x
-            </button>
-          </div>
-
-          <p class="mt-4 text-sm leading-7 text-slate-300">{{ help.summary }}</p>
-
-          <ul class="mt-5 space-y-3 text-sm text-slate-200">
-            <li *ngFor="let bullet of help.bullets" class="flex items-start gap-3 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3">
-              <span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-cyan-300"></span>
-              <span>{{ bullet }}</span>
-            </li>
-          </ul>
-
-          <div class="mt-6 flex justify-end">
-            <button
-              type="button"
-              (click)="closeDocumentHelp()"
-              class="inline-flex min-h-11 items-center justify-center rounded-full bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 px-5 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-950"
-            >
-              Entendido
-            </button>
-          </div>
+  <!-- ══════════════════════════════════
+       DOCUMENT HELP MODAL
+  ══════════════════════════════════ -->
+  <div
+    *ngIf="activeDocumentHelp as help"
+    class="ch-modal-backdrop"
+    (click)="closeDocumentHelp()"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div class="ch-modal" (click)="$event.stopPropagation()">
+      <div class="ch-modal__header">
+        <div>
+          <p class="ch-eyebrow">Documento requerido</p>
+          <h3 class="ch-modal__title">{{ help.title }}</h3>
         </div>
+        <button type="button" (click)="closeDocumentHelp()" class="ch-modal__close" aria-label="Cerrar">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+        </button>
       </div>
 
-      <article class="companies-home__hero order-2 rounded-[1.75rem] p-5 sm:p-6 lg:order-1 lg:rounded-[2.25rem] lg:p-8">
-        <p class="font-mono text-xs uppercase tracking-[0.35em] text-cyan-300">Empresas</p>
-        <h1 class="companies-home__hero-title mt-4 max-w-3xl text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:mt-5 lg:text-5xl">
-          Solicita el alta de tu empresa sin perderte en pasos innecesarios.
-        </h1>
-        <p class="companies-home__hero-copy mt-5 text-sm leading-7 text-slate-300 sm:text-base sm:leading-8">
-          Esta pantalla ya es el punto de entrada real para registrar la empresa. Envias la solicitud, queda en estado
-          pendiente y luego un administrador la aprueba antes de habilitar accesos y operacion.
-        </p>
+      <p class="ch-modal__summary">{{ help.summary }}</p>
 
-        <div class="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <a
-            routerLink="/login"
-            class="companies-home__primary-cta inline-flex min-h-12 w-full items-center justify-center rounded-full bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 px-6 py-3 text-sm font-semibold uppercase tracking-[0.24em] text-slate-950 sm:w-auto"
-          >
-            Iniciar como empresa
-          </a>
-        </div>
+      <ul class="ch-modal__bullets" role="list">
+        <li *ngFor="let bullet of help.bullets" class="ch-modal__bullet">
+          <span class="ch-modal__bullet-dot" aria-hidden="true"></span>
+          <span>{{ bullet }}</span>
+        </li>
+      </ul>
 
-        <ul class="mt-8 grid gap-3 text-sm text-slate-300">
-          <li *ngFor="let highlight of highlights" class="companies-home__highlight flex items-start gap-3 rounded-2xl border border-white/8 px-4 py-3">
-            <span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-cyan-300"></span>
-            <span>{{ highlight }}</span>
-          </li>
-        </ul>
-      </article>
-    </section>
-  </main>
+      <div class="ch-modal__footer">
+        <button type="button" (click)="closeDocumentHelp()" class="ch-btn ch-btn--primary">Entendido</button>
+      </div>
+    </div>
+  </div>
+
 </section>

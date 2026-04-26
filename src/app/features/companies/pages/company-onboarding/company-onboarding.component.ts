@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -36,7 +37,8 @@ type ProjectVisibilityFilter = 'ALL' | 'PUBLISHED' | 'EDITING';
     FormsModule,
     DashboardShellComponent
   ],
-  templateUrl: './company-onboarding.component.html'
+  templateUrl: './company-onboarding.component.html',
+  styleUrl: './company-onboarding.component.scss'
 })
 export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   private static readonly PROJECTS_POLL_INTERVAL_MS = 3000;
@@ -72,6 +74,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   uploadingDocumentType: RegistrationDocumentType | null = null;
   private hasLoadedAccessData = false;
   private readonly dialog = inject(MatDialog);
+  private readonly route = inject(ActivatedRoute);
   private projectsPollHandle: ReturnType<typeof setTimeout> | null = null;
 
   readonly ownerNavItems: DashboardNavItem[] = [
@@ -81,10 +84,23 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     { id: 'access', label: 'Correos', accent: 'accent-2', mobileBarWidthClass: 'w-20' }
   ];
 
+  readonly ownerUniversityNavItems: DashboardNavItem[] = [
+    { id: 'status', label: 'Campus', accent: 'accent-3', mobileBarWidthClass: 'w-20' },
+    { id: 'profile', label: 'Perfil', accent: 'accent-1', mobileBarWidthClass: 'w-20' },
+    { id: 'projects', label: 'Convocatorias', accent: 'accent-4', mobileBarWidthClass: 'w-28' },
+    { id: 'access', label: 'Admins', accent: 'accent-2', mobileBarWidthClass: 'w-20' }
+  ];
+
   readonly memberNavItems: DashboardNavItem[] = [
     { id: 'status', label: 'Estado', accent: 'accent-3', mobileBarWidthClass: 'w-20' },
     { id: 'profile', label: 'Perfil', accent: 'accent-1', mobileBarWidthClass: 'w-20' },
     { id: 'projects', label: 'Proyectos', accent: 'accent-4', mobileBarWidthClass: 'w-24' }
+  ];
+
+  readonly memberUniversityNavItems: DashboardNavItem[] = [
+    { id: 'status', label: 'Campus', accent: 'accent-3', mobileBarWidthClass: 'w-20' },
+    { id: 'profile', label: 'Perfil', accent: 'accent-1', mobileBarWidthClass: 'w-20' },
+    { id: 'projects', label: 'Equipos', accent: 'accent-4', mobileBarWidthClass: 'w-20' }
   ];
 
   readonly form: CompanyFormModel = {
@@ -133,11 +149,34 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   }
 
   get isCompanyMemberView(): boolean {
-    return this.sessionUser?.roleName === 'USUARIOS_EMPRESA';
+    return this.sessionUser?.roleName === 'USUARIOS_EMPRESA' || this.sessionUser?.roleName === 'USUARIOS_UNIVERSIDAD';
   }
 
   get isCompanyOwnerView(): boolean {
-    return this.sessionUser?.roleName === 'EMPRESAS';
+    return this.sessionUser?.roleName === 'EMPRESAS' || this.sessionUser?.roleName === 'UNIVERSIDADES';
+  }
+
+  get organizationType(): 'COMPANY' | 'UNIVERSITY' {
+    if (this.currentCompany?.organizationType === 'UNIVERSITY') {
+      return 'UNIVERSITY';
+    }
+    return this.route.snapshot.data['organizationType'] === 'UNIVERSITY' ? 'UNIVERSITY' : 'COMPANY';
+  }
+
+  get organizationLabel(): string {
+    return this.organizationType === 'UNIVERSITY' ? 'universidad' : 'empresa';
+  }
+
+  get organizationLabelCapitalized(): string {
+    return this.organizationType === 'UNIVERSITY' ? 'Universidad' : 'Empresa';
+  }
+
+  get organizationMemberLabel(): string {
+    return this.organizationType === 'UNIVERSITY' ? 'institucionales' : 'corporativos';
+  }
+
+  get dashboardEyebrow(): string {
+    return this.organizationType === 'UNIVERSITY' ? 'Campus operativo' : 'Panel de empresa';
   }
 
   get canManageCompanyAccess(): boolean {
@@ -149,6 +188,9 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   }
 
   get navItems(): DashboardNavItem[] {
+    if (this.organizationType === 'UNIVERSITY') {
+      return this.isCompanyMemberView ? this.memberUniversityNavItems : this.ownerUniversityNavItems;
+    }
     return this.isCompanyMemberView ? this.memberNavItems : this.ownerNavItems;
   }
 
@@ -338,7 +380,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   }
 
   get dashboardTitle(): string {
-    return this.currentCompany?.companyName ?? 'Empresa';
+    return this.currentCompany?.companyName ?? this.organizationLabelCapitalized;
   }
 
   get dashboardAvatarImageUrl(): string | null {
@@ -346,22 +388,22 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   }
 
   get dashboardAvatarLabel(): string {
-    const source = this.currentCompany?.companyName ?? 'Empresa';
+    const source = this.currentCompany?.companyName ?? this.organizationLabelCapitalized;
     const parts = source.trim().split(/\s+/).filter(Boolean).slice(0, 2);
     if (!parts.length) {
       return 'EM';
     }
-    return parts.map(part => part[0]?.toUpperCase() ?? '').join('');
+    return parts.map((part: string) => part[0]?.toUpperCase() ?? '').join('');
   }
 
   get heroDescription(): string {
     if (!this.currentCompany) {
-      return 'Registra la empresa, define el dominio oficial y deja listo el acceso para que un administrador valide la operacion.';
+      return `Registra la ${this.organizationLabel}, define el dominio oficial y deja listo el acceso para que un administrador valide la operacion.`;
     }
     if (this.isCompanyMemberView) {
-      return 'Consulta la informacion compartida de la empresa y mantén al dia los datos operativos que usa el equipo.';
+      return `Consulta la informacion compartida de la ${this.organizationLabel} y mantén al dia los datos operativos que usa el equipo.`;
     }
-    return 'Gestiona el perfil de la empresa y mantén bajo control los correos corporativos que pueden entrar a la plataforma.';
+    return `Gestiona el perfil de la ${this.organizationLabel} y mantén bajo control los correos ${this.organizationMemberLabel} que pueden entrar a la plataforma.`;
   }
 
   get isRejectedCompany(): boolean {
@@ -507,6 +549,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
       contactPhone: this.toNullable(this.form.contactPhone),
       website: this.toNullable(this.form.website),
       domain: this.normalizeDomain(this.form.domain),
+      organizationType: this.organizationType,
       description: this.toNullable(this.form.description),
       address: this.toNullable(this.form.address),
       onboardingCompleted: true,

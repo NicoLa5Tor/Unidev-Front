@@ -2,6 +2,7 @@ export interface CompanyOption {
   id: number;
   companyName: string;
   domain: string;
+  organizationType?: 'COMPANY' | 'UNIVERSITY';
 }
 
 export interface Company {
@@ -17,6 +18,7 @@ export interface Company {
   contactPhone: string | null;
   website: string | null;
   domain: string;
+  organizationType: 'COMPANY' | 'UNIVERSITY';
   description: string | null;
   address: string | null;
   logoUrl: string | null;
@@ -40,6 +42,7 @@ export interface CreateCompanyDto {
   contactPhone: string | null;
   website: string | null;
   domain: string;
+  organizationType?: 'COMPANY' | 'UNIVERSITY' | null;
   description: string | null;
   address: string | null;
   onboardingCompleted: boolean;

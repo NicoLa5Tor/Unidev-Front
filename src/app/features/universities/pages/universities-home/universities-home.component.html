@@ -1,0 +1,296 @@
+<section class="u-shell">
+  <div class="u-bg" aria-hidden="true">
+    <div class="u-bg__orb u-bg__orb--1"></div>
+    <div class="u-bg__orb u-bg__orb--2"></div>
+    <div class="u-bg__orb u-bg__orb--3"></div>
+    <div class="u-bg__grid"></div>
+  </div>
+
+  <main class="u-layout">
+
+    <!-- ── LEFT COLUMN ── -->
+    <aside class="u-sidebar">
+      <div class="u-brand">
+        <div class="u-brand__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 3L1 9l11 6 9-4.91V17M1 9v8"/>
+            <path d="M5 11.18v5.64L12 21l7-4.18v-5.64"/>
+          </svg>
+        </div>
+        <span>UniDev</span>
+      </div>
+
+      <div class="u-sidebar__body">
+        <p class="u-eyebrow">Campus access</p>
+        <h1 class="u-heading">Registro<br/>universitario</h1>
+        <p class="u-desc">Vincula tu institución a la red académica. Solo minutos, impacto permanente.</p>
+      </div>
+
+      <ol class="u-steps-list">
+        <li class="u-step" [class.u-step--done]="registrationStep === 'otp' || registrationStep === 'company'" [class.u-step--active]="registrationStep === 'email'">
+          <div class="u-step__num">
+            <span *ngIf="registrationStep === 'email'">1</span>
+            <svg *ngIf="registrationStep !== 'email'" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,8 7,12 13,4"/></svg>
+          </div>
+          <div>
+            <strong>Correo admin</strong>
+            <p>Correo de referencia del responsable</p>
+          </div>
+        </li>
+        <li class="u-step" [class.u-step--done]="registrationStep === 'company'" [class.u-step--active]="registrationStep === 'otp'">
+          <div class="u-step__num">
+            <span *ngIf="registrationStep !== 'company'">2</span>
+            <svg *ngIf="registrationStep === 'company'" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,8 7,12 13,4"/></svg>
+          </div>
+          <div>
+            <strong>Verificación OTP</strong>
+            <p>Código enviado a tu correo</p>
+          </div>
+        </li>
+        <li class="u-step" [class.u-step--active]="registrationStep === 'company'">
+          <div class="u-step__num">3</div>
+          <div>
+            <strong>Datos del campus</strong>
+            <p>Dominio, NIT y documentos</p>
+          </div>
+        </li>
+      </ol>
+
+      <div class="u-sidebar__footer">
+        <a routerLink="/login" class="u-link">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M10 3H13a1 1 0 011 1v8a1 1 0 01-1 1H10"/>
+            <polyline points="7,11 10,8 7,5"/>
+            <line x1="2" y1="8" x2="10" y2="8"/>
+          </svg>
+          Ya tengo cuenta
+        </a>
+      </div>
+    </aside>
+
+    <!-- ── RIGHT PANEL ── -->
+    <section class="u-card">
+
+      <!-- STEP INDICATOR (mobile) -->
+      <div class="u-progress">
+        <div class="u-progress__bar"
+             [style.width]="registrationStep === 'email' ? '33%' : registrationStep === 'otp' ? '66%' : '100%'">
+        </div>
+      </div>
+
+      <header class="u-card__header">
+        <div>
+          <p class="u-eyebrow u-eyebrow--amber">Solicitud</p>
+          <h2 class="u-card__title">Alta de universidad</h2>
+        </div>
+        <span class="u-tag">Academia</span>
+      </header>
+
+      <!-- ── EMAIL STEP ── -->
+      <form *ngIf="registrationStep === 'email'" class="u-form" (ngSubmit)="requestOtp()">
+        <div class="u-fieldset">
+          <label class="u-field">
+            <span class="u-label">Correo administrador</span>
+            <div class="u-input-wrap">
+              <svg class="u-input-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="2" y="5" width="16" height="11" rx="2"/>
+                <polyline points="2,5 10,12 18,5"/>
+              </svg>
+              <input
+                [(ngModel)]="form.email"
+                name="email"
+                type="email"
+                placeholder="gestion@uniportal.com"
+                class="u-input u-input--icon"
+              />
+            </div>
+          </label>
+
+          <label class="u-field">
+            <span class="u-label">Confirmar correo</span>
+            <div class="u-input-wrap">
+              <svg class="u-input-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="2" y="5" width="16" height="11" rx="2"/>
+                <polyline points="2,5 10,12 18,5"/>
+              </svg>
+              <input
+                [(ngModel)]="form.confirmEmail"
+                name="confirmEmail"
+                type="email"
+                placeholder="gestion@uniportal.com"
+                class="u-input u-input--icon"
+              />
+            </div>
+          </label>
+        </div>
+
+        <div class="u-hint">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="8" cy="8" r="6.5"/>
+            <line x1="8" y1="7" x2="8" y2="11"/>
+            <circle cx="8" cy="5" r="0.5" fill="currentColor"/>
+          </svg>
+          El correo admin puede ser cualquiera. El que debe ser academico es el <strong>dominio institucional</strong>.
+        </div>
+
+        <button type="submit" class="u-btn u-btn--primary" [disabled]="isRequestingOtp">
+          <span *ngIf="!isRequestingOtp">Enviar código OTP</span>
+          <span *ngIf="isRequestingOtp" class="u-spinner-wrap">
+            <span class="u-spinner"></span> Enviando&hellip;
+          </span>
+        </button>
+      </form>
+
+      <!-- ── OTP STEP ── -->
+      <form *ngIf="registrationStep === 'otp'" class="u-form" (ngSubmit)="verifyOtp()">
+        <div class="u-otp-hint">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M16 12a4 4 0 10-8 0v1H5v2h10v-2h-3v-1z"/>
+            <rect x="2" y="13" width="16" height="5" rx="1.5"/>
+          </svg>
+          <p>Código enviado a <strong>{{ form.email }}</strong></p>
+        </div>
+
+        <div class="u-fieldset">
+          <label class="u-field">
+            <span class="u-label">Código de verificación</span>
+            <input
+              [(ngModel)]="form.otpCode"
+              name="otpCode"
+              inputmode="numeric"
+              maxlength="6"
+              placeholder="_ _ _ _ _ _"
+              class="u-input u-input--otp"
+            />
+          </label>
+        </div>
+
+        <div class="u-row">
+          <button type="button" class="u-btn u-btn--ghost" (click)="backToEmail()">
+            ← Cambiar correo
+          </button>
+          <button type="submit" class="u-btn u-btn--primary" [disabled]="isVerifyingOtp">
+            <span *ngIf="!isVerifyingOtp">Validar código</span>
+            <span *ngIf="isVerifyingOtp" class="u-spinner-wrap">
+              <span class="u-spinner"></span> Validando&hellip;
+            </span>
+          </button>
+        </div>
+      </form>
+
+      <!-- ── COMPANY STEP ── -->
+      <form *ngIf="registrationStep === 'company'" class="u-form" (ngSubmit)="submit()">
+        <div class="u-fieldset u-fieldset--grid">
+          <label class="u-field u-field--full">
+            <span class="u-label">Nombre de la universidad</span>
+            <input
+              [(ngModel)]="form.companyName"
+              (ngModelChange)="clearCompanyFieldError('companyName')"
+              name="companyName"
+              placeholder="Universidad Ejemplo"
+              class="u-input"
+              [class.u-input--error]="hasCompanyFieldError('companyName')"
+            />
+          </label>
+
+          <label class="u-field">
+            <span class="u-label">Dominio institucional</span>
+            <div class="u-input-wrap">
+              <svg class="u-input-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="10" cy="10" r="8"/>
+                <ellipse cx="10" cy="10" rx="4" ry="8"/>
+                <line x1="2" y1="10" x2="18" y2="10"/>
+              </svg>
+              <input
+                [(ngModel)]="form.domain"
+                (ngModelChange)="clearCompanyFieldError('domain')"
+                name="domain"
+                placeholder="universidad.edu.co"
+                class="u-input u-input--icon"
+                [class.u-input--error]="hasCompanyFieldError('domain')"
+              />
+            </div>
+          </label>
+
+          <label class="u-field">
+            <span class="u-label">NIT / Identificador</span>
+            <input
+              [(ngModel)]="form.nit"
+              (ngModelChange)="clearCompanyFieldError('nit')"
+              name="nit"
+              placeholder="900.123.456-7"
+              class="u-input"
+              [class.u-input--error]="hasCompanyFieldError('nit')"
+            />
+          </label>
+
+          <label class="u-field u-field--full">
+            <span class="u-label">Correo admin (solo lectura)</span>
+            <input
+              [(ngModel)]="form.contactEmail"
+              name="contactEmail"
+              type="email"
+              class="u-input u-input--readonly"
+              readonly
+            />
+          </label>
+        </div>
+
+        <div class="u-docs-title">
+          <span class="u-label">Documentos requeridos</span>
+          <span class="u-docs-badge">PDF · PNG · JPG</span>
+        </div>
+        <div class="u-docs">
+          <label class="u-doc">
+            <div class="u-doc__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                <polyline points="14,2 14,8 20,8"/>
+                <line x1="8" y1="13" x2="16" y2="13"/>
+                <line x1="8" y1="17" x2="16" y2="17"/>
+              </svg>
+            </div>
+            <div class="u-doc__info">
+              <strong>Acreditación institucional</strong>
+              <span>Certificado legal vigente</span>
+            </div>
+            <input type="file" accept=".pdf,.png,.jpg,.jpeg" (change)="uploadDocument($event, 'LEGAL_CERTIFICATE')" />
+            <div class="u-doc__cta">Subir</div>
+          </label>
+
+          <label class="u-doc">
+            <div class="u-doc__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="2" y="3" width="20" height="14" rx="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+              </svg>
+            </div>
+            <div class="u-doc__info">
+              <strong>Documento tributario</strong>
+              <span>RUT o equivalente</span>
+            </div>
+            <input type="file" accept=".pdf,.png,.jpg,.jpeg" (change)="uploadDocument($event, 'TAX_DOCUMENT')" />
+            <div class="u-doc__cta">Subir</div>
+          </label>
+        </div>
+
+        <p *ngIf="companyDocumentsError" class="u-error">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="8" cy="8" r="6.5"/>
+            <line x1="8" y1="5" x2="8" y2="9"/>
+            <circle cx="8" cy="11" r="0.5" fill="currentColor"/>
+          </svg>
+          {{ companyDocumentsError }}
+        </p>
+
+        <button type="submit" class="u-btn u-btn--primary" [disabled]="isSubmitting">
+          <span *ngIf="!isSubmitting">Enviar solicitud</span>
+          <span *ngIf="isSubmitting" class="u-spinner-wrap">
+            <span class="u-spinner"></span> Enviando&hellip;
+          </span>
+        </button>
+      </form>
+    </section>
+  </main>
+</section>

@@ -111,6 +111,19 @@ export const routes: Routes = [
     }
   },
   {
+    path: 'universities',
+    title: 'Universidades | UniDev',
+    loadComponent: () =>
+      import('./features/universities/pages/universities-home/universities-home.component').then(
+        m => m.UniversitiesHomeComponent
+      ),
+    data: {
+      publicHeader: true,
+      organizationType: 'UNIVERSITY',
+      description: 'Conoce como UniDev ayuda a las universidades a vincular administracion, estudiantes y colaboracion academica.'
+    }
+  },
+  {
     path: 'companies/onboarding',
     title: 'Onboarding de empresa | UniDev',
     loadComponent: () =>
@@ -124,6 +137,20 @@ export const routes: Routes = [
     }
   },
   {
+    path: 'universities/onboarding',
+    title: 'Onboarding de universidad | UniDev',
+    loadComponent: () =>
+      import('./features/companies/pages/company-onboarding/company-onboarding.component').then(
+        m => m.CompanyOnboardingComponent
+      ),
+    canActivate: [authGuard, roleGuard],
+    data: {
+      roles: ['UNIVERSIDADES'],
+      organizationType: 'UNIVERSITY',
+      description: 'Completa el proceso de onboarding de tu universidad dentro de UniDev.'
+    }
+  },
+  {
     path: 'company/workspace',
     title: 'Espacio empresarial | UniDev',
     loadComponent: () =>
@@ -134,6 +161,20 @@ export const routes: Routes = [
     data: {
       roles: ['USUARIOS_EMPRESA'],
       description: 'Consulta y actualiza la informacion de tu empresa dentro de UniDev.'
+    }
+  },
+  {
+    path: 'university/workspace',
+    title: 'Espacio universitario | UniDev',
+    loadComponent: () =>
+      import('./features/companies/pages/company-onboarding/company-onboarding.component').then(
+        m => m.CompanyOnboardingComponent
+      ),
+    canActivate: [authGuard, roleGuard],
+    data: {
+      roles: ['USUARIOS_UNIVERSIDAD'],
+      organizationType: 'UNIVERSITY',
+      description: 'Consulta y actualiza la informacion compartida de tu universidad dentro de UniDev.'
     }
   },
   {
