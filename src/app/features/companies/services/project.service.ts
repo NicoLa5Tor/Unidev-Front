@@ -51,4 +51,12 @@ export class ProjectService {
     return this.http.post<ProjectDetail>(`${this.projectsUrl}/${projectId}/retry-ai`, {});
   }
 
+  publishProject(projectId: number) {
+    return this.http.post<ProjectDetail>(`${this.projectsUrl}/${projectId}/publish`, {});
+  }
+
+  publishProjectSummary(projectId: number) {
+    return this.http.post<Project>(`${this.projectsUrl}/${projectId}/publish`, {});
+  }
+
 }

@@ -26,6 +26,7 @@ export class ProjectDetailDialogComponent implements OnDestroy {
   isLoading = true;
   updatingRequirementId: number | null = null;
   retryingAi = false;
+  publishingProject = false;
   project: ProjectDetail | null = null;
   private expandedRequirementIds = new Set<number>();
   private pollHandle: ReturnType<typeof setTimeout> | null = null;
@@ -77,6 +78,18 @@ export class ProjectDetailDialogComponent implements OnDestroy {
     return 'No disponible';
   }
 
+  get isPublished(): boolean {
+    return !!this.project?.publishedAt || this.project?.statusCode === 'PUBLISHED';
+  }
+
+  get canPublish(): boolean {
+    if (!this.project || this.isPublished) {
+      return false;
+    }
+    return this.project.requirementsStatus === 'COMPLETED'
+      && this.project.estimationStatus === 'COMPLETED';
+  }
+
   close(): void {
     this.stopPolling();
     this.dialogRef.close(this.project);
@@ -104,7 +117,7 @@ export class ProjectDetailDialogComponent implements OnDestroy {
   }
 
   openRequirementAssistant(requirement: ProjectRequirement): void {
-    if (!this.project || !requirement.active) {
+    if (!this.project || !requirement.active || this.isPublished) {
       return;
     }
 
@@ -135,7 +148,7 @@ export class ProjectDetailDialogComponent implements OnDestroy {
   }
 
   toggleRequirementActivation(requirement: ProjectRequirement, active: boolean): void {
-    if (!this.project || this.updatingRequirementId === requirement.id) {
+    if (!this.project || this.updatingRequirementId === requirement.id || this.isPublished) {
       return;
     }
 
@@ -169,7 +182,7 @@ export class ProjectDetailDialogComponent implements OnDestroy {
   }
 
   retryAiPipeline(): void {
-    if (!this.project || this.retryingAi) {
+    if (!this.project || this.retryingAi || this.isPublished) {
       return;
     }
 
@@ -184,6 +197,26 @@ export class ProjectDetailDialogComponent implements OnDestroy {
       error: error => {
         this.retryingAi = false;
         this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos reintentar la IA para este proyecto.'));
+      }
+    });
+  }
+
+  publishProject(): void {
+    if (!this.project || this.publishingProject || !this.canPublish) {
+      return;
+    }
+
+    this.publishingProject = true;
+    this.projectService.publishProject(this.project.id).subscribe({
+      next: project => {
+        this.project = project;
+        this.ensureExpandedRequirements(project.requirements);
+        this.publishingProject = false;
+        this.uiToastService.success('Proyecto publicado. Ya no admite cambios.');
+      },
+      error: error => {
+        this.publishingProject = false;
+        this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos publicar el proyecto.'));
       }
     });
   }

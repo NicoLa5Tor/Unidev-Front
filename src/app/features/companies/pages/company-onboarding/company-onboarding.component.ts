@@ -26,6 +26,7 @@ type MessageState = { type: 'success' | 'error'; text: string } | null;
 type CreateField = 'companyName' | 'domain' | 'nit' | 'contactEmail';
 type ProjectCreateField = 'name' | 'description' | 'businessObjective' | 'targetUsers' | 'mainModules';
 type RegistrationDocumentType = 'LEGAL_CERTIFICATE' | 'TAX_DOCUMENT';
+type ProjectVisibilityFilter = 'ALL' | 'PUBLISHED' | 'EDITING';
 
 @Component({
   selector: 'app-company-onboarding',
@@ -53,6 +54,8 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   isCreatingProject = false;
   isProjectsLoading = false;
   isProjectCreatePanelOpen = false;
+  publishingProjectId: number | null = null;
+  projectVisibilityFilter: ProjectVisibilityFilter = 'ALL';
   message: MessageState = null;
   createFieldErrors: Partial<Record<CreateField, string>> = {};
   projectCreateErrors: Partial<Record<ProjectCreateField, string>> = {};
@@ -173,12 +176,35 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     return this.projects.length > 0;
   }
 
+  get filteredProjects(): Project[] {
+    switch (this.projectVisibilityFilter) {
+      case 'PUBLISHED':
+        return this.projects.filter(project => this.isPublishedProject(project));
+      case 'EDITING':
+        return this.projects.filter(project => !this.isPublishedProject(project));
+      default:
+        return this.projects;
+    }
+  }
+
+  get hasFilteredProjects(): boolean {
+    return this.filteredProjects.length > 0;
+  }
+
   get pendingProjectsCount(): number {
     return this.projects.filter(project => project.estimationStatus === 'PENDING' || project.requirementsStatus === 'PENDING').length;
   }
 
   get hasPendingProjects(): boolean {
     return this.pendingProjectsCount > 0;
+  }
+
+  get publishedProjectsCount(): number {
+    return this.projects.filter(project => this.isPublishedProject(project)).length;
+  }
+
+  get editingProjectsCount(): number {
+    return this.projects.filter(project => !this.isPublishedProject(project)).length;
   }
 
   get selectedProjectFormExample(): ProjectCreateFormExample | null {
@@ -795,6 +821,36 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     this.isProjectCreatePanelOpen = !this.isProjectCreatePanelOpen;
   }
 
+  setProjectVisibilityFilter(filter: ProjectVisibilityFilter): void {
+    this.projectVisibilityFilter = filter;
+  }
+
+  canPublishProject(project: Project): boolean {
+    return !this.isPublishedProject(project)
+      && project.requirementsStatus === 'COMPLETED'
+      && project.estimationStatus === 'COMPLETED';
+  }
+
+  publishProject(project: Project, event?: Event): void {
+    event?.stopPropagation();
+    if (this.publishingProjectId === project.id || !this.canPublishProject(project)) {
+      return;
+    }
+
+    this.publishingProjectId = project.id;
+    this.projectService.publishProjectSummary(project.id).subscribe({
+      next: publishedProject => {
+        this.projects = this.projects.map(item => item.id === publishedProject.id ? publishedProject : item);
+        this.publishingProjectId = null;
+        this.uiToastService.success('Proyecto publicado. Ya no admite cambios.');
+      },
+      error: error => {
+        this.publishingProjectId = null;
+        this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos publicar el proyecto.'));
+      }
+    });
+  }
+
   applyProjectFormExample(exampleId: string): void {
     this.projectFormExampleId = exampleId;
     const example = this.selectedProjectFormExample;
@@ -1222,6 +1278,20 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
       return 'app-status-warning';
     }
     return 'app-status-success';
+  }
+
+  projectPublicationLabel(project: Project | ProjectDetail): string {
+    return this.isPublishedProject(project) ? 'Publicado' : 'En edición';
+  }
+
+  projectPublicationTone(project: Project | ProjectDetail): string {
+    return this.isPublishedProject(project)
+      ? 'app-status-success'
+      : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)]';
+  }
+
+  private isPublishedProject(project: Project | ProjectDetail): boolean {
+    return !!project.publishedAt || project.statusCode === 'PUBLISHED';
   }
 
   private syncProjectsPolling(): void {
