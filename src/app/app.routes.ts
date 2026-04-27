@@ -197,6 +197,18 @@ export const routes: Routes = [
     }
   },
   {
+    path: 'contact',
+    title: 'Contacto | UniDev',
+    loadComponent: () =>
+      import('./features/contact/pages/contact/contact.component').then(
+        m => m.ContactComponent
+      ),
+    data: {
+      publicHeader: true,
+      description: 'Contacta a UniDev para registro de empresas, universidades y alianzas.'
+    }
+  },
+  {
     path: '**',
     redirectTo: ''
   }

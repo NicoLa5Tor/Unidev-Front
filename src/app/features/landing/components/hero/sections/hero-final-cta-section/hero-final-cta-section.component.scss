@@ -139,15 +139,24 @@
   gap: 0.62rem;
 }
 
-.cta-band__stat {
+.cta-band__contact-card {
   position: relative;
+  display: block;
   padding: 0.85rem 0.95rem 0.9rem 1.18rem;
   border-radius: 0.95rem;
   border: 1px solid rgba(148, 163, 184, 0.1);
   background: linear-gradient(180deg, rgba(15, 23, 42, 0.68), rgba(15, 23, 42, 0.34));
+  text-decoration: none;
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
 }
 
-.cta-band__stat::before {
+.cta-band__contact-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(103, 232, 249, 0.32);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.82), rgba(15, 23, 42, 0.42));
+}
+
+.cta-band__contact-card::before {
   content: '';
   position: absolute;
   left: 0.75rem;
@@ -158,13 +167,13 @@
   background: linear-gradient(180deg, rgba(34, 211, 238, 0.88), rgba(168, 85, 247, 0.16));
 }
 
-.cta-band__stat small,
-.cta-band__stat strong,
-.cta-band__stat span {
+.cta-band__contact-card small,
+.cta-band__contact-card strong,
+.cta-band__contact-card span {
   display: block;
 }
 
-.cta-band__stat small {
+.cta-band__contact-card small {
   margin-bottom: 0.26rem;
   color: #67e8f9;
   font-size: 0.63rem;
@@ -172,14 +181,15 @@
   text-transform: uppercase;
 }
 
-.cta-band__stat strong {
+.cta-band__contact-card strong {
   margin-bottom: 0.2rem;
   color: #f8fafc;
   font-size: 0.98rem;
   line-height: 1.2;
+  word-break: break-word;
 }
 
-.cta-band__stat span {
+.cta-band__contact-card span {
   color: rgba(203, 213, 225, 0.82);
   font-size: 0.78rem;
   line-height: 1.38;

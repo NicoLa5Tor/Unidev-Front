@@ -1,0 +1,42 @@
+<section class="contact-page">
+  <div class="contact-page__backdrop" aria-hidden="true">
+    <div class="contact-page__orb contact-page__orb--a"></div>
+    <div class="contact-page__orb contact-page__orb--b"></div>
+    <div class="contact-page__grid"></div>
+  </div>
+
+  <main class="contact-page__main">
+    <section class="contact-hero">
+      <div class="contact-hero__brand">
+        <img src="/Logo.png" alt="UniDev" class="contact-hero__logo" />
+        <span class="contact-hero__eyebrow">Contacto UniDev</span>
+      </div>
+
+      <h1 class="contact-hero__title">
+        Hablemos sin
+        <span>dar vueltas.</span>
+      </h1>
+
+      <p class="contact-hero__copy">
+        Si quieres registrar una empresa, activar una universidad o abrir una conversación comercial,
+        aquí están los canales correctos.
+      </p>
+
+      <div class="contact-hero__actions">
+        <a routerLink="/companies" class="contact-btn contact-btn--primary">Registrar empresa</a>
+        <a routerLink="/universities" class="contact-btn contact-btn--secondary">Registrar universidad</a>
+      </div>
+    </section>
+
+    <section class="contact-grid">
+      <article *ngFor="let channel of channels" class="contact-card">
+        <p class="contact-card__label">{{ channel.label }}</p>
+        <h2 class="contact-card__email">{{ channel.email }}</h2>
+        <p class="contact-card__text">{{ channel.description }}</p>
+        <a [href]="channel.href" class="contact-card__link">Escribir</a>
+      </article>
+    </section>
+  </main>
+
+  <app-footer></app-footer>
+</section>

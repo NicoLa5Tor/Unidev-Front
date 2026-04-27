@@ -14,8 +14,12 @@
         <div class="footer-logo mb-8">
           <div class="flex items-center space-x-3 mb-4">
             <div class="relative">
-              <div class="w-12 h-12 bg-gradient-to-r from-neon-purple to-neon-pink rounded-lg flex items-center justify-center animate-glow">
-                <span class="text-white font-cyber font-bold text-2xl">U</span>
+              <div class="flex h-14 w-20 items-center justify-center overflow-hidden rounded-xl border border-neon-cyan/30 bg-dark-700/70 px-2 shadow-[0_0_24px_rgba(59,130,246,0.18)]">
+                <img
+                  src="/Logo.png"
+                  alt="UniDev"
+                  class="h-full w-full object-contain"
+                  loading="eager" />
               </div>
               <div class="absolute -top-1 -right-1 w-4 h-4 bg-neon-cyan rounded-full animate-pulse"></div>
             </div>
@@ -28,20 +32,9 @@
           </div>
           
           <p class="text-gray-300 font-tech leading-relaxed mb-6">
-            Conectando el talento estudiantil con proyectos reales de empresas innovadoras. 
-            Construyendo el futuro del trabajo colaborativo.
+            UniDev conecta talento, ejecución real y colaboración entre estudiantes, empresas y universidades.
           </p>
 
-          <!-- Social Links -->
-          <div class="flex space-x-4">
-            <a 
-              *ngFor="let social of socialLinks" 
-              [href]="social.href"
-              class="social-link w-10 h-10 bg-dark-700 border border-neon-purple/20 rounded-lg flex items-center justify-center text-lg hover:border-neon-purple hover:bg-neon-purple/10 transition-all duration-300 transform hover:scale-110"
-              [title]="social.label">
-              {{ social.icon }}
-            </a>
-          </div>
         </div>
       </div>
 
@@ -53,39 +46,47 @@
           <h4 class="text-lg font-tech font-semibold text-neon-purple mb-4">Plataforma</h4>
           <ul class="space-y-2">
             <li *ngFor="let link of footerLinks.platform">
-              <a 
-                [href]="link.href" 
-                class="text-gray-400 hover:text-neon-purple transition-all duration-300 hover:pl-2 block py-1 font-tech">
-                {{ link.label }}
-              </a>
+              <div
+                class="group relative block py-1 font-tech text-gray-400 transition-all duration-300 hover:pl-2 hover:text-neon-purple">
+                <span>{{ link.label }}</span>
+                <span class="pointer-events-none absolute left-0 top-full z-10 mt-2 hidden w-56 rounded-lg border border-neon-purple/20 bg-dark-900/95 px-3 py-2 text-[11px] leading-relaxed text-gray-300 shadow-xl group-hover:block">
+                  {{ link.description }}
+                </span>
+              </div>
             </li>
           </ul>
         </div>
 
-        <!-- Support Links -->
+        <!-- Access Links -->
         <div class="footer-section">
-          <h4 class="text-lg font-tech font-semibold text-neon-cyan mb-4">Soporte</h4>
+          <h4 class="text-lg font-tech font-semibold text-neon-cyan mb-4">Accesos</h4>
           <ul class="space-y-2">
-            <li *ngFor="let link of footerLinks.support">
-              <a 
-                [href]="link.href" 
-                class="text-gray-400 hover:text-neon-cyan transition-all duration-300 hover:pl-2 block py-1 font-tech">
-                {{ link.label }}
-              </a>
+            <li *ngFor="let link of footerLinks.access">
+              <div class="rounded-lg border border-transparent transition-all duration-300 hover:border-neon-cyan/20 hover:bg-dark-700/40">
+                <button
+                  type="button"
+                  (click)="navigateTo(link.href)"
+                  class="group relative block w-full px-2 py-2 text-left font-tech text-sm text-gray-300 transition-all duration-300 hover:pl-4 hover:text-neon-cyan">
+                  {{ link.label }}
+                </button>
+              </div>
             </li>
           </ul>
         </div>
 
-        <!-- Legal Links -->
+        <!-- Build Links -->
         <div class="footer-section">
-          <h4 class="text-lg font-tech font-semibold text-neon-pink mb-4">Legal</h4>
+          <h4 class="text-lg font-tech font-semibold text-neon-pink mb-4">GitHub</h4>
           <ul class="space-y-2">
-            <li *ngFor="let link of footerLinks.legal">
-              <a 
-                [href]="link.href" 
-                class="text-gray-400 hover:text-neon-pink transition-all duration-300 hover:pl-2 block py-1 font-tech">
-                {{ link.label }}
-              </a>
+            <li *ngFor="let link of footerLinks.build">
+              <div class="rounded-lg border border-transparent transition-all duration-300 hover:border-neon-pink/20 hover:bg-dark-700/40">
+                <button
+                  type="button"
+                  (click)="openExternalLink(link.href)"
+                  class="group relative block w-full px-2 py-2 text-left font-tech text-sm text-gray-300 transition-all duration-300 hover:pl-4 hover:text-neon-pink">
+                  {{ link.label }}
+                </button>
+              </div>
             </li>
           </ul>
         </div>
@@ -110,23 +111,27 @@
           </div>
           
           <h5 class="text-xl font-tech font-semibold text-white mb-1">{{ creator.name }}</h5>
-          <p class="text-neon-purple font-tech mb-4">{{ creator.role }}</p>
+          <p class="text-neon-purple font-tech mb-3">{{ creator.role }}</p>
+          <p class="text-xs text-neon-cyan font-tech mb-4">{{ creator.githubLabel }}</p>
           
           <div class="flex justify-center space-x-3">
             <a 
-              [href]="creator.linkedin" 
+              [href]="creator.whatsapp"
+              target="_blank"
+              rel="noreferrer"
               class="w-8 h-8 bg-dark-600 border border-neon-purple/20 rounded-lg flex items-center justify-center text-sm hover:border-neon-purple hover:bg-neon-purple/10 transition-all duration-300">
-              💼
+              <svg class="h-4 w-4 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M19.05 4.91A9.82 9.82 0 0 0 12.03 2a9.93 9.93 0 0 0-8.6 14.9L2 22l5.25-1.37a9.94 9.94 0 0 0 4.77 1.22h.01c5.48 0 9.94-4.46 9.94-9.94 0-2.65-1.03-5.14-2.92-7M12.03 20.17h-.01a8.27 8.27 0 0 1-4.2-1.14l-.3-.18-3.12.81.83-3.04-.2-.31a8.25 8.25 0 0 1-1.27-4.4c0-4.56 3.71-8.27 8.28-8.27a8.2 8.2 0 0 1 5.85 2.43 8.2 8.2 0 0 1 2.42 5.84c0 4.57-3.71 8.28-8.28 8.28m4.54-6.19c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.78.97-.14.17-.28.19-.53.06-.25-.12-1.04-.38-1.98-1.22-.73-.65-1.23-1.46-1.37-1.7-.14-.25-.02-.38.1-.51.11-.11.25-.28.37-.42.12-.14.16-.25.25-.42.08-.17.04-.31-.02-.43-.06-.12-.56-1.35-.76-1.84-.2-.49-.41-.42-.56-.43h-.48c-.16 0-.43.06-.66.31-.23.25-.86.84-.86 2.04s.88 2.36 1 2.53c.12.16 1.72 2.63 4.16 3.69.58.25 1.03.4 1.38.51.58.18 1.11.16 1.53.1.47-.07 1.47-.6 1.67-1.18.21-.58.21-1.08.14-1.18-.06-.1-.22-.16-.47-.28"/>
+              </svg>
             </a>
             <a 
               [href]="creator.github" 
+              target="_blank"
+              rel="noreferrer"
               class="w-8 h-8 bg-dark-600 border border-neon-purple/20 rounded-lg flex items-center justify-center text-sm hover:border-neon-purple hover:bg-neon-purple/10 transition-all duration-300">
-              🐙
-            </a>
-            <a 
-              [href]="'mailto:' + creator.email" 
-              class="w-8 h-8 bg-dark-600 border border-neon-purple/20 rounded-lg flex items-center justify-center text-sm hover:border-neon-purple hover:bg-neon-purple/10 transition-all duration-300">
-              📧
+              <svg class="h-4 w-4 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2.18c-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.27-1.69-1.27-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.74 2.68 1.24 3.33.95.1-.74.4-1.24.73-1.53-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.18-3.09-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.17 1.18a10.9 10.9 0 0 1 5.78 0c2.19-1.49 3.16-1.18 3.16-1.18.63 1.58.24 2.75.12 3.04.73.8 1.17 1.83 1.17 3.09 0 4.43-2.7 5.4-5.27 5.69.41.36.78 1.05.78 2.13v3.15c0 .31.2.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/>
+              </svg>
             </a>
           </div>
         </div>
@@ -139,9 +144,7 @@
         © {{ currentYear }} UniDev. Todos los derechos reservados.
       </p>
       <p class="text-xs text-gray-500 font-tech">
-        Hecho con 
-        <span class="text-neon-pink animate-pulse">♥</span> 
-        por estudiantes, para estudiantes
+        Construido por Nicolas y Yamid
       </p>
     </div>
 
