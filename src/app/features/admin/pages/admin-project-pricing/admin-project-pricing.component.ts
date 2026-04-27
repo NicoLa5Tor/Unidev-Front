@@ -52,6 +52,8 @@ export class AdminProjectPricingComponent implements OnInit {
   levelEditorMode: 'edit' = 'edit';
 
   readonly navItems: DashboardNavItem[] = [
+    { id: 'admin-users', label: 'Usuarios', accent: 'accent-1', route: '/admin/users' },
+    { id: 'admin-companies', label: 'Empresas', accent: 'accent-3', route: '/admin/companies' },
     {
       id: 'project-pricing',
       label: 'Pricing de proyectos',
@@ -63,8 +65,6 @@ export class AdminProjectPricingComponent implements OnInit {
         { id: 'level-editor', label: 'Nivel', accent: 'accent-2', mobileBarWidthClass: 'w-20' }
       ]
     },
-    { id: 'admin-users', label: 'Usuarios', accent: 'accent-3', route: '/admin/users' },
-    { id: 'admin-companies', label: 'Empresas', accent: 'accent-1', route: '/admin/companies' },
     { id: 'admin-emails', label: 'Correos', accent: 'accent-4', route: '/admin/email-templates' }
   ];
 

@@ -42,6 +42,7 @@ export class AdminUsersComponent implements OnInit {
   editorMode: 'create' | 'edit' = 'create';
 
   readonly navItems: DashboardNavItem[] = [
+    { id: 'admin-companies', label: 'Empresas', accent: 'accent-3', route: '/admin/companies' },
     {
       id: 'user-management',
       label: 'Gestion de usuarios',
@@ -52,7 +53,6 @@ export class AdminUsersComponent implements OnInit {
         { id: 'editor', label: 'Editor', accent: 'accent-2', mobileBarWidthClass: 'w-20' }
       ]
     },
-    { id: 'admin-companies', label: 'Empresas', accent: 'accent-3', route: '/admin/companies' },
     { id: 'admin-pricing', label: 'Pricing', accent: 'accent-2', route: '/admin/project-pricing' },
     { id: 'admin-emails', label: 'Correos', accent: 'accent-4', route: '/admin/email-templates' }
   ];

@@ -35,6 +35,9 @@ export class AdminEmailTemplatesComponent implements OnInit {
   editorMode: 'create' | 'edit' = 'create';
 
   readonly navItems: DashboardNavItem[] = [
+    { id: 'admin-users', label: 'Usuarios', accent: 'accent-1', route: '/admin/users' },
+    { id: 'admin-companies', label: 'Empresas', accent: 'accent-3', route: '/admin/companies' },
+    { id: 'admin-pricing', label: 'Pricing', accent: 'accent-2', route: '/admin/project-pricing' },
     {
       id: 'email-system',
       label: 'Correos del sistema',
@@ -43,10 +46,7 @@ export class AdminEmailTemplatesComponent implements OnInit {
         { id: 'library', label: 'Biblioteca', accent: 'accent-3', mobileBarWidthClass: 'w-24' },
         { id: 'editor', label: 'Editor', accent: 'accent-1', mobileBarWidthClass: 'w-20' }
       ]
-    },
-    { id: 'admin-users', label: 'Usuarios', accent: 'accent-3', route: '/admin/users' },
-    { id: 'admin-companies', label: 'Empresas', accent: 'accent-1', route: '/admin/companies' },
-    { id: 'admin-pricing', label: 'Pricing', accent: 'accent-2', route: '/admin/project-pricing' }
+    }
   ];
 
   editor: EmailTemplateEditorModel = this.createEmptyEditor();

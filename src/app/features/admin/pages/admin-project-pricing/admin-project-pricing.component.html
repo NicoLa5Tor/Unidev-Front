@@ -8,19 +8,57 @@
 >
   <button
     dashboard-header-actions
-    class="rounded-full border border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/15 px-3 py-1 font-tech text-[var(--accent-1)]"
+    class="flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/15 text-[var(--accent-1)]"
     (click)="openCreateEditor()"
+    aria-label="Nueva tarifa"
+    title="Nueva tarifa"
   >
-    Nueva tarifa
+    <svg class="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+      <path d="M8 3v10M3 8h10"/>
+    </svg>
   </button>
 
-  <a
-    dashboard-header-actions-mobile
-    class="rounded-full border border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/15 px-3 py-1 font-tech text-[var(--accent-1)]"
-    (click)="openCreateEditor()"
+  <button
+    dashboard-header-actions
+    class="flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--accent-3)]/35 bg-[var(--accent-3)]/10 text-[var(--accent-3)]"
+    (click)="activeTab === 'levels' ? refreshLevels() : refreshRates()"
+    aria-label="Refrescar pricing"
+    title="Refrescar pricing"
   >
-    Tarifa
-  </a>
+    <svg class="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+      <path d="M13 3v4H9"/>
+      <path d="M3 13V9h4"/>
+      <path d="M4.5 6.5A4.5 4.5 0 0 1 12 5l1 2"/>
+      <path d="M11.5 9.5A4.5 4.5 0 0 1 4 11l-1-2"/>
+    </svg>
+  </button>
+
+  <button
+    dashboard-header-actions-mobile
+    class="flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/15 text-[var(--accent-1)]"
+    (click)="openCreateEditor()"
+    aria-label="Nueva tarifa"
+    title="Nueva tarifa"
+  >
+    <svg class="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+      <path d="M8 3v10M3 8h10"/>
+    </svg>
+  </button>
+
+  <button
+    dashboard-header-actions-mobile
+    class="flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--accent-3)]/35 bg-[var(--accent-3)]/10 text-[var(--accent-3)]"
+    (click)="refreshRates()"
+    aria-label="Refrescar pricing"
+    title="Refrescar pricing"
+  >
+    <svg class="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+      <path d="M13 3v4H9"/>
+      <path d="M3 13V9h4"/>
+      <path d="M4.5 6.5A4.5 4.5 0 0 1 12 5l1 2"/>
+      <path d="M11.5 9.5A4.5 4.5 0 0 1 4 11l-1-2"/>
+    </svg>
+  </button>
 
   <section *ngIf="activeTab === 'rates'" class="space-y-6">
     <div class="grid gap-4 md:grid-cols-3">
@@ -43,19 +81,13 @@
       </article>
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+    <div class="grid gap-6 xl:grid-cols-[1.2fr_1fr]">
       <div class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[var(--shadow)]">
         <div class="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-1)]">Biblioteca</p>
             <h2 class="mt-2 text-2xl font-cyber text-[var(--text)]">Tarifas por nivel</h2>
           </div>
-          <button
-            class="rounded-full border border-[color:var(--accent-3)]/35 bg-[var(--accent-3)]/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-[var(--accent-3)]"
-            (click)="refreshRates()"
-          >
-            Refrescar
-          </button>
         </div>
 
         <div *ngIf="isLoadingRates" class="mt-6 rounded-2xl border border-[color:var(--panel-border)] bg-black/10 p-5 text-sm text-[var(--muted)]">
@@ -148,19 +180,13 @@
       </article>
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+    <div class="grid gap-6 xl:grid-cols-[1.2fr_1fr]">
       <div class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[var(--shadow)]">
         <div class="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-2)]">Catalogo</p>
             <h2 class="mt-2 text-2xl font-cyber text-[var(--text)]">Niveles disponibles</h2>
           </div>
-          <button
-            class="rounded-full border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-[var(--accent-2)]"
-            (click)="refreshLevels()"
-          >
-            Refrescar
-          </button>
         </div>
 
         <div *ngIf="isLoadingLevels" class="mt-6 rounded-2xl border border-[color:var(--panel-border)] bg-black/10 p-5 text-sm text-[var(--muted)]">
@@ -226,7 +252,7 @@
     </div>
   </section>
 
-  <section *ngIf="activeTab === 'editor'" class="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+  <section *ngIf="activeTab === 'editor'" class="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
     <form class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[var(--shadow)]" (ngSubmit)="saveRate()">
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div>

@@ -137,7 +137,7 @@
   ══════════════════════════════════ -->
   <section *ngIf="activeTab === 'my-teams'">
 
-    <div class="mb-6 flex items-center justify-between gap-4">
+    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <h2 class="font-cyber text-lg font-bold text-[var(--text)]">Mis equipos</h2>
         <p class="mt-1 text-sm text-[var(--muted)]">Equipos en los que participas como líder o miembro.</p>
@@ -165,13 +165,13 @@
           <textarea [(ngModel)]="newTeamDescription" name="newTeamDescription" rows="2" placeholder="Describe el enfoque de tu equipo…"
             class="w-full resize-none rounded-xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-3 py-2.5 text-sm text-[var(--text)] placeholder-[var(--muted)] outline-none transition-colors focus:border-[color:var(--accent-3)]/60"></textarea>
         </div>
-        <div class="flex gap-2">
+        <div class="flex flex-col gap-2 sm:flex-row">
           <button type="button" (click)="showCreateTeamForm = false; newTeamName = ''; newTeamDescription = ''"
             class="rounded-full border border-[color:var(--panel-border)] px-4 py-2 font-tech text-xs text-[var(--muted)] transition-colors hover:text-[var(--text)]">
             Cancelar
           </button>
           <button type="button" (click)="createTeam()" [disabled]="isCreatingTeam || !newTeamName.trim()"
-            class="flex-1 rounded-full border border-[color:var(--accent-3)]/40 bg-[var(--accent-3)]/15 px-4 py-2 font-tech text-xs uppercase tracking-[0.2em] text-[var(--accent-3)] transition-colors hover:bg-[var(--accent-3)]/25 disabled:cursor-not-allowed disabled:opacity-50">
+              class="w-full flex-1 rounded-full border border-[color:var(--accent-3)]/40 bg-[var(--accent-3)]/15 px-4 py-2 font-tech text-xs uppercase tracking-[0.2em] text-[var(--accent-3)] transition-colors hover:bg-[var(--accent-3)]/25 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto">
             {{ isCreatingTeam ? 'Creando…' : 'Crear equipo' }}
           </button>
         </div>
@@ -195,7 +195,7 @@
 
     <div *ngIf="!isLoadingTeams && myTeams.length > 0" class="flex flex-col gap-5">
       <article *ngFor="let team of myTeams" class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel-2)]/70 p-5 shadow-[var(--shadow)]">
-        <div class="flex items-start justify-between gap-4">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div class="flex-1 min-w-0">
             <div class="flex flex-wrap items-center gap-2">
               <h3 class="font-cyber text-sm font-bold text-[var(--text)]">{{ team.name }}</h3>
@@ -226,12 +226,12 @@
         </div>
 
         <!-- Members -->
-        <div *ngIf="team.members && team.members.length > 0" class="mt-4">
+          <div *ngIf="team.members && team.members.length > 0" class="mt-4">
           <p class="mb-2 font-tech text-xs uppercase tracking-[0.3em] text-[var(--muted)]">Miembros ({{ team.members.length }})</p>
           <div class="flex flex-col gap-2">
             <div *ngFor="let member of team.members"
-              class="flex items-center justify-between gap-3 rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)]/50 px-3 py-2.5">
-              <div class="flex items-center gap-3 min-w-0 flex-1">
+              class="flex flex-col gap-3 rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)]/50 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
+              <div class="flex min-w-0 flex-1 items-center gap-3">
                 <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--panel-2)] font-cyber text-xs font-bold text-[var(--accent-1)]">
                   {{ member.displayName.charAt(0).toUpperCase() }}
                 </div>
@@ -254,7 +254,7 @@
               </div>
               <button *ngIf="isLeader(team) && member.userId !== currentUser?.id"
                 (click)="removeMember(team.id, member.userId)"
-                class="shrink-0 rounded-full border border-rose-500/20 bg-rose-500/10 px-2.5 py-1 font-tech text-xs text-rose-400 transition-colors hover:bg-rose-500/20">
+                class="w-full shrink-0 rounded-full border border-rose-500/20 bg-rose-500/10 px-2.5 py-1 font-tech text-xs text-rose-400 transition-colors hover:bg-rose-500/20 sm:w-auto">
                 Remover
               </button>
             </div>
@@ -291,7 +291,7 @@
 
     <div *ngIf="universityTeams.length > 0" class="flex flex-col gap-4">
       <article *ngFor="let team of universityTeams" class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel-2)]/70 p-5 shadow-[var(--shadow)]">
-        <div class="flex items-start justify-between gap-4">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div class="flex-1 min-w-0">
             <h3 class="font-cyber text-sm font-bold text-[var(--text)]">{{ team.name }}</h3>
             <p *ngIf="team.description" class="mt-1 text-xs text-[var(--muted)]">{{ team.description }}</p>
@@ -300,8 +300,8 @@
               · {{ team.createdAt | date:'dd/MM/yyyy' }}
             </p>
           </div>
-          <span class="shrink-0 rounded-full border border-[color:var(--panel-border)] bg-[var(--panel)] px-2.5 py-0.5 font-tech text-xs text-[var(--muted)]">
-            {{ team.members?.length ?? 0 }} {{ (team.members?.length ?? 0) === 1 ? 'miembro' : 'miembros' }}
+          <span class="w-full shrink-0 rounded-full border border-[color:var(--panel-border)] bg-[var(--panel)] px-2.5 py-1 font-tech text-xs text-[var(--muted)] sm:w-auto">
+            {{ team.members.length }} {{ team.members.length === 1 ? 'miembro' : 'miembros' }}
           </span>
         </div>
 
@@ -309,7 +309,7 @@
           <p class="mb-2 font-tech text-xs uppercase tracking-[0.3em] text-[var(--muted)]">Integrantes</p>
           <div class="flex flex-col gap-2">
             <div *ngFor="let member of team.members"
-              class="flex items-center gap-3 rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)]/50 px-3 py-2">
+              class="flex flex-col gap-3 rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)]/50 px-3 py-2 sm:flex-row sm:items-center">
               <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--panel-2)] font-cyber text-xs text-[var(--accent-1)]">
                 {{ member.displayName.charAt(0).toUpperCase() }}
               </div>

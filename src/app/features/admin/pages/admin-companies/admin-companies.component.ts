@@ -31,6 +31,7 @@ export class AdminCompaniesComponent implements OnInit {
   selectedCompanyReviewItems: CompanyReviewItem[] = [];
 
   readonly navItems: DashboardNavItem[] = [
+    { id: 'admin-users', label: 'Usuarios', accent: 'accent-1', route: '/admin/users' },
     {
       id: 'company-approvals',
       label: 'Aprobacion de empresas',
@@ -39,7 +40,6 @@ export class AdminCompaniesComponent implements OnInit {
         { id: 'queue', label: 'Solicitudes', accent: 'accent-3', mobileBarWidthClass: 'w-24' }
       ]
     },
-    { id: 'admin-users', label: 'Usuarios', accent: 'accent-1', route: '/admin/users' },
     { id: 'admin-pricing', label: 'Pricing', accent: 'accent-2', route: '/admin/project-pricing' },
     { id: 'admin-emails', label: 'Correos', accent: 'accent-4', route: '/admin/email-templates' }
   ];
