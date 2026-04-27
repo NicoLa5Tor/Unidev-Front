@@ -4,4 +4,7 @@ export interface SessionUser {
   email: string;
   companyId: number | null;
   roleName: string;
+  career?: string | null;
+  semester?: number | null;
+  bio?: string | null;
 }

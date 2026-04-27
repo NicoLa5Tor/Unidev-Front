@@ -1,111 +1,137 @@
-<div class="relative min-h-screen bg-[var(--bg)] px-4 py-10 text-[var(--text)] lg:px-10">
-  <div class="absolute inset-0 bg-cyber-grid bg-grid opacity-10"></div>
-  <div class="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-[var(--accent-1)] via-[var(--accent-2)] to-[var(--accent-3)]"></div>
+<div class="relative flex min-h-screen bg-[var(--bg)] text-[var(--text)]">
 
-  <header
-    class="sticky top-0 z-30 w-full border-b border-[color:var(--panel-border)] bg-[var(--panel)]/95 px-4 shadow-[var(--shadow)] backdrop-blur transition-all duration-300 lg:px-10"
-    [ngClass]="isHeaderCompact ? 'py-2' : 'py-4'"
+  <!-- ── MOBILE BACKDROP ── -->
+  <div
+    *ngIf="isMobileMenuOpen"
+    class="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden"
+    (click)="toggleMobileMenu()"
+  ></div>
+
+  <!-- ── SIDEBAR ──
+       Mobile: hidden by default (-translate-x-full), slides in when open (translate-x-0)
+       Desktop (lg+): always visible (lg:translate-x-0 overrides the -translate-x-full)
+  -->
+  <aside
+    class="fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-[color:var(--panel-border)] bg-[var(--panel)] transition-transform duration-300 ease-in-out"
+    [ngClass]="isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
   >
-    <div class="mx-auto flex w-full flex-col gap-4" [ngClass]="contentWidthClass">
-      <div class="flex items-center justify-between gap-4">
-        <div class="flex items-center gap-4">
-          <div
-            class="flex items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)] font-cyber text-[var(--text)] transition-all duration-300"
-            [ngClass]="isHeaderCompact ? 'h-9 w-9 text-sm' : 'h-12 w-12 text-lg'"
-          >
-            <img *ngIf="avatarImageUrl; else avatarFallback" [src]="avatarImageUrl" alt="Avatar" class="h-full w-full object-cover" />
-            <ng-template #avatarFallback>{{ avatarLabel }}</ng-template>
-          </div>
-          <div>
-            <p *ngIf="!isHeaderCompact && eyebrow" class="font-tech text-xs uppercase tracking-[0.3em] text-[var(--accent-3)]">
-              {{ eyebrow }}
-            </p>
-            <h1
-              class="bg-gradient-to-r from-[var(--accent-1)] via-[var(--accent-2)] to-[var(--accent-3)] bg-clip-text font-cyber font-bold text-transparent transition-all duration-300"
-              [ngClass]="isHeaderCompact ? 'text-lg' : 'mt-1 text-2xl'"
-            >
-              {{ title }}
-            </h1>
-          </div>
-        </div>
-
-        <button
-          class="rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-3 py-2 text-xs uppercase tracking-[0.2em] text-[var(--muted)] lg:hidden"
-          (click)="toggleMobileMenu()"
-        >
-          Menu
-        </button>
+    <!-- Brand / User -->
+    <div class="flex shrink-0 items-center gap-3 border-b border-[color:var(--panel-border)] px-5 py-5">
+      <div class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] font-cyber text-base font-bold text-[var(--bg)]">
+        <img *ngIf="avatarImageUrl; else avatarFallback" [src]="avatarImageUrl" alt="Avatar" class="h-full w-full object-cover"/>
+        <ng-template #avatarFallback>{{ avatarLabel }}</ng-template>
       </div>
-
-      <nav class="hidden flex-wrap items-center justify-between gap-4 lg:flex" [ngClass]="isHeaderCompact ? 'pb-1' : ''">
-        <div class="flex flex-wrap items-center gap-8 text-[11px] uppercase tracking-[0.36em]">
-          <button
-            *ngFor="let item of navItems"
-            class="group relative pb-2 font-tech transition"
-            (click)="selectTab(item.id)"
-          >
-            <span [ngClass]="navAccentText(item)">
-              {{ item.label }}
-            </span>
-            <span
-              class="absolute left-0 -bottom-1 h-[2px] w-full rounded-full transition-all duration-300"
-              [ngClass]="[navAccentBar(item), navBarState(item)]"
-            ></span>
-          </button>
-        </div>
-
-        <div class="flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
-          <ng-content select="[dashboard-header-actions]"></ng-content>
-          <label class="font-tech">Tema</label>
-          <select
-            class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel)] px-3 py-1 text-xs uppercase tracking-[0.2em] text-[var(--muted)] focus:border-[color:var(--accent-3)]/60 focus:outline-none"
-            [ngModel]="currentTheme"
-            (ngModelChange)="setTheme($event)"
-          >
-            <option *ngFor="let theme of themes" [value]="theme.id">{{ theme.label }}</option>
-          </select>
-          <button
-            class="rounded-full border border-[color:var(--accent-2)]/40 bg-[var(--accent-2)]/15 px-3 py-1 font-tech text-[var(--accent-2)]"
-            (click)="logout()"
-          >
-            Cerrar sesion
-          </button>
-        </div>
-      </nav>
-
-      <div *ngIf="isMobileMenuOpen" class="space-y-4 lg:hidden">
-        <div class="flex flex-col gap-4 text-[11px] uppercase tracking-[0.36em]">
-          <button *ngFor="let item of navItems" class="group relative pb-2 text-left font-tech transition" (click)="selectTab(item.id)">
-            <span [ngClass]="navMobileText(item)">{{ item.label }}</span>
-            <span
-              class="absolute left-0 -bottom-1 h-[2px] rounded-full transition-all duration-300"
-              [ngClass]="[item.mobileBarWidthClass || 'w-24', navAccentBar(item), activeTab === item.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-60']"
-            ></span>
-          </button>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
-          <ng-content select="[dashboard-header-actions-mobile]"></ng-content>
-          <label class="font-tech">Tema</label>
-          <select
-            class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel)] px-3 py-1 text-xs uppercase tracking-[0.2em] text-[var(--muted)] focus:border-[color:var(--accent-3)]/60 focus:outline-none"
-            [ngModel]="currentTheme"
-            (ngModelChange)="setTheme($event)"
-          >
-            <option *ngFor="let theme of themes" [value]="theme.id">{{ theme.label }}</option>
-          </select>
-          <button
-            class="rounded-full border border-[color:var(--accent-2)]/40 bg-[var(--accent-2)]/15 px-3 py-1 font-tech text-[var(--accent-2)]"
-            (click)="logout()"
-          >
-            Cerrar sesion
-          </button>
-        </div>
+      <div class="min-w-0 flex-1">
+        <p *ngIf="eyebrow" class="truncate font-tech text-[10px] uppercase tracking-[0.3em] text-[var(--accent-3)]">{{ eyebrow }}</p>
+        <h1 class="truncate font-cyber text-sm font-bold text-[var(--text)]">{{ title }}</h1>
       </div>
     </div>
-  </header>
 
-  <div class="relative mx-auto flex w-full flex-col gap-8 pt-10" [ngClass]="contentWidthClass">
-    <ng-content></ng-content>
+    <!-- Nav items -->
+    <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+      <button
+        *ngFor="let item of navItems"
+        (click)="selectTab(item.id)"
+        class="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-150"
+        [ngClass]="activeTab === item.id
+          ? 'bg-[var(--panel-2)] shadow-[var(--shadow)]'
+          : 'hover:bg-[var(--panel-2)]/60'"
+      >
+        <span
+          class="h-2 w-2 shrink-0 rounded-full transition-all duration-200"
+          [ngClass]="{
+            'scale-110': activeTab === item.id,
+            'opacity-30': activeTab !== item.id,
+            'bg-[var(--accent-1)]': item.accent === 'accent-1',
+            'bg-[var(--accent-2)]': item.accent === 'accent-2',
+            'bg-[var(--accent-3)]': item.accent === 'accent-3',
+            'bg-[var(--accent-4)]': item.accent === 'accent-4'
+          }"
+        ></span>
+
+        <span
+          class="flex-1 font-tech text-xs uppercase tracking-[0.18em] transition-colors duration-150"
+          [ngClass]="activeTab === item.id ? accentTextClass(item) : 'text-[var(--muted)] group-hover:text-[var(--text)]'"
+        >
+          {{ item.label }}
+        </span>
+
+        <span
+          *ngIf="activeTab === item.id"
+          class="h-5 w-0.5 rounded-full"
+          [ngClass]="accentBgClass(item)"
+        ></span>
+      </button>
+    </nav>
+
+    <!-- Extra slot: acciones del panel (refresh, domain badge, etc.) -->
+    <div class="shrink-0 border-t border-[color:var(--panel-border)] px-3 pt-3 pb-1 space-y-1">
+      <ng-content select="[dashboard-header-actions]"></ng-content>
+    </div>
+
+    <!-- Bottom: theme + logout -->
+    <div class="shrink-0 px-3 pb-4 pt-2 space-y-1">
+      <div class="flex items-center gap-2 rounded-xl px-3 py-2">
+        <span class="font-tech text-[10px] uppercase tracking-[0.3em] text-[var(--muted)]">Tema</span>
+        <select
+          class="flex-1 rounded-lg border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-2 py-1 font-tech text-[10px] uppercase tracking-[0.15em] text-[var(--muted)] outline-none focus:border-[color:var(--accent-3)]/60"
+          [ngModel]="currentTheme"
+          (ngModelChange)="setTheme($event)"
+        >
+          <option *ngFor="let theme of themes" [value]="theme.id">{{ theme.label }}</option>
+        </select>
+      </div>
+
+      <button
+        (click)="logout()"
+        class="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 font-tech text-xs uppercase tracking-[0.18em] text-[var(--muted)] transition-colors hover:bg-rose-500/10 hover:text-rose-400"
+      >
+        <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M6 2H3a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3M10 11l3-3-3-3M13 8H6"/>
+        </svg>
+        Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN CONTENT ── -->
+  <div class="flex w-full min-h-screen flex-col lg:pl-64">
+
+    <!-- Mobile top bar (hidden on lg+) -->
+    <header class="sticky top-0 z-20 flex shrink-0 items-center justify-between border-b border-[color:var(--panel-border)] bg-[var(--panel)]/95 px-4 py-3 backdrop-blur-sm lg:hidden">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] font-cyber text-sm font-bold text-[var(--bg)]">
+          {{ avatarLabel }}
+        </div>
+        <span class="truncate font-cyber text-sm font-bold text-[var(--text)]">{{ title }}</span>
+      </div>
+      <div class="flex shrink-0 items-center gap-2">
+        <ng-content select="[dashboard-header-actions-mobile]"></ng-content>
+        <button
+          (click)="toggleMobileMenu()"
+          class="flex items-center gap-1.5 rounded-xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-3 py-1.5 font-tech text-xs uppercase tracking-[0.2em] text-[var(--muted)] transition-colors hover:text-[var(--text)]"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <line x1="2" y1="4" x2="14" y2="4"/>
+            <line x1="2" y1="8" x2="14" y2="8"/>
+            <line x1="2" y1="12" x2="14" y2="12"/>
+          </svg>
+          Menú
+        </button>
+      </div>
+    </header>
+
+    <!-- Accent top line -->
+    <div class="h-px w-full shrink-0 bg-gradient-to-r from-[var(--accent-1)] via-[var(--accent-2)] to-[var(--accent-3)]"></div>
+
+    <!-- Page content -->
+    <main class="relative flex-1">
+      <div class="absolute inset-0 bg-cyber-grid bg-grid opacity-5 pointer-events-none"></div>
+      <div class="relative mx-auto px-4 py-8 sm:px-6 lg:px-8" [ngClass]="contentWidthClass">
+        <ng-content></ng-content>
+      </div>
+    </main>
+
   </div>
+
 </div>

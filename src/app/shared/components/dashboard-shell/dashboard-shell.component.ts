@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { AuthService } from '../../../core/services/auth.service';
@@ -29,7 +29,6 @@ export class DashboardShellComponent {
   @Output() readonly tabChange = new EventEmitter<string>();
 
   isMobileMenuOpen = false;
-  isHeaderCompact = false;
 
   readonly themes: Array<{ id: ThemeName; label: string }> = [
     { id: 'cyber', label: 'Neon' },
@@ -63,51 +62,21 @@ export class DashboardShellComponent {
     this.authService.logout();
   }
 
-  navAccentText(item: DashboardNavItem): string {
+  accentTextClass(item: DashboardNavItem): string {
     switch (item.accent) {
-      case 'accent-2':
-        return this.activeTab === item.id ? 'text-[var(--accent-2)]' : 'text-[var(--muted)] group-hover:text-[var(--accent-2)]';
-      case 'accent-3':
-        return this.activeTab === item.id ? 'text-[var(--accent-3)]' : 'text-[var(--muted)] group-hover:text-[var(--accent-3)]';
-      case 'accent-4':
-        return this.activeTab === item.id ? 'text-[var(--accent-4)]' : 'text-[var(--muted)] group-hover:text-[var(--accent-4)]';
-      default:
-        return this.activeTab === item.id ? 'text-[var(--accent-1)]' : 'text-[var(--muted)] group-hover:text-[var(--accent-1)]';
+      case 'accent-2': return 'text-[var(--accent-2)]';
+      case 'accent-3': return 'text-[var(--accent-3)]';
+      case 'accent-4': return 'text-[var(--accent-4)]';
+      default:         return 'text-[var(--accent-1)]';
     }
   }
 
-  navAccentBar(item: DashboardNavItem): string {
+  accentBgClass(item: DashboardNavItem): string {
     switch (item.accent) {
-      case 'accent-2':
-        return 'bg-[var(--accent-2)]';
-      case 'accent-3':
-        return 'bg-[var(--accent-3)]';
-      case 'accent-4':
-        return 'bg-[var(--accent-4)]';
-      default:
-        return 'bg-[var(--accent-1)]';
+      case 'accent-2': return 'bg-[var(--accent-2)]';
+      case 'accent-3': return 'bg-[var(--accent-3)]';
+      case 'accent-4': return 'bg-[var(--accent-4)]';
+      default:         return 'bg-[var(--accent-1)]';
     }
-  }
-
-  navBarState(item: DashboardNavItem): string {
-    return this.activeTab === item.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-60';
-  }
-
-  navMobileText(item: DashboardNavItem): string {
-    switch (item.accent) {
-      case 'accent-2':
-        return this.activeTab === item.id ? 'text-[var(--accent-2)]' : 'text-[var(--muted)]';
-      case 'accent-3':
-        return this.activeTab === item.id ? 'text-[var(--accent-3)]' : 'text-[var(--muted)]';
-      case 'accent-4':
-        return this.activeTab === item.id ? 'text-[var(--accent-4)]' : 'text-[var(--muted)]';
-      default:
-        return this.activeTab === item.id ? 'text-[var(--accent-1)]' : 'text-[var(--muted)]';
-    }
-  }
-
-  @HostListener('window:scroll')
-  onWindowScroll(): void {
-    this.isHeaderCompact = window.scrollY > 80;
   }
 }

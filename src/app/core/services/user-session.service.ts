@@ -45,6 +45,10 @@ export class UserSessionService {
     );
   }
 
+  setCurrentUser(user: SessionUser): void {
+    this.currentUserSubject.next(user);
+  }
+
   clear(): void {
     this.currentUserSubject.next(null);
   }

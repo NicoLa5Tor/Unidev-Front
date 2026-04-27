@@ -165,16 +165,15 @@ export const routes: Routes = [
   },
   {
     path: 'university/workspace',
-    title: 'Espacio universitario | UniDev',
+    title: 'Espacio estudiantil | UniDev',
     loadComponent: () =>
-      import('./features/companies/pages/company-onboarding/company-onboarding.component').then(
-        m => m.CompanyOnboardingComponent
+      import('./features/universities/pages/student-workspace/student-workspace.component').then(
+        m => m.StudentWorkspaceComponent
       ),
     canActivate: [authGuard, roleGuard],
     data: {
       roles: ['USUARIOS_UNIVERSIDAD'],
-      organizationType: 'UNIVERSITY',
-      description: 'Consulta y actualiza la informacion compartida de tu universidad dentro de UniDev.'
+      description: 'Tu espacio estudiantil: proyectos, equipos y colaboracion universitaria.'
     }
   },
   {
