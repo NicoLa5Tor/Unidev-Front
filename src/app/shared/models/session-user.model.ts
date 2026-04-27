@@ -14,4 +14,6 @@ export interface SessionUser {
   skills?: string | null;
   city?: string | null;
   availableForProjects?: boolean | null;
+  campusId?: number | null;
+  campusName?: string | null;
 }

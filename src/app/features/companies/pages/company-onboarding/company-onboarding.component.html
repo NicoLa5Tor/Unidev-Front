@@ -93,6 +93,98 @@
         </div>
 
         <ng-container *ngIf="!isLoading">
+
+          <!-- ══ TAB: SEDES (university only) ══ -->
+          <section
+            *ngIf="activeTab === 'sedes'"
+            class="rounded-[32px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[var(--shadow)] md:p-8"
+          >
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div class="space-y-2">
+                <p class="font-tech text-xs uppercase tracking-[0.28em] text-[var(--muted)]">Organización</p>
+                <h2 class="text-2xl font-semibold text-[var(--text)] sm:text-3xl">Sedes universitarias</h2>
+                <p class="max-w-2xl text-sm leading-6 text-[var(--muted)]">
+                  <ng-container *ngIf="isCompanyOwnerView">Crea y administra las sedes de tu universidad. Cada administrador institucional quedará vinculado a una sede específica.</ng-container>
+                  <ng-container *ngIf="isCompanyMemberView">Sede asignada a tu cuenta de administrador institucional.</ng-container>
+                </p>
+              </div>
+              <button *ngIf="isCompanyOwnerView && currentCompany && isApprovedCompany" (click)="showCreateCampusForm = !showCreateCampusForm"
+                class="shrink-0 self-start rounded-full border border-[color:var(--accent-3)]/40 bg-[var(--accent-3)]/10 px-4 py-2 font-tech text-xs uppercase tracking-[0.2em] text-[var(--accent-3)] hover:bg-[var(--accent-3)]/20">
+                + Nueva sede
+              </button>
+            </div>
+
+            <!-- Member: show own campus -->
+            <div *ngIf="isCompanyMemberView" class="mt-8">
+              <div *ngIf="sessionUser?.campusName" class="rounded-[28px] border border-[color:var(--accent-3)]/30 bg-[var(--panel-2)]/70 p-5">
+                <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-3)]">Tu sede asignada</p>
+                <p class="mt-2 text-xl font-semibold text-[var(--text)]">{{ sessionUser!.campusName }}</p>
+              </div>
+              <div *ngIf="!sessionUser?.campusName" class="rounded-[28px] border border-dashed border-[color:var(--panel-border)] bg-[var(--panel-2)]/50 p-8 text-center text-sm text-[var(--muted)]">
+                No tienes una sede asignada aún. Contacta al administrador principal.
+              </div>
+            </div>
+
+            <!-- Owner: campus list + create -->
+            <ng-container *ngIf="isCompanyOwnerView">
+              <div *ngIf="!currentCompany" class="mt-8 rounded-[28px] border border-[color:var(--panel-border)] bg-[var(--panel-2)]/70 p-5 text-sm text-[var(--muted)]">
+                Primero registra la universidad para poder crear sedes.
+              </div>
+              <div *ngIf="currentCompany && !isApprovedCompany" class="app-status-warning mt-8 rounded-[28px] border p-5 text-sm">
+                Las sedes se habilitan cuando la universidad esté aprobada.
+              </div>
+
+              <ng-container *ngIf="currentCompany && isApprovedCompany">
+                <!-- Create form -->
+                <div *ngIf="showCreateCampusForm" class="mt-6 rounded-[28px] border border-[color:var(--accent-3)]/30 bg-[var(--panel-2)]/70 p-5">
+                  <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-3)]">Nueva sede</p>
+                  <div class="mt-4 flex flex-col gap-3">
+                    <input [(ngModel)]="newCampusName" name="newCampusName" type="text" placeholder="Nombre de la sede *"
+                      class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-3)]"/>
+                    <div class="grid gap-3 sm:grid-cols-2">
+                      <input [(ngModel)]="newCampusCity" name="newCampusCity" type="text" placeholder="Ciudad"
+                        class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-3)]"/>
+                      <input [(ngModel)]="newCampusAddress" name="newCampusAddress" type="text" placeholder="Dirección"
+                        class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-3)]"/>
+                    </div>
+                    <textarea [(ngModel)]="newCampusDescription" name="newCampusDescription" rows="2" placeholder="Descripción (opcional)"
+                      class="w-full resize-none rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-3)]"></textarea>
+                    <div class="flex gap-2">
+                      <button type="button" (click)="showCreateCampusForm = false"
+                        class="rounded-full border border-[color:var(--panel-border)] px-5 py-2 font-tech text-xs text-[var(--muted)] hover:text-[var(--text)]">Cancelar</button>
+                      <button type="button" (click)="createCampus()" [disabled]="isCreatingCampus || !newCampusName.trim()"
+                        class="flex-1 rounded-full bg-[var(--accent-3)] px-5 py-2 font-tech text-xs uppercase tracking-[0.2em] text-[var(--bg)] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">
+                        {{ isCreatingCampus ? 'Creando…' : 'Crear sede' }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Loading -->
+                <div *ngIf="isCampusesLoading" class="mt-6 text-sm text-[var(--muted)]">Cargando sedes...</div>
+
+                <!-- Empty -->
+                <div *ngIf="!isCampusesLoading && campuses.length === 0" class="mt-6 rounded-[28px] border border-dashed border-[color:var(--panel-border)] bg-[var(--panel-2)]/50 p-8 text-center text-sm text-[var(--muted)]">
+                  Aún no hay sedes registradas. Crea la primera sede para poder asignar administradores.
+                </div>
+
+                <!-- List -->
+                <div *ngIf="!isCampusesLoading && campuses.length > 0" class="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  <article *ngFor="let campus of campuses"
+                    class="flex flex-col gap-2 rounded-[28px] border border-[color:var(--panel-border)] bg-[var(--panel-2)]/70 p-5">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--accent-3)]/15">
+                      <svg class="h-5 w-5 text-[var(--accent-3)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 21h18M9 21V9l3-6 3 6v12M9 12h6"/></svg>
+                    </div>
+                    <p class="font-semibold text-[var(--text)]">{{ campus.name }}</p>
+                    <p *ngIf="campus.city" class="font-tech text-xs text-[var(--muted)]">{{ campus.city }}</p>
+                    <p *ngIf="campus.address" class="text-xs text-[var(--muted)]">{{ campus.address }}</p>
+                    <p *ngIf="campus.description" class="text-xs leading-relaxed text-[var(--muted)]">{{ campus.description }}</p>
+                  </article>
+                </div>
+              </ng-container>
+            </ng-container>
+          </section>
+
           <section
             *ngIf="activeTab === 'status'"
             class="rounded-[32px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[var(--shadow)] md:p-8"
@@ -1153,8 +1245,130 @@
             </form>
           </section>
 
+          <!-- ══ ACCESS TAB: UNIVERSITY admins ══ -->
           <section
-            *ngIf="!isCompanyMemberView && activeTab === 'access'"
+            *ngIf="!isCompanyMemberView && activeTab === 'access' && organizationType === 'UNIVERSITY'"
+            class="rounded-[32px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[var(--shadow)] md:p-8"
+          >
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div class="space-y-2">
+                <p class="font-tech text-xs uppercase tracking-[0.28em] text-[var(--muted)]">Administradores institucionales</p>
+                <h2 class="text-2xl font-semibold text-[var(--text)] sm:text-3xl">Admins por sede</h2>
+                <p class="max-w-2xl text-sm leading-6 text-[var(--muted)]">
+                  Cada admin queda vinculado a una sede. Primero habilita su correo en la lista blanca; luego créalo aquí con su sede asignada.
+                </p>
+              </div>
+              <button *ngIf="currentCompany && isApprovedCompany && campuses.length > 0" (click)="showCreateUserForm = !showCreateUserForm"
+                class="shrink-0 self-start rounded-full border border-[color:var(--accent-2)]/40 bg-[var(--accent-2)]/10 px-4 py-2 font-tech text-xs uppercase tracking-[0.2em] text-[var(--accent-2)] hover:bg-[var(--accent-2)]/20">
+                + Nuevo admin
+              </button>
+            </div>
+
+            <div *ngIf="!currentCompany" class="mt-8 rounded-[28px] border border-[color:var(--panel-border)] bg-[var(--panel-2)]/70 p-5 text-sm text-[var(--muted)]">
+              Primero registra la universidad.
+            </div>
+            <div *ngIf="currentCompany && !isApprovedCompany" class="app-status-warning mt-8 rounded-[28px] border p-5 text-sm">
+              Disponible cuando la universidad esté aprobada.
+            </div>
+
+            <ng-container *ngIf="currentCompany && isApprovedCompany">
+
+              <!-- No campuses yet -->
+              <div *ngIf="campuses.length === 0" class="mt-8 rounded-[28px] border border-amber-500/20 bg-amber-500/10 p-5 text-sm text-amber-400">
+                Primero crea al menos una sede en la pestaña "Sedes" para poder asignar administradores.
+              </div>
+
+              <!-- Create admin form -->
+              <div *ngIf="showCreateUserForm && campuses.length > 0" class="mt-6 rounded-[28px] border border-[color:var(--accent-2)]/30 bg-[var(--panel-2)]/70 p-5">
+                <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-2)]">Nuevo administrador</p>
+                <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label class="mb-1 block font-tech text-xs text-[var(--muted)]">Correo institucional *</label>
+                    <input [(ngModel)]="newUserEmail" name="newUserEmail" type="email" [placeholder]="'usuario@' + companyDomain"
+                      class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]"/>
+                  </div>
+                  <div>
+                    <label class="mb-1 block font-tech text-xs text-[var(--muted)]">Nombre (opcional)</label>
+                    <input [(ngModel)]="newUserDisplayName" name="newUserDisplayName" type="text" placeholder="Nombre completo"
+                      class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]"/>
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="mb-1 block font-tech text-xs text-[var(--muted)]">Sede asignada *</label>
+                    <select [(ngModel)]="newUserCampusId" name="newUserCampusId"
+                      class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]">
+                      <option [ngValue]="null">Selecciona una sede…</option>
+                      <option *ngFor="let campus of campuses" [ngValue]="campus.id">{{ campus.name }}<ng-container *ngIf="campus.city"> — {{ campus.city }}</ng-container></option>
+                    </select>
+                  </div>
+                </div>
+                <p class="mt-2 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-2 text-xs text-amber-400">
+                  El correo debe estar habilitado en la lista blanca antes de crear el admin.
+                </p>
+                <div class="mt-4 flex gap-2">
+                  <button type="button" (click)="showCreateUserForm = false"
+                    class="rounded-full border border-[color:var(--panel-border)] px-5 py-2 font-tech text-xs text-[var(--muted)] hover:text-[var(--text)]">Cancelar</button>
+                  <button type="button" (click)="createUniversityUser()" [disabled]="isCreatingUser || !newUserEmail.trim() || !newUserCampusId"
+                    class="flex-1 rounded-full bg-[var(--accent-2)] px-5 py-2 font-tech text-xs uppercase tracking-[0.2em] text-[var(--bg)] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">
+                    {{ isCreatingUser ? 'Creando…' : 'Crear administrador' }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Email whitelist (compact) -->
+              <details class="mt-6 rounded-[28px] border border-[color:var(--panel-border)] bg-[var(--panel-2)]/50">
+                <summary class="cursor-pointer rounded-[28px] px-5 py-4 font-tech text-xs uppercase tracking-[0.22em] text-[var(--muted)] hover:text-[var(--text)]">
+                  Lista blanca de correos ({{ activeAllowedEmailsCount }} activos)
+                </summary>
+                <div class="px-5 pb-5">
+                  <div class="flex gap-3 mt-3">
+                    <input [(ngModel)]="allowedEmailInput" name="allowedEmailInputUniv" type="email" [placeholder]="'usuario@' + companyDomain"
+                      class="flex-1 rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]"/>
+                    <button type="button" (click)="addAllowedEmail()" [disabled]="isAddingAllowedEmail"
+                      class="rounded-full bg-[var(--accent-2)] px-4 py-2.5 font-tech text-xs uppercase tracking-[0.2em] text-[var(--bg)] hover:brightness-110 disabled:opacity-50">
+                      {{ isAddingAllowedEmail ? '...' : 'Habilitar' }}
+                    </button>
+                  </div>
+                  <div *ngIf="isAccessLoading" class="mt-3 text-sm text-[var(--muted)]">Cargando...</div>
+                  <div class="mt-3 space-y-2">
+                    <div *ngFor="let ae of allowedEmails" class="flex items-center justify-between gap-3 rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)]/50 px-4 py-2.5">
+                      <span class="truncate text-sm text-[var(--text)]">{{ ae.email }}</span>
+                      <span class="font-tech text-xs" [ngClass]="ae.status === 'ACTIVE' ? 'text-emerald-400' : 'text-[var(--muted)]'">{{ ae.status === 'ACTIVE' ? 'Activo' : 'Retirado' }}</span>
+                      <button *ngIf="ae.status === 'ACTIVE'" type="button" (click)="removeAllowedEmail(ae)"
+                        class="shrink-0 rounded-full border border-rose-500/20 bg-rose-500/10 px-3 py-1 font-tech text-xs text-rose-400 hover:bg-rose-500/20">Retirar</button>
+                    </div>
+                  </div>
+                </div>
+              </details>
+
+              <!-- Admin list -->
+              <div *ngIf="isUsersLoading" class="mt-6 text-sm text-[var(--muted)]">Cargando administradores...</div>
+              <div *ngIf="!isUsersLoading && universityUsers.length === 0" class="mt-6 rounded-[28px] border border-dashed border-[color:var(--panel-border)] bg-[var(--panel-2)]/50 p-8 text-center text-sm text-[var(--muted)]">
+                Aún no hay administradores registrados.
+              </div>
+              <div *ngIf="!isUsersLoading && universityUsers.length > 0" class="mt-6 space-y-3">
+                <article *ngFor="let user of universityUsers"
+                  class="flex flex-col gap-3 rounded-[28px] border border-[color:var(--panel-border)] bg-[var(--panel-2)]/70 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div class="flex min-w-0 flex-1 items-center gap-3">
+                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--accent-2)] to-[var(--accent-3)] font-cyber text-sm font-bold text-[var(--bg)]">
+                      {{ (user.displayName || user.email).charAt(0).toUpperCase() }}
+                    </div>
+                    <div class="min-w-0">
+                      <p class="truncate font-semibold text-[var(--text)]">{{ user.displayName || user.email }}</p>
+                      <p class="truncate font-tech text-xs text-[var(--muted)]">{{ user.email }}</p>
+                    </div>
+                  </div>
+                  <div class="flex shrink-0 items-center gap-2">
+                    <span *ngIf="user.campusName" class="rounded-full border border-[color:var(--accent-3)]/30 bg-[var(--accent-3)]/10 px-3 py-1 font-tech text-xs text-[var(--accent-3)]">{{ user.campusName }}</span>
+                    <span *ngIf="!user.campusName" class="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 font-tech text-xs text-amber-400">Sin sede</span>
+                  </div>
+                </article>
+              </div>
+            </ng-container>
+          </section>
+
+          <!-- ══ ACCESS TAB: COMPANY emails (original) ══ -->
+          <section
+            *ngIf="!isCompanyMemberView && activeTab === 'access' && organizationType !== 'UNIVERSITY'"
             class="rounded-[32px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[var(--shadow)] md:p-8"
           >
             <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">

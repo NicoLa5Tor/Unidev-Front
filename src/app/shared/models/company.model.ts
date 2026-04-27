@@ -125,3 +125,42 @@ export interface Plan {
   displayOrder: number;
   active: boolean;
 }
+
+
+export interface UniversityCampus {
+  id: number;
+  name: string;
+  description: string | null;
+  city: string | null;
+  address: string | null;
+  universityId: number;
+  universityName: string;
+  createdAt: string;
+}
+
+export interface CreateUniversityCampusDto {
+  name: string;
+  description?: string | null;
+  city?: string | null;
+  address?: string | null;
+}
+
+export interface CompanyUser {
+  id: number;
+  nombre: string | null;
+  displayName: string | null;
+  email: string;
+  roleName: string;
+  campusId: number | null;
+  campusName: string | null;
+}
+
+export interface CreateCompanyUserDto {
+  nombre?: string | null;
+  displayName?: string | null;
+  email: string;
+  walletPhone?: string | null;
+  idType?: string | null;
+  idNumber?: string | null;
+  campusId?: number | null;
+}

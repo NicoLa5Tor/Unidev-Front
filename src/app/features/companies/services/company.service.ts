@@ -13,7 +13,11 @@ import {
   CompanyReviewItem,
   UpdateRejectedCompanyDraftDto,
   UpdateCompanyProfileDto,
-  Plan
+  Plan,
+  UniversityCampus,
+  CreateUniversityCampusDto,
+  CompanyUser,
+  CreateCompanyUserDto
 } from '../../../shared/models/company.model';
 
 @Injectable({
@@ -126,5 +130,23 @@ export class CompanyService {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<Company>(`${this.companiesUrl}/profile/logo`, formData);
+  }
+
+  // ── University campuses ──────────────────────────────────
+  listCampuses() {
+    return this.http.get<UniversityCampus[]>(`${environment.apiUrl}/university/campuses`);
+  }
+
+  createCampus(payload: CreateUniversityCampusDto) {
+    return this.http.post<UniversityCampus>(`${environment.apiUrl}/university/campuses`, payload);
+  }
+
+  // ── Company/University users ─────────────────────────────
+  listCompanyUsers() {
+    return this.http.get<CompanyUser[]>(`${environment.apiUrl}/company-users`);
+  }
+
+  createCompanyUser(payload: CreateCompanyUserDto) {
+    return this.http.post<CompanyUser>(`${environment.apiUrl}/company-users`, payload);
   }
 }

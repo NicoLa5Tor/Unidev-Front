@@ -13,7 +13,7 @@ import { UiToastService } from '../../../../shared/services/ui-toast.service';
 import { CompanyService } from '../../services/company.service';
 import { CompanyAccessService } from '../../services/company-access.service';
 import { ProjectService } from '../../services/project.service';
-import { Company, CompanyRegistrationDocument, CompanyReviewItem, CreateCompanyDto, UpdateCompanyProfileDto, UpdateRejectedCompanyDraftDto } from '../../../../shared/models/company.model';
+import { Company, CompanyRegistrationDocument, CompanyReviewItem, CreateCompanyDto, UpdateCompanyProfileDto, UpdateRejectedCompanyDraftDto, UniversityCampus, CompanyUser, CreateCompanyUserDto } from '../../../../shared/models/company.model';
 import { CreateProjectDto, Project, ProjectDetail, ProjectDevelopmentTypeOption } from '../../../../shared/models/project.model';
 import { SessionUser } from '../../../../shared/models/session-user.model';
 import { CompanyAllowedEmail } from '../../../../shared/models/company-access.model';
@@ -22,7 +22,7 @@ import { CompanyFormModel, ProjectCreateFormModel } from './company-onboarding.t
 import { environment } from '../../../../../environments/environment';
 import { PROJECT_CREATE_FORM_EXAMPLES, ProjectCreateFormExample } from '../../examples/project-create-form/project-create-form-examples';
 
-type CompanyTab = 'status' | 'profile' | 'projects' | 'access';
+type CompanyTab = 'status' | 'profile' | 'projects' | 'access' | 'sedes';
 type MessageState = { type: 'success' | 'error'; text: string } | null;
 type CreateField = 'companyName' | 'domain' | 'nit' | 'contactEmail';
 type ProjectCreateField = 'name' | 'description' | 'businessObjective' | 'targetUsers' | 'mainModules';
@@ -73,6 +73,27 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   allowedEmailInput = '';
   uploadingDocumentType: RegistrationDocumentType | null = null;
   private hasLoadedAccessData = false;
+
+  // Campus / Sedes
+  campuses: UniversityCampus[] = [];
+  isCampusesLoading = false;
+  isCreatingCampus = false;
+  showCreateCampusForm = false;
+  newCampusName = '';
+  newCampusDescription = '';
+  newCampusCity = '';
+  newCampusAddress = '';
+  private hasLoadedCampuses = false;
+
+  // University admin users
+  universityUsers: CompanyUser[] = [];
+  isUsersLoading = false;
+  isCreatingUser = false;
+  showCreateUserForm = false;
+  newUserEmail = '';
+  newUserDisplayName = '';
+  newUserCampusId: number | null = null;
+  private hasLoadedUsers = false;
   private readonly dialog = inject(MatDialog);
   private readonly route = inject(ActivatedRoute);
   private projectsPollHandle: ReturnType<typeof setTimeout> | null = null;
@@ -85,7 +106,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   ];
 
   readonly ownerUniversityNavItems: DashboardNavItem[] = [
-    { id: 'status', label: 'Campus', accent: 'accent-3', mobileBarWidthClass: 'w-20' },
+    { id: 'sedes', label: 'Sedes', accent: 'accent-3', mobileBarWidthClass: 'w-20' },
     { id: 'profile', label: 'Perfil', accent: 'accent-1', mobileBarWidthClass: 'w-20' },
     { id: 'access', label: 'Admins', accent: 'accent-2', mobileBarWidthClass: 'w-20' }
   ];
@@ -97,7 +118,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   ];
 
   readonly memberUniversityNavItems: DashboardNavItem[] = [
-    { id: 'status', label: 'Campus', accent: 'accent-3', mobileBarWidthClass: 'w-20' },
+    { id: 'sedes', label: 'Mi sede', accent: 'accent-3', mobileBarWidthClass: 'w-20' },
     { id: 'profile', label: 'Perfil', accent: 'accent-1', mobileBarWidthClass: 'w-20' }
   ];
 
@@ -516,16 +537,16 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
 
   setActiveTab(tabId: string): void {
     if (this.organizationType === 'UNIVERSITY' && tabId === 'projects') {
-      this.activeTab = 'status';
+      this.activeTab = this.organizationType === 'UNIVERSITY' ? 'sedes' : 'status';
       return;
     }
     if (this.isCompanyMemberView && tabId === 'access') {
-      this.activeTab = 'status';
+      this.activeTab = 'sedes';
       return;
     }
-    if (tabId === 'status' || tabId === 'profile' || tabId === 'projects' || tabId === 'access') {
-      this.activeTab = tabId;
-      this.loadTabDataIfNeeded(tabId);
+    if (tabId === 'status' || tabId === 'profile' || tabId === 'projects' || tabId === 'access' || tabId === 'sedes') {
+      this.activeTab = tabId as CompanyTab;
+      this.loadTabDataIfNeeded(tabId as CompanyTab);
     }
   }
 
@@ -950,7 +971,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
               this.patchFormFromCompany(company);
               this.reviewItems = [];
               this.registrationDocuments = [];
-              this.activeTab = 'status';
+              this.activeTab = this.organizationType === 'UNIVERSITY' ? 'sedes' : 'status';
               this.loadTabDataIfNeeded(this.activeTab);
             } else {
               this.activeTab = 'profile';
@@ -966,6 +987,75 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
       error: () => {
         this.isLoading = false;
         this.message = { type: 'error', text: 'No pudimos validar la sesion de empresa.' };
+      }
+    });
+  }
+
+  private loadCampuses(): void {
+    this.isCampusesLoading = true;
+    this.companyService.listCampuses().subscribe({
+      next: campuses => { this.campuses = campuses; this.isCampusesLoading = false; },
+      error: () => { this.isCampusesLoading = false; this.uiToastService.error('No pudimos cargar las sedes.'); }
+    });
+  }
+
+  createCampus(): void {
+    if (!this.newCampusName.trim() || this.isCreatingCampus) return;
+    this.isCreatingCampus = true;
+    this.companyService.createCampus({
+      name: this.newCampusName.trim(),
+      description: this.newCampusDescription.trim() || null,
+      city: this.newCampusCity.trim() || null,
+      address: this.newCampusAddress.trim() || null
+    }).subscribe({
+      next: campus => {
+        this.campuses = [campus, ...this.campuses];
+        this.showCreateCampusForm = false;
+        this.newCampusName = '';
+        this.newCampusDescription = '';
+        this.newCampusCity = '';
+        this.newCampusAddress = '';
+        this.isCreatingCampus = false;
+        this.uiToastService.success('Sede creada correctamente.');
+      },
+      error: err => {
+        this.isCreatingCampus = false;
+        const msg = err?.error?.message || 'No pudimos crear la sede.';
+        this.uiToastService.error(msg);
+      }
+    });
+  }
+
+  private loadUniversityUsers(): void {
+    this.isUsersLoading = true;
+    this.companyService.listCompanyUsers().subscribe({
+      next: users => { this.universityUsers = users; this.isUsersLoading = false; },
+      error: () => { this.isUsersLoading = false; this.uiToastService.error('No pudimos cargar los administradores.'); }
+    });
+  }
+
+  createUniversityUser(): void {
+    if (!this.newUserEmail.trim() || this.isCreatingUser) return;
+    if (!this.newUserCampusId) { this.uiToastService.error('Selecciona una sede para el administrador.'); return; }
+    this.isCreatingUser = true;
+    const payload: CreateCompanyUserDto = {
+      email: this.newUserEmail.trim(),
+      displayName: this.newUserDisplayName.trim() || null,
+      campusId: this.newUserCampusId
+    };
+    this.companyService.createCompanyUser(payload).subscribe({
+      next: user => {
+        this.universityUsers = [user, ...this.universityUsers];
+        this.showCreateUserForm = false;
+        this.newUserEmail = '';
+        this.newUserDisplayName = '';
+        this.newUserCampusId = null;
+        this.isCreatingUser = false;
+        this.uiToastService.success('Administrador creado. El usuario debe iniciar sesión para activar su acceso.');
+      },
+      error: err => {
+        this.isCreatingUser = false;
+        this.uiToastService.error(err?.error?.message || 'No pudimos crear el administrador.');
       }
     });
   }
@@ -994,9 +1084,19 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     if (!this.currentCompany || this.currentCompany.approvalStatus !== 'APPROVED') {
       return;
     }
+    if (tab === 'sedes' && !this.hasLoadedCampuses) {
+      this.hasLoadedCampuses = true;
+      this.loadCampuses();
+    }
     if (tab === 'access' && !this.hasLoadedAccessData) {
       this.hasLoadedAccessData = true;
-      this.loadAccessGroup();
+      if (this.organizationType === 'UNIVERSITY') {
+        this.loadUniversityUsers();
+        this.loadAccessGroup();
+        if (!this.hasLoadedCampuses) { this.hasLoadedCampuses = true; this.loadCampuses(); }
+      } else {
+        this.loadAccessGroup();
+      }
     }
     if (tab === 'projects') {
       this.loadProjects();
