@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 
 import { CompanyService } from '../../../companies/services/company.service';
 import { Company, CompanyRegistrationDocument, CompanyReviewDecisionDto, CompanyReviewItem } from '../../../../shared/models/company.model';
@@ -13,7 +12,7 @@ type MessageState = { type: 'success' | 'error'; text: string } | null;
 @Component({
   selector: 'app-admin-companies',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, DashboardShellComponent],
+  imports: [CommonModule, FormsModule, DashboardShellComponent],
   templateUrl: './admin-companies.component.html'
 })
 export class AdminCompaniesComponent implements OnInit {
@@ -32,7 +31,17 @@ export class AdminCompaniesComponent implements OnInit {
   selectedCompanyReviewItems: CompanyReviewItem[] = [];
 
   readonly navItems: DashboardNavItem[] = [
-    { id: 'queue', label: 'Solicitudes', accent: 'accent-3', mobileBarWidthClass: 'w-24' }
+    {
+      id: 'company-approvals',
+      label: 'Aprobacion de empresas',
+      accent: 'accent-3',
+      children: [
+        { id: 'queue', label: 'Solicitudes', accent: 'accent-3', mobileBarWidthClass: 'w-24' }
+      ]
+    },
+    { id: 'admin-users', label: 'Usuarios', accent: 'accent-1', route: '/admin/users' },
+    { id: 'admin-pricing', label: 'Pricing', accent: 'accent-2', route: '/admin/project-pricing' },
+    { id: 'admin-emails', label: 'Correos', accent: 'accent-4', route: '/admin/email-templates' }
   ];
 
   constructor(

@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
 import { AdminCatalogService } from '../../services/admin-catalog.service';
@@ -27,7 +26,7 @@ interface UserEditorModel {
 @Component({
   selector: 'app-admin-users',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, DashboardShellComponent],
+  imports: [CommonModule, FormsModule, DashboardShellComponent],
   templateUrl: './admin-users.component.html'
 })
 export class AdminUsersComponent implements OnInit {
@@ -43,9 +42,19 @@ export class AdminUsersComponent implements OnInit {
   editorMode: 'create' | 'edit' = 'create';
 
   readonly navItems: DashboardNavItem[] = [
-    { id: 'overview', label: 'Resumen', accent: 'accent-3', mobileBarWidthClass: 'w-20' },
-    { id: 'directory', label: 'Usuarios', accent: 'accent-1', mobileBarWidthClass: 'w-24' },
-    { id: 'editor', label: 'Editor', accent: 'accent-2', mobileBarWidthClass: 'w-20' }
+    {
+      id: 'user-management',
+      label: 'Gestion de usuarios',
+      accent: 'accent-1',
+      children: [
+        { id: 'overview', label: 'Resumen', accent: 'accent-3', mobileBarWidthClass: 'w-20' },
+        { id: 'directory', label: 'Directorio', accent: 'accent-1', mobileBarWidthClass: 'w-24' },
+        { id: 'editor', label: 'Editor', accent: 'accent-2', mobileBarWidthClass: 'w-20' }
+      ]
+    },
+    { id: 'admin-companies', label: 'Empresas', accent: 'accent-3', route: '/admin/companies' },
+    { id: 'admin-pricing', label: 'Pricing', accent: 'accent-2', route: '/admin/project-pricing' },
+    { id: 'admin-emails', label: 'Correos', accent: 'accent-4', route: '/admin/email-templates' }
   ];
 
   editor: UserEditorModel = this.createEmptyEditor();

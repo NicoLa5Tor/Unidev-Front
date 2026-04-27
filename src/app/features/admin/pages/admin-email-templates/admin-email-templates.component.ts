@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 
 import { EmailTemplateService } from '../../services/email-template.service';
 import { DashboardNavItem, DashboardShellComponent } from '../../../../shared/components/dashboard-shell/dashboard-shell.component';
@@ -23,7 +22,7 @@ interface EmailTemplateEditorModel {
 @Component({
   selector: 'app-admin-email-templates',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, DashboardShellComponent],
+  imports: [CommonModule, FormsModule, DashboardShellComponent],
   templateUrl: './admin-email-templates.component.html'
 })
 export class AdminEmailTemplatesComponent implements OnInit {
@@ -36,8 +35,18 @@ export class AdminEmailTemplatesComponent implements OnInit {
   editorMode: 'create' | 'edit' = 'create';
 
   readonly navItems: DashboardNavItem[] = [
-    { id: 'library', label: 'Biblioteca', accent: 'accent-3', mobileBarWidthClass: 'w-24' },
-    { id: 'editor', label: 'Editor', accent: 'accent-1', mobileBarWidthClass: 'w-20' }
+    {
+      id: 'email-system',
+      label: 'Correos del sistema',
+      accent: 'accent-4',
+      children: [
+        { id: 'library', label: 'Biblioteca', accent: 'accent-3', mobileBarWidthClass: 'w-24' },
+        { id: 'editor', label: 'Editor', accent: 'accent-1', mobileBarWidthClass: 'w-20' }
+      ]
+    },
+    { id: 'admin-users', label: 'Usuarios', accent: 'accent-3', route: '/admin/users' },
+    { id: 'admin-companies', label: 'Empresas', accent: 'accent-1', route: '/admin/companies' },
+    { id: 'admin-pricing', label: 'Pricing', accent: 'accent-2', route: '/admin/project-pricing' }
   ];
 
   editor: EmailTemplateEditorModel = this.createEmptyEditor();

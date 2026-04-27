@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 
 import { DashboardNavItem, DashboardShellComponent } from '../../../../shared/components/dashboard-shell/dashboard-shell.component';
 import { UiToastService } from '../../../../shared/services/ui-toast.service';
@@ -36,7 +35,7 @@ interface PricingLevelEditorModel {
 @Component({
   selector: 'app-admin-project-pricing',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, DashboardShellComponent],
+  imports: [CommonModule, FormsModule, DashboardShellComponent],
   templateUrl: './admin-project-pricing.component.html'
 })
 export class AdminProjectPricingComponent implements OnInit {
@@ -53,10 +52,20 @@ export class AdminProjectPricingComponent implements OnInit {
   levelEditorMode: 'edit' = 'edit';
 
   readonly navItems: DashboardNavItem[] = [
-    { id: 'rates', label: 'Tarifas', accent: 'accent-3', mobileBarWidthClass: 'w-24' },
-    { id: 'levels', label: 'Niveles', accent: 'accent-4', mobileBarWidthClass: 'w-24' },
-    { id: 'editor', label: 'Tarifa', accent: 'accent-1', mobileBarWidthClass: 'w-20' },
-    { id: 'level-editor', label: 'Nivel', accent: 'accent-2', mobileBarWidthClass: 'w-20' }
+    {
+      id: 'project-pricing',
+      label: 'Pricing de proyectos',
+      accent: 'accent-2',
+      children: [
+        { id: 'rates', label: 'Tarifas', accent: 'accent-3', mobileBarWidthClass: 'w-24' },
+        { id: 'levels', label: 'Niveles', accent: 'accent-4', mobileBarWidthClass: 'w-24' },
+        { id: 'editor', label: 'Tarifa', accent: 'accent-1', mobileBarWidthClass: 'w-20' },
+        { id: 'level-editor', label: 'Nivel', accent: 'accent-2', mobileBarWidthClass: 'w-20' }
+      ]
+    },
+    { id: 'admin-users', label: 'Usuarios', accent: 'accent-3', route: '/admin/users' },
+    { id: 'admin-companies', label: 'Empresas', accent: 'accent-1', route: '/admin/companies' },
+    { id: 'admin-emails', label: 'Correos', accent: 'accent-4', route: '/admin/email-templates' }
   ];
 
   editor: PricingRateEditorModel = this.createEmptyEditor();
