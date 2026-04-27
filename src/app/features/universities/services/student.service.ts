@@ -52,6 +52,10 @@ export class StudentService {
     return this.http.get<StudentTeam[]>(`${this.baseUrl}/student/teams`);
   }
 
+  listCampusTeams() {
+    return this.http.get<StudentTeam[]>(`${this.baseUrl}/student/teams/campus`);
+  }
+
   removeMember(teamId: number, memberId: number) {
     return this.http.delete<void>(`${this.baseUrl}/student/teams/${teamId}/members/${memberId}`);
   }
@@ -65,6 +69,16 @@ export class StudentService {
   /** Student requests to join a team */
   requestJoin(teamId: number, payload: TeamJoinRequestDto) {
     return this.http.post<TeamInvitation>(`${this.baseUrl}/student/teams/${teamId}/join-request`, payload);
+  }
+
+  /** Tutor requests to tutor a team */
+  requestTutoring(teamId: number, payload: TeamJoinRequestDto) {
+    return this.http.post<TeamInvitation>(`${this.baseUrl}/student/teams/${teamId}/tutor-request`, payload);
+  }
+
+  /** Leader invites a tutor to tutor their team */
+  inviteTutor(teamId: number, payload: TeamInviteDto) {
+    return this.http.post<TeamInvitation>(`${this.baseUrl}/student/teams/${teamId}/invite-tutor`, payload);
   }
 
   listInvitations() {

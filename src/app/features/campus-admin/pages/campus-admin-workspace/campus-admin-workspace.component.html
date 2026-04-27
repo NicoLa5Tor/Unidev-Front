@@ -1,0 +1,103 @@
+<app-dashboard-shell
+  [title]="currentUser?.campusName ?? 'Mi Sede'"
+  eyebrow="Admin de Sede"
+  [avatarLabel]="(currentUser?.displayName ?? 'AS')[0].toUpperCase()"
+  [avatarImageUrl]="currentUser?.photoUrl ?? null"
+  [activeTab]="activeTab"
+  [navItems]="navItems"
+  (tabChange)="onTabChange($event)">
+
+  <!-- ── EQUIPOS ─────────────────────────────────────── -->
+  <ng-container *ngIf="activeTab === 'teams'">
+    <div class="mb-6">
+      <h2 class="text-xl font-semibold text-white">Equipos de la sede</h2>
+      <p class="mt-1 text-sm text-purple-200">Equipos cuyos líderes pertenecen a {{ currentUser?.campusName ?? 'tu sede' }}.</p>
+    </div>
+
+    <div *ngIf="isLoadingTeams" class="flex justify-center py-12">
+      <div class="h-10 w-10 animate-spin rounded-full border-2 border-white/20 border-t-purple-400"></div>
+    </div>
+
+    <div *ngIf="!isLoadingTeams && campusTeams.length === 0"
+         class="rounded-2xl border border-white/10 bg-white/5 p-8 text-center text-purple-200">
+      No hay equipos registrados en esta sede todavía.
+    </div>
+
+    <div *ngIf="!isLoadingTeams && campusTeams.length > 0"
+         class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div *ngFor="let team of campusTeams"
+           class="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-2">
+        <div class="flex items-start justify-between gap-2">
+          <span class="font-semibold text-white text-sm">{{ team.name }}</span>
+          <span *ngIf="team.tutorDisplayName"
+                class="rounded-full bg-teal-500/20 px-2 py-0.5 text-xs text-teal-300">
+            Tutor: {{ team.tutorDisplayName }}
+          </span>
+        </div>
+        <p *ngIf="team.description" class="text-xs text-purple-200 line-clamp-2">{{ team.description }}</p>
+        <p class="text-xs text-purple-300">Líder: {{ team.leaderDisplayName }}</p>
+        <p class="text-xs text-purple-300">Miembros: {{ team.members.length }}</p>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ── TUTORES ─────────────────────────────────────── -->
+  <ng-container *ngIf="activeTab === 'tutors'">
+    <div class="mb-6 flex items-center justify-between gap-4">
+      <div>
+        <h2 class="text-xl font-semibold text-white">Tutores de la sede</h2>
+        <p class="mt-1 text-sm text-purple-200">Tutores registrados en {{ currentUser?.campusName ?? 'tu sede' }}.</p>
+      </div>
+      <button (click)="showCreateTutorForm = !showCreateTutorForm"
+              class="rounded-xl bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500 transition">
+        {{ showCreateTutorForm ? 'Cancelar' : '+ Tutor' }}
+      </button>
+    </div>
+
+    <!-- Create tutor form -->
+    <div *ngIf="showCreateTutorForm"
+         class="mb-6 rounded-2xl border border-white/10 bg-white/5 p-5 space-y-4">
+      <h3 class="text-sm font-semibold text-white">Registrar tutor</h3>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div class="space-y-1">
+          <label class="block text-xs text-purple-200">Correo institucional *</label>
+          <input [(ngModel)]="newTutorEmail" type="email" placeholder="tutor@universidad.edu"
+                 class="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-purple-500" />
+        </div>
+        <div class="space-y-1">
+          <label class="block text-xs text-purple-200">Nombre a mostrar</label>
+          <input [(ngModel)]="newTutorDisplayName" type="text" placeholder="Nombre del tutor"
+                 class="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-purple-500" />
+        </div>
+      </div>
+      <button (click)="createTutor()" [disabled]="isCreatingTutor || !newTutorEmail.trim()"
+              class="rounded-xl bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500 disabled:opacity-50 transition">
+        {{ isCreatingTutor ? 'Registrando...' : 'Registrar tutor' }}
+      </button>
+    </div>
+
+    <div *ngIf="isLoadingTutors" class="flex justify-center py-12">
+      <div class="h-10 w-10 animate-spin rounded-full border-2 border-white/20 border-t-purple-400"></div>
+    </div>
+
+    <div *ngIf="!isLoadingTutors && tutors.length === 0"
+         class="rounded-2xl border border-white/10 bg-white/5 p-8 text-center text-purple-200">
+      No hay tutores registrados en esta sede todavía.
+    </div>
+
+    <div *ngIf="!isLoadingTutors && tutors.length > 0" class="space-y-3">
+      <div *ngFor="let tutor of tutors"
+           class="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/5 p-4">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-500/20 text-teal-300 font-semibold text-sm">
+          {{ (tutor.displayName || tutor.email)[0].toUpperCase() }}
+        </div>
+        <div class="min-w-0">
+          <p class="truncate text-sm font-medium text-white">{{ tutor.displayName || tutor.email }}</p>
+          <p class="truncate text-xs text-purple-200">{{ tutor.email }}</p>
+        </div>
+        <span class="ml-auto rounded-full bg-teal-500/20 px-2 py-0.5 text-xs text-teal-300">Tutor</span>
+      </div>
+    </div>
+  </ng-container>
+
+</app-dashboard-shell>

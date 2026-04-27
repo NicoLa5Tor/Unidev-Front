@@ -16,6 +16,10 @@ export interface StudentTeam {
   universityName: string;
   leaderId: number;
   leaderDisplayName: string;
+  campusId: number | null;
+  campusName: string | null;
+  tutorId: number | null;
+  tutorDisplayName: string | null;
   createdAt: string;
   members: StudentTeamMember[];
 }
@@ -61,6 +65,7 @@ export interface StudentProfileUpdateDto {
   skills?: string | null;
   city?: string | null;
   availableForProjects?: boolean | null;
+  campusId?: number | null;
 }
 
 export interface TeamInvitation {

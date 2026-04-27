@@ -177,6 +177,32 @@ export const routes: Routes = [
     }
   },
   {
+    path: 'campus-admin/workspace',
+    title: 'Admin de Sede | UniDev',
+    loadComponent: () =>
+      import('./features/campus-admin/pages/campus-admin-workspace/campus-admin-workspace.component').then(
+        m => m.CampusAdminWorkspaceComponent
+      ),
+    canActivate: [authGuard, roleGuard],
+    data: {
+      roles: ['ADMIN_SEDE'],
+      description: 'Gestiona los equipos y tutores de tu sede universitaria.'
+    }
+  },
+  {
+    path: 'tutor/workspace',
+    title: 'Espacio de Tutor | UniDev',
+    loadComponent: () =>
+      import('./features/tutor/pages/tutor-workspace/tutor-workspace.component').then(
+        m => m.TutorWorkspaceComponent
+      ),
+    canActivate: [authGuard, roleGuard],
+    data: {
+      roles: ['TUTOR_SEDE'],
+      description: 'Tu espacio como tutor: acompana equipos y revisa proyectos.'
+    }
+  },
+  {
     path: 'blackbird-experience',
     title: 'Blackbird Experience | UniDev',
     loadComponent: () =>

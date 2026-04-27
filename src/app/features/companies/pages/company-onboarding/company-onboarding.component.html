@@ -254,7 +254,7 @@
                         <p class="mt-2 text-lg font-semibold text-[var(--text)]">{{ profileCompletionPercent }}%</p>
                         <p class="mt-1 text-sm text-[var(--muted)]">{{ profileCompletionCount }} de 5</p>
                       </div>
-                      <div class="rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
+                      <div *ngIf="organizationType !== 'UNIVERSITY'" class="rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
                         <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-1)]">Acceso</p>
                         <p class="mt-2 text-lg font-semibold text-[var(--text)]">{{ activeAllowedEmailsCount }} activos</p>
                         <p class="mt-1 text-sm text-[var(--muted)]">Correos habilitados</p>
@@ -331,7 +331,7 @@
                     </div>
 
                     <div
-                      *ngIf="!isCompanyMemberView && currentCompany.approvalStatus === 'APPROVED'"
+                      *ngIf="!isCompanyMemberView && organizationType !== 'UNIVERSITY' && currentCompany.approvalStatus === 'APPROVED'"
                       class="flex items-start justify-between gap-4 rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3"
                     >
                       <div>
@@ -346,7 +346,7 @@
                     </div>
 
                     <div
-                      *ngIf="!isCompanyMemberView && currentCompany.approvalStatus === 'APPROVED' && profileCompletionCount === 5 && activeAllowedEmailsCount > 0"
+                      *ngIf="!isCompanyMemberView && currentCompany.approvalStatus === 'APPROVED' && profileCompletionCount === 5 && (organizationType === 'UNIVERSITY' || activeAllowedEmailsCount > 0)"
                       class="rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4"
                     >
                       <p class="text-sm font-medium text-[var(--text)]">Operacion al dia</p>
@@ -1255,7 +1255,7 @@
                 <p class="font-tech text-xs uppercase tracking-[0.28em] text-[var(--muted)]">Administradores institucionales</p>
                 <h2 class="text-2xl font-semibold text-[var(--text)] sm:text-3xl">Admins por sede</h2>
                 <p class="max-w-2xl text-sm leading-6 text-[var(--muted)]">
-                  Cada admin queda vinculado a una sede. Primero habilita su correo en la lista blanca; luego créalo aquí con su sede asignada.
+                  Cada admin queda vinculado a una sede. Crea el usuario directamente con su correo institucional y sede asignada.
                 </p>
               </div>
               <button *ngIf="currentCompany && isApprovedCompany && campuses.length > 0" (click)="showCreateUserForm = !showCreateUserForm"
@@ -1301,9 +1301,6 @@
                     </select>
                   </div>
                 </div>
-                <p class="mt-2 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-2 text-xs text-amber-400">
-                  El correo debe estar habilitado en la lista blanca antes de crear el admin.
-                </p>
                 <div class="mt-4 flex gap-2">
                   <button type="button" (click)="showCreateUserForm = false"
                     class="rounded-full border border-[color:var(--panel-border)] px-5 py-2 font-tech text-xs text-[var(--muted)] hover:text-[var(--text)]">Cancelar</button>
@@ -1313,32 +1310,6 @@
                   </button>
                 </div>
               </div>
-
-              <!-- Email whitelist (compact) -->
-              <details class="mt-6 rounded-[28px] border border-[color:var(--panel-border)] bg-[var(--panel-2)]/50">
-                <summary class="cursor-pointer rounded-[28px] px-5 py-4 font-tech text-xs uppercase tracking-[0.22em] text-[var(--muted)] hover:text-[var(--text)]">
-                  Lista blanca de correos ({{ activeAllowedEmailsCount }} activos)
-                </summary>
-                <div class="px-5 pb-5">
-                  <div class="flex gap-3 mt-3">
-                    <input [(ngModel)]="allowedEmailInput" name="allowedEmailInputUniv" type="email" [placeholder]="'usuario@' + companyDomain"
-                      class="flex-1 rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]"/>
-                    <button type="button" (click)="addAllowedEmail()" [disabled]="isAddingAllowedEmail"
-                      class="rounded-full bg-[var(--accent-2)] px-4 py-2.5 font-tech text-xs uppercase tracking-[0.2em] text-[var(--bg)] hover:brightness-110 disabled:opacity-50">
-                      {{ isAddingAllowedEmail ? '...' : 'Habilitar' }}
-                    </button>
-                  </div>
-                  <div *ngIf="isAccessLoading" class="mt-3 text-sm text-[var(--muted)]">Cargando...</div>
-                  <div class="mt-3 space-y-2">
-                    <div *ngFor="let ae of allowedEmails" class="flex items-center justify-between gap-3 rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)]/50 px-4 py-2.5">
-                      <span class="truncate text-sm text-[var(--text)]">{{ ae.email }}</span>
-                      <span class="font-tech text-xs" [ngClass]="ae.status === 'ACTIVE' ? 'text-emerald-400' : 'text-[var(--muted)]'">{{ ae.status === 'ACTIVE' ? 'Activo' : 'Retirado' }}</span>
-                      <button *ngIf="ae.status === 'ACTIVE'" type="button" (click)="removeAllowedEmail(ae)"
-                        class="shrink-0 rounded-full border border-rose-500/20 bg-rose-500/10 px-3 py-1 font-tech text-xs text-rose-400 hover:bg-rose-500/20">Retirar</button>
-                    </div>
-                  </div>
-                </div>
-              </details>
 
               <!-- Admin list -->
               <div *ngIf="isUsersLoading" class="mt-6 text-sm text-[var(--muted)]">Cargando administradores...</div>

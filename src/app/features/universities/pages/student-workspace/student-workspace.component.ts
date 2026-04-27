@@ -8,6 +8,8 @@ import { DashboardShellComponent, DashboardNavItem } from '../../../../shared/co
 import { StudentTeam, ProjectApplication, TeamInvitation } from '../../../../shared/models/student.model';
 import { Project } from '../../../../shared/models/project.model';
 import { SessionUser } from '../../../../shared/models/session-user.model';
+import { CompanyService } from '../../../companies/services/company.service';
+import { UniversityCampus } from '../../../../shared/models/company.model';
 
 @Component({
   selector: 'app-student-workspace',
@@ -18,6 +20,7 @@ import { SessionUser } from '../../../../shared/models/session-user.model';
 export class StudentWorkspaceComponent implements OnInit {
   private readonly studentService = inject(StudentService);
   private readonly userSessionService = inject(UserSessionService);
+  private readonly companyService = inject(CompanyService);
   private readonly toast = inject(UiToastService);
 
   currentUser: SessionUser | null = null;
@@ -85,6 +88,12 @@ export class StudentWorkspaceComponent implements OnInit {
   profileSkillInput = '';
   profileSkillsList: string[] = [];
 
+  // Campus selection
+  showCampusModal = false;
+  availableCampuses: UniversityCampus[] = [];
+  selectedCampusId: number | null = null;
+  isSelectingCampus = false;
+
   get avatarLabel(): string {
     return this.currentUser?.displayName?.charAt(0)?.toUpperCase() ?? 'E';
   }
@@ -100,6 +109,11 @@ export class StudentWorkspaceComponent implements OnInit {
         this.profileCareer = user.career ?? '';
         this.profileSemester = user.semester ?? null;
         this.profileBio = user.bio ?? '';
+        if (!user.campusId) {
+          this.companyService.listCampuses().subscribe({
+            next: campuses => { this.availableCampuses = campuses; }
+          });
+        }
       }
     });
     this.loadProjects();
@@ -324,9 +338,35 @@ export class StudentWorkspaceComponent implements OnInit {
     return inv.status === 'PENDING' && inv.toUserId === this.currentUser?.id;
   }
 
+  // ── Campus selection ──────────────────────────────────
+  openCampusModal(): void { this.showCampusModal = true; this.selectedCampusId = null; }
+  closeCampusModal(): void { this.showCampusModal = false; }
+
+  confirmCampus(): void {
+    if (!this.selectedCampusId) return;
+    this.isSelectingCampus = true;
+    this.studentService.updateProfile({ campusId: this.selectedCampusId }).subscribe({
+      next: updatedUser => {
+        this.userSessionService.setCurrentUser(updatedUser);
+        this.currentUser = { ...this.currentUser!, campusId: updatedUser.campusId, campusName: updatedUser.campusName };
+        this.showCampusModal = false;
+        this.isSelectingCampus = false;
+        this.toast.success('Sede seleccionada correctamente.');
+      },
+      error: err => {
+        this.isSelectingCampus = false;
+        this.toast.error(err?.error?.message || 'No se pudo guardar la sede.');
+      }
+    });
+  }
+
   // ── Team management ───────────────────────────────────
   createTeam(): void {
     if (!this.newTeamName.trim()) return;
+    if (!this.currentUser?.campusId) {
+      this.openCampusModal();
+      return;
+    }
     this.isCreatingTeam = true;
     this.studentService.createTeam({ name: this.newTeamName.trim(), description: this.newTeamDescription.trim() || null }).subscribe({
       next: team => {
