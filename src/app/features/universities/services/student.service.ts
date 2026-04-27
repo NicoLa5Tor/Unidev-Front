@@ -1,7 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
-import { StudentTeam, CreateStudentTeamDto, AddTeamMemberDto, ProjectApplication, ApplyToProjectDto, StudentProfileUpdateDto } from '../../../shared/models/student.model';
+import {
+  StudentTeam, CreateStudentTeamDto,
+  ProjectApplication, ApplyToProjectDto, StudentProfileUpdateDto,
+  TeamInvitation, TeamInviteDto, TeamJoinRequestDto
+} from '../../../shared/models/student.model';
 import { Project } from '../../../shared/models/project.model';
 import { SessionUser } from '../../../shared/models/session-user.model';
 
@@ -11,6 +15,7 @@ export class StudentService {
 
   constructor(private readonly http: HttpClient) {}
 
+  // ── Projects ──────────────────────────────────────────
   listPublishedProjects() {
     return this.http.get<Project[]>(`${this.baseUrl}/projects/published`);
   }
@@ -23,10 +28,18 @@ export class StudentService {
     return this.http.get<ProjectApplication[]>(`${this.baseUrl}/student/applications`);
   }
 
+  // ── Profile ───────────────────────────────────────────
   updateProfile(payload: StudentProfileUpdateDto) {
     return this.http.put<SessionUser>(`${this.baseUrl}/student/profile`, payload);
   }
 
+  uploadPhoto(file: File) {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<SessionUser>(`${this.baseUrl}/student/profile/photo`, form);
+  }
+
+  // ── Teams ─────────────────────────────────────────────
   createTeam(payload: CreateStudentTeamDto) {
     return this.http.post<StudentTeam>(`${this.baseUrl}/student/teams`, payload);
   }
@@ -39,11 +52,34 @@ export class StudentService {
     return this.http.get<StudentTeam[]>(`${this.baseUrl}/student/teams`);
   }
 
-  addMember(teamId: number, payload: AddTeamMemberDto) {
-    return this.http.post<StudentTeam>(`${this.baseUrl}/student/teams/${teamId}/members`, payload);
-  }
-
   removeMember(teamId: number, memberId: number) {
     return this.http.delete<void>(`${this.baseUrl}/student/teams/${teamId}/members/${memberId}`);
+  }
+
+  // ── Invitations ───────────────────────────────────────
+  /** Leader invites a student by email */
+  inviteMember(teamId: number, payload: TeamInviteDto) {
+    return this.http.post<TeamInvitation>(`${this.baseUrl}/student/teams/${teamId}/invite`, payload);
+  }
+
+  /** Student requests to join a team */
+  requestJoin(teamId: number, payload: TeamJoinRequestDto) {
+    return this.http.post<TeamInvitation>(`${this.baseUrl}/student/teams/${teamId}/join-request`, payload);
+  }
+
+  listInvitations() {
+    return this.http.get<TeamInvitation[]>(`${this.baseUrl}/student/invitations`);
+  }
+
+  pendingCount() {
+    return this.http.get<{ count: number }>(`${this.baseUrl}/student/invitations/pending-count`);
+  }
+
+  acceptInvitation(id: number) {
+    return this.http.put<TeamInvitation>(`${this.baseUrl}/student/invitations/${id}/accept`, {});
+  }
+
+  rejectInvitation(id: number) {
+    return this.http.put<TeamInvitation>(`${this.baseUrl}/student/invitations/${id}/reject`, {});
   }
 }

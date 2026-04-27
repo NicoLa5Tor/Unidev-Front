@@ -55,4 +55,38 @@ export interface StudentProfileUpdateDto {
   career?: string | null;
   semester?: number | null;
   bio?: string | null;
+  linkedinUrl?: string | null;
+  githubUrl?: string | null;
+  portfolioUrl?: string | null;
+  skills?: string | null;
+  city?: string | null;
+  availableForProjects?: boolean | null;
+}
+
+export interface TeamInvitation {
+  id: number;
+  teamId: number;
+  teamName: string;
+  fromUserId: number;
+  fromUserDisplayName: string;
+  fromUserEmail: string;
+  toUserId: number;
+  toUserDisplayName: string;
+  toUserEmail: string;
+  /** 'LEADER_INVITE' | 'JOIN_REQUEST' */
+  type: string;
+  /** 'PENDING' | 'ACCEPTED' | 'REJECTED' */
+  status: string;
+  message: string | null;
+  createdAt: string;
+  respondedAt: string | null;
+}
+
+export interface TeamInviteDto {
+  email: string;
+  message?: string | null;
+}
+
+export interface TeamJoinRequestDto {
+  message?: string | null;
 }

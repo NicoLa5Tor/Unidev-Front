@@ -7,4 +7,11 @@ export interface SessionUser {
   career?: string | null;
   semester?: number | null;
   bio?: string | null;
+  photoUrl?: string | null;
+  linkedinUrl?: string | null;
+  githubUrl?: string | null;
+  portfolioUrl?: string | null;
+  skills?: string | null;
+  city?: string | null;
+  availableForProjects?: boolean | null;
 }
