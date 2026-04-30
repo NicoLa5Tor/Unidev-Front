@@ -69,8 +69,7 @@ export class CallbackComponent implements OnInit {
     UNIVERSIDADES: '/universities/onboarding',
     USUARIOS_UNIVERSIDAD: '/university/workspace',
     ADMIN_SEDE: '/campus-admin/workspace',
-    TUTOR_SEDE: '/tutor/workspace',
-    USUARIOS: '/users'
+    TUTOR_SEDE: '/tutor/workspace'
   };
   private isBypassRedirect = false;
   private readonly redirectDelayMs = 1200;
@@ -199,7 +198,7 @@ export class CallbackComponent implements OnInit {
   }
 
   private redirectByRole(roleName?: string): void {
-    const target = (roleName && this.roleRedirects[roleName]) || '/';
+    const target = (roleName && this.roleRedirects[roleName]) || '/access-denied';
     setTimeout(() => {
       void this.router.navigateByUrl(target);
     }, this.redirectDelayMs);

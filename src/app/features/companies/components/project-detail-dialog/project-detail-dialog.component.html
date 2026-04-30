@@ -174,8 +174,68 @@
           </p>
         </div>
 
-        <div class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel)] px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
-          {{ currentProject.levelEstimations.length }} escenarios
+        <div class="flex items-center gap-2 shrink-0">
+          <button type="button" (click)="toggleInfo('metodologia-general')"
+            class="flex items-center gap-1.5 rounded-full border px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] transition"
+            [ngClass]="infoOpen['metodologia-general']
+              ? 'border-[color:var(--accent-2)] bg-[color:color-mix(in_srgb,var(--accent-2)_12%,transparent)] text-[var(--accent-2)]'
+              : 'border-[color:var(--panel-border)] bg-[var(--panel)] text-[var(--muted)] hover:text-[var(--text)]'">
+            <svg viewBox="0 0 16 16" fill="currentColor" width="11" height="11"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a.75.75 0 110 1.5A.75.75 0 018 4zm-.25 3h1.5v4.5h-1.5V7z"/></svg>
+            ¿Cómo funciona?
+          </button>
+          <div class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel)] px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+            {{ currentProject.levelEstimations.length }} escenarios
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel metodología general -->
+      <div *ngIf="infoOpen['metodologia-general']"
+        class="mt-4 rounded-[20px] border border-[color:var(--accent-2)]/25 bg-[color:color-mix(in_srgb,var(--accent-2)_5%,transparent)] p-4 text-sm leading-6 text-[var(--muted)]">
+        <p class="mb-3 font-tech text-[11px] uppercase tracking-[0.2em] text-[var(--accent-2)]">Metodología de estimación</p>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          <div class="space-y-1">
+            <p class="text-xs font-semibold text-[var(--text)]">① Horas base (Junior)</p>
+            <p class="text-xs leading-5">La IA analiza cada requerimiento activo y estima las horas necesarias para un dev Junior. La suma es el punto de partida de todos los escenarios.</p>
+          </div>
+
+          <div class="space-y-1">
+            <p class="text-xs font-semibold text-[var(--text)]">② Ajuste de horas por nivel</p>
+            <p class="text-xs leading-5">
+              <span class="rounded bg-black/20 px-1 py-0.5 font-mono">horas = horasBase × 100 / eficiencia%</span><br>
+              El 100 normaliza el porcentaje a decimal. Eficiencia 200% → ÷ 2 → mitad de horas. Eficiencia 100% → ÷ 1 → sin cambio.
+            </p>
+          </div>
+
+          <div class="space-y-1">
+            <p class="text-xs font-semibold text-[var(--text)]">③ Tarifa por hora</p>
+            <p class="text-xs leading-5">
+              <span class="rounded bg-black/20 px-1 py-0.5 font-mono">tarifa = SMLV ÷ horas/mes × (eficiencia / 100)</span><br>
+              El SMLV y las horas mensuales los configura el admin. A mayor eficiencia, mayor tarifa — el perfil es más valioso por hora.
+            </p>
+          </div>
+
+          <div class="space-y-1">
+            <p class="text-xs font-semibold text-[var(--text)]">④ Monto base</p>
+            <p class="text-xs leading-5">
+              <span class="rounded bg-black/20 px-1 py-0.5 font-mono">base = horas × tarifa/h</span><br>
+              Costo puntual sin margen. Un Senior cobra más por hora pero termina antes, por eso los montos base suelen ser similares entre niveles.
+            </p>
+          </div>
+
+          <div class="space-y-1">
+            <p class="text-xs font-semibold text-[var(--text)]">⑤ Rango comercial</p>
+            <p class="text-xs leading-5">
+              <span class="rounded bg-black/20 px-1 py-0.5 font-mono">mín = base × (1 − %/100) · máx = base × (1 + %/100)</span><br>
+              El porcentaje de apertura cubre variabilidad real: cambios de alcance, bugs imprevistos y reuniones no planificadas.
+            </p>
+          </div>
+
+          <div class="space-y-1">
+            <p class="text-xs font-semibold text-[var(--text)]">⑥ Precio sugerido al publicar</p>
+            <p class="text-xs leading-5">Se usa el escenario Junior como base conservadora — es el más accesible para el cliente. Los estudiantes verán todos los escenarios para comparar.</p>
+          </div>
         </div>
       </div>
 
@@ -199,33 +259,96 @@
           </div>
 
           <div class="mt-4 grid gap-3 sm:grid-cols-2">
+            <!-- Complejidad -->
             <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3">
               <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Complejidad</p>
               <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ levelEstimation.generalComplexity || 'Pendiente' }}</p>
             </div>
-            <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3">
-              <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Horas</p>
+
+            <!-- Horas -->
+            <div class="relative rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3">
+              <div class="flex items-center justify-between gap-1">
+                <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Horas</p>
+                <button type="button" (click)="toggleInfo('card-horas-' + levelEstimation.levelCode)"
+                  class="text-[var(--muted)]/40 hover:text-[var(--accent-2)] transition">
+                  <svg viewBox="0 0 16 16" fill="currentColor" width="12" height="12"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a.75.75 0 110 1.5A.75.75 0 018 4zm-.25 3h1.5v4.5h-1.5V7z"/></svg>
+                </button>
+              </div>
               <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ levelEstimation.totalProjectHours ?? 'Pendiente' }}</p>
+              <div *ngIf="infoOpen['card-horas-' + levelEstimation.levelCode]"
+                class="absolute right-0 top-full z-20 mt-1.5 w-56 rounded-[12px] border border-[color:var(--accent-2)]/30 bg-[var(--panel)] px-3 py-2.5 text-[11px] leading-[1.55] text-[var(--muted)] shadow-xl">
+                Horas base IA × 100 ÷ eficiencia%.
+                <span *ngIf="levelEstimation.levelCode === 'JUNIOR'"> Junior es la base (100% = sin ajuste).</span>
+                <span *ngIf="levelEstimation.levelCode !== 'JUNIOR'"> Mayor eficiencia = menos horas para el mismo resultado.</span>
+              </div>
             </div>
-            <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3">
-              <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Productividad</p>
+
+            <!-- Productividad -->
+            <div class="relative rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3">
+              <div class="flex items-center justify-between gap-1">
+                <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Productividad</p>
+                <button type="button" (click)="toggleInfo('card-prod-' + levelEstimation.levelCode)"
+                  class="text-[var(--muted)]/40 hover:text-[var(--accent-2)] transition">
+                  <svg viewBox="0 0 16 16" fill="currentColor" width="12" height="12"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a.75.75 0 110 1.5A.75.75 0 018 4zm-.25 3h1.5v4.5h-1.5V7z"/></svg>
+                </button>
+              </div>
               <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ levelEstimation.productivityPercentage ?? '100' }}%</p>
+              <div *ngIf="infoOpen['card-prod-' + levelEstimation.levelCode]"
+                class="absolute right-0 top-full z-20 mt-1.5 w-56 rounded-[12px] border border-[color:var(--accent-2)]/30 bg-[var(--panel)] px-3 py-2.5 text-[11px] leading-[1.55] text-[var(--muted)] shadow-xl">
+                Eficiencia relativa del nivel, configurada por el admin. 100% = base (Junior). 200% = Senior produce el doble por hora.
+              </div>
             </div>
-            <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3">
-              <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Tarifa</p>
+
+            <!-- Tarifa -->
+            <div class="relative rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3">
+              <div class="flex items-center justify-between gap-1">
+                <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Tarifa/h</p>
+                <button type="button" (click)="toggleInfo('card-tarifa-' + levelEstimation.levelCode)"
+                  class="text-[var(--muted)]/40 hover:text-[var(--accent-2)] transition">
+                  <svg viewBox="0 0 16 16" fill="currentColor" width="12" height="12"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a.75.75 0 110 1.5A.75.75 0 018 4zm-.25 3h1.5v4.5h-1.5V7z"/></svg>
+                </button>
+              </div>
               <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ formatMoney(levelEstimation.hourlyRate, levelEstimation.currency) }}</p>
+              <div *ngIf="infoOpen['card-tarifa-' + levelEstimation.levelCode]"
+                class="absolute right-0 top-full z-20 mt-1.5 w-60 rounded-[12px] border border-[color:var(--accent-2)]/30 bg-[var(--panel)] px-3 py-2.5 text-[11px] leading-[1.55] text-[var(--muted)] shadow-xl">
+                SMLV ÷ horas/mes × (eficiencia / 100). El SMLV y las horas/mes los fija el admin. Mayor eficiencia = mayor tarifa.
+              </div>
             </div>
-            <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3">
-              <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Base</p>
+
+            <!-- Base -->
+            <div class="relative rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3">
+              <div class="flex items-center justify-between gap-1">
+                <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Base</p>
+                <button type="button" (click)="toggleInfo('card-base-' + levelEstimation.levelCode)"
+                  class="text-[var(--muted)]/40 hover:text-[var(--accent-2)] transition">
+                  <svg viewBox="0 0 16 16" fill="currentColor" width="12" height="12"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a.75.75 0 110 1.5A.75.75 0 018 4zm-.25 3h1.5v4.5h-1.5V7z"/></svg>
+                </button>
+              </div>
               <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ formatMoney(levelEstimation.baseAmount, levelEstimation.currency) }}</p>
+              <div *ngIf="infoOpen['card-base-' + levelEstimation.levelCode]"
+                class="absolute right-0 top-full z-20 mt-1.5 w-56 rounded-[12px] border border-[color:var(--accent-2)]/30 bg-[var(--panel)] px-3 py-2.5 text-[11px] leading-[1.55] text-[var(--muted)] shadow-xl">
+                Horas × tarifa/hora. Costo puntual sin margen. El rango se aplica sobre este valor.
+              </div>
             </div>
-            <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3">
-              <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Minimo</p>
-              <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ formatMoney(levelEstimation.minAmount, levelEstimation.currency) }}</p>
-            </div>
-            <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3">
-              <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Maximo</p>
-              <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ formatMoney(levelEstimation.maxAmount, levelEstimation.currency) }}</p>
+
+            <!-- Rango mín–máx -->
+            <div class="relative rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3 sm:col-span-2">
+              <div class="flex items-center justify-between gap-1">
+                <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Rango comercial</p>
+                <button type="button" (click)="toggleInfo('card-rango-' + levelEstimation.levelCode)"
+                  class="text-[var(--muted)]/40 hover:text-[var(--accent-2)] transition">
+                  <svg viewBox="0 0 16 16" fill="currentColor" width="12" height="12"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a.75.75 0 110 1.5A.75.75 0 018 4zm-.25 3h1.5v4.5h-1.5V7z"/></svg>
+                </button>
+              </div>
+              <div class="mt-2 flex items-baseline gap-2">
+                <span class="text-sm font-semibold text-[var(--text)]">{{ formatMoney(levelEstimation.minAmount, levelEstimation.currency) }}</span>
+                <span class="text-[var(--muted)]">–</span>
+                <span class="text-sm font-semibold text-[var(--text)]">{{ formatMoney(levelEstimation.maxAmount, levelEstimation.currency) }}</span>
+              </div>
+              <div *ngIf="infoOpen['card-rango-' + levelEstimation.levelCode]"
+                class="absolute right-0 top-full z-20 mt-1.5 w-64 rounded-[12px] border border-[color:var(--accent-2)]/30 bg-[var(--panel)] px-3 py-2.5 text-[11px] leading-[1.55] text-[var(--muted)] shadow-xl">
+                Monto base ± porcentaje de apertura configurado. El margen cubre variabilidad: cambios de alcance, bugs imprevistos y reuniones.
+              </div>
             </div>
           </div>
 
@@ -236,21 +359,80 @@
       </div>
     </section>
 
-    <div *ngIf="canPublish || isPublished" class="grid gap-3">
-      <div *ngIf="isPublished" class="app-status-success rounded-[20px] border p-4 text-sm">
-        <p class="font-tech text-[11px] uppercase tracking-[0.18em]">Proyecto publicado</p>
-        <p class="mt-2 leading-6">Este proyecto ya quedó publicado y su contenido ya no admite cambios desde esta vista.</p>
-      </div>
-      <div *ngIf="!isPublished && canPublish" class="rounded-[20px] border border-[color:var(--accent-3)] bg-[color:color-mix(in srgb,var(--accent-3) 10%,transparent)] p-4 text-sm">
-        <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-3)]">Listo para publicar</p>
-        <p class="mt-2 leading-6 text-[var(--muted)]">La IA ya terminó. Revisa el proyecto y publícalo cuando estés conforme. Después de publicarlo ya no se podrá editar.</p>
-        <button
-          type="button"
-          class="mt-4 inline-flex items-center justify-center rounded-full border border-[color:var(--accent-3)] bg-[color:color-mix(in srgb,var(--accent-3) 18%,transparent)] px-5 py-2 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-3)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-          [disabled]="publishingProject"
-          (click)="publishProject()">
-          {{ publishingProject ? 'Publicando...' : 'Publicar proyecto' }}
-        </button>
+
+    <!-- Modal: aprobación de precio -->
+    <div *ngIf="showPriceApprovalModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+      <div class="w-full max-w-md rounded-[28px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-2xl">
+        <p class="font-tech text-xs uppercase tracking-[0.24em] text-[var(--accent-3)]">Confirmación de precio</p>
+        <h4 class="mt-3 text-xl font-semibold text-[var(--text)]">¿Aceptas el precio sugerido?</h4>
+
+        <div *ngIf="project && project.quote?.available" class="mt-4 rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3">
+          <p class="font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Precio sugerido por IA (escenario base)</p>
+          <p class="mt-1 text-base font-semibold text-[var(--text)]">
+            {{ formatMoney(project.quote.minAmount, project.quote.currency) }}
+            –
+            {{ formatMoney(project.quote.maxAmount, project.quote.currency) }}
+          </p>
+          <p class="mt-1 text-xs text-[var(--muted)]">{{ project.quote.baseHours }} h · {{ project.quote.currency }}</p>
+        </div>
+
+        <p class="mt-4 text-sm leading-6 text-[var(--muted)]">
+          Los estudiantes verán tanto el precio sugerido por la IA como el precio que tú definas. Esto les permite comparar y evaluar la oferta de forma transparente.
+        </p>
+
+        <div class="mt-5 space-y-3">
+          <label class="flex cursor-pointer items-start gap-3 rounded-[16px] border px-4 py-3 transition"
+            [ngClass]="priceDecision === 'agreed' ? 'border-[color:var(--accent-3)] bg-[color:color-mix(in_srgb,var(--accent-3)_10%,transparent)]' : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] hover:border-[color:var(--accent-3)]/40'">
+            <input type="radio" name="priceDecision" value="agreed" [(ngModel)]="priceDecision" class="mt-0.5 accent-[var(--accent-3)]" />
+            <div>
+              <p class="text-sm font-medium text-[var(--text)]">Sí, acepto el precio sugerido</p>
+              <p class="text-xs text-[var(--muted)]">El rango de la IA quedará como precio oficial del proyecto.</p>
+            </div>
+          </label>
+
+          <label class="flex cursor-pointer items-start gap-3 rounded-[16px] border px-4 py-3 transition"
+            [ngClass]="priceDecision === 'custom' ? 'border-[color:var(--accent-2)] bg-[color:color-mix(in_srgb,var(--accent-2)_10%,transparent)]' : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] hover:border-[color:var(--accent-2)]/40'">
+            <input type="radio" name="priceDecision" value="custom" [(ngModel)]="priceDecision" class="mt-0.5 accent-[var(--accent-2)]" />
+            <div>
+              <p class="text-sm font-medium text-[var(--text)]">No, quiero definir mi propio precio</p>
+              <p class="text-xs text-[var(--muted)]">Ingresa un rango de precio propio. Los estudiantes verán ambos precios.</p>
+            </div>
+          </label>
+        </div>
+
+        <!-- Formulario precio custom -->
+        <div *ngIf="priceDecision === 'custom'" class="mt-4 grid gap-3 sm:grid-cols-2">
+          <div>
+            <label class="mb-1 block font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Precio mínimo *</label>
+            <input type="number" [(ngModel)]="customPriceMin" min="1" placeholder="0"
+              class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]" />
+          </div>
+          <div>
+            <label class="mb-1 block font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Precio máximo *</label>
+            <input type="number" [(ngModel)]="customPriceMax" min="1" placeholder="0"
+              class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]" />
+          </div>
+          <div class="sm:col-span-2">
+            <label class="mb-1 block font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Moneda</label>
+            <select [(ngModel)]="customPriceCurrency"
+              class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]">
+              <option value="COP">COP</option>
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mt-6 flex gap-3">
+          <button type="button" (click)="closePriceApproval()"
+            class="rounded-full border border-[color:var(--panel-border)] px-5 py-2 font-tech text-xs text-[var(--muted)] hover:text-[var(--text)]">
+            Cancelar
+          </button>
+          <button type="button" (click)="confirmPriceAndPublish()" [disabled]="!priceDecision || publishingProject"
+            class="flex-1 rounded-full bg-[var(--accent-3)] px-5 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--bg)] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">
+            {{ publishingProject ? 'Publicando...' : 'Confirmar y publicar' }}
+          </button>
+        </div>
       </div>
     </div>
 
@@ -538,6 +720,242 @@
             </div>
           </div>
         </section>
+      </div>
+    </div>
+
+    <!-- ══ PUBLICAR — al fondo, después de revisar todo ══ -->
+    <div *ngIf="canPublish || isPublished" class="grid gap-3">
+
+      <!-- Ya publicado -->
+      <div *ngIf="isPublished" class="app-status-success rounded-[24px] border p-5 text-sm">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em]">Proyecto publicado</p>
+            <p class="mt-2 leading-6">Ya no admite cambios. Visible para equipos de estudiantes.</p>
+          </div>
+          <svg class="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg>
+        </div>
+        <div *ngIf="currentProject.companyPriceMinAmount != null" class="mt-4 grid gap-3 sm:grid-cols-2">
+          <div class="rounded-[16px] border border-white/10 bg-black/20 px-4 py-3">
+            <p class="font-tech text-[10px] uppercase tracking-[0.2em] text-white/50">Precio publicado</p>
+            <p class="mt-1 font-semibold text-white">
+              {{ formatMoney(currentProject.companyPriceMinAmount, currentProject.companyPriceCurrency) }} – {{ formatMoney(currentProject.companyPriceMaxAmount, currentProject.companyPriceCurrency) }}
+            </p>
+            <p class="mt-1 text-[10px] text-white/40">{{ currentProject.companyAgreedToSuggestedPrice ? 'Aceptó precio sugerido por IA' : 'Precio definido por la empresa' }}</p>
+          </div>
+          <div *ngIf="!currentProject.companyAgreedToSuggestedPrice && currentProject.quote?.available" class="rounded-[16px] border border-white/10 bg-black/20 px-4 py-3">
+            <p class="font-tech text-[10px] uppercase tracking-[0.2em] text-white/50">Precio sugerido por IA</p>
+            <p class="mt-1 font-semibold text-white/70">
+              {{ formatMoney(currentProject.quote.minAmount, currentProject.quote.currency) }} – {{ formatMoney(currentProject.quote.maxAmount, currentProject.quote.currency) }}
+            </p>
+            <p class="mt-1 text-[10px] text-white/40">Referencia de la estimación automática</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Listo para publicar -->
+      <div *ngIf="!isPublished && canPublish" class="rounded-[24px] border border-[color:var(--accent-3)] bg-[color:color-mix(in_srgb,var(--accent-3)_8%,transparent)] p-5">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-3)]">Listo para publicar</p>
+            <p class="mt-2 text-sm leading-6 text-[var(--muted)]">
+              Revisaste el proyecto. Antes de publicar deberás confirmar si aceptas el precio sugerido por la IA o prefieres definir uno propio.
+              Los estudiantes verán ambos valores para comparar.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="shrink-0 rounded-full border border-[color:var(--accent-3)] bg-[color:color-mix(in_srgb,var(--accent-3)_18%,transparent)] px-6 py-2.5 font-tech text-xs uppercase tracking-[0.18em] text-[var(--accent-3)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+            [disabled]="publishingProject"
+            (click)="openPriceApproval()">
+            {{ publishingProject ? 'Publicando...' : 'Publicar proyecto →' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: aprobación de precio ══ -->
+  <div *ngIf="showPriceApprovalModal" class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 px-4 py-8">
+    <div class="w-full max-w-lg rounded-[28px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-2xl">
+
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="font-tech text-xs uppercase tracking-[0.24em] text-[var(--accent-3)]">Confirmación de precio</p>
+          <h4 class="mt-2 text-xl font-semibold text-[var(--text)]">¿Aceptas el precio sugerido?</h4>
+        </div>
+        <button type="button" (click)="closePriceApproval()" class="mt-1 rounded-full border border-[color:var(--panel-border)] px-3 py-1 font-tech text-xs text-[var(--muted)] hover:text-[var(--text)]">✕</button>
+      </div>
+
+      <!-- ── Desglose de cómo se calculó el precio ── -->
+      <div *ngIf="project && project.levelEstimations?.length" class="mt-5 space-y-2">
+
+        <!-- Header metodología -->
+        <div class="flex items-center justify-between gap-2">
+          <p class="font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Escenarios por nivel de seniority</p>
+          <button type="button" (click)="toggleInfo('metodologia')"
+            class="flex items-center gap-1 rounded-full border border-[color:var(--panel-border)] px-2 py-0.5 font-tech text-[9px] text-[var(--muted)] hover:text-[var(--text)] transition">
+            <svg viewBox="0 0 16 16" fill="currentColor" width="10" height="10"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a.75.75 0 110 1.5A.75.75 0 018 4zm-.25 3h1.5v4.5h-1.5V7z"/></svg>
+            ¿Cómo funciona?
+          </button>
+        </div>
+
+        <!-- Panel: metodología general -->
+        <div *ngIf="infoOpen['metodologia']" class="rounded-[14px] border border-[color:var(--accent-2)]/25 bg-[color:color-mix(in_srgb,var(--accent-2)_6%,transparent)] px-4 py-3 text-xs leading-5 text-[var(--muted)] space-y-2">
+          <p><span class="text-[var(--text)] font-medium">Paso 1 — Horas base:</span> La IA analiza cada requerimiento y estima las horas necesarias para un dev Junior. La suma es las horas base del proyecto.</p>
+          <p><span class="text-[var(--text)] font-medium">Paso 2 — Ajuste por nivel:</span> Horas del nivel = horas base × 100 ÷ eficiencia%. Un Senior con 200% de eficiencia necesita la mitad de horas.</p>
+          <p><span class="text-[var(--text)] font-medium">Paso 3 — Tarifa/hora:</span> Se calcula desde el SMLV configurado por el admin: <span class="text-[var(--text)]">SMLV ÷ horas/mes × (eficiencia / 100)</span>. A más eficiencia, mayor tarifa.</p>
+          <p><span class="text-[var(--text)] font-medium">Paso 4 — Monto base:</span> horas × tarifa/hora. El rango aplica ±% para cubrir variabilidad.</p>
+          <p><span class="text-[var(--text)] font-medium">Precio sugerido:</span> Se usa el escenario <span class="text-[var(--text)]">Junior</span> como base conservadora — el más económico y predecible para el cliente.</p>
+        </div>
+
+        <!-- Filas por nivel -->
+        <div *ngFor="let lvl of project.levelEstimations" class="rounded-[16px] border bg-[var(--panel)] overflow-hidden"
+          [ngClass]="lvl.levelCode === 'JUNIOR' ? 'border-[color:var(--accent-1)]/35' : 'border-[color:var(--panel-border)]'">
+
+          <!-- Fila principal -->
+          <div class="grid grid-cols-[1fr_auto_auto_auto_auto] items-center gap-x-2 px-3 py-2.5 text-xs">
+            <div class="flex items-center gap-2">
+              <span class="font-tech text-[10px] uppercase tracking-[0.16em]"
+                [ngClass]="lvl.levelCode === 'JUNIOR' ? 'text-[var(--accent-1)]' : 'text-[var(--muted)]'">{{ lvl.levelLabel }}</span>
+              <span *ngIf="lvl.levelCode === 'JUNIOR'" class="rounded-full bg-[var(--accent-1)]/15 px-2 py-0.5 font-tech text-[9px] text-[var(--accent-1)]">Base</span>
+            </div>
+
+            <!-- Horas -->
+            <span class="flex items-center gap-1 text-[var(--muted)]">
+              {{ lvl.totalProjectHours ?? '–' }} h
+              <button type="button" (click)="toggleInfo('horas-' + lvl.levelCode)"
+                class="text-[var(--muted)]/50 hover:text-[var(--accent-2)] transition" title="¿Cómo se calcularon las horas?">
+                <svg viewBox="0 0 16 16" fill="currentColor" width="11" height="11"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a.75.75 0 110 1.5A.75.75 0 018 4zm-.25 3h1.5v4.5h-1.5V7z"/></svg>
+              </button>
+            </span>
+
+            <!-- Tarifa -->
+            <span class="flex items-center gap-1 text-[var(--muted)]">
+              × {{ formatMoney(lvl.hourlyRate, lvl.currency) }}/h
+              <button type="button" (click)="toggleInfo('tarifa-' + lvl.levelCode)"
+                class="text-[var(--muted)]/50 hover:text-[var(--accent-2)] transition" title="¿Cómo se calculó la tarifa?">
+                <svg viewBox="0 0 16 16" fill="currentColor" width="11" height="11"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a.75.75 0 110 1.5A.75.75 0 018 4zm-.25 3h1.5v4.5h-1.5V7z"/></svg>
+              </button>
+            </span>
+
+            <!-- Rango final -->
+            <span class="flex items-center gap-1 font-semibold text-[var(--text)]">
+              {{ formatMoney(lvl.minAmount, lvl.currency) }} – {{ formatMoney(lvl.maxAmount, lvl.currency) }}
+              <button type="button" (click)="toggleInfo('rango-' + lvl.levelCode)"
+                class="font-normal text-[var(--muted)]/50 hover:text-[var(--accent-2)] transition" title="¿De dónde sale el rango?">
+                <svg viewBox="0 0 16 16" fill="currentColor" width="11" height="11"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a.75.75 0 110 1.5A.75.75 0 018 4zm-.25 3h1.5v4.5h-1.5V7z"/></svg>
+              </button>
+            </span>
+          </div>
+
+          <!-- Info: horas -->
+          <div *ngIf="infoOpen['horas-' + lvl.levelCode]"
+            class="border-t border-[color:var(--panel-border)] bg-[color:color-mix(in_srgb,var(--accent-2)_5%,transparent)] px-4 py-2.5 text-[11px] leading-5 text-[var(--muted)]">
+            <span class="text-[var(--text)]">Horas {{ lvl.levelLabel }}:</span>
+            horas base IA × 100 ÷ {{ lvl.levelCode === 'JUNIOR' ? '100' : 'eficiencia%' }} = <span class="text-[var(--text)]">{{ lvl.totalProjectHours ?? '?' }} h</span>.
+            <span *ngIf="lvl.levelCode !== 'JUNIOR'"> Un nivel más eficiente termina en menos horas porque produce más por unidad de tiempo.</span>
+            <span *ngIf="lvl.levelCode === 'JUNIOR'"> Junior es la línea base (100% = sin ajuste).</span>
+          </div>
+
+          <!-- Info: tarifa -->
+          <div *ngIf="infoOpen['tarifa-' + lvl.levelCode]"
+            class="border-t border-[color:var(--panel-border)] bg-[color:color-mix(in_srgb,var(--accent-2)_5%,transparent)] px-4 py-2.5 text-[11px] leading-5 text-[var(--muted)]">
+            <span class="text-[var(--text)]">Tarifa {{ lvl.levelLabel }}:</span>
+            SMLV ÷ horas/mes × (eficiencia / 100) = <span class="text-[var(--text)]">{{ formatMoney(lvl.hourlyRate, lvl.currency) }}/h</span>.
+            El SMLV y las horas/mes los configura el administrador de la plataforma. Mayor eficiencia = mayor tarifa porque el perfil es más valioso.
+          </div>
+
+          <!-- Info: rango -->
+          <div *ngIf="infoOpen['rango-' + lvl.levelCode]"
+            class="border-t border-[color:var(--panel-border)] bg-[color:color-mix(in_srgb,var(--accent-2)_5%,transparent)] px-4 py-2.5 text-[11px] leading-5 text-[var(--muted)]">
+            <span class="text-[var(--text)]">Rango {{ lvl.levelLabel }}:</span>
+            monto base ({{ formatMoney(lvl.minAmount, lvl.currency) }}) × ±{{ project.quote.rangePercentage ?? 20 }}% = <span class="text-[var(--text)]">{{ formatMoney(lvl.minAmount, lvl.currency) }} – {{ formatMoney(lvl.maxAmount, lvl.currency) }}</span>.
+            El rango cubre variabilidad real del proyecto: cambios de alcance, bugs imprevistos y reuniones.
+          </div>
+        </div>
+      </div>
+
+      <!-- Precio sugerido resumen -->
+      <div *ngIf="project && project.quote?.available" class="mt-3 rounded-[18px] border border-[color:var(--accent-1)]/30 bg-[color:color-mix(in_srgb,var(--accent-1)_8%,transparent)] px-4 py-3">
+        <div class="flex items-center justify-between gap-3">
+          <p class="font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--accent-1)]">Precio sugerido (escenario Junior)</p>
+          <div class="flex items-center gap-1.5">
+            <span class="rounded-full border border-[color:var(--accent-1)]/30 px-2 py-0.5 font-tech text-[9px] text-[var(--accent-1)]">{{ project.quote.currency }}</span>
+            <button type="button" (click)="toggleInfo('precio-final')"
+              class="text-[var(--accent-1)]/50 hover:text-[var(--accent-1)] transition" title="¿Por qué Junior como base?">
+              <svg viewBox="0 0 16 16" fill="currentColor" width="12" height="12"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a.75.75 0 110 1.5A.75.75 0 018 4zm-.25 3h1.5v4.5h-1.5V7z"/></svg>
+            </button>
+          </div>
+        </div>
+        <p class="mt-1 text-lg font-semibold text-[var(--text)]">
+          {{ formatMoney(project.quote.minAmount, project.quote.currency) }} – {{ formatMoney(project.quote.maxAmount, project.quote.currency) }}
+        </p>
+        <p class="mt-1 text-[10px] text-[var(--muted)]">
+          {{ project.quote.baseHours }} h × {{ formatMoney(project.quote.hourlyRate, project.quote.currency) }}/h = {{ formatMoney(project.quote.baseAmount, project.quote.currency) }} base · apertura ±{{ project.quote.rangePercentage ?? 20 }}%
+        </p>
+        <div *ngIf="infoOpen['precio-final']" class="mt-2 rounded-[12px] border border-[color:var(--accent-1)]/20 bg-[color:color-mix(in_srgb,var(--accent-1)_8%,transparent)] px-3 py-2 text-[11px] leading-5 text-[var(--muted)]">
+          Se usa Junior como base porque es el escenario más conservador y accesible para el cliente. Los estudiantes pueden ver todos los escenarios para comparar. Aceptar este precio no significa que el equipo sea Junior — es solo la referencia económica mínima.
+        </div>
+      </div>
+
+      <p class="mt-4 text-xs leading-5 text-[var(--muted)]">
+        Los estudiantes verán el precio que definas aquí y, si difiere del sugerido por la IA, también verán el sugerido para comparar. Esto evita que se exploten sin información.
+      </p>
+
+      <!-- Opciones -->
+      <div class="mt-5 space-y-3">
+        <label class="flex cursor-pointer items-start gap-3 rounded-[16px] border px-4 py-3 transition"
+          [ngClass]="priceDecision === 'agreed' ? 'border-[color:var(--accent-3)] bg-[color:color-mix(in_srgb,var(--accent-3)_10%,transparent)]' : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] hover:border-[color:var(--accent-3)]/40'">
+          <input type="radio" name="priceDecision" value="agreed" [(ngModel)]="priceDecision" class="mt-0.5 accent-[var(--accent-3)]" />
+          <div>
+            <p class="text-sm font-medium text-[var(--text)]">Sí, acepto el precio sugerido por la IA</p>
+            <p class="text-xs text-[var(--muted)]">Se usará el rango calculado automáticamente como precio oficial.</p>
+          </div>
+        </label>
+
+        <label class="flex cursor-pointer items-start gap-3 rounded-[16px] border px-4 py-3 transition"
+          [ngClass]="priceDecision === 'custom' ? 'border-[color:var(--accent-2)] bg-[color:color-mix(in_srgb,var(--accent-2)_10%,transparent)]' : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] hover:border-[color:var(--accent-2)]/40'">
+          <input type="radio" name="priceDecision" value="custom" [(ngModel)]="priceDecision" class="mt-0.5 accent-[var(--accent-2)]" />
+          <div>
+            <p class="text-sm font-medium text-[var(--text)]">No, prefiero definir mi propio precio</p>
+            <p class="text-xs text-[var(--muted)]">Los estudiantes verán tu precio y el sugerido por la IA como referencia.</p>
+          </div>
+        </label>
+      </div>
+
+      <!-- Formulario precio custom -->
+      <div *ngIf="priceDecision === 'custom'" class="mt-4 grid gap-3 sm:grid-cols-2">
+        <div>
+          <label class="mb-1 block font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Precio mínimo *</label>
+          <input type="number" [(ngModel)]="customPriceMin" min="1" placeholder="0"
+            class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]" />
+        </div>
+        <div>
+          <label class="mb-1 block font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Precio máximo *</label>
+          <input type="number" [(ngModel)]="customPriceMax" min="1" placeholder="0"
+            class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]" />
+        </div>
+        <div class="sm:col-span-2">
+          <label class="mb-1 block font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Moneda</label>
+          <select [(ngModel)]="customPriceCurrency"
+            class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]">
+            <option value="COP">COP — Peso colombiano</option>
+            <option value="USD">USD — Dólar americano</option>
+            <option value="EUR">EUR — Euro</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mt-6 flex gap-3">
+        <button type="button" (click)="closePriceApproval()"
+          class="rounded-full border border-[color:var(--panel-border)] px-5 py-2 font-tech text-xs text-[var(--muted)] hover:text-[var(--text)]">
+          Cancelar
+        </button>
+        <button type="button" (click)="confirmPriceAndPublish()" [disabled]="!priceDecision || publishingProject"
+          class="flex-1 rounded-full bg-[var(--accent-3)] px-5 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--bg)] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">
+          {{ publishingProject ? 'Publicando...' : 'Confirmar y publicar' }}
+        </button>
       </div>
     </div>
   </div>

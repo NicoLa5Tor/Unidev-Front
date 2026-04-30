@@ -913,13 +913,13 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     }
 
     this.publishingProjectId = project.id;
-    this.projectService.publishProjectSummary(project.id).subscribe({
-      next: publishedProject => {
+    this.projectService.publishProject(project.id, { agreedToSuggestedPrice: true }).subscribe({
+      next: (publishedProject: Project) => {
         this.projects = this.projects.map(item => item.id === publishedProject.id ? publishedProject : item);
         this.publishingProjectId = null;
         this.uiToastService.success('Proyecto publicado. Ya no admite cambios.');
       },
-      error: error => {
+      error: (error: unknown) => {
         this.publishingProjectId = null;
         this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos publicar el proyecto.'));
       }
@@ -1426,7 +1426,12 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
       estimationStatus: project.estimationStatus,
       requirementsError: project.requirementsError,
       estimationError: project.estimationError,
-      quote: project.quote
+      quote: project.quote,
+      companyAgreedToSuggestedPrice: project.companyAgreedToSuggestedPrice,
+      companyPriceCurrency: project.companyPriceCurrency,
+      companyPriceMinAmount: project.companyPriceMinAmount,
+      companyPriceMaxAmount: project.companyPriceMaxAmount,
+      priceSetAt: project.priceSetAt
     };
   }
 

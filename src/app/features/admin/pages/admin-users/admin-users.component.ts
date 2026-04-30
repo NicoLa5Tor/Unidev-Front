@@ -88,8 +88,8 @@ export class AdminUsersComponent implements OnInit {
     return this.users.filter(user => user.roleName === 'EMPRESAS').length;
   }
 
-  get finalUsersCount(): number {
-    return this.users.filter(user => user.roleName === 'USUARIOS').length;
+  get usersWithOrganizationCount(): number {
+    return this.users.filter(user => !!user.companyId).length;
   }
 
   get usersWithoutCompanyCount(): number {
@@ -101,7 +101,7 @@ export class AdminUsersComponent implements OnInit {
   }
 
   get requiresCompany(): boolean {
-    return this.selectedRole?.roleName === 'USUARIOS';
+    return this.selectedRole?.roleName !== 'ADMINISTRADORES';
   }
 
   setActiveTab(tabId: string): void {

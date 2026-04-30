@@ -5,8 +5,24 @@ export interface ProjectPricingLevel {
   description: string | null;
   active: boolean;
   productivityPercentage: number;
+  computedHourlyRate: number | null;
+  computedCurrency: string | null;
   updatedAt: string | null;
   updatedBy: string | null;
+}
+
+export interface PlatformConfig {
+  smlvAmount: number;
+  smlvCurrency: string;
+  workingHoursPerMonth: number;
+  updatedAt: string | null;
+  updatedBy: string | null;
+}
+
+export interface PlatformConfigPayload {
+  smlvAmount: number;
+  smlvCurrency: string;
+  workingHoursPerMonth: number;
 }
 
 export interface ProjectPricingLevelPayload {

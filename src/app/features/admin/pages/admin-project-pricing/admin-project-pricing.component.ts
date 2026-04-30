@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { DashboardNavItem, DashboardShellComponent } from '../../../../shared/components/dashboard-shell/dashboard-shell.component';
 import { UiToastService } from '../../../../shared/services/ui-toast.service';
 import {
+  PlatformConfig,
+  PlatformConfigPayload,
   ProjectPricingLevel,
   ProjectPricingLevelPayload,
   ProjectPricingRate,
@@ -12,7 +14,7 @@ import {
 } from '../../../../shared/models/project-pricing-rate.model';
 import { ProjectPricingRateService } from '../../services/project-pricing-rate.service';
 
-type AdminTab = 'rates' | 'levels' | 'editor' | 'level-editor';
+type AdminTab = 'rates' | 'levels' | 'editor' | 'level-editor' | 'smlv';
 
 interface PricingRateEditorModel {
   id: number | null;
@@ -39,17 +41,22 @@ interface PricingLevelEditorModel {
   templateUrl: './admin-project-pricing.component.html'
 })
 export class AdminProjectPricingComponent implements OnInit {
-  activeTab: AdminTab = 'rates';
+  activeTab: AdminTab = 'smlv';
   isLoadingRates = false;
   isLoadingLevels = false;
+  isLoadingConfig = false;
   isSaving = false;
   isSavingLevel = false;
+  isSavingConfig = false;
   rates: ProjectPricingRate[] = [];
   levels: ProjectPricingLevel[] = [];
+  platformConfig: PlatformConfig | null = null;
   selectedRate: ProjectPricingRate | null = null;
   selectedLevel: ProjectPricingLevel | null = null;
   editorMode: 'create' | 'edit' = 'create';
-  levelEditorMode: 'edit' = 'edit';
+  levelEditorMode: 'create' | 'edit' = 'create';
+
+  smlvEditor = { smlvAmount: '', smlvCurrency: 'COP', workingHoursPerMonth: '192' };
 
   readonly navItems: DashboardNavItem[] = [
     { id: 'admin-users', label: 'Usuarios', accent: 'accent-1', route: '/admin/users' },
@@ -59,10 +66,9 @@ export class AdminProjectPricingComponent implements OnInit {
       label: 'Pricing de proyectos',
       accent: 'accent-2',
       children: [
-        { id: 'rates', label: 'Tarifas', accent: 'accent-3', mobileBarWidthClass: 'w-24' },
+        { id: 'smlv', label: 'SMLV', accent: 'accent-2', mobileBarWidthClass: 'w-20' },
         { id: 'levels', label: 'Niveles', accent: 'accent-4', mobileBarWidthClass: 'w-24' },
-        { id: 'editor', label: 'Tarifa', accent: 'accent-1', mobileBarWidthClass: 'w-20' },
-        { id: 'level-editor', label: 'Nivel', accent: 'accent-2', mobileBarWidthClass: 'w-20' }
+        { id: 'level-editor', label: 'Editar nivel', accent: 'accent-2', mobileBarWidthClass: 'w-28' }
       ]
     },
     { id: 'admin-emails', label: 'Correos', accent: 'accent-4', route: '/admin/email-templates' }
@@ -79,6 +85,7 @@ export class AdminProjectPricingComponent implements OnInit {
   ngOnInit(): void {
     this.refreshLevels();
     this.refreshRates();
+    this.refreshPlatformConfig();
   }
 
   get activeRatesCount(): number {
@@ -109,8 +116,8 @@ export class AdminProjectPricingComponent implements OnInit {
   }
 
   setActiveTab(tabId: string): void {
-    if (tabId === 'rates' || tabId === 'levels' || tabId === 'editor' || tabId === 'level-editor') {
-      this.activeTab = tabId;
+    if (tabId === 'rates' || tabId === 'levels' || tabId === 'editor' || tabId === 'level-editor' || tabId === 'smlv') {
+      this.activeTab = tabId as AdminTab;
     }
   }
 
@@ -180,6 +187,13 @@ export class AdminProjectPricingComponent implements OnInit {
     this.activeTab = 'editor';
   }
 
+  openCreateLevelEditor(): void {
+    this.levelEditorMode = 'create';
+    this.selectedLevel = null;
+    this.levelEditor = this.createEmptyLevelEditor();
+    this.activeTab = 'level-editor';
+  }
+
   editRate(rate: ProjectPricingRate): void {
     this.selectedRate = rate;
     this.editorMode = 'edit';
@@ -195,6 +209,7 @@ export class AdminProjectPricingComponent implements OnInit {
   }
 
   editLevel(level: ProjectPricingLevel): void {
+    this.levelEditorMode = 'edit';
     this.selectedLevel = level;
     this.patchLevelEditor(level);
     this.activeTab = 'level-editor';
@@ -261,7 +276,9 @@ export class AdminProjectPricingComponent implements OnInit {
       this.uiToastService.error('La productividad debe ser mayor a 0.');
       return;
     }
-    if (!this.levelEditor.id) {
+
+    const isCreating = this.levelEditorMode === 'create';
+    if (!isCreating && !this.levelEditor.id) {
       this.uiToastService.error('Selecciona un nivel existente antes de editarlo.');
       return;
     }
@@ -275,18 +292,76 @@ export class AdminProjectPricingComponent implements OnInit {
       productivityPercentage
     };
 
-    this.pricingRateService.updatePricingLevel(this.levelEditor.id, payload).subscribe({
+    const request$ = isCreating
+      ? this.pricingRateService.createPricingLevel(payload)
+      : this.pricingRateService.updatePricingLevel(this.levelEditor.id!, payload);
+
+    request$.subscribe({
       next: level => {
+        this.levelEditorMode = 'edit';
         this.selectedLevel = level;
         this.patchLevelEditor(level);
         this.isSavingLevel = false;
-        this.uiToastService.success('Nivel actualizado correctamente.');
+        this.uiToastService.success(isCreating ? 'Nivel creado. Las tarifas se calculan automáticamente desde el SMLV.' : 'Nivel actualizado correctamente.');
         this.activeTab = 'levels';
         this.refreshLevels();
       },
       error: error => {
         this.isSavingLevel = false;
         this.uiToastService.error(error?.error?.message || 'No pudimos guardar el nivel.');
+      }
+    });
+  }
+
+  refreshPlatformConfig(): void {
+    this.isLoadingConfig = true;
+    this.pricingRateService.getPlatformConfig().subscribe({
+      next: config => {
+        this.platformConfig = config;
+        this.smlvEditor = {
+          smlvAmount: String(config.smlvAmount),
+          smlvCurrency: config.smlvCurrency,
+          workingHoursPerMonth: String(config.workingHoursPerMonth)
+        };
+        this.isLoadingConfig = false;
+      },
+      error: () => {
+        this.isLoadingConfig = false;
+        this.uiToastService.error('No pudimos cargar la configuración SMLV.');
+      }
+    });
+  }
+
+  savePlatformConfig(): void {
+    const smlvAmount = Number(this.smlvEditor.smlvAmount);
+    const workingHoursPerMonth = Number(this.smlvEditor.workingHoursPerMonth);
+
+    if (!Number.isFinite(smlvAmount) || smlvAmount <= 0) {
+      this.uiToastService.error('El SMLV debe ser mayor a 0.');
+      return;
+    }
+    if (!Number.isFinite(workingHoursPerMonth) || workingHoursPerMonth < 40) {
+      this.uiToastService.error('Las horas de trabajo mensual deben ser al menos 40.');
+      return;
+    }
+
+    this.isSavingConfig = true;
+    const payload: PlatformConfigPayload = {
+      smlvAmount,
+      smlvCurrency: this.smlvEditor.smlvCurrency.trim().toUpperCase(),
+      workingHoursPerMonth
+    };
+
+    this.pricingRateService.updatePlatformConfig(payload).subscribe({
+      next: config => {
+        this.platformConfig = config;
+        this.isSavingConfig = false;
+        this.uiToastService.success('SMLV actualizado. Las próximas estimaciones usarán las nuevas tarifas calculadas.');
+        this.refreshLevels();
+      },
+      error: error => {
+        this.isSavingConfig = false;
+        this.uiToastService.error(error?.error?.message || 'No pudimos guardar la configuración SMLV.');
       }
     });
   }

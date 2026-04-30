@@ -2,9 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, Inject, OnDestroy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
+import { FormsModule } from '@angular/forms';
 import { ProjectService } from '../../services/project.service';
 import {
   ProjectDetail,
+  ProjectPublishRequest,
   ProjectRequirement
 } from '../../../../shared/models/project.model';
 import { UiToastService } from '../../../../shared/services/ui-toast.service';
@@ -17,17 +19,31 @@ export interface ProjectDetailDialogData {
 @Component({
   selector: 'app-project-detail-dialog',
   standalone: true,
-  imports: [CommonModule, MatDialogModule],
+  imports: [CommonModule, MatDialogModule, FormsModule],
   templateUrl: './project-detail-dialog.component.html',
   styleUrl: './project-detail-dialog.component.scss'
 })
 export class ProjectDetailDialogComponent implements OnDestroy {
-  private static readonly POLL_INTERVAL_MS = 3000;
+  private static readonly POLL_INTERVAL_MS = 2000;
   isLoading = true;
   updatingRequirementId: number | null = null;
   retryingAi = false;
   publishingProject = false;
   project: ProjectDetail | null = null;
+
+  // Flujo de aprobación de precio
+  showPriceApprovalModal = false;
+  priceDecision: 'agreed' | 'custom' | null = null;
+  customPriceMin: number | null = null;
+  customPriceMax: number | null = null;
+  customPriceCurrency = 'COP';
+
+  // Info panels en modal de precio
+  infoOpen: Record<string, boolean> = {};
+  toggleInfo(key: string): void {
+    this.infoOpen[key] = !this.infoOpen[key];
+  }
+
   private expandedRequirementIds = new Set<number>();
   private pollHandle: ReturnType<typeof setTimeout> | null = null;
   private readonly dialog = inject(MatDialog);
@@ -172,6 +188,7 @@ export class ProjectDetailDialogComponent implements OnDestroy {
         this.project = project;
         this.ensureExpandedRequirements(project.requirements);
         this.updatingRequirementId = null;
+        this.syncPolling(project);
         this.uiToastService.success(active ? 'Requerimiento reactivado.' : 'Requerimiento excluido del estimado actual.');
       },
       error: error => {
@@ -192,6 +209,7 @@ export class ProjectDetailDialogComponent implements OnDestroy {
         this.project = project;
         this.ensureExpandedRequirements(project.requirements);
         this.retryingAi = false;
+        this.syncPolling(project);
         this.uiToastService.success('Reintentamos el pipeline de IA para este proyecto.');
       },
       error: error => {
@@ -201,13 +219,54 @@ export class ProjectDetailDialogComponent implements OnDestroy {
     });
   }
 
-  publishProject(): void {
+  openPriceApproval(): void {
     if (!this.project || this.publishingProject || !this.canPublish) {
       return;
     }
+    this.priceDecision = null;
+    this.customPriceMin = null;
+    this.customPriceMax = null;
+    this.customPriceCurrency = this.project.quote?.currency || 'COP';
+    this.showPriceApprovalModal = true;
+  }
 
+  closePriceApproval(): void {
+    this.showPriceApprovalModal = false;
+  }
+
+  confirmPriceAndPublish(): void {
+    if (!this.project || !this.priceDecision) {
+      return;
+    }
+
+    if (this.priceDecision === 'custom') {
+      if (!this.customPriceMin || !this.customPriceMax) {
+        this.uiToastService.error('Ingresa el rango de precio mínimo y máximo.');
+        return;
+      }
+      if (this.customPriceMin <= 0 || this.customPriceMax <= 0) {
+        this.uiToastService.error('Los precios deben ser mayores a cero.');
+        return;
+      }
+      if (this.customPriceMin > this.customPriceMax) {
+        this.uiToastService.error('El precio mínimo no puede ser mayor al máximo.');
+        return;
+      }
+    }
+
+    const payload: ProjectPublishRequest = this.priceDecision === 'agreed'
+      ? { agreedToSuggestedPrice: true }
+      : {
+          agreedToSuggestedPrice: false,
+          customMinAmount: this.customPriceMin,
+          customMaxAmount: this.customPriceMax,
+          currency: this.customPriceCurrency
+        };
+
+    this.showPriceApprovalModal = false;
     this.publishingProject = true;
-    this.projectService.publishProject(this.project.id).subscribe({
+
+    this.projectService.publishProject(this.project.id, payload).subscribe({
       next: project => {
         this.project = project;
         this.ensureExpandedRequirements(project.requirements);

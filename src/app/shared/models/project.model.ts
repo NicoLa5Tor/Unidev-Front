@@ -1,3 +1,10 @@
+export interface ProjectPublishRequest {
+  agreedToSuggestedPrice: boolean;
+  customMinAmount?: number | null;
+  customMaxAmount?: number | null;
+  currency?: string | null;
+}
+
 export interface CreateProjectDto {
   companyId: number;
   name: string;
@@ -118,6 +125,12 @@ export interface Project {
   requirementsError: string | null;
   estimationError: string | null;
   quote: ProjectQuote;
+  // Precio acordado por la empresa al publicar
+  companyAgreedToSuggestedPrice: boolean | null;
+  companyPriceCurrency: string | null;
+  companyPriceMinAmount: number | null;
+  companyPriceMaxAmount: number | null;
+  priceSetAt: string | null;
 }
 
 export interface ProjectRequirement {
@@ -157,4 +170,10 @@ export interface ProjectDetail extends Project {
   levelEstimations: ProjectLevelEstimation[];
   requirements: ProjectRequirement[];
   modules: ProjectModule[];
+  // Precio acordado por la empresa al publicar
+  companyAgreedToSuggestedPrice: boolean | null;
+  companyPriceCurrency: string | null;
+  companyPriceMinAmount: number | null;
+  companyPriceMaxAmount: number | null;
+  priceSetAt: string | null;
 }

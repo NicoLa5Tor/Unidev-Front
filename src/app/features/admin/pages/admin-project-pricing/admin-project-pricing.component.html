@@ -8,6 +8,18 @@
 >
   <button
     dashboard-header-actions
+    class="flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/15 text-[var(--accent-2)]"
+    (click)="openCreateLevelEditor()"
+    aria-label="Nuevo nivel"
+    title="Nuevo nivel"
+  >
+    <svg class="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+      <path d="M8 3v10M3 8h10"/>
+    </svg>
+  </button>
+
+  <button
+    dashboard-header-actions
     class="flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/15 text-[var(--accent-1)]"
     (click)="openCreateEditor()"
     aria-label="Nueva tarifa"
@@ -59,6 +71,95 @@
       <path d="M11.5 9.5A4.5 4.5 0 0 1 4 11l-1-2"/>
     </svg>
   </button>
+
+  <!-- ── SMLV ── -->
+  <section *ngIf="activeTab === 'smlv'" class="space-y-6">
+    <div class="grid gap-4 md:grid-cols-3">
+      <article class="rounded-3xl border border-[color:var(--accent-2)]/20 bg-[var(--panel)] p-5 shadow-[var(--shadow)]">
+        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-2)]">SMLV Mensual</p>
+        <h2 class="mt-3 text-3xl font-cyber text-[var(--text)]">{{ platformConfig ? formatMoney(platformConfig.smlvAmount, platformConfig.smlvCurrency) : '—' }}</h2>
+        <p class="mt-2 text-sm text-[var(--muted)]">Salario Mínimo Legal Vigente configurado.</p>
+      </article>
+      <article class="rounded-3xl border border-[color:var(--accent-3)]/20 bg-[var(--panel)] p-5 shadow-[var(--shadow)]">
+        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-3)]">Horas / Mes</p>
+        <h2 class="mt-3 text-3xl font-cyber text-[var(--text)]">{{ platformConfig?.workingHoursPerMonth ?? '—' }}</h2>
+        <p class="mt-2 text-sm text-[var(--muted)]">Horas laborales mensuales base para calcular tarifa/hora.</p>
+      </article>
+      <article class="rounded-3xl border border-[color:var(--accent-1)]/20 bg-[var(--panel)] p-5 shadow-[var(--shadow)]">
+        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-1)]">Tarifa base/hora</p>
+        <h2 class="mt-3 text-3xl font-cyber text-[var(--text)]">
+          {{ (platformConfig && platformConfig.workingHoursPerMonth) ? formatMoney(platformConfig.smlvAmount / platformConfig.workingHoursPerMonth, platformConfig.smlvCurrency) : '—' }}
+        </h2>
+        <p class="mt-2 text-sm text-[var(--muted)]">SMLV ÷ horas/mes. Cada nivel multiplica por su eficiencia.</p>
+      </article>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+      <form class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-[var(--shadow)]" (ngSubmit)="savePlatformConfig()">
+        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-2)]">Configuración</p>
+        <h2 class="mt-2 text-2xl font-cyber text-[var(--text)]">Salario Mínimo Legal Vigente</h2>
+        <p class="mt-2 text-sm text-[var(--muted)]">
+          Define el SMLV vigente y las horas laborales mensuales. El sistema derivará automáticamente la tarifa por hora de cada nivel usando su porcentaje de eficiencia.
+        </p>
+
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
+          <label class="space-y-2 text-sm text-[var(--muted)] md:col-span-2">
+            <span>SMLV mensual *</span>
+            <input [(ngModel)]="smlvEditor.smlvAmount" name="smlvAmount" type="number" min="1" step="1"
+              placeholder="1423500"
+              class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-2)]/60 focus:outline-none" />
+            <p class="text-xs text-[var(--muted)]">Colombia 2026: $ 1.423.500 COP</p>
+          </label>
+
+          <label class="space-y-2 text-sm text-[var(--muted)]">
+            <span>Moneda *</span>
+            <select [(ngModel)]="smlvEditor.smlvCurrency" name="smlvCurrency"
+              class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-2)]/60 focus:outline-none">
+              <option value="COP">COP — Peso colombiano</option>
+              <option value="USD">USD — Dólar americano</option>
+              <option value="EUR">EUR — Euro</option>
+            </select>
+          </label>
+
+          <label class="space-y-2 text-sm text-[var(--muted)]">
+            <span>Horas laborales / mes *</span>
+            <input [(ngModel)]="smlvEditor.workingHoursPerMonth" name="workingHoursPerMonth" type="number" min="40" step="1"
+              placeholder="192"
+              class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3 text-[var(--text)] focus:border-[color:var(--accent-2)]/60 focus:outline-none" />
+            <p class="text-xs text-[var(--muted)]">Estándar: 192h (24 días × 8h) o 160h (20 días × 8h)</p>
+          </label>
+        </div>
+
+        <div class="mt-6 flex flex-wrap gap-3">
+          <button type="submit" [disabled]="isSavingConfig"
+            class="rounded-xl border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/15 px-5 py-3 text-xs uppercase tracking-[0.2em] text-[var(--accent-2)] disabled:opacity-50">
+            {{ isSavingConfig ? 'Guardando...' : 'Guardar SMLV' }}
+          </button>
+        </div>
+      </form>
+
+      <aside class="rounded-3xl border border-[color:var(--accent-2)]/20 bg-[var(--panel)] p-6 shadow-[var(--shadow)]">
+        <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-2)]">Tarifas calculadas</p>
+        <p class="mt-2 text-sm text-[var(--muted)]">Con el SMLV actual, estas son las tarifas/hora por nivel:</p>
+        <div *ngIf="isLoadingLevels" class="mt-4 text-sm text-[var(--muted)]">Cargando niveles...</div>
+        <div class="mt-4 space-y-2">
+          <div *ngFor="let lvl of levels" class="flex items-center justify-between rounded-2xl border border-[color:var(--panel-border)] bg-black/10 px-4 py-3">
+            <div>
+              <p class="text-sm font-semibold text-[var(--text)]">{{ lvl.displayName }}</p>
+              <p class="text-xs text-[var(--muted)]">{{ lvl.productivityPercentage }}% eficiencia</p>
+            </div>
+            <p class="font-semibold text-[var(--accent-2)]">{{ formatMoney(lvl.computedHourlyRate, lvl.computedCurrency) }}/h</p>
+          </div>
+        </div>
+        <p class="mt-4 text-xs text-[var(--muted)]">
+          Fórmula: <span class="text-[var(--text)]">SMLV ÷ horas/mes × (eficiencia / 100)</span>
+        </p>
+        <p class="mt-1 text-xs text-[var(--muted)]">
+          Última actualización: {{ platformConfig?.updatedAt ? (platformConfig?.updatedAt | date:'dd/MM/yyyy HH:mm') : 'Sin registro' }} por {{ platformConfig?.updatedBy ?? '—' }}
+        </p>
+      </aside>
+    </div>
+  </section>
 
   <section *ngIf="activeTab === 'rates'" class="space-y-6">
     <div class="grid gap-4 md:grid-cols-3">
@@ -228,6 +329,7 @@
             <p><span class="text-[var(--text)]">Codigo:</span> {{ selectedLevel.code }}</p>
             <p><span class="text-[var(--text)]">Estado:</span> {{ selectedLevel.active ? 'Activo' : 'Inactivo' }}</p>
             <p><span class="text-[var(--text)]">Productividad:</span> {{ selectedLevel.productivityPercentage }}%</p>
+            <p><span class="text-[var(--text)]">Tarifa/hora calculada:</span> {{ formatMoney(selectedLevel.computedHourlyRate, selectedLevel.computedCurrency) }}</p>
             <p><span class="text-[var(--text)]">Descripcion:</span> {{ selectedLevel.description || 'Sin descripcion' }}</p>
             <p><span class="text-[var(--text)]">Actualizado:</span> {{ selectedLevel.updatedAt ? (selectedLevel.updatedAt | date:'dd/MM/yyyy HH:mm') : 'Sin registro' }}</p>
             <p><span class="text-[var(--text)]">Actualizado por:</span> {{ selectedLevel.updatedBy || 'Sin registro' }}</p>
@@ -337,13 +439,13 @@
         <div>
           <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-2)]">Editor</p>
           <h2 class="mt-2 text-2xl font-cyber text-[var(--text)]">
-            Editar nivel existente
+            {{ levelEditorMode === 'create' ? 'Nuevo nivel de seniority' : 'Editar nivel existente' }}
           </h2>
         </div>
       </div>
 
       <div class="mt-6 grid gap-4 md:grid-cols-2">
-        <label class="space-y-2 text-sm text-[var(--muted)] md:col-span-2">
+        <label *ngIf="levelEditorMode === 'edit'" class="space-y-2 text-sm text-[var(--muted)] md:col-span-2">
           <span>Nivel existente</span>
           <select
             [ngModel]="selectedLevel?.id ?? null"
@@ -354,7 +456,6 @@
             <option [ngValue]="null">Selecciona un nivel</option>
             <option *ngFor="let level of levels" [ngValue]="level.id">{{ level.displayName }} · {{ level.code }}</option>
           </select>
-          <p class="text-xs text-[var(--muted)]">Este listado se consume desde la base de datos igual que el selector de tarifas.</p>
         </label>
 
         <label class="space-y-2 text-sm text-[var(--muted)]">
@@ -394,7 +495,7 @@
           class="rounded-xl border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/15 px-5 py-3 text-xs uppercase tracking-[0.2em] text-[var(--accent-2)]"
           [disabled]="isSavingLevel"
         >
-          {{ isSavingLevel ? 'Guardando...' : 'Actualizar nivel' }}
+          {{ isSavingLevel ? 'Guardando...' : levelEditorMode === 'create' ? 'Crear nivel' : 'Actualizar nivel' }}
         </button>
       </div>
     </form>
@@ -402,9 +503,10 @@
     <aside class="rounded-3xl border border-[color:var(--accent-2)]/20 bg-[var(--panel)] p-6 shadow-[var(--shadow)]">
       <p class="text-xs uppercase tracking-[0.3em] text-[var(--accent-2)]">Ayuda</p>
       <div class="mt-4 space-y-4 text-sm text-[var(--muted)]">
-        <p>Los niveles son el catalogo base del pricing. Por defecto arrancan en `JUNIOR`, `MIDDLE` y `SENIOR`.</p>
-        <p>Las tarifas ya no inventan su propio tipo: siempre cuelgan de uno de estos niveles ya existentes.</p>
-        <p>La productividad 100% representa el baseline. Un valor mayor reduce las horas calculadas para ese nivel.</p>
+        <p>Los niveles son el catálogo de seniorities. Por defecto: <span class="text-[var(--text)]">JUNIOR, MIDDLE, SENIOR</span>.</p>
+        <p>La <span class="text-[var(--text)]">productividad</span> tiene dos efectos: ajusta las horas estimadas para ese nivel <em>y</em> multiplica la tarifa base/hora derivada del SMLV.</p>
+        <p>Ejemplo con 100% → tarifa base. Con 150% → 1.5× tarifa base (gana más y entrega en menos horas).</p>
+        <p>Al crear un nuevo nivel, su tarifa/hora se calcula automáticamente desde el SMLV configurado.</p>
       </div>
     </aside>
   </section>

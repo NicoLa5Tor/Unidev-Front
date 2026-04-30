@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 
 import { environment } from '../../../../environments/environment';
 import {
+  PlatformConfig,
+  PlatformConfigPayload,
   ProjectPricingLevel,
   ProjectPricingLevelPayload,
   ProjectPricingRate,
@@ -15,6 +17,7 @@ import {
 export class ProjectPricingRateService {
   private readonly pricingRatesUrl = `${environment.apiUrl}/project-pricing-rates`;
   private readonly pricingLevelsUrl = `${environment.apiUrl}/project-pricing-levels`;
+  private readonly platformConfigUrl = `${environment.apiUrl}/platform-config`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -40,5 +43,13 @@ export class ProjectPricingRateService {
 
   updatePricingLevel(levelId: number, payload: ProjectPricingLevelPayload) {
     return this.http.put<ProjectPricingLevel>(`${this.pricingLevelsUrl}/${levelId}`, payload);
+  }
+
+  getPlatformConfig() {
+    return this.http.get<PlatformConfig>(this.platformConfigUrl);
+  }
+
+  updatePlatformConfig(payload: PlatformConfigPayload) {
+    return this.http.put<PlatformConfig>(this.platformConfigUrl, payload);
   }
 }
