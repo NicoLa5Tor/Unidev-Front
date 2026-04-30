@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { StudentService } from '../../services/student.service';
 import { UserSessionService } from '../../../../core/services/user-session.service';
 import { UiToastService } from '../../../../shared/services/ui-toast.service';
@@ -10,6 +11,7 @@ import { Project } from '../../../../shared/models/project.model';
 import { SessionUser } from '../../../../shared/models/session-user.model';
 import { CompanyService } from '../../../companies/services/company.service';
 import { UniversityCampus } from '../../../../shared/models/company.model';
+import { ProjectDetailDialogComponent } from '../../../companies/components/project-detail-dialog/project-detail-dialog.component';
 
 @Component({
   selector: 'app-student-workspace',
@@ -22,6 +24,7 @@ export class StudentWorkspaceComponent implements OnInit {
   private readonly userSessionService = inject(UserSessionService);
   private readonly companyService = inject(CompanyService);
   private readonly toast = inject(UiToastService);
+  private readonly dialog = inject(MatDialog);
 
   currentUser: SessionUser | null = null;
   publishedProjects: Project[] = [];
@@ -204,6 +207,21 @@ export class StudentWorkspaceComponent implements OnInit {
   }
 
   // ── Apply ─────────────────────────────────────────────
+  openProjectDetail(project: Project): void {
+    this.dialog.open(ProjectDetailDialogComponent, {
+      width: '1120px',
+      maxWidth: '96vw',
+      maxHeight: '92vh',
+      panelClass: 'app-shell-dialog-panel',
+      backdropClass: 'app-shell-dialog-backdrop',
+      data: {
+        projectId: project.id,
+        viewerMode: 'student',
+        initialSection: 'detail'
+      }
+    });
+  }
+
   openApply(project: Project): void { this.applyingToProject = project; this.applyMessage = ''; this.applyTeamId = null; }
   closeApply(): void { this.applyingToProject = null; }
 

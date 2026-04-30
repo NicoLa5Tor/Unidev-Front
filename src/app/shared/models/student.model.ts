@@ -42,14 +42,17 @@ export interface ProjectApplication {
   id: number;
   projectId: number;
   projectName: string;
+  projectDescription?: string | null;
   companyName: string | null;
   applicantUserId: number;
   applicantDisplayName: string;
   applicantEmail: string;
   applicantCareer: string | null;
   applicantSemester: number | null;
+  applicantBio?: string | null;
   teamId: number | null;
   teamName: string | null;
+  teamDescription?: string | null;
   message: string | null;
   status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
   createdAt: string;

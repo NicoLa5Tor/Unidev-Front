@@ -1,8 +1,6 @@
 export interface ProjectPublishRequest {
   agreedToSuggestedPrice: boolean;
-  customMinAmount?: number | null;
-  customMaxAmount?: number | null;
-  currency?: string | null;
+  customAmount?: number | null;
 }
 
 export interface CreateProjectDto {
@@ -105,6 +103,11 @@ export interface ProjectLevelEstimation {
 export interface Project {
   id: number;
   companyId: number;
+  companyName: string | null;
+  companyLogoUrl: string | null;
+  companyWebsite: string | null;
+  companyDescription: string | null;
+  companyOrganizationType: string | null;
   name: string;
   description: string | null;
   businessObjective: string | null;
@@ -132,6 +135,8 @@ export interface Project {
   companyPriceMaxAmount: number | null;
   priceSetAt: string | null;
   paymentStatus: 'PENDING_PAYMENT' | 'PAID_HELD' | 'RELEASED' | 'FAILED' | null;
+  applicationsCount: number;
+  acceptedApplicationsCount: number;
 }
 
 export interface ProjectRequirement {
@@ -163,6 +168,9 @@ export interface ProjectModule {
 }
 
 export interface ProjectDetail extends Project {
+  companyTotalProjectsPosted: number | null;
+  companyProjectsInDevelopmentCount: number;
+  companyCompletedProjectsCount: number;
   generalComplexity: string | null;
   totalProjectHours: number | null;
   detectedRisks: string[];

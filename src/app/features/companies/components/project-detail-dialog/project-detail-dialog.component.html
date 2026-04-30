@@ -3,6 +3,9 @@
     <div class="space-y-2">
       <p class="font-tech text-xs uppercase tracking-[0.24em] text-[var(--accent-4)]">Detalle del proyecto</p>
       <h3 class="text-2xl font-semibold text-[var(--text)]">{{ project?.name || 'Proyecto' }}</h3>
+      <p *ngIf="project?.companyName" class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+        Publicado por {{ project?.companyName }}
+      </p>
       <p class="max-w-3xl text-sm leading-6 text-[var(--muted)]">
         {{ project?.description || 'Sin descripcion cargada.' }}
       </p>
@@ -17,7 +20,7 @@
         {{ statusLabel }}
       </div>
       <button
-        *ngIf="project"
+        *ngIf="project && !isStudentView"
         type="button"
         [disabled]="retryingAi"
         class="rounded-full border border-[color:var(--accent-2)] bg-[color:color-mix(in srgb,var(--accent-2) 12%,transparent)] px-3 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--accent-2)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
@@ -35,18 +38,325 @@
     </div>
   </div>
 
+  <!-- Tab switcher -->
+  <div *ngIf="!isStudentView" class="mt-5 flex gap-2">
+    <button type="button"
+      class="rounded-full border px-4 py-1.5 font-tech text-xs uppercase tracking-[0.18em] transition"
+      [ngClass]="activeSection === 'detail'
+        ? 'border-[color:var(--accent-4)] bg-[color:color-mix(in_srgb,var(--accent-4)_12%,transparent)] text-[var(--accent-4)]'
+        : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)] hover:text-[var(--text)]'"
+      (click)="switchSection('detail')">
+      Detalle
+    </button>
+    <button type="button"
+      class="rounded-full border px-4 py-1.5 font-tech text-xs uppercase tracking-[0.18em] transition"
+      [ngClass]="activeSection === 'applications'
+        ? 'border-[color:var(--accent-3)] bg-[color:color-mix(in_srgb,var(--accent-3)_12%,transparent)] text-[var(--accent-3)]'
+        : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)] hover:text-[var(--text)]'"
+      (click)="switchSection('applications')">
+      Postulados
+      <span *ngIf="project" class="ml-1 opacity-70">({{ project.applicationsCount }})</span>
+    </button>
+  </div>
+
   <div *ngIf="isLoading" class="mt-6 rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4 text-sm text-[var(--muted)]">
     Cargando detalle del proyecto...
   </div>
 
-  <div *ngIf="!isLoading && project as currentProject" class="mt-6 space-y-6">
+  <!-- ══ SECCIÓN: POSTULADOS ══ -->
+  <div *ngIf="!isStudentView && !isLoading && activeSection === 'applications'" class="mt-6 space-y-4">
+    <div *ngIf="project?.description" class="rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-5 py-4">
+      <p class="font-tech text-[10px] uppercase tracking-[0.22em] text-[var(--accent-4)]">Contexto del proyecto</p>
+      <p class="mt-2 text-sm leading-6 text-[var(--muted)]">{{ project?.description }}</p>
+    </div>
+
+    <div class="flex items-center justify-between gap-4">
+      <div>
+        <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-3)]">Postulaciones</p>
+        <h4 class="mt-1 text-lg font-semibold text-[var(--text)]">Equipos y estudiantes interesados</h4>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel)] px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+          {{ project?.applicationsCount ?? 0 }} total
+        </div>
+        <div *ngIf="(project?.acceptedApplicationsCount ?? 0) > 0" class="app-status-success rounded-full border px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em]">
+          {{ project?.acceptedApplicationsCount }} aceptado{{ (project?.acceptedApplicationsCount ?? 0) !== 1 ? 's' : '' }}
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="applicationsLoading" class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4 text-sm text-[var(--muted)]">
+      Cargando postulaciones...
+    </div>
+
+    <div *ngIf="!applicationsLoading && applications.length === 0" class="rounded-[20px] border border-dashed border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-6 text-center text-sm leading-6 text-[var(--muted)]">
+      Aún no hay postulaciones para este proyecto.
+    </div>
+
+    <div *ngIf="!applicationsLoading && applications.length > 0" class="space-y-4">
+      <div class="grid gap-3 xl:grid-cols-[minmax(0,1.2fr)_220px_220px_220px]">
+        <label class="block">
+          <span class="mb-1 block font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Buscar postulados</span>
+          <input [(ngModel)]="applicationSearch" type="text" placeholder="Nombre, correo, carrera, equipo..."
+            class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]/60"/>
+        </label>
+        <label class="block">
+          <span class="mb-1 block font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Estado</span>
+          <select [(ngModel)]="applicationStatusFilter"
+            class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]/60">
+            <option value="ALL">Todos</option>
+            <option value="PENDING">Pendientes</option>
+            <option value="ACCEPTED">Aceptados</option>
+            <option value="REJECTED">Rechazados</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="mb-1 block font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Disponibilidad</span>
+          <select [(ngModel)]="availabilityFilter"
+            class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]/60">
+            <option value="ALL">Todos</option>
+            <option value="AVAILABLE">Disponibles</option>
+            <option value="UNAVAILABLE">No disponibles</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="mb-1 block font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Skill requerida</span>
+          <input [(ngModel)]="requiredSkill" type="text" placeholder="React, Python, QA..."
+            class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]/60"/>
+        </label>
+      </div>
+
+      <div class="grid gap-3 lg:grid-cols-[240px_auto]">
+        <label class="block">
+          <span class="mb-1 block font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Mínimo proyectos aceptados</span>
+          <input [(ngModel)]="minimumAcceptedProjects" type="number" min="0"
+            class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]/60"/>
+        </label>
+        <div class="flex items-end">
+          <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-sm text-[var(--muted)]">
+            {{ filteredApplications.length }} resultado{{ filteredApplications.length === 1 ? '' : 's' }} con los filtros actuales
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="filteredApplications.length === 0" class="rounded-[20px] border border-dashed border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-6 text-center text-sm leading-6 text-[var(--muted)]">
+        No encontramos postulados con los filtros actuales.
+      </div>
+
+      <div *ngIf="filteredApplications.length > 0" class="grid gap-4 xl:grid-cols-[minmax(0,1.02fr)_minmax(320px,0.98fr)]">
+        <div class="space-y-3">
+          <div *ngFor="let app of filteredApplications"
+            class="rounded-[24px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-5 transition"
+            [ngClass]="isProfileOpenFor(app) ? 'border-[color:var(--accent-2)]/45 shadow-[0_0_0_1px_color-mix(in_srgb,var(--accent-2)_20%,transparent)]' : ''">
+
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <p class="text-base font-semibold text-[var(--text)]">{{ app.applicantDisplayName || app.applicantEmail }}</p>
+                  <span *ngIf="app.teamId" class="rounded-full border border-[color:var(--accent-2)]/40 bg-[color:color-mix(in_srgb,var(--accent-2)_8%,transparent)] px-2.5 py-0.5 font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--accent-2)]">
+                    Equipo: {{ app.teamName || 'Sin nombre' }}
+                  </span>
+                  <span *ngIf="!app.teamId" class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-2.5 py-0.5 font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">
+                    Individual
+                  </span>
+                </div>
+                <p class="mt-0.5 text-sm text-[var(--muted)]">{{ app.applicantEmail }}</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="rounded-full border px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em]"
+                  [ngClass]="applicationStatusTone(app)">
+                  {{ applicationStatusLabel(app) }}
+                </span>
+              </div>
+            </div>
+
+            <div *ngIf="app.applicantCareer || app.applicantSemester != null" class="mt-3 flex flex-wrap gap-2">
+              <div *ngIf="app.applicantCareer" class="rounded-[14px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-3 py-1.5 text-xs text-[var(--muted)]">
+                <span class="font-semibold text-[var(--text)]">Carrera:</span> {{ app.applicantCareer }}
+              </div>
+              <div *ngIf="app.applicantSemester != null" class="rounded-[14px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-3 py-1.5 text-xs text-[var(--muted)]">
+                <span class="font-semibold text-[var(--text)]">Semestre:</span> {{ app.applicantSemester }}
+              </div>
+              <div *ngIf="app.applicantAvailableForProjects === true" class="rounded-[14px] border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-400">
+                Disponible
+              </div>
+              <div *ngIf="app.acceptedProjectsCount > 0" class="rounded-[14px] border border-[color:var(--accent-1)]/30 bg-[color:color-mix(in_srgb,var(--accent-1)_10%,transparent)] px-3 py-1.5 text-xs text-[var(--accent-1)]">
+                {{ app.acceptedProjectsCount }} proyecto{{ app.acceptedProjectsCount === 1 ? '' : 's' }} aceptado{{ app.acceptedProjectsCount === 1 ? '' : 's' }}
+              </div>
+            </div>
+
+            <div *ngIf="applicationSkills(app).length" class="mt-3 flex flex-wrap gap-2">
+              <span *ngFor="let skill of applicationSkills(app).slice(0, 6)"
+                class="rounded-full border border-[color:var(--accent-1)]/25 bg-[var(--accent-1)]/10 px-3 py-1 font-tech text-[10px] uppercase tracking-[0.12em] text-[var(--accent-1)]">
+                {{ skill }}
+              </span>
+            </div>
+
+            <div *ngIf="app.applicantBio" class="mt-3 rounded-[16px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm leading-6 text-[var(--muted)]">
+              <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--accent-2)]">Resumen</p>
+              <p class="mt-2">{{ app.applicantBio }}</p>
+            </div>
+
+            <div *ngIf="app.message" class="mt-3 rounded-[16px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm leading-6 text-[var(--muted)]">
+              {{ app.message }}
+            </div>
+
+            <div class="mt-4 flex flex-wrap items-center gap-2">
+              <button type="button"
+                class="rounded-full border border-[color:var(--accent-2)]/40 bg-[color:color-mix(in_srgb,var(--accent-2)_10%,transparent)] px-4 py-1.5 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-2)] transition hover:brightness-110"
+                (click)="openApplicantProfile(app, $event)">
+                {{ isProfileOpenFor(app) ? 'Perfil abierto' : 'Ver perfil completo' }}
+              </button>
+              <button *ngIf="app.status === 'PENDING'" type="button"
+                [disabled]="updatingApplicationId === app.id"
+                class="rounded-full border border-[color:var(--accent-3)]/40 bg-[color:color-mix(in_srgb,var(--accent-3)_10%,transparent)] px-4 py-1.5 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-3)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                (click)="updateApplicationStatus(app, 'ACCEPTED', $event)">
+                {{ updatingApplicationId === app.id ? 'Guardando...' : 'Aceptar' }}
+              </button>
+              <button *ngIf="app.status === 'PENDING'" type="button"
+                [disabled]="updatingApplicationId === app.id"
+                class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-1.5 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)] transition hover:border-[color:var(--accent-4)]/40 hover:text-[var(--text)] disabled:cursor-not-allowed disabled:opacity-60"
+                (click)="updateApplicationStatus(app, 'REJECTED', $event)">
+                Rechazar
+              </button>
+              <span class="ml-auto text-xs text-[var(--muted)]">
+                Postulado el {{ app.createdAt | date:'dd/MM/yyyy' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="rounded-[24px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-5">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <p class="font-tech text-[10px] uppercase tracking-[0.22em] text-[var(--accent-2)]">Perfil del postulante</p>
+              <h5 class="mt-1 text-lg font-semibold text-[var(--text)]">
+                {{ selectedApplicantProfile?.displayName || 'Selecciona un postulante' }}
+              </h5>
+            </div>
+            <button *ngIf="selectedApplicationId" type="button"
+              class="rounded-full border border-[color:var(--panel-border)] px-3 py-1 font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]"
+              (click)="closeApplicantProfile()">
+              Cerrar
+            </button>
+          </div>
+
+          <div *ngIf="applicantProfileLoading" class="mt-5 rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-5 text-sm text-[var(--muted)]">
+            Cargando perfil del postulante...
+          </div>
+
+          <div *ngIf="!applicantProfileLoading && !selectedApplicantProfile" class="mt-5 rounded-[18px] border border-dashed border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-5 text-sm leading-6 text-[var(--muted)]">
+            Abre un perfil para revisar experiencia, links y proyectos aceptados anteriormente.
+          </div>
+
+          <div *ngIf="!applicantProfileLoading && selectedApplicantProfile as profile" class="mt-5 space-y-4">
+            <div class="flex items-center gap-4">
+              <div *ngIf="profile.photoUrl; else applicantInitial" class="h-16 w-16 overflow-hidden rounded-2xl border border-[color:var(--panel-border)]">
+                <img [src]="profile.photoUrl" alt="Foto del postulante" class="h-full w-full object-cover"/>
+              </div>
+              <ng-template #applicantInitial>
+                <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] font-cyber text-2xl font-bold text-[var(--bg)]">
+                  {{ profile.displayName?.charAt(0)?.toUpperCase() || '?' }}
+                </div>
+              </ng-template>
+              <div class="min-w-0">
+                <p class="font-cyber text-base font-bold text-[var(--text)]">{{ profile.displayName || profile.email }}</p>
+                <p class="text-sm text-[var(--muted)]">{{ profile.email }}</p>
+                <div class="mt-1.5 flex flex-wrap gap-1.5">
+                  <span *ngIf="profile.availableForProjects" class="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 font-tech text-xs text-emerald-400">Disponible</span>
+                  <span *ngIf="profile.city" class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-2.5 py-0.5 font-tech text-xs text-[var(--muted)]">{{ profile.city }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3">
+                <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Carrera</p>
+                <p class="mt-1 text-sm font-semibold text-[var(--text)]">{{ profile.career || 'No definida' }}</p>
+              </div>
+              <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3">
+                <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Semestre</p>
+                <p class="mt-1 text-sm font-semibold text-[var(--text)]">{{ profile.semester ?? 'No definido' }}</p>
+              </div>
+            </div>
+
+            <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3">
+              <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Bio</p>
+              <p class="mt-2 text-sm leading-6 text-[var(--text)]">{{ profile.bio || 'Sin bio registrada.' }}</p>
+            </div>
+
+            <div *ngIf="profile.teamName || profile.teamDescription" class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3">
+              <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--accent-3)]">Equipo actual</p>
+              <p class="mt-1 text-sm font-semibold text-[var(--text)]">{{ profile.teamName || 'Postulación individual' }}</p>
+              <p *ngIf="profile.teamDescription" class="mt-2 text-sm leading-6 text-[var(--muted)]">{{ profile.teamDescription }}</p>
+            </div>
+
+            <div *ngIf="applicantSkills(profile).length" class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3">
+              <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Habilidades</p>
+              <div class="mt-3 flex flex-wrap gap-2">
+                <span *ngFor="let skill of applicantSkills(profile)" class="rounded-full border border-[color:var(--accent-1)]/25 bg-[var(--accent-1)]/10 px-3 py-1 font-tech text-xs text-[var(--accent-1)]">
+                  {{ skill }}
+                </span>
+              </div>
+            </div>
+
+            <div *ngIf="profile.linkedinUrl || profile.githubUrl || profile.portfolioUrl" class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3">
+              <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Links</p>
+              <div class="mt-3 flex flex-col gap-2 text-sm">
+                <a *ngIf="profile.linkedinUrl" [href]="profile.linkedinUrl" target="_blank" rel="noopener" class="text-[var(--accent-2)] hover:underline">LinkedIn</a>
+                <a *ngIf="profile.githubUrl" [href]="profile.githubUrl" target="_blank" rel="noopener" class="text-[var(--text)] hover:underline">GitHub</a>
+                <a *ngIf="profile.portfolioUrl" [href]="profile.portfolioUrl" target="_blank" rel="noopener" class="text-[var(--accent-3)] hover:underline">Portfolio</a>
+              </div>
+            </div>
+
+            <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3">
+              <div class="flex items-center justify-between gap-3">
+                <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Proyectos aceptados</p>
+                <span class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel)] px-2.5 py-0.5 font-tech text-[10px] text-[var(--muted)]">
+                  {{ profile.projectHistory.length }}
+                </span>
+              </div>
+
+              <div *ngIf="profile.projectHistory.length === 0" class="mt-3 text-sm text-[var(--muted)]">
+                Aún no tiene proyectos aceptados registrados.
+              </div>
+
+              <div *ngIf="profile.projectHistory.length > 0" class="mt-3 space-y-3">
+                <div *ngFor="let item of profile.projectHistory" class="rounded-[16px] border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3">
+                  <div class="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                      <p class="text-sm font-semibold text-[var(--text)]">{{ item.projectName }}</p>
+                      <p class="mt-1 text-xs text-[var(--muted)]">{{ item.companyName || 'Empresa sin nombre' }}</p>
+                    </div>
+                    <span class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-2.5 py-0.5 font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">
+                      {{ profileProjectStatusLabel(item.projectStatus) }}
+                    </span>
+                  </div>
+                  <p *ngIf="item.projectDescription" class="mt-2 text-sm leading-6 text-[var(--muted)]">{{ item.projectDescription }}</p>
+                  <p class="mt-2 text-xs text-[var(--muted)]">
+                    {{ item.teamName ? ('Equipo: ' + item.teamName + ' · ') : '' }}Aceptado el {{ item.appliedAt | date:'dd/MM/yyyy' }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && activeSection === 'detail' && project as currentProject" class="mt-6 space-y-6">
     <section class="rounded-[28px] border border-[color:var(--panel-border)] bg-black/10 p-5">
       <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-3)]">Estado del proyecto</p>
           <h4 class="mt-2 text-lg font-semibold text-[var(--text)]">Pipeline actual</h4>
           <p class="mt-3 text-sm leading-6 text-[var(--muted)]">
-            Aqui se concentra el estado del pipeline antes de revisar requerimientos, horas y salida del modelo.
+            {{
+              isStudentView
+                ? 'Aqui ves el estado general del proyecto antes de revisar requerimientos, tiempos y alcance estimado.'
+                : 'Aqui se concentra el estado del pipeline antes de revisar requerimientos, horas y salida del modelo.'
+            }}
           </p>
         </div>
 
@@ -76,6 +386,56 @@
         <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
           <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Horas totales</p>
           <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ currentProject.totalProjectHours ?? 'Pendiente' }}</p>
+        </div>
+      </div>
+    </section>
+
+    <section *ngIf="isStudentView" class="rounded-[28px] border border-[color:var(--panel-border)] bg-black/10 p-5">
+      <div class="rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-4 sm:p-5">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
+          <div class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)]">
+            <img *ngIf="currentProject.companyLogoUrl; else companyInitials" [src]="currentProject.companyLogoUrl" [alt]="currentProject.companyName || 'Empresa'" class="h-full w-full object-cover" />
+            <ng-template #companyInitials>
+              <span class="font-tech text-base uppercase tracking-[0.12em] text-[var(--muted)]">
+                {{ (currentProject.companyName || 'E').slice(0, 2) }}
+              </span>
+            </ng-template>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+              <div class="min-w-0">
+                <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-1)]">Empresa que publica</p>
+                <h4 class="mt-2 text-xl font-semibold text-[var(--text)]">{{ currentProject.companyName || 'Empresa sin nombre' }}</h4>
+              </div>
+              <p *ngIf="currentProject.companyOrganizationType" class="shrink-0 text-xs uppercase tracking-[0.18em] text-[var(--muted)] lg:pt-1">
+                {{ currentProject.companyOrganizationType === 'UNIVERSITY' ? 'Universidad' : 'Empresa' }}
+              </p>
+            </div>
+
+            <p class="mt-3 max-w-3xl text-sm leading-6 text-[var(--muted)]">
+              {{ currentProject.companyDescription || 'Esta empresa aún no cargó una descripción pública.' }}
+            </p>
+
+            <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div class="flex flex-wrap gap-2">
+                <span class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-3 py-1.5 font-tech text-[11px] uppercase tracking-[0.16em] text-[var(--muted)]">
+                  {{ currentProject.companyTotalProjectsPosted ?? 0 }} publicados
+                </span>
+                <span class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-3 py-1.5 font-tech text-[11px] uppercase tracking-[0.16em] text-[var(--muted)]">
+                  {{ currentProject.companyProjectsInDevelopmentCount }} activos
+                </span>
+                <span class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-3 py-1.5 font-tech text-[11px] uppercase tracking-[0.16em] text-[var(--muted)]">
+                  {{ currentProject.companyCompletedProjectsCount }} cerrados
+                </span>
+              </div>
+              <button
+                type="button"
+                (click)="openCompanyProfile()"
+                class="inline-flex w-full items-center justify-center rounded-full border border-[color:var(--accent-3)]/30 bg-[var(--accent-3)]/10 px-4 py-2 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-3)] transition hover:bg-[var(--accent-3)]/20 sm:w-auto">
+                Ver perfil completo
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -122,7 +482,9 @@
       <section class="rounded-[28px] border border-[color:var(--panel-border)] bg-black/10 p-5">
         <div class="flex items-start justify-between gap-4">
           <div>
-            <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-1)]">Cotizacion estimada</p>
+            <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-1)]">
+              {{ isStudentView ? 'Referencia comercial' : 'Cotizacion estimada' }}
+            </p>
             <h4 class="mt-2 text-lg font-semibold text-[var(--text)]">Rango comercial</h4>
           </div>
           <div class="rounded-full border px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em]" [ngClass]="quoteStatusTone(currentProject)">
@@ -170,7 +532,11 @@
           <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-3)]">Escenarios por nivel</p>
           <h4 class="mt-2 text-lg font-semibold text-[var(--text)]">Comparativo de tiempos y rango</h4>
           <p class="mt-2 text-sm leading-6 text-[var(--muted)]">
-            El agente compara cada nivel activo asumiendo apoyo de IA por defecto. Esto te deja ver cuánto cambia el tiempo y el rango comercial por nivel.
+            {{
+              isStudentView
+                ? 'Aquí puedes ver cómo cambian el tiempo y el rango comercial según el perfil técnico considerado.'
+                : 'El agente compara cada nivel activo asumiendo apoyo de IA por defecto. Esto te deja ver cuánto cambia el tiempo y el rango comercial por nivel.'
+            }}
           </p>
         </div>
 
@@ -197,7 +563,13 @@
         <div class="grid gap-4 md:grid-cols-2">
           <div class="space-y-1">
             <p class="text-xs font-semibold text-[var(--text)]">① Horas base (Junior)</p>
-            <p class="text-xs leading-5">La IA analiza cada requerimiento activo y estima las horas necesarias para un dev Junior. La suma es el punto de partida de todos los escenarios.</p>
+            <p class="text-xs leading-5">
+              {{
+                isStudentView
+                  ? 'Se toma una estimación base de horas para un perfil Junior. Esa suma es el punto de partida de todos los escenarios.'
+                  : 'La IA analiza cada requerimiento activo y estima las horas necesarias para un dev Junior. La suma es el punto de partida de todos los escenarios.'
+              }}
+            </p>
           </div>
 
           <div class="space-y-1">
@@ -277,7 +649,7 @@
               <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ levelEstimation.totalProjectHours ?? 'Pendiente' }}</p>
               <div *ngIf="infoOpen['card-horas-' + levelEstimation.levelCode]"
                 class="absolute right-0 top-full z-20 mt-1.5 w-56 rounded-[12px] border border-[color:var(--accent-2)]/30 bg-[var(--panel)] px-3 py-2.5 text-[11px] leading-[1.55] text-[var(--muted)] shadow-xl">
-                Horas base IA × 100 ÷ eficiencia%.
+                {{ isStudentView ? 'Horas base × 100 ÷ eficiencia%.' : 'Horas base IA × 100 ÷ eficiencia%.' }}
                 <span *ngIf="levelEstimation.levelCode === 'JUNIOR'"> Junior es la base (100% = sin ajuste).</span>
                 <span *ngIf="levelEstimation.levelCode !== 'JUNIOR'"> Mayor eficiencia = menos horas para el mismo resultado.</span>
               </div>
@@ -369,15 +741,13 @@
         <div *ngIf="project && project.quote?.available" class="mt-4 rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3">
           <p class="font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Precio sugerido por IA (escenario base)</p>
           <p class="mt-1 text-base font-semibold text-[var(--text)]">
-            {{ formatMoney(project.quote.minAmount, project.quote.currency) }}
-            –
-            {{ formatMoney(project.quote.maxAmount, project.quote.currency) }}
+            {{ formatMoney(project.quote.baseAmount, project.quote.currency) }}
           </p>
-          <p class="mt-1 text-xs text-[var(--muted)]">{{ project.quote.baseHours }} h · {{ project.quote.currency }}</p>
+          <p class="mt-1 text-xs text-[var(--muted)]">{{ project.quote.baseHours }} h · moneda activa {{ project.quote.currency }}</p>
         </div>
 
         <p class="mt-4 text-sm leading-6 text-[var(--muted)]">
-          Los estudiantes verán tanto el precio sugerido por la IA como el precio que tú definas. Esto les permite comparar y evaluar la oferta de forma transparente.
+          Los estudiantes verán el precio sugerido por la IA y el precio oficial que publiques. Esto les permite comparar y evaluar la oferta de forma transparente.
         </p>
 
         <div class="mt-5 space-y-3">
@@ -385,8 +755,8 @@
             [ngClass]="priceDecision === 'agreed' ? 'border-[color:var(--accent-3)] bg-[color:color-mix(in_srgb,var(--accent-3)_10%,transparent)]' : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] hover:border-[color:var(--accent-3)]/40'">
             <input type="radio" name="priceDecision" value="agreed" [(ngModel)]="priceDecision" class="mt-0.5 accent-[var(--accent-3)]" />
             <div>
-              <p class="text-sm font-medium text-[var(--text)]">Sí, acepto el precio sugerido</p>
-              <p class="text-xs text-[var(--muted)]">El rango de la IA quedará como precio oficial del proyecto.</p>
+              <p class="text-sm font-medium text-[var(--text)]">Sí, acepto el precio sugerido por la IA</p>
+              <p class="text-xs text-[var(--muted)]">Se usará el monto base calculado automáticamente como precio oficial.</p>
             </div>
           </label>
 
@@ -394,33 +764,22 @@
             [ngClass]="priceDecision === 'custom' ? 'border-[color:var(--accent-2)] bg-[color:color-mix(in_srgb,var(--accent-2)_10%,transparent)]' : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] hover:border-[color:var(--accent-2)]/40'">
             <input type="radio" name="priceDecision" value="custom" [(ngModel)]="priceDecision" class="mt-0.5 accent-[var(--accent-2)]" />
             <div>
-              <p class="text-sm font-medium text-[var(--text)]">No, quiero definir mi propio precio</p>
-              <p class="text-xs text-[var(--muted)]">Ingresa un rango de precio propio. Los estudiantes verán ambos precios.</p>
+              <p class="text-sm font-medium text-[var(--text)]">No, prefiero definir mi propio precio</p>
+              <p class="text-xs text-[var(--muted)]">Los estudiantes verán tu precio y el sugerido por la IA como referencia.</p>
             </div>
           </label>
         </div>
 
         <!-- Formulario precio custom -->
-        <div *ngIf="priceDecision === 'custom'" class="mt-4 grid gap-3 sm:grid-cols-2">
+        <div *ngIf="priceDecision === 'custom'" class="mt-4">
           <div>
-            <label class="mb-1 block font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Precio mínimo *</label>
-            <input type="number" [(ngModel)]="customPriceMin" min="1" placeholder="0"
+            <label class="mb-1 block font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Precio *</label>
+            <input type="number" [(ngModel)]="customPriceAmount" min="1" placeholder="0"
               class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]" />
           </div>
-          <div>
-            <label class="mb-1 block font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Precio máximo *</label>
-            <input type="number" [(ngModel)]="customPriceMax" min="1" placeholder="0"
-              class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]" />
-          </div>
-          <div class="sm:col-span-2">
-            <label class="mb-1 block font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Moneda</label>
-            <select [(ngModel)]="customPriceCurrency"
-              class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]">
-              <option value="COP">COP</option>
-              <option value="USD">USD</option>
-              <option value="EUR">EUR</option>
-            </select>
-          </div>
+          <p class="mt-2 text-xs text-[var(--muted)]">
+            Moneda activa: {{ project.quote.currency || 'Sin moneda configurada' }}.
+          </p>
         </div>
 
         <div class="mt-6 flex gap-3">
@@ -451,9 +810,15 @@
       <div class="flex items-start justify-between gap-4">
         <div>
           <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-1)]">Requerimientos</p>
-          <h4 class="mt-2 text-lg font-semibold text-[var(--text)]">Items generados por IA</h4>
+          <h4 class="mt-2 text-lg font-semibold text-[var(--text)]">
+            {{ isStudentView ? 'Requerimientos del proyecto' : 'Items generados por IA' }}
+          </h4>
           <p class="mt-2 text-sm leading-6 text-[var(--muted)]">
-            Aquí solo revisas el resultado, activas o excluyes items y conversas con la IA. El contenido del requerimiento se ajusta desde el asistente, no por edición manual directa.
+            {{
+              isStudentView
+                ? 'Revisa el alcance, prioridades y condiciones del proyecto antes de postularte.'
+                : 'Aquí solo revisas el resultado, activas o excluyes items y conversas con la IA. El contenido del requerimiento se ajusta desde el asistente, no por edición manual directa.'
+            }}
           </p>
         </div>
         <div class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel)] px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
@@ -480,7 +845,7 @@
                   <span class="rounded-full border px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em]" [ngClass]="requirement.active ? 'app-status-success' : 'app-status-warning'">
                     {{ requirement.active ? 'Activo' : 'Excluido del estimado' }}
                   </span>
-                  <span *ngIf="isPublished" class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+                  <span *ngIf="isLocked" class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
                     Solo lectura
                   </span>
                   <span class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
@@ -504,7 +869,7 @@
                     <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Prioridad</p>
                     <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ requirement.priority || 'Sin prioridad' }}</p>
                   </div>
-                  <div class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3">
+                  <div *ngIf="!isStudentView" class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3">
                     <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Asistente IA</p>
                     <p class="mt-2 text-sm font-semibold text-[var(--text)]">
                       {{ requirement.assistantSuggestion ? 'Propuesta lista' : (requirement.assistantMessages.length ? 'Hilo activo' : 'Sin actividad') }}
@@ -516,7 +881,7 @@
 
             <div class="flex flex-wrap items-center gap-3 lg:pl-4">
               <button
-                *ngIf="!isPublished"
+                *ngIf="!isLocked"
                 type="button"
                 [disabled]="updatingRequirementId === requirement.id"
                 class="rounded-full border px-4 py-2 font-tech text-[11px] uppercase tracking-[0.18em] transition disabled:cursor-not-allowed disabled:opacity-60"
@@ -583,7 +948,7 @@
             </div>
           </div>
 
-          <div class="mt-5 grid gap-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+          <div class="mt-5 grid gap-4" [ngClass]="isStudentView ? '' : 'xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]'">
             <div class="rounded-[22px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
               <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-4)]">Lectura del estimado</p>
               <div class="mt-4 grid gap-3 md:grid-cols-2">
@@ -602,7 +967,7 @@
               </div>
             </div>
 
-            <div class="rounded-[22px] border border-[color:var(--panel-border)] bg-black/10 p-4">
+            <div *ngIf="!isStudentView" class="rounded-[22px] border border-[color:var(--panel-border)] bg-black/10 p-4">
               <div class="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-2)]">Asistente IA</p>
@@ -611,7 +976,7 @@
                   </p>
                 </div>
                 <button
-                  *ngIf="requirement.active && !isPublished"
+                  *ngIf="requirement.active && !isLocked"
                   type="button"
                   class="inline-flex items-center justify-center rounded-full border border-[color:var(--accent-2)] bg-[color:color-mix(in srgb,var(--accent-2) 16%,transparent)] px-4 py-2 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-2)] transition hover:brightness-110"
                   (click)="openRequirementAssistant(requirement)">
@@ -659,8 +1024,12 @@
       <section class="rounded-[28px] border border-[color:var(--panel-border)] bg-black/10 p-5">
         <div class="flex items-start justify-between gap-4">
           <div>
-            <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-4)]">Modulos estimados</p>
-            <h4 class="mt-2 text-lg font-semibold text-[var(--text)]">Salida actual del modelo</h4>
+            <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-4)]">
+              {{ isStudentView ? 'Modulos propuestos' : 'Modulos estimados' }}
+            </p>
+            <h4 class="mt-2 text-lg font-semibold text-[var(--text)]">
+              {{ isStudentView ? 'Estructura funcional del proyecto' : 'Salida actual del modelo' }}
+            </h4>
           </div>
           <div class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel)] px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
             {{ currentProject.modules.length }} modulos
@@ -668,7 +1037,7 @@
         </div>
 
         <div *ngIf="!currentProject.modules.length" class="mt-5 rounded-[20px] border border-dashed border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-5 text-sm leading-6 text-[var(--muted)]">
-          Todavia no hay modulos estimados para este proyecto.
+          {{ isStudentView ? 'Todavia no hay modulos definidos para este proyecto.' : 'Todavia no hay modulos estimados para este proyecto.' }}
         </div>
 
         <div *ngIf="currentProject.modules.length" class="mt-5 space-y-3">
@@ -724,14 +1093,16 @@
     </div>
 
     <!-- ══ PUBLICAR — al fondo, después de revisar todo ══ -->
-    <div *ngIf="canPublish || isPublished" class="grid gap-3">
+    <div *ngIf="!isStudentView && (canPublish || isLocked)" class="grid gap-3">
 
-      <!-- Ya publicado -->
-      <div *ngIf="isPublished" class="app-status-success rounded-[24px] border p-5 text-sm">
+      <!-- Proyecto bloqueado -->
+      <div *ngIf="isLocked" class="app-status-success rounded-[24px] border p-5 text-sm">
         <div class="flex items-start justify-between gap-4">
           <div>
-            <p class="font-tech text-[11px] uppercase tracking-[0.18em]">Proyecto publicado</p>
-            <p class="mt-2 leading-6">Ya no admite cambios. Visible para equipos de estudiantes.</p>
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em]">{{ isInDevelopment ? 'Proyecto en desarrollo' : 'Proyecto publicado' }}</p>
+            <p class="mt-2 leading-6">
+              {{ isInDevelopment ? 'Ya tiene una postulación adjudicada. No admite más cambios ni nuevas decisiones de postulaciones.' : 'Ya no admite cambios. Visible para equipos de estudiantes.' }}
+            </p>
           </div>
           <svg class="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg>
         </div>
@@ -739,7 +1110,7 @@
           <div class="rounded-[16px] border border-white/10 bg-black/20 px-4 py-3">
             <p class="font-tech text-[10px] uppercase tracking-[0.2em] text-white/50">Precio publicado</p>
             <p class="mt-1 font-semibold text-white">
-              {{ formatMoney(currentProject.companyPriceMinAmount, currentProject.companyPriceCurrency) }} – {{ formatMoney(currentProject.companyPriceMaxAmount, currentProject.companyPriceCurrency) }}
+              {{ formatMoney(currentProject.companyPriceMinAmount, currentProject.companyPriceCurrency) }}
             </p>
             <p class="mt-1 text-[10px] text-white/40">{{ currentProject.companyAgreedToSuggestedPrice ? 'Aceptó precio sugerido por IA' : 'Precio definido por la empresa' }}</p>
           </div>
@@ -754,13 +1125,13 @@
       </div>
 
       <!-- Listo para publicar -->
-      <div *ngIf="!isPublished && canPublish" class="rounded-[24px] border border-[color:var(--accent-3)] bg-[color:color-mix(in_srgb,var(--accent-3)_8%,transparent)] p-5">
+      <div *ngIf="!isLocked && canPublish" class="rounded-[24px] border border-[color:var(--accent-3)] bg-[color:color-mix(in_srgb,var(--accent-3)_8%,transparent)] p-5">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-3)]">Listo para publicar</p>
             <p class="mt-2 text-sm leading-6 text-[var(--muted)]">
-              Revisaste el proyecto. Antes de publicar deberás confirmar si aceptas el precio sugerido por la IA o prefieres definir uno propio.
-              Los estudiantes verán ambos valores para comparar.
+              Revisaste el proyecto. Antes de publicar deberás confirmar si aceptas el precio sugerido por la IA o prefieres definir un precio propio.
+              Los estudiantes verán el precio oficial y la referencia de la IA.
             </p>
           </div>
           <button
@@ -910,7 +1281,7 @@
           <input type="radio" name="priceDecision" value="agreed" [(ngModel)]="priceDecision" class="mt-0.5 accent-[var(--accent-3)]" />
           <div>
             <p class="text-sm font-medium text-[var(--text)]">Sí, acepto el precio sugerido por la IA</p>
-            <p class="text-xs text-[var(--muted)]">Se usará el rango calculado automáticamente como precio oficial.</p>
+            <p class="text-xs text-[var(--muted)]">Se usará el monto calculado automáticamente como precio oficial.</p>
           </div>
         </label>
 
@@ -925,26 +1296,15 @@
       </div>
 
       <!-- Formulario precio custom -->
-      <div *ngIf="priceDecision === 'custom'" class="mt-4 grid gap-3 sm:grid-cols-2">
+      <div *ngIf="priceDecision === 'custom'" class="mt-4">
         <div>
-          <label class="mb-1 block font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Precio mínimo *</label>
-          <input type="number" [(ngModel)]="customPriceMin" min="1" placeholder="0"
+          <label class="mb-1 block font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Precio *</label>
+          <input type="number" [(ngModel)]="customPriceAmount" min="1" placeholder="0"
             class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]" />
         </div>
-        <div>
-          <label class="mb-1 block font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Precio máximo *</label>
-          <input type="number" [(ngModel)]="customPriceMax" min="1" placeholder="0"
-            class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]" />
-        </div>
-        <div class="sm:col-span-2">
-          <label class="mb-1 block font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Moneda</label>
-          <select [(ngModel)]="customPriceCurrency"
-            class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]">
-            <option value="COP">COP — Peso colombiano</option>
-            <option value="USD">USD — Dólar americano</option>
-            <option value="EUR">EUR — Euro</option>
-          </select>
-        </div>
+        <p class="mt-2 text-xs text-[var(--muted)]">
+          Moneda activa: {{ project?.quote?.currency || 'Sin moneda configurada' }}.
+        </p>
       </div>
 
       <div class="mt-6 flex gap-3">
@@ -956,6 +1316,64 @@
           class="flex-1 rounded-full bg-[var(--accent-3)] px-5 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--bg)] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">
           {{ publishingProject ? 'Publicando...' : 'Confirmar y publicar' }}
         </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="showCompanyProfileModal && project as currentProject" class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 px-4 py-8">
+    <div class="w-full max-w-3xl rounded-[28px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-2xl">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="font-tech text-xs uppercase tracking-[0.24em] text-[var(--accent-1)]">Perfil público</p>
+          <h4 class="mt-2 text-xl font-semibold text-[var(--text)]">{{ currentProject.companyName || 'Empresa sin nombre' }}</h4>
+        </div>
+        <button type="button" (click)="closeCompanyProfile()" class="mt-1 rounded-full border border-[color:var(--panel-border)] px-3 py-1 font-tech text-xs text-[var(--muted)] hover:text-[var(--text)]">✕</button>
+      </div>
+
+      <div class="mt-5 flex flex-col gap-5 sm:flex-row sm:items-start">
+        <div class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[24px] border border-[color:var(--panel-border)] bg-[var(--panel-2)]">
+          <img *ngIf="currentProject.companyLogoUrl; else companyProfileInitials" [src]="currentProject.companyLogoUrl" [alt]="currentProject.companyName || 'Empresa'" class="h-full w-full object-cover" />
+          <ng-template #companyProfileInitials>
+            <span class="font-tech text-lg uppercase tracking-[0.12em] text-[var(--muted)]">
+              {{ (currentProject.companyName || 'E').slice(0, 2) }}
+            </span>
+          </ng-template>
+        </div>
+
+        <div class="min-w-0 flex-1">
+          <div class="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+            <p *ngIf="currentProject.companyOrganizationType" class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+              {{ currentProject.companyOrganizationType === 'UNIVERSITY' ? 'Universidad' : 'Empresa' }}
+            </p>
+            <a
+              *ngIf="currentProject.companyWebsite"
+              [href]="currentProject.companyWebsite"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center justify-center rounded-full border border-[color:var(--accent-3)]/30 bg-[var(--accent-3)]/10 px-4 py-2 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-3)] transition hover:bg-[var(--accent-3)]/20">
+              Ver sitio web
+            </a>
+          </div>
+
+          <p class="mt-4 text-sm leading-7 text-[var(--muted)]">
+            {{ currentProject.companyDescription || 'Esta empresa aún no cargó una descripción pública.' }}
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-6 grid gap-3 sm:grid-cols-3">
+        <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-4">
+          <p class="font-tech text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">Proyectos publicados</p>
+          <p class="mt-2 text-2xl font-semibold text-[var(--text)]">{{ currentProject.companyTotalProjectsPosted ?? 0 }}</p>
+        </div>
+        <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-4">
+          <p class="font-tech text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">En desarrollo</p>
+          <p class="mt-2 text-2xl font-semibold text-[var(--text)]">{{ currentProject.companyProjectsInDevelopmentCount }}</p>
+        </div>
+        <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-4">
+          <p class="font-tech text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">Cerrados</p>
+          <p class="mt-2 text-2xl font-semibold text-[var(--text)]">{{ currentProject.companyCompletedProjectsCount }}</p>
+        </div>
       </div>
     </div>
   </div>

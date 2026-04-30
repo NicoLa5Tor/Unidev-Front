@@ -4,16 +4,23 @@ import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angu
 
 import { FormsModule } from '@angular/forms';
 import { ProjectService } from '../../services/project.service';
+import { ApplicationService } from '../../services/application.service';
+import { StudentService } from '../../../universities/services/student.service';
 import {
   ProjectDetail,
   ProjectPublishRequest,
   ProjectRequirement
 } from '../../../../shared/models/project.model';
+import { ApplicantProfile, ProjectApplication } from '../../../../shared/models/project-application.model';
 import { UiToastService } from '../../../../shared/services/ui-toast.service';
 import { RequirementAssistantDialogComponent } from '../requirement-assistant-dialog/requirement-assistant-dialog.component';
 
+export type ProjectDetailSection = 'detail' | 'applications';
+
 export interface ProjectDetailDialogData {
   projectId: number;
+  initialSection?: ProjectDetailSection;
+  viewerMode?: 'company' | 'student';
 }
 
 @Component({
@@ -31,12 +38,25 @@ export class ProjectDetailDialogComponent implements OnDestroy {
   publishingProject = false;
   project: ProjectDetail | null = null;
 
+  // Sección activa: detalle o postulaciones
+  activeSection: ProjectDetailSection = 'detail';
+  applications: ProjectApplication[] = [];
+  applicationsLoading = false;
+  updatingApplicationId: number | null = null;
+  applicationSearch = '';
+  applicationStatusFilter: 'ALL' | 'PENDING' | 'ACCEPTED' | 'REJECTED' = 'ALL';
+  availabilityFilter: 'ALL' | 'AVAILABLE' | 'UNAVAILABLE' = 'ALL';
+  requiredSkill = '';
+  minimumAcceptedProjects = 0;
+  selectedApplicationId: number | null = null;
+  selectedApplicantProfile: ApplicantProfile | null = null;
+  applicantProfileLoading = false;
+
   // Flujo de aprobación de precio
   showPriceApprovalModal = false;
+  showCompanyProfileModal = false;
   priceDecision: 'agreed' | 'custom' | null = null;
-  customPriceMin: number | null = null;
-  customPriceMax: number | null = null;
-  customPriceCurrency = 'COP';
+  customPriceAmount: number | null = null;
 
   // Info panels en modal de precio
   infoOpen: Record<string, boolean> = {};
@@ -52,13 +72,28 @@ export class ProjectDetailDialogComponent implements OnDestroy {
     private readonly dialogRef: MatDialogRef<ProjectDetailDialogComponent, ProjectDetail | null>,
     @Inject(MAT_DIALOG_DATA) readonly data: ProjectDetailDialogData,
     private readonly projectService: ProjectService,
+    private readonly applicationService: ApplicationService,
+    private readonly studentService: StudentService,
     private readonly uiToastService: UiToastService
   ) {
+    this.activeSection = data.initialSection ?? 'detail';
     this.loadProject();
   }
 
   get requirements(): ProjectRequirement[] {
     return this.project?.requirements ?? [];
+  }
+
+  get viewerMode(): 'company' | 'student' {
+    return this.data.viewerMode ?? 'company';
+  }
+
+  get isStudentView(): boolean {
+    return this.viewerMode === 'student';
+  }
+
+  get isReadOnlyView(): boolean {
+    return this.isStudentView;
   }
 
   get activeRequirementsCount(): number {
@@ -78,7 +113,18 @@ export class ProjectDetailDialogComponent implements OnDestroy {
     if (this.project.requirementsStatus === 'PENDING') {
       return 'Requerimientos en curso';
     }
-    return this.project.statusCode;
+    switch (this.project.statusCode) {
+      case 'PUBLISHED':
+        return 'Publicado';
+      case 'IN_PROGRESS':
+        return 'En desarrollo';
+      case 'CLOSED':
+        return 'Cerrado';
+      case 'READY':
+        return 'Listo';
+      default:
+        return 'En edicion';
+    }
   }
 
   get quoteStatusLabel(): string {
@@ -95,20 +141,91 @@ export class ProjectDetailDialogComponent implements OnDestroy {
   }
 
   get isPublished(): boolean {
-    return !!this.project?.publishedAt || this.project?.statusCode === 'PUBLISHED';
+    return this.project?.statusCode === 'PUBLISHED';
+  }
+
+  get isLocked(): boolean {
+    const status = this.project?.statusCode;
+    return status === 'PUBLISHED' || status === 'IN_PROGRESS' || status === 'CLOSED';
+  }
+
+  get isInDevelopment(): boolean {
+    return this.project?.statusCode === 'IN_PROGRESS';
   }
 
   get canPublish(): boolean {
-    if (!this.project || this.isPublished) {
+    if (!this.project || this.isLocked || this.isReadOnlyView) {
       return false;
     }
     return this.project.requirementsStatus === 'COMPLETED'
       && this.project.estimationStatus === 'COMPLETED';
   }
 
+  get filteredApplications(): ProjectApplication[] {
+    const query = this.applicationSearch.trim().toLowerCase();
+
+    return this.applications.filter(app => {
+      if (this.applicationStatusFilter !== 'ALL' && app.status !== this.applicationStatusFilter) {
+        return false;
+      }
+
+      if (this.availabilityFilter === 'AVAILABLE' && app.applicantAvailableForProjects !== true) {
+        return false;
+      }
+
+      if (this.availabilityFilter === 'UNAVAILABLE' && app.applicantAvailableForProjects !== false) {
+        return false;
+      }
+
+      if ((app.acceptedProjectsCount ?? 0) < this.minimumAcceptedProjects) {
+        return false;
+      }
+
+      const skillQuery = this.requiredSkill.trim().toLowerCase();
+      if (skillQuery) {
+        const skills = (app.applicantSkills ?? '').toLowerCase();
+        if (!skills.includes(skillQuery)) {
+          return false;
+        }
+      }
+
+      if (!query) {
+        return true;
+      }
+
+      const haystack = [
+        app.applicantDisplayName,
+        app.applicantEmail,
+        app.applicantCareer,
+        app.applicantSkills,
+        app.applicantCity,
+        app.teamName,
+        app.teamDescription,
+        app.applicantBio,
+        app.message
+      ]
+        .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+        .join(' ')
+        .toLowerCase();
+
+      return haystack.includes(query);
+    });
+  }
+
   close(): void {
     this.stopPolling();
     this.dialogRef.close(this.project);
+  }
+
+  openCompanyProfile(): void {
+    if (!this.project || !this.isStudentView) {
+      return;
+    }
+    this.showCompanyProfileModal = true;
+  }
+
+  closeCompanyProfile(): void {
+    this.showCompanyProfileModal = false;
   }
 
   ngOnDestroy(): void {
@@ -133,7 +250,7 @@ export class ProjectDetailDialogComponent implements OnDestroy {
   }
 
   openRequirementAssistant(requirement: ProjectRequirement): void {
-    if (!this.project || !requirement.active || this.isPublished) {
+    if (!this.project || !requirement.active || this.isLocked) {
       return;
     }
 
@@ -164,7 +281,7 @@ export class ProjectDetailDialogComponent implements OnDestroy {
   }
 
   toggleRequirementActivation(requirement: ProjectRequirement, active: boolean): void {
-    if (!this.project || this.updatingRequirementId === requirement.id || this.isPublished) {
+    if (!this.project || this.updatingRequirementId === requirement.id || this.isLocked) {
       return;
     }
 
@@ -199,7 +316,7 @@ export class ProjectDetailDialogComponent implements OnDestroy {
   }
 
   retryAiPipeline(): void {
-    if (!this.project || this.retryingAi || this.isPublished) {
+    if (!this.project || this.retryingAi || this.isLocked) {
       return;
     }
 
@@ -224,9 +341,7 @@ export class ProjectDetailDialogComponent implements OnDestroy {
       return;
     }
     this.priceDecision = null;
-    this.customPriceMin = null;
-    this.customPriceMax = null;
-    this.customPriceCurrency = this.project.quote?.currency || 'COP';
+    this.customPriceAmount = null;
     this.showPriceApprovalModal = true;
   }
 
@@ -240,16 +355,12 @@ export class ProjectDetailDialogComponent implements OnDestroy {
     }
 
     if (this.priceDecision === 'custom') {
-      if (!this.customPriceMin || !this.customPriceMax) {
-        this.uiToastService.error('Ingresa el rango de precio mínimo y máximo.');
+      if (!this.customPriceAmount) {
+        this.uiToastService.error('Ingresa el precio que deseas publicar.');
         return;
       }
-      if (this.customPriceMin <= 0 || this.customPriceMax <= 0) {
+      if (this.customPriceAmount <= 0) {
         this.uiToastService.error('Los precios deben ser mayores a cero.');
-        return;
-      }
-      if (this.customPriceMin > this.customPriceMax) {
-        this.uiToastService.error('El precio mínimo no puede ser mayor al máximo.');
         return;
       }
     }
@@ -258,9 +369,7 @@ export class ProjectDetailDialogComponent implements OnDestroy {
       ? { agreedToSuggestedPrice: true }
       : {
           agreedToSuggestedPrice: false,
-          customMinAmount: this.customPriceMin,
-          customMaxAmount: this.customPriceMax,
-          currency: this.customPriceCurrency
+          customAmount: this.customPriceAmount
         };
 
     this.showPriceApprovalModal = false;
@@ -322,14 +431,143 @@ export class ProjectDetailDialogComponent implements OnDestroy {
     }).format(amount);
   }
 
+  switchSection(section: ProjectDetailSection): void {
+    if (this.isStudentView && section === 'applications') {
+      return;
+    }
+    this.activeSection = section;
+    if (section === 'applications' && !this.applicationsLoading && this.applications.length === 0 && this.project) {
+      this.loadApplications();
+    }
+  }
+
+  applicationStatusLabel(app: ProjectApplication): string {
+    switch (app.status) {
+      case 'ACCEPTED': return 'Aceptado';
+      case 'REJECTED': return 'Rechazado';
+      default: return 'Pendiente';
+    }
+  }
+
+  applicationStatusTone(app: ProjectApplication): string {
+    switch (app.status) {
+      case 'ACCEPTED': return 'app-status-success';
+      case 'REJECTED': return 'app-status-danger';
+      default: return 'app-status-warning';
+    }
+  }
+
+  isProfileOpenFor(app: ProjectApplication): boolean {
+    return this.selectedApplicationId === app.id;
+  }
+
+  openApplicantProfile(app: ProjectApplication, event?: Event): void {
+    event?.stopPropagation();
+    if (!this.project) {
+      return;
+    }
+    if (this.selectedApplicationId === app.id && this.selectedApplicantProfile) {
+      return;
+    }
+
+    this.selectedApplicationId = app.id;
+    this.selectedApplicantProfile = null;
+    this.applicantProfileLoading = true;
+
+    this.applicationService.getApplicantProfile(this.project.id, app.id).subscribe({
+      next: profile => {
+        this.selectedApplicantProfile = profile;
+        this.applicantProfileLoading = false;
+      },
+      error: error => {
+        this.applicantProfileLoading = false;
+        this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos cargar el perfil del postulante.'));
+      }
+    });
+  }
+
+  closeApplicantProfile(): void {
+    this.selectedApplicationId = null;
+    this.selectedApplicantProfile = null;
+    this.applicantProfileLoading = false;
+  }
+
+  applicantSkills(profile: ApplicantProfile | null): string[] {
+    if (!profile?.skills) {
+      return [];
+    }
+    return profile.skills.split(',').map(skill => skill.trim()).filter(Boolean);
+  }
+
+  applicationSkills(app: ProjectApplication): string[] {
+    if (!app.applicantSkills) {
+      return [];
+    }
+    return app.applicantSkills.split(',').map(skill => skill.trim()).filter(Boolean);
+  }
+
+  profileProjectStatusLabel(status: string | null | undefined): string {
+    switch (status) {
+      case 'PUBLISHED': return 'Publicado';
+      case 'IN_PROGRESS': return 'En desarrollo';
+      case 'CLOSED': return 'Cerrado';
+      case 'READY': return 'Listo';
+      default: return 'Sin estado';
+    }
+  }
+
+  updateApplicationStatus(app: ProjectApplication, status: 'ACCEPTED' | 'REJECTED', event?: Event): void {
+    event?.stopPropagation();
+    if (!this.project || this.updatingApplicationId === app.id) return;
+
+    this.updatingApplicationId = app.id;
+    this.applicationService.updateStatus(this.project.id, app.id, status).subscribe({
+      next: () => {
+        this.updatingApplicationId = null;
+        const label = status === 'ACCEPTED' ? 'Postulación aceptada.' : 'Postulación rechazada.';
+        this.loadProject();
+        this.uiToastService.success(label);
+      },
+      error: error => {
+        this.updatingApplicationId = null;
+        this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos actualizar el estado de la postulación.'));
+      }
+    });
+  }
+
+  private loadApplications(): void {
+    if (!this.project) return;
+    this.applicationsLoading = true;
+    this.applicationService.listApplications(this.project.id).subscribe({
+      next: apps => {
+        this.applications = apps;
+        if (this.selectedApplicationId && !apps.some(app => app.id === this.selectedApplicationId)) {
+          this.closeApplicantProfile();
+        }
+        this.applicationsLoading = false;
+      },
+      error: error => {
+        this.applicationsLoading = false;
+        this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos cargar las postulaciones.'));
+      }
+    });
+  }
+
   private loadProject(): void {
     this.isLoading = true;
-    this.projectService.getProject(this.data.projectId).subscribe({
+    const request$ = this.isStudentView
+      ? this.studentService.getPublishedProjectDetail(this.data.projectId)
+      : this.projectService.getProject(this.data.projectId);
+
+    request$.subscribe({
       next: project => {
         this.project = project;
         this.ensureExpandedRequirements(project.requirements);
         this.isLoading = false;
         this.syncPolling(project);
+        if (this.activeSection === 'applications') {
+          this.loadApplications();
+        }
       },
       error: error => {
         this.isLoading = false;
@@ -348,6 +586,9 @@ export class ProjectDetailDialogComponent implements OnDestroy {
   }
 
   private shouldPoll(project: ProjectDetail | null): boolean {
+    if (this.isStudentView) {
+      return false;
+    }
     if (!project) {
       return false;
     }

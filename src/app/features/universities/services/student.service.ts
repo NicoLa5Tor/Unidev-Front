@@ -6,7 +6,7 @@ import {
   ProjectApplication, ApplyToProjectDto, StudentProfileUpdateDto,
   TeamInvitation, TeamInviteDto, TeamJoinRequestDto
 } from '../../../shared/models/student.model';
-import { Project } from '../../../shared/models/project.model';
+import { Project, ProjectDetail } from '../../../shared/models/project.model';
 import { SessionUser } from '../../../shared/models/session-user.model';
 
 @Injectable({ providedIn: 'root' })
@@ -18,6 +18,10 @@ export class StudentService {
   // ── Projects ──────────────────────────────────────────
   listPublishedProjects() {
     return this.http.get<Project[]>(`${this.baseUrl}/projects/published`);
+  }
+
+  getPublishedProjectDetail(projectId: number) {
+    return this.http.get<ProjectDetail>(`${this.baseUrl}/student/projects/${projectId}`);
   }
 
   applyToProject(projectId: number, payload: ApplyToProjectDto) {

@@ -722,10 +722,10 @@
                           </p>
                           <p class="text-[10px] text-[var(--muted)]">{{ project.quote.baseHours }} h · escenario base</p>
                         </div>
-                        <div *ngIf="project.companyPriceMinAmount" class="rounded-[18px] border border-[color:var(--accent-3)]/30 bg-[color:color-mix(in_srgb,var(--accent-3)_6%,transparent)] px-3 py-2">
+                        <div *ngIf="project.companyPriceMinAmount != null" class="rounded-[18px] border border-[color:var(--accent-3)]/30 bg-[color:color-mix(in_srgb,var(--accent-3)_6%,transparent)] px-3 py-2">
                           <p class="font-tech text-[10px] uppercase tracking-[0.16em] text-[var(--accent-3)]">Precio acordado</p>
                           <p class="mt-1 text-sm font-semibold text-[var(--text)]">
-                            {{ formatMoney(project.companyPriceMinAmount, project.companyPriceCurrency) }} – {{ formatMoney(project.companyPriceMaxAmount, project.companyPriceCurrency) }}
+                            {{ formatMoney(project.companyPriceMinAmount, project.companyPriceCurrency) }}
                           </p>
                           <p class="text-[10px] text-[var(--muted)]">{{ project.companyPriceCurrency || 'COP' }} · precio empresa</p>
                         </div>
@@ -747,6 +747,16 @@
                             (click)="publishProject(project, $event)"
                           >
                             {{ publishingProjectId === project.id ? 'Publicando...' : 'Publicar' }}
+                          </button>
+                          <!-- Botón postulados -->
+                          <button
+                            *ngIf="isPublishedProject(project)"
+                            type="button"
+                            class="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--accent-3)]/40 bg-[var(--accent-3)]/10 px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-3)] transition hover:brightness-110"
+                            (click)="openProjectApplications(project, $event)"
+                          >
+                            <svg class="h-3 w-3" viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm-5 6a5 5 0 0110 0H3z"/></svg>
+                            Postulados ({{ project.applicationsCount }})
                           </button>
                           <!-- Botón pagar -->
                           <button

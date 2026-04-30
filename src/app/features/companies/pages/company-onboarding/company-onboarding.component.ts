@@ -18,7 +18,7 @@ import { Company, CompanyRegistrationDocument, CompanyReviewItem, CreateCompanyD
 import { CreateProjectDto, Project, ProjectDetail, ProjectDevelopmentTypeOption } from '../../../../shared/models/project.model';
 import { SessionUser } from '../../../../shared/models/session-user.model';
 import { CompanyAllowedEmail } from '../../../../shared/models/company-access.model';
-import { ProjectDetailDialogComponent } from '../../components/project-detail-dialog/project-detail-dialog.component';
+import { ProjectDetailDialogComponent, ProjectDetailSection } from '../../components/project-detail-dialog/project-detail-dialog.component';
 import { CompanyFormModel, ProjectCreateFormModel } from './company-onboarding.types';
 import { environment } from '../../../../../environments/environment';
 import { PROJECT_CREATE_FORM_EXAMPLES, ProjectCreateFormExample } from '../../examples/project-create-form/project-create-form-examples';
@@ -247,7 +247,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
       case 'PUBLISHED':
         return this.projects.filter(project => this.isPublishedProject(project));
       case 'EDITING':
-        return this.projects.filter(project => !this.isPublishedProject(project));
+        return this.projects.filter(project => this.isEditableProject(project));
       default:
         return this.projects;
     }
@@ -270,7 +270,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   }
 
   get editingProjectsCount(): number {
-    return this.projects.filter(project => !this.isPublishedProject(project)).length;
+    return this.projects.filter(project => this.isEditableProject(project)).length;
   }
 
   get selectedProjectFormExample(): ProjectCreateFormExample | null {
@@ -863,7 +863,12 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     });
   }
 
-  openProject(projectId: number): void {
+  openProjectApplications(project: Project, event?: Event): void {
+    event?.stopPropagation();
+    this.openProject(project.id, 'applications');
+  }
+
+  openProject(projectId: number, initialSection?: ProjectDetailSection): void {
     if (this.organizationType === 'UNIVERSITY') {
       return;
     }
@@ -880,7 +885,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
         maxHeight: '92vh',
         panelClass: 'app-shell-dialog-panel',
         backdropClass: 'app-shell-dialog-backdrop',
-        data: { projectId }
+        data: { projectId, initialSection }
       })
       .afterClosed()
       .subscribe((project: ProjectDetail | null | undefined) => {
@@ -904,13 +909,14 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   }
 
   canPublishProject(project: Project): boolean {
-    return !this.isPublishedProject(project)
+    return this.isEditableProject(project)
       && project.requirementsStatus === 'COMPLETED'
       && project.estimationStatus === 'COMPLETED';
   }
 
   canPayProject(project: Project): boolean {
-    if (!this.isPublishedProject(project)) return false;
+    if (!this.isPublishedProject(project) && !this.isInDevelopmentProject(project)) return false;
+    if ((project.acceptedApplicationsCount ?? 0) === 0) return false;
     const paid = project.paymentStatus;
     return paid == null || paid === 'FAILED';
   }
@@ -1448,6 +1454,9 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   private createProjectDetailShell(project: Project): ProjectDetail {
     return {
       ...project,
+      companyTotalProjectsPosted: null,
+      companyProjectsInDevelopmentCount: 0,
+      companyCompletedProjectsCount: 0,
       generalComplexity: null,
       totalProjectHours: null,
       detectedRisks: [],
@@ -1456,7 +1465,9 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
       levelEstimations: [],
       requirements: [],
       modules: [],
-      paymentStatus: project.paymentStatus ?? null
+      paymentStatus: project.paymentStatus ?? null,
+      applicationsCount: project.applicationsCount ?? 0,
+      acceptedApplicationsCount: project.acceptedApplicationsCount ?? 0
     };
   }
 
@@ -1464,6 +1475,11 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     return {
       id: project.id,
       companyId: project.companyId,
+      companyName: project.companyName,
+      companyLogoUrl: project.companyLogoUrl,
+      companyWebsite: project.companyWebsite,
+      companyDescription: project.companyDescription,
+      companyOrganizationType: project.companyOrganizationType,
       name: project.name,
       description: project.description,
       businessObjective: project.businessObjective,
@@ -1489,7 +1505,9 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
       companyPriceMinAmount: project.companyPriceMinAmount,
       companyPriceMaxAmount: project.companyPriceMaxAmount,
       priceSetAt: project.priceSetAt,
-      paymentStatus: project.paymentStatus ?? null
+      paymentStatus: project.paymentStatus ?? null,
+      applicationsCount: project.applicationsCount ?? 0,
+      acceptedApplicationsCount: project.acceptedApplicationsCount ?? 0
     };
   }
 
@@ -1507,17 +1525,40 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   }
 
   projectPublicationLabel(project: Project | ProjectDetail): string {
-    return this.isPublishedProject(project) ? 'Publicado' : 'En edición';
+    if (this.isPublishedProject(project)) {
+      return 'Publicado';
+    }
+    if (this.isInDevelopmentProject(project)) {
+      return 'En desarrollo';
+    }
+    if (project.statusCode === 'CLOSED') {
+      return 'Cerrado';
+    }
+    return 'En edición';
   }
 
   projectPublicationTone(project: Project | ProjectDetail): string {
-    return this.isPublishedProject(project)
-      ? 'app-status-success'
-      : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)]';
+    if (this.isPublishedProject(project)) {
+      return 'app-status-success';
+    }
+    if (this.isInDevelopmentProject(project)) {
+      return 'border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/10 text-[var(--accent-2)]';
+    }
+    return 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)]';
   }
 
-  private isPublishedProject(project: Project | ProjectDetail): boolean {
-    return !!project.publishedAt || project.statusCode === 'PUBLISHED';
+  isPublishedProject(project: Project | ProjectDetail): boolean {
+    return project.statusCode === 'PUBLISHED';
+  }
+
+  isInDevelopmentProject(project: Project | ProjectDetail): boolean {
+    return project.statusCode === 'IN_PROGRESS';
+  }
+
+  isEditableProject(project: Project | ProjectDetail): boolean {
+    return !this.isPublishedProject(project)
+      && !this.isInDevelopmentProject(project)
+      && project.statusCode !== 'CLOSED';
   }
 
   private syncProjectsPolling(): void {
