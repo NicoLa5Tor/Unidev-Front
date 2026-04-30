@@ -131,6 +131,7 @@ export interface Project {
   companyPriceMinAmount: number | null;
   companyPriceMaxAmount: number | null;
   priceSetAt: string | null;
+  paymentStatus: 'PENDING_PAYMENT' | 'PAID_HELD' | 'RELEASED' | 'FAILED' | null;
 }
 
 export interface ProjectRequirement {
@@ -176,4 +177,5 @@ export interface ProjectDetail extends Project {
   companyPriceMinAmount: number | null;
   companyPriceMaxAmount: number | null;
   priceSetAt: string | null;
+  paymentStatus: 'PENDING_PAYMENT' | 'PAID_HELD' | 'RELEASED' | 'FAILED' | null;
 }

@@ -13,6 +13,7 @@ import { UiToastService } from '../../../../shared/services/ui-toast.service';
 import { CompanyService } from '../../services/company.service';
 import { CompanyAccessService } from '../../services/company-access.service';
 import { ProjectService } from '../../services/project.service';
+import { PaymentService } from '../../services/payment.service';
 import { Company, CompanyRegistrationDocument, CompanyReviewItem, CreateCompanyDto, UpdateCompanyProfileDto, UpdateRejectedCompanyDraftDto, UniversityCampus, CompanyUser, CreateCompanyUserDto } from '../../../../shared/models/company.model';
 import { CreateProjectDto, Project, ProjectDetail, ProjectDevelopmentTypeOption } from '../../../../shared/models/project.model';
 import { SessionUser } from '../../../../shared/models/session-user.model';
@@ -57,6 +58,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   isProjectsLoading = false;
   isProjectCreatePanelOpen = false;
   publishingProjectId: number | null = null;
+  payingProjectId: number | null = null;
   projectVisibilityFilter: ProjectVisibilityFilter = 'ALL';
   message: MessageState = null;
   createFieldErrors: Partial<Record<CreateField, string>> = {};
@@ -154,6 +156,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     private readonly companyService: CompanyService,
     private readonly companyAccessService: CompanyAccessService,
     private readonly projectService: ProjectService,
+    private readonly paymentService: PaymentService,
     private readonly userSessionService: UserSessionService,
     private readonly uiToastService: UiToastService
   ) {}
@@ -906,6 +909,59 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
       && project.estimationStatus === 'COMPLETED';
   }
 
+  canPayProject(project: Project): boolean {
+    if (!this.isPublishedProject(project)) return false;
+    const paid = project.paymentStatus;
+    return paid == null || paid === 'FAILED';
+  }
+
+  paymentStatusLabel(project: Project): string {
+    switch (project.paymentStatus) {
+      case 'PENDING_PAYMENT': return 'Pago pendiente';
+      case 'PAID_HELD': return 'Pago en garantía';
+      case 'RELEASED': return 'Pago liberado';
+      case 'FAILED': return 'Pago fallido';
+      default: return '';
+    }
+  }
+
+  paymentStatusTone(project: Project): string {
+    switch (project.paymentStatus) {
+      case 'PENDING_PAYMENT': return 'app-status-warning';
+      case 'PAID_HELD': return 'app-status-success';
+      case 'RELEASED': return 'app-status-info';
+      case 'FAILED': return 'app-status-danger';
+      default: return '';
+    }
+  }
+
+  formatMoney(amount: number | null | undefined, currency: string | null | undefined): string {
+    if (amount == null || !Number.isFinite(amount)) return '—';
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: currency || 'COP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  }
+
+  initiatePayment(project: Project, event?: Event): void {
+    event?.stopPropagation();
+    if (this.payingProjectId === project.id || !this.canPayProject(project)) return;
+
+    this.payingProjectId = project.id;
+    this.paymentService.createCheckout(project.id).subscribe({
+      next: checkout => {
+        this.payingProjectId = null;
+        window.location.href = checkout.checkoutUrl;
+      },
+      error: error => {
+        this.payingProjectId = null;
+        this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos iniciar el pago. Intenta de nuevo.'));
+      }
+    });
+  }
+
   publishProject(project: Project, event?: Event): void {
     event?.stopPropagation();
     if (this.publishingProjectId === project.id || !this.canPublishProject(project)) {
@@ -1399,7 +1455,8 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
       teamWarnings: [],
       levelEstimations: [],
       requirements: [],
-      modules: []
+      modules: [],
+      paymentStatus: project.paymentStatus ?? null
     };
   }
 
@@ -1431,7 +1488,8 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
       companyPriceCurrency: project.companyPriceCurrency,
       companyPriceMinAmount: project.companyPriceMinAmount,
       companyPriceMaxAmount: project.companyPriceMaxAmount,
-      priceSetAt: project.priceSetAt
+      priceSetAt: project.priceSetAt,
+      paymentStatus: project.paymentStatus ?? null
     };
   }
 
