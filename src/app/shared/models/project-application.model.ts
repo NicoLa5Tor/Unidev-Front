@@ -1,4 +1,40 @@
 export type ApplicationStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
+export type NegotiationSenderRole = 'STUDENT' | 'COMPANY';
+
+export interface ApplicationNegotiationMessage {
+  id: number;
+  applicationId: number;
+  senderUserId: number;
+  senderRole: NegotiationSenderRole;
+  senderDisplayName: string | null;
+  message: string | null;
+  proposedAmount: number | null;
+  proposedCurrency: string | null;
+  acceptedProposal: boolean | null;
+  acceptedByRole: NegotiationSenderRole | null;
+  acceptedAt: string | null;
+  createdAt: string;
+}
+
+export interface ApplicationNegotiationThread {
+  applicationId: number;
+  projectId: number;
+  projectName: string;
+  companyName: string | null;
+  applicantDisplayName: string | null;
+  applicationStatus: ApplicationStatus;
+  projectStatus: string | null;
+  negotiationCurrency: string | null;
+  officialPriceAmount: number | null;
+  acceptedProposalMessageId: number | null;
+  acceptedProposalAmount: number | null;
+  acceptedProposalCurrency: string | null;
+  canSendMessages: boolean;
+  lockedReason: string | null;
+  messagesCount: number;
+  lastMessageAt: string | null;
+  messages: ApplicationNegotiationMessage[];
+}
 
 export interface ApplicantProjectExperience {
   projectId: number;

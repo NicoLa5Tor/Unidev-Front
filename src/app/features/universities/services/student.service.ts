@@ -6,6 +6,7 @@ import {
   ProjectApplication, ApplyToProjectDto, StudentProfileUpdateDto,
   TeamInvitation, TeamInviteDto, TeamJoinRequestDto
 } from '../../../shared/models/student.model';
+import { ApplicationNegotiationThread } from '../../../shared/models/project-application.model';
 import { Project, ProjectDetail } from '../../../shared/models/project.model';
 import { SessionUser } from '../../../shared/models/session-user.model';
 
@@ -30,6 +31,18 @@ export class StudentService {
 
   listMyApplications() {
     return this.http.get<ProjectApplication[]>(`${this.baseUrl}/student/applications`);
+  }
+
+  getApplicationNegotiation(applicationId: number) {
+    return this.http.get<ApplicationNegotiationThread>(`${this.baseUrl}/student/applications/${applicationId}/negotiation`);
+  }
+
+  sendApplicationNegotiationMessage(applicationId: number, payload: { message?: string | null; proposedAmount?: number | null }) {
+    return this.http.post<ApplicationNegotiationThread>(`${this.baseUrl}/student/applications/${applicationId}/negotiation/messages`, payload);
+  }
+
+  acceptApplicationNegotiationProposal(applicationId: number, messageId: number) {
+    return this.http.post<ApplicationNegotiationThread>(`${this.baseUrl}/student/applications/${applicationId}/negotiation/messages/${messageId}/accept`, {});
   }
 
   // ── Profile ───────────────────────────────────────────

@@ -104,6 +104,12 @@
           <p class="mt-0.5 text-xs text-[var(--muted)]">{{ app.companyName ?? 'Empresa desconocida' }}</p>
           <p *ngIf="app.teamName" class="mt-1 text-xs text-[var(--muted)]">Equipo: <span class="text-[var(--text)]">{{ app.teamName }}</span></p>
           <p *ngIf="app.message" class="mt-2 text-xs italic leading-relaxed text-[var(--muted)]">"{{ app.message }}"</p>
+          <div class="mt-3">
+            <button type="button" (click)="openApplicationNegotiation(app.id)"
+              class="rounded-full border border-[color:var(--accent-1)]/35 bg-[var(--accent-1)]/10 px-4 py-1.5 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-1)] transition hover:bg-[var(--accent-1)]/20">
+              {{ app.status === 'PENDING' ? 'Abrir negociación' : 'Ver negociación' }}
+            </button>
+          </div>
         </div>
         <p class="shrink-0 font-tech text-xs text-[var(--muted)]">{{ app.createdAt | date:'dd/MM/yyyy' }}</p>
       </article>
@@ -568,8 +574,34 @@
   <div class="relative w-full max-w-lg rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel)] p-6 shadow-2xl">
     <p class="mb-1 font-tech text-xs uppercase tracking-[0.3em] text-[var(--accent-1)]">Postularse</p>
     <h2 class="mb-1 font-cyber text-base font-bold text-[var(--text)]">{{ applyingToProject!.name }}</h2>
-    <p class="mb-5 text-xs text-[var(--muted)]">Envía tu postulación. Puedes incluir un mensaje y seleccionar tu equipo.</p>
+    <p class="mb-5 text-xs text-[var(--muted)]">Envía tu postulación. Puedes postularte con la oferta actual o abrir una contraoferta si necesitas negociar.</p>
     <div class="flex flex-col gap-4">
+      <div class="rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3">
+        <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Precio publicado actual</p>
+        <p class="mt-1 text-sm font-semibold text-[var(--text)]">
+          {{ applyingToProject!.companyPriceMinAmount != null ? (applyingToProject!.companyPriceMinAmount | number:'1.0-0') : 'Sin precio publicado' }}
+          <span *ngIf="applyingToProject!.companyPriceMinAmount != null">{{ applyCurrency(applyingToProject) }}</span>
+        </p>
+        <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p class="text-xs text-[var(--muted)]">
+            {{ applyWantsCustomOffer ? 'Tu oferta usará esta misma moneda.' : 'Si estás de acuerdo, puedes postularte directo con esta oferta.' }}
+          </p>
+          <button
+            *ngIf="!applyWantsCustomOffer"
+            type="button"
+            (click)="enableCustomOffer()"
+            class="rounded-full border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/10 px-4 py-1.5 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-2)] transition hover:bg-[var(--accent-2)]/20">
+            Hacer oferta
+          </button>
+          <button
+            *ngIf="applyWantsCustomOffer"
+            type="button"
+            (click)="disableCustomOffer()"
+            class="rounded-full border border-[color:var(--panel-border)] px-4 py-1.5 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)] transition hover:text-[var(--text)]">
+            Usar oferta actual
+          </button>
+        </div>
+      </div>
       <div *ngIf="myTeams.length > 0">
         <label class="mb-1 block font-tech text-xs text-[var(--muted)]">Postular con equipo <span class="opacity-60">(opcional)</span></label>
         <select [(ngModel)]="applyTeamId" name="applyTeamId"
@@ -578,14 +610,24 @@
           <option *ngFor="let team of myTeams" [ngValue]="team.id">{{ team.name }}</option>
         </select>
       </div>
-      <textarea [(ngModel)]="applyMessage" name="applyMessage" rows="4" placeholder="¿Por qué eres el candidato ideal para este proyecto?"
+      <div *ngIf="applyWantsCustomOffer">
+        <label class="mb-1 block font-tech text-xs text-[var(--muted)]">Tu nueva oferta *</label>
+        <input [(ngModel)]="applyProposedAmount" name="applyProposedAmount" type="number" min="1" placeholder="Ej. 850000"
+          class="w-full rounded-xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-3 py-2.5 text-sm text-[var(--text)] placeholder-[var(--muted)] outline-none focus:border-[color:var(--accent-1)]/60" />
+        <p class="mt-1 text-xs text-[var(--muted)]">Este valor abrirá la negociación con la empresa.</p>
+      </div>
+      <textarea [(ngModel)]="applyMessage" name="applyMessage" rows="4"
+        [placeholder]="applyWantsCustomOffer ? 'Explica por qué propones ese nuevo precio y qué incluye tu oferta.' : '¿Por qué eres el candidato ideal para este proyecto?'"
         class="w-full resize-none rounded-xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-3 py-2.5 text-sm text-[var(--text)] placeholder-[var(--muted)] outline-none focus:border-[color:var(--accent-1)]/60"></textarea>
+      <p *ngIf="applyWantsCustomOffer" class="mt-[-0.5rem] text-xs text-[var(--muted)]">
+        La oferta nueva debe llevar precio y justificación.
+      </p>
       <div class="flex gap-2">
         <button type="button" (click)="closeApply()"
           class="rounded-full border border-[color:var(--panel-border)] px-5 py-2 font-tech text-xs text-[var(--muted)] hover:text-[var(--text)]">Cancelar</button>
-        <button type="button" (click)="submitApply()" [disabled]="isSubmittingApply"
+        <button type="button" (click)="submitApply()" [disabled]="!canSubmitApply()"
           class="flex-1 rounded-full border border-[color:var(--accent-1)]/40 bg-[var(--accent-1)]/15 px-5 py-2 font-tech text-xs uppercase tracking-[0.2em] text-[var(--accent-1)] hover:bg-[var(--accent-1)]/25 disabled:cursor-not-allowed disabled:opacity-50">
-          {{ isSubmittingApply ? 'Enviando…' : 'Enviar postulación' }}
+          {{ applySubmitLabel(applyingToProject) }}
         </button>
       </div>
     </div>

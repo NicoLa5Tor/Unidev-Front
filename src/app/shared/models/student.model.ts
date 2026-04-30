@@ -36,6 +36,7 @@ export interface AddTeamMemberDto {
 export interface ApplyToProjectDto {
   message?: string | null;
   teamId?: number | null;
+  proposedAmount?: number | null;
 }
 
 export interface ProjectApplication {

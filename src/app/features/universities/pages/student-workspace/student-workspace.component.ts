@@ -12,6 +12,7 @@ import { SessionUser } from '../../../../shared/models/session-user.model';
 import { CompanyService } from '../../../companies/services/company.service';
 import { UniversityCampus } from '../../../../shared/models/company.model';
 import { ProjectDetailDialogComponent } from '../../../companies/components/project-detail-dialog/project-detail-dialog.component';
+import { ApplicationNegotiationDialogComponent } from '../../../../shared/components/application-negotiation-dialog/application-negotiation-dialog.component';
 
 @Component({
   selector: 'app-student-workspace',
@@ -54,6 +55,8 @@ export class StudentWorkspaceComponent implements OnInit {
   applyingToProject: Project | null = null;
   applyMessage = '';
   applyTeamId: number | null = null;
+  applyProposedAmount: number | null = null;
+  applyWantsCustomOffer = false;
   isSubmittingApply = false;
   appliedProjectIds = new Set<number>();
 
@@ -222,15 +225,37 @@ export class StudentWorkspaceComponent implements OnInit {
     });
   }
 
-  openApply(project: Project): void { this.applyingToProject = project; this.applyMessage = ''; this.applyTeamId = null; }
-  closeApply(): void { this.applyingToProject = null; }
+  openApply(project: Project): void {
+    this.applyingToProject = project;
+    this.applyMessage = '';
+    this.applyTeamId = null;
+    this.applyProposedAmount = null;
+    this.applyWantsCustomOffer = false;
+  }
+
+  closeApply(): void {
+    this.applyingToProject = null;
+    this.applyProposedAmount = null;
+    this.applyWantsCustomOffer = false;
+  }
+
+  canSubmitApply(): boolean {
+    if (this.isSubmittingApply) {
+      return false;
+    }
+    if (!this.applyWantsCustomOffer) {
+      return true;
+    }
+    return this.applyProposedAmount != null && this.applyProposedAmount > 0 && this.applyMessage.trim().length > 0;
+  }
 
   submitApply(): void {
     if (!this.applyingToProject) return;
     this.isSubmittingApply = true;
     this.studentService.applyToProject(this.applyingToProject.id, {
       message: this.applyMessage.trim() || null,
-      teamId: this.applyTeamId
+      teamId: this.applyTeamId,
+      proposedAmount: this.applyWantsCustomOffer && this.applyProposedAmount != null ? this.applyProposedAmount : null
     }).subscribe({
       next: app => {
         this.myApplications = [app, ...this.myApplications];
@@ -245,6 +270,39 @@ export class StudentWorkspaceComponent implements OnInit {
 
   hasApplied(projectId: number): boolean { return this.appliedProjectIds.has(projectId); }
 
+  applyCurrency(project: Project | null): string {
+    if (!project) {
+      return 'COP';
+    }
+    return project.companyPriceCurrency || project.quote?.currency || 'COP';
+  }
+
+  projectHasPublishedPrice(project: Project | null): boolean {
+    return project?.companyPriceMinAmount != null;
+  }
+
+  enableCustomOffer(): void {
+    this.applyWantsCustomOffer = true;
+  }
+
+  disableCustomOffer(): void {
+    this.applyWantsCustomOffer = false;
+    this.applyProposedAmount = null;
+  }
+
+  applySubmitLabel(project: Project | null): string {
+    if (this.isSubmittingApply) {
+      return 'Enviando…';
+    }
+    if (this.applyWantsCustomOffer) {
+      return 'Enviar oferta y postularme';
+    }
+    if (this.projectHasPublishedPrice(project)) {
+      return 'Postular con oferta actual';
+    }
+    return 'Enviar postulación';
+  }
+
   applicationStatusLabel(status: string): string {
     return status === 'PENDING' ? 'Pendiente' : status === 'ACCEPTED' ? 'Aceptada' : 'Rechazada';
   }
@@ -253,6 +311,20 @@ export class StudentWorkspaceComponent implements OnInit {
     if (status === 'ACCEPTED') return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20';
     if (status === 'REJECTED') return 'bg-rose-500/15 text-rose-400 border-rose-500/20';
     return 'bg-amber-500/15 text-amber-400 border-amber-500/20';
+  }
+
+  openApplicationNegotiation(applicationId: number): void {
+    this.dialog.open(ApplicationNegotiationDialogComponent, {
+      width: '960px',
+      maxWidth: '96vw',
+      maxHeight: '92vh',
+      panelClass: 'app-shell-dialog-panel',
+      backdropClass: 'app-shell-dialog-backdrop',
+      data: {
+        viewerMode: 'student',
+        applicationId
+      }
+    });
   }
 
   // ── Invite (leader → student) ─────────────────────────

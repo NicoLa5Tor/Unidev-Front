@@ -207,6 +207,11 @@
                 (click)="openApplicantProfile(app, $event)">
                 {{ isProfileOpenFor(app) ? 'Perfil abierto' : 'Ver perfil completo' }}
               </button>
+              <button type="button"
+                class="rounded-full border border-[color:var(--accent-1)]/40 bg-[color:color-mix(in_srgb,var(--accent-1)_10%,transparent)] px-4 py-1.5 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-1)] transition hover:brightness-110"
+                (click)="openNegotiation(app, $event)">
+                {{ app.status === 'PENDING' ? 'Negociar' : 'Ver negociación' }}
+              </button>
               <button *ngIf="app.status === 'PENDING'" type="button"
                 [disabled]="updatingApplicationId === app.id"
                 class="rounded-full border border-[color:var(--accent-3)]/40 bg-[color:color-mix(in_srgb,var(--accent-3)_10%,transparent)] px-4 py-1.5 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-3)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"

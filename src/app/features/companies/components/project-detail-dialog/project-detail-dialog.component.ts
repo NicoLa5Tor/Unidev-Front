@@ -14,6 +14,7 @@ import {
 import { ApplicantProfile, ProjectApplication } from '../../../../shared/models/project-application.model';
 import { UiToastService } from '../../../../shared/services/ui-toast.service';
 import { RequirementAssistantDialogComponent } from '../requirement-assistant-dialog/requirement-assistant-dialog.component';
+import { ApplicationNegotiationDialogComponent } from '../../../../shared/components/application-negotiation-dialog/application-negotiation-dialog.component';
 
 export type ProjectDetailSection = 'detail' | 'applications';
 
@@ -490,6 +491,25 @@ export class ProjectDetailDialogComponent implements OnDestroy {
     this.selectedApplicationId = null;
     this.selectedApplicantProfile = null;
     this.applicantProfileLoading = false;
+  }
+
+  openNegotiation(app: ProjectApplication, event?: Event): void {
+    event?.stopPropagation();
+    if (!this.project) {
+      return;
+    }
+    this.dialog.open(ApplicationNegotiationDialogComponent, {
+      width: '960px',
+      maxWidth: '96vw',
+      maxHeight: '92vh',
+      panelClass: 'app-shell-dialog-panel',
+      backdropClass: 'app-shell-dialog-backdrop',
+      data: {
+        viewerMode: 'company',
+        projectId: this.project.id,
+        applicationId: app.id
+      }
+    });
   }
 
   applicantSkills(profile: ApplicantProfile | null): string[] {

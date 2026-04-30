@@ -1,0 +1,137 @@
+<div class="application-negotiation-dialog">
+  <div class="flex items-start justify-between gap-4">
+    <div>
+      <p class="font-tech text-xs uppercase tracking-[0.24em] text-[var(--accent-3)]">Negociación</p>
+      <h3 class="mt-2 text-2xl font-semibold text-[var(--text)]">{{ thread?.projectName || 'Cargando...' }}</h3>
+      <p class="mt-2 text-sm text-[var(--muted)]">
+        Conversación con {{ counterpartLabel }}
+      </p>
+    </div>
+    <button
+      type="button"
+      class="rounded-full border border-[color:var(--panel-border)] bg-black/10 px-3 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--muted)] transition hover:bg-black/20"
+      (click)="close()">
+      Cerrar
+    </button>
+  </div>
+
+  <div *ngIf="isLoading" class="mt-6 rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4 text-sm text-[var(--muted)]">
+    Cargando negociación...
+  </div>
+
+  <div *ngIf="!isLoading && thread as currentThread" class="mt-6 space-y-5">
+    <section class="grid gap-3 sm:grid-cols-3">
+      <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
+        <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Precio oficial</p>
+        <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ formatMoney(currentThread.officialPriceAmount, currentThread.negotiationCurrency) }}</p>
+      </div>
+      <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
+        <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Estado postulación</p>
+        <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ currentThread.applicationStatus }}</p>
+      </div>
+      <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
+        <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Moneda</p>
+        <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ currentThread.negotiationCurrency || 'Sin definir' }}</p>
+      </div>
+    </section>
+
+    <div *ngIf="currentThread.acceptedProposalAmount != null" class="rounded-[20px] border border-emerald-500/30 bg-emerald-500/10 px-4 py-4">
+      <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-emerald-300">Propuesta aceptada</p>
+      <p class="mt-2 text-sm font-semibold text-white">{{ formatMoney(currentThread.acceptedProposalAmount, currentThread.acceptedProposalCurrency) }}</p>
+      <p class="mt-2 text-xs text-emerald-100/80">El precio oficial del proyecto ya fue actualizado con este acuerdo.</p>
+    </div>
+
+    <section class="rounded-[24px] border border-[color:var(--panel-border)] bg-black/10 p-4">
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <p class="font-tech text-[10px] uppercase tracking-[0.22em] text-[var(--accent-2)]">Hilo</p>
+          <p class="mt-1 text-sm text-[var(--muted)]">{{ currentThread.messagesCount }} mensaje{{ currentThread.messagesCount === 1 ? '' : 's' }}</p>
+        </div>
+        <div *ngIf="!currentThread.canSendMessages" class="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 font-tech text-[10px] uppercase tracking-[0.18em] text-amber-300">
+          Solo lectura
+        </div>
+      </div>
+
+      <div *ngIf="currentThread.lockedReason" class="mt-4 rounded-[16px] border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-sm text-[var(--muted)]">
+        {{ currentThread.lockedReason }}
+      </div>
+
+      <div *ngIf="currentThread.messages.length === 0" class="mt-4 rounded-[16px] border border-dashed border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-6 text-sm text-[var(--muted)]">
+        Todavía no hay mensajes. Puedes abrir la conversación con una pregunta, una aclaración o una contraoferta.
+      </div>
+
+      <div *ngIf="currentThread.messages.length > 0" class="mt-4 space-y-3">
+        <div
+          *ngFor="let message of currentThread.messages"
+          class="rounded-[18px] border px-4 py-3"
+          [ngClass]="isOwnMessage(message)
+            ? 'border-[color:var(--accent-3)]/30 bg-[color:color-mix(in srgb,var(--accent-3) 10%,transparent)]'
+            : 'border-[color:var(--panel-border)] bg-[var(--panel)]'">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <p class="font-tech text-[10px] uppercase tracking-[0.18em]" [ngClass]="isOwnMessage(message) ? 'text-[var(--accent-3)]' : 'text-[var(--muted)]'">
+              {{ senderLabel(message) }}
+            </p>
+            <p class="text-[11px] text-[var(--muted)]">{{ message.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+          </div>
+
+          <p *ngIf="message.message" class="mt-2 text-sm leading-6 text-[var(--text)]">
+            {{ message.message }}
+          </p>
+
+          <div *ngIf="message.proposedAmount != null" class="mt-3 inline-flex rounded-full border border-[color:var(--accent-1)]/30 bg-[var(--accent-1)]/10 px-3 py-1.5 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-1)]">
+            Contraoferta: {{ formatMoney(message.proposedAmount, message.proposedCurrency) }}
+          </div>
+
+          <div *ngIf="message.acceptedProposal" class="mt-3 inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 font-tech text-[11px] uppercase tracking-[0.18em] text-emerald-300">
+            Propuesta aceptada
+          </div>
+
+          <div *ngIf="canAcceptProposal(message)" class="mt-3">
+            <button
+              type="button"
+              [disabled]="acceptingMessageId === message.id"
+              (click)="acceptProposal(message)"
+              class="rounded-full border border-emerald-500/35 bg-emerald-500/10 px-4 py-1.5 font-tech text-[11px] uppercase tracking-[0.18em] text-emerald-300 transition hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60">
+              {{ acceptingMessageId === message.id ? 'Aceptando...' : 'Aceptar propuesta' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="rounded-[24px] border border-[color:var(--panel-border)] bg-black/10 p-4">
+      <p class="font-tech text-[10px] uppercase tracking-[0.22em] text-[var(--accent-4)]">Responder</p>
+      <div class="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px]">
+        <textarea
+          [(ngModel)]="draftMessage"
+          rows="4"
+          placeholder="Escribe tu mensaje, argumentos o condiciones..."
+          [disabled]="!currentThread.canSendMessages || sending"
+          class="w-full resize-none rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-sm leading-6 text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]/60 disabled:cursor-not-allowed disabled:opacity-60"></textarea>
+        <div class="space-y-3">
+          <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-4">
+            <label class="block">
+              <span class="mb-1 block font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Contraoferta</span>
+              <input
+                [(ngModel)]="draftAmount"
+                type="number"
+                min="1"
+                [disabled]="!currentThread.canSendMessages || sending"
+                class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]/60 disabled:cursor-not-allowed disabled:opacity-60" />
+            </label>
+            <p class="mt-2 text-xs text-[var(--muted)]">
+              Moneda: {{ currentThread.negotiationCurrency || 'Sin definir' }}
+            </p>
+          </div>
+          <button
+            type="button"
+            [disabled]="!canSubmit"
+            (click)="send()"
+            class="w-full rounded-full border border-[color:var(--accent-3)] bg-[var(--accent-3)] px-4 py-2.5 font-tech text-xs uppercase tracking-[0.18em] text-[var(--bg)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60">
+            {{ sending ? 'Enviando...' : 'Enviar propuesta' }}
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
