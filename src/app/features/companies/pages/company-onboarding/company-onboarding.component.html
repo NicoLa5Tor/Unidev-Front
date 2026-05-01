@@ -742,11 +742,10 @@
                           <button
                             *ngIf="canPublishProject(project)"
                             type="button"
-                            class="inline-flex items-center rounded-full border border-[color:var(--accent-3)]/35 bg-[var(--accent-3)]/10 px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-3)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-                            [disabled]="publishingProjectId === project.id"
-                            (click)="publishProject(project, $event)"
+                            class="inline-flex items-center rounded-full border border-[color:var(--accent-3)]/35 bg-[var(--accent-3)]/10 px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-3)] transition hover:brightness-110"
+                            (click)="openProjectPublish(project.id, $event)"
                           >
-                            {{ publishingProjectId === project.id ? 'Publicando...' : 'Publicar' }}
+                            Publicar
                           </button>
                           <!-- Botón postulados -->
                           <button

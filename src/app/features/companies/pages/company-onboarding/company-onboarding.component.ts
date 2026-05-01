@@ -868,6 +868,11 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     this.openProject(project.id, 'applications');
   }
 
+  openProjectPublish(projectId: number, event: Event): void {
+    event.stopPropagation();
+    this.openProject(projectId);
+  }
+
   openProject(projectId: number, initialSection?: ProjectDetailSection): void {
     if (this.organizationType === 'UNIVERSITY') {
       return;

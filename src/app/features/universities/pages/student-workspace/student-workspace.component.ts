@@ -260,9 +260,18 @@ export class StudentWorkspaceComponent implements OnInit {
       next: app => {
         this.myApplications = [app, ...this.myApplications];
         this.appliedProjectIds.add(app.projectId);
+        const hadOffer = this.applyWantsCustomOffer;
         this.applyingToProject = null;
         this.isSubmittingApply = false;
-        this.toast.success('¡Postulación enviada correctamente!');
+        this.applyWantsCustomOffer = false;
+        this.applyProposedAmount = null;
+        if (hadOffer) {
+          this.activeTab = 'applications';
+          this.toast.success('¡Oferta enviada! Aquí puedes seguir la negociación.');
+          this.openApplicationNegotiation(app.id);
+        } else {
+          this.toast.success('¡Postulación enviada correctamente!');
+        }
       },
       error: err => { this.isSubmittingApply = false; this.toast.error(err?.error?.message || 'No pudimos enviar tu postulación.'); }
     });
@@ -304,10 +313,14 @@ export class StudentWorkspaceComponent implements OnInit {
   }
 
   applicationStatusLabel(status: string): string {
-    return status === 'PENDING' ? 'Pendiente' : status === 'ACCEPTED' ? 'Aceptada' : 'Rechazada';
+    if (status === 'PENDING') return 'Pendiente';
+    if (status === 'NEGOTIATING') return 'En negociación';
+    if (status === 'ACCEPTED') return 'Aceptada';
+    return 'Rechazada';
   }
 
   applicationStatusClass(status: string): string {
+    if (status === 'NEGOTIATING') return 'bg-sky-500/15 text-sky-400 border-sky-500/20';
     if (status === 'ACCEPTED') return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20';
     if (status === 'REJECTED') return 'bg-rose-500/15 text-rose-400 border-rose-500/20';
     return 'bg-amber-500/15 text-amber-400 border-amber-500/20';
@@ -324,6 +337,8 @@ export class StudentWorkspaceComponent implements OnInit {
         viewerMode: 'student',
         applicationId
       }
+    }).afterClosed().subscribe(() => {
+      this.loadMyApplications();
     });
   }
 

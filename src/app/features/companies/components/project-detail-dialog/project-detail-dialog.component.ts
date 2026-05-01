@@ -45,7 +45,7 @@ export class ProjectDetailDialogComponent implements OnDestroy {
   applicationsLoading = false;
   updatingApplicationId: number | null = null;
   applicationSearch = '';
-  applicationStatusFilter: 'ALL' | 'PENDING' | 'ACCEPTED' | 'REJECTED' = 'ALL';
+  applicationStatusFilter: 'ALL' | 'PENDING' | 'NEGOTIATING' | 'ACCEPTED' | 'REJECTED' = 'ALL';
   availabilityFilter: 'ALL' | 'AVAILABLE' | 'UNAVAILABLE' = 'ALL';
   requiredSkill = '';
   minimumAcceptedProjects = 0;
@@ -446,6 +446,7 @@ export class ProjectDetailDialogComponent implements OnDestroy {
     switch (app.status) {
       case 'ACCEPTED': return 'Aceptado';
       case 'REJECTED': return 'Rechazado';
+      case 'NEGOTIATING': return 'En negociación';
       default: return 'Pendiente';
     }
   }
@@ -454,6 +455,7 @@ export class ProjectDetailDialogComponent implements OnDestroy {
     switch (app.status) {
       case 'ACCEPTED': return 'app-status-success';
       case 'REJECTED': return 'app-status-danger';
+      case 'NEGOTIATING': return 'app-status-info';
       default: return 'app-status-warning';
     }
   }
@@ -508,6 +510,15 @@ export class ProjectDetailDialogComponent implements OnDestroy {
         viewerMode: 'company',
         projectId: this.project.id,
         applicationId: app.id
+      }
+    }).afterClosed().subscribe((result?: { hired?: boolean }) => {
+      if (result?.hired) {
+        // Reload project + applications to reflect IN_PROGRESS status and rejected apps
+        this.loadProject();
+        this.loadApplications();
+      } else {
+        // Refresh application statuses silently (student may have accepted while dialog was open)
+        this.loadApplications();
       }
     });
   }

@@ -1,4 +1,4 @@
-export type ApplicationStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
+export type ApplicationStatus = 'PENDING' | 'NEGOTIATING' | 'ACCEPTED' | 'REJECTED';
 export type NegotiationSenderRole = 'STUDENT' | 'COMPANY';
 
 export interface ApplicationNegotiationMessage {
@@ -29,6 +29,7 @@ export interface ApplicationNegotiationThread {
   acceptedProposalMessageId: number | null;
   acceptedProposalAmount: number | null;
   acceptedProposalCurrency: string | null;
+  acceptedProposalAcceptedByRole: 'STUDENT' | 'COMPANY' | null;
   canSendMessages: boolean;
   lockedReason: string | null;
   messagesCount: number;

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
@@ -14,6 +14,8 @@ export interface ApplicationNegotiationDialogData {
   projectId?: number;
 }
 
+const POLL_INTERVAL_MS = 4000;
+
 @Component({
   selector: 'app-application-negotiation-dialog',
   standalone: true,
@@ -21,13 +23,15 @@ export interface ApplicationNegotiationDialogData {
   templateUrl: './application-negotiation-dialog.component.html',
   styleUrl: './application-negotiation-dialog.component.scss'
 })
-export class ApplicationNegotiationDialogComponent {
+export class ApplicationNegotiationDialogComponent implements OnDestroy {
   isLoading = true;
   sending = false;
   acceptingMessageId: number | null = null;
+  hiring = false;
   thread: ApplicationNegotiationThread | null = null;
   draftMessage = '';
   draftAmount: number | null = null;
+  private pollHandle: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private readonly dialogRef: MatDialogRef<ApplicationNegotiationDialogComponent>,
@@ -37,6 +41,10 @@ export class ApplicationNegotiationDialogComponent {
     private readonly toast: UiToastService
   ) {
     this.loadThread();
+  }
+
+  ngOnDestroy(): void {
+    this.stopPolling();
   }
 
   get isStudentView(): boolean {
@@ -109,6 +117,7 @@ export class ApplicationNegotiationDialogComponent {
         this.draftMessage = '';
         this.draftAmount = null;
         this.sending = false;
+        this.syncPolling();
       },
       error: error => {
         this.sending = false;
@@ -131,6 +140,12 @@ export class ApplicationNegotiationDialogComponent {
       next: thread => {
         this.thread = thread;
         this.acceptingMessageId = null;
+        // Company accepting student's proposal = hire completed → close and notify parent
+        if (!this.isStudentView) {
+          this.dialogRef.close({ hired: true });
+          return;
+        }
+        this.syncPolling();
       },
       error: error => {
         this.acceptingMessageId = null;
@@ -155,6 +170,86 @@ export class ApplicationNegotiationDialogComponent {
     }
   }
 
+  get waitingForCompany(): boolean {
+    return this.isStudentView
+      && this.thread?.applicationStatus === 'PENDING'
+      && !this.thread?.canSendMessages;
+  }
+
+  get waitingForStudent(): boolean {
+    return !this.isStudentView
+      && this.thread?.applicationStatus === 'PENDING'
+      && !this.thread?.canSendMessages;
+  }
+
+  /** Company view: student accepted a company proposal — show hire banner */
+  get studentAcceptedCompanyOffer(): boolean {
+    return !this.isStudentView
+      && this.thread?.acceptedProposalAcceptedByRole === 'STUDENT'
+      && this.thread?.acceptedProposalAmount != null;
+  }
+
+  contratar(): void {
+    if (!this.thread || this.hiring || this.data.projectId == null) return;
+    this.hiring = true;
+    this.applicationService.updateStatus(this.data.projectId, this.thread.applicationId, 'ACCEPTED').subscribe({
+      next: () => {
+        this.hiring = false;
+        this.dialogRef.close({ hired: true });
+      },
+      error: error => {
+        this.hiring = false;
+        this.toast.error(error?.error?.message || 'No pudimos contratar al postulante.');
+      }
+    });
+  }
+
+  get statusLabel(): string {
+    switch (this.thread?.applicationStatus) {
+      case 'PENDING': return 'Esperando respuesta';
+      case 'NEGOTIATING': return 'En negociación';
+      case 'ACCEPTED': return 'Aceptada';
+      case 'REJECTED': return 'Rechazada';
+      default: return '—';
+    }
+  }
+
+  get statusTone(): string {
+    switch (this.thread?.applicationStatus) {
+      case 'NEGOTIATING': return 'border-sky-500/30 bg-sky-500/10 text-sky-300';
+      case 'ACCEPTED': return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300';
+      case 'REJECTED': return 'border-rose-500/30 bg-rose-500/10 text-rose-300';
+      default: return 'border-amber-500/30 bg-amber-500/10 text-amber-300';
+    }
+  }
+
+  refreshThread(): void {
+    const request$ = this.isStudentView
+      ? this.studentService.getApplicationNegotiation(this.data.applicationId)
+      : this.applicationService.getNegotiation(this.data.projectId!, this.data.applicationId);
+
+    request$.subscribe({
+      next: thread => { this.thread = thread; this.syncPolling(); },
+      error: () => { /* silent background refresh */ }
+    });
+  }
+
+  private syncPolling(): void {
+    this.stopPolling();
+    // Poll while negotiation is live (PENDING or NEGOTIATING) and dialog stays open
+    const status = this.thread?.applicationStatus;
+    if (status === 'PENDING' || status === 'NEGOTIATING') {
+      this.pollHandle = setTimeout(() => this.refreshThread(), POLL_INTERVAL_MS);
+    }
+  }
+
+  private stopPolling(): void {
+    if (this.pollHandle != null) {
+      clearTimeout(this.pollHandle);
+      this.pollHandle = null;
+    }
+  }
+
   private loadThread(): void {
     this.isLoading = true;
     const request$ = this.isStudentView
@@ -165,6 +260,7 @@ export class ApplicationNegotiationDialogComponent {
       next: thread => {
         this.thread = thread;
         this.isLoading = false;
+        this.syncPolling();
       },
       error: error => {
         this.isLoading = false;

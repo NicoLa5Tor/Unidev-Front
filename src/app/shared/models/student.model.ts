@@ -55,7 +55,7 @@ export interface ProjectApplication {
   teamName: string | null;
   teamDescription?: string | null;
   message: string | null;
-  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+  status: 'PENDING' | 'NEGOTIATING' | 'ACCEPTED' | 'REJECTED';
   createdAt: string;
 }
 
@@ -84,7 +84,7 @@ export interface TeamInvitation {
   toUserEmail: string;
   /** 'LEADER_INVITE' | 'JOIN_REQUEST' */
   type: string;
-  /** 'PENDING' | 'ACCEPTED' | 'REJECTED' */
+  /** 'PENDING' | 'NEGOTIATING' | 'ACCEPTED' | 'REJECTED' */
   status: string;
   message: string | null;
   createdAt: string;

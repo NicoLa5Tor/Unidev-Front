@@ -7,12 +7,18 @@
         Conversación con {{ counterpartLabel }}
       </p>
     </div>
-    <button
-      type="button"
-      class="rounded-full border border-[color:var(--panel-border)] bg-black/10 px-3 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--muted)] transition hover:bg-black/20"
-      (click)="close()">
-      Cerrar
-    </button>
+    <div class="flex items-center gap-2">
+      <div *ngIf="thread" class="rounded-full border px-3 py-1.5 font-tech text-[11px] uppercase tracking-[0.18em]"
+        [ngClass]="statusTone">
+        {{ statusLabel }}
+      </div>
+      <button
+        type="button"
+        class="rounded-full border border-[color:var(--panel-border)] bg-black/10 px-3 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--muted)] transition hover:bg-black/20"
+        (click)="close()">
+        Cerrar
+      </button>
+    </div>
   </div>
 
   <div *ngIf="isLoading" class="mt-6 rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4 text-sm text-[var(--muted)]">
@@ -20,44 +26,79 @@
   </div>
 
   <div *ngIf="!isLoading && thread as currentThread" class="mt-6 space-y-5">
-    <section class="grid gap-3 sm:grid-cols-3">
+    <section class="grid gap-3 sm:grid-cols-2">
       <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
-        <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Precio oficial</p>
+        <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Precio oficial publicado</p>
         <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ formatMoney(currentThread.officialPriceAmount, currentThread.negotiationCurrency) }}</p>
       </div>
       <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
-        <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Estado postulación</p>
-        <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ currentThread.applicationStatus }}</p>
-      </div>
-      <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
-        <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Moneda</p>
+        <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Moneda de negociación</p>
         <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ currentThread.negotiationCurrency || 'Sin definir' }}</p>
       </div>
     </section>
 
-    <div *ngIf="currentThread.acceptedProposalAmount != null" class="rounded-[20px] border border-emerald-500/30 bg-emerald-500/10 px-4 py-4">
+    <!-- Banner: estudiante esperando respuesta de empresa (vista estudiante) -->
+    <div *ngIf="waitingForCompany" class="flex items-start gap-3 rounded-[20px] border border-amber-500/30 bg-amber-500/8 px-4 py-4">
+      <div class="mt-0.5 h-2 w-2 shrink-0 animate-pulse rounded-full bg-amber-400"></div>
+      <div>
+        <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-amber-300">Esperando respuesta</p>
+        <p class="mt-1 text-sm leading-5 text-amber-100/70">
+          Tu oferta fue enviada. La empresa la revisará y podrá aceptarla, rechazarla o hacerte una contraoferta. Esta pantalla se actualiza automáticamente.
+        </p>
+      </div>
+    </div>
+
+    <!-- Banner: empresa debe contratar (estudiante aceptó oferta de empresa) -->
+    <div *ngIf="studentAcceptedCompanyOffer" class="rounded-[20px] border border-sky-500/40 bg-sky-500/10 px-4 py-5">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-sky-300">Estudiante aceptó tu oferta</p>
+          <p class="mt-1 text-base font-semibold text-white">
+            {{ formatMoney(currentThread.acceptedProposalAmount, currentThread.acceptedProposalCurrency) }}
+          </p>
+          <p class="mt-1 text-xs text-sky-100/70">
+            Puedes contratar a {{ currentThread.applicantDisplayName || 'este postulante' }} con ese precio o esperar mejores ofertas. Si contratas, se cierra el proyecto para otros postulantes.
+          </p>
+        </div>
+        <button type="button"
+          [disabled]="hiring"
+          (click)="contratar()"
+          class="shrink-0 rounded-full border border-sky-400/50 bg-sky-500/20 px-6 py-2.5 font-tech text-xs uppercase tracking-[0.18em] text-sky-300 transition hover:bg-sky-500/30 disabled:cursor-not-allowed disabled:opacity-60">
+          {{ hiring ? 'Contratando...' : 'Contratar →' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Banner: propuesta aceptada por la empresa / historial -->
+    <div *ngIf="currentThread.acceptedProposalAmount != null && !studentAcceptedCompanyOffer" class="rounded-[20px] border border-emerald-500/30 bg-emerald-500/10 px-4 py-4">
       <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-emerald-300">Propuesta aceptada</p>
       <p class="mt-2 text-sm font-semibold text-white">{{ formatMoney(currentThread.acceptedProposalAmount, currentThread.acceptedProposalCurrency) }}</p>
-      <p class="mt-2 text-xs text-emerald-100/80">El precio oficial del proyecto ya fue actualizado con este acuerdo.</p>
+      <p class="mt-2 text-xs text-emerald-100/80">Precio acordado en la negociación. Se aplicará al proyecto cuando la empresa confirme la contratación.</p>
     </div>
 
     <section class="rounded-[24px] border border-[color:var(--panel-border)] bg-black/10 p-4">
       <div class="flex items-center justify-between gap-3">
         <div>
-          <p class="font-tech text-[10px] uppercase tracking-[0.22em] text-[var(--accent-2)]">Hilo</p>
+          <p class="font-tech text-[10px] uppercase tracking-[0.22em] text-[var(--accent-2)]">Historial del chat</p>
           <p class="mt-1 text-sm text-[var(--muted)]">{{ currentThread.messagesCount }} mensaje{{ currentThread.messagesCount === 1 ? '' : 's' }}</p>
         </div>
-        <div *ngIf="!currentThread.canSendMessages" class="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 font-tech text-[10px] uppercase tracking-[0.18em] text-amber-300">
-          Solo lectura
-        </div>
+        <button type="button" (click)="refreshThread()"
+          class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel)] px-3 py-1 font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)] transition hover:text-[var(--text)]">
+          Actualizar
+        </button>
       </div>
 
-      <div *ngIf="currentThread.lockedReason" class="mt-4 rounded-[16px] border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-sm text-[var(--muted)]">
+      <!-- locked reason si existe (no PENDING con oferta) -->
+      <div *ngIf="currentThread.lockedReason && !waitingForCompany" class="mt-4 rounded-[16px] border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-sm text-[var(--muted)]">
         {{ currentThread.lockedReason }}
       </div>
 
-      <div *ngIf="currentThread.messages.length === 0" class="mt-4 rounded-[16px] border border-dashed border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-6 text-sm text-[var(--muted)]">
+      <div *ngIf="currentThread.messages.length === 0 && !waitingForCompany" class="mt-4 rounded-[16px] border border-dashed border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-6 text-sm text-[var(--muted)]">
         Todavía no hay mensajes. Puedes abrir la conversación con una pregunta, una aclaración o una contraoferta.
+      </div>
+
+      <div *ngIf="currentThread.messages.length === 0 && waitingForCompany" class="mt-4 rounded-[16px] border border-dashed border-amber-500/20 bg-amber-500/5 px-4 py-6 text-sm text-amber-200/60">
+        Tu oferta fue enviada. Cuando la empresa responda, el chat aparecerá aquí.
       </div>
 
       <div *ngIf="currentThread.messages.length > 0" class="mt-4 space-y-3">
@@ -92,7 +133,7 @@
               [disabled]="acceptingMessageId === message.id"
               (click)="acceptProposal(message)"
               class="rounded-full border border-emerald-500/35 bg-emerald-500/10 px-4 py-1.5 font-tech text-[11px] uppercase tracking-[0.18em] text-emerald-300 transition hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60">
-              {{ acceptingMessageId === message.id ? 'Aceptando...' : 'Aceptar propuesta' }}
+              {{ acceptingMessageId === message.id ? (isStudentView ? 'Aceptando...' : 'Contratando...') : (isStudentView ? 'Aceptar propuesta' : 'Contratar →') }}
             </button>
           </div>
         </div>
