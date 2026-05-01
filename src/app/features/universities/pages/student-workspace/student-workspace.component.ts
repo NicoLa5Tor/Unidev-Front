@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -13,6 +13,7 @@ import { CompanyService } from '../../../companies/services/company.service';
 import { UniversityCampus } from '../../../../shared/models/company.model';
 import { ProjectDetailDialogComponent } from '../../../companies/components/project-detail-dialog/project-detail-dialog.component';
 import { ApplicationNegotiationDialogComponent } from '../../../../shared/components/application-negotiation-dialog/application-negotiation-dialog.component';
+import { TeamChatDialogComponent } from '../../../../shared/components/team-chat-dialog/team-chat-dialog.component';
 
 @Component({
   selector: 'app-student-workspace',
@@ -20,7 +21,7 @@ import { ApplicationNegotiationDialogComponent } from '../../../../shared/compon
   imports: [CommonModule, FormsModule, DashboardShellComponent],
   templateUrl: './student-workspace.component.html'
 })
-export class StudentWorkspaceComponent implements OnInit {
+export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   private readonly studentService = inject(StudentService);
   private readonly userSessionService = inject(UserSessionService);
   private readonly companyService = inject(CompanyService);
@@ -50,6 +51,9 @@ export class StudentWorkspaceComponent implements OnInit {
   isLoadingTeams = false;
   isLoadingApplications = false;
   isLoadingInvitations = false;
+
+  private notifPollHandle: ReturnType<typeof setInterval> | null = null;
+  private lastKnownPendingCount = -1;
 
   // Apply modal
   applyingToProject: Project | null = null;
@@ -126,6 +130,39 @@ export class StudentWorkspaceComponent implements OnInit {
     this.loadMyTeams();
     this.loadMyApplications();
     this.loadInvitations();
+    this.startNotifPolling();
+  }
+
+  ngOnDestroy(): void {
+    this.stopNotifPolling();
+  }
+
+  private startNotifPolling(): void {
+    this.notifPollHandle = setInterval(() => {
+      this.studentService.pendingCount().subscribe({
+        next: ({ count }) => {
+          if (this.lastKnownPendingCount >= 0 && count > this.lastKnownPendingCount) {
+            const diff = count - this.lastKnownPendingCount;
+            this.toast.notify(
+              `${diff === 1 ? 'Nueva solicitud' : `${diff} nuevas solicitudes`} pendiente${diff === 1 ? '' : 's'}`,
+              () => {
+                this.activeTab = 'invitations';
+                this.loadInvitations();
+              },
+              'Ver'
+            );
+          }
+          this.lastKnownPendingCount = count;
+        }
+      });
+    }, 15000);
+  }
+
+  private stopNotifPolling(): void {
+    if (this.notifPollHandle != null) {
+      clearInterval(this.notifPollHandle);
+      this.notifPollHandle = null;
+    }
   }
 
   setActiveTab(tab: string): void {
@@ -500,6 +537,22 @@ export class StudentWorkspaceComponent implements OnInit {
 
   isLeader(team: StudentTeam): boolean {
     return this.currentUser !== null && team.leaderId === this.currentUser.id;
+  }
+
+  openTeamChat(team: StudentTeam): void {
+    if (!this.currentUser) return;
+    this.dialog.open(TeamChatDialogComponent, {
+      width: '680px',
+      maxWidth: '96vw',
+      maxHeight: '88vh',
+      panelClass: 'app-shell-dialog-panel',
+      backdropClass: 'app-shell-dialog-backdrop',
+      data: {
+        teamId: team.id,
+        teamName: team.name,
+        currentUserId: this.currentUser.id
+      }
+    });
   }
 
   // ── Profile ───────────────────────────────────────────

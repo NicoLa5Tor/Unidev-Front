@@ -5,9 +5,15 @@
     class="ui-toast-item"
     [class.ui-toast-item--success]="toast.type === 'success'"
     [class.ui-toast-item--error]="toast.type === 'error'"
-    (click)="dismiss(toast.id)"
+    [class.ui-toast-item--info]="toast.type === 'info'"
+    (click)="handleClick(toast)"
   >
-    <span class="ui-toast-item__badge">{{ toast.type === 'success' ? 'OK' : 'ERR' }}</span>
+    <span class="ui-toast-item__badge">
+      {{ toast.type === 'success' ? 'OK' : toast.type === 'error' ? 'ERR' : 'NEW' }}
+    </span>
     <span class="ui-toast-item__message">{{ toast.message }}</span>
+    <span *ngIf="toast.action && toast.actionLabel" class="ui-toast-item__action">
+      {{ toast.actionLabel }} →
+    </span>
   </button>
 </div>

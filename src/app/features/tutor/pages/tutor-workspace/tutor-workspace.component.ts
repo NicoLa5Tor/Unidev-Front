@@ -1,6 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { UserSessionService } from '../../../../core/services/user-session.service';
 import { UiToastService } from '../../../../shared/services/ui-toast.service';
 import { DashboardShellComponent, DashboardNavItem } from '../../../../shared/components/dashboard-shell/dashboard-shell.component';
@@ -8,6 +9,7 @@ import { StudentService } from '../../../universities/services/student.service';
 import { StudentTeam, TeamInvitation } from '../../../../shared/models/student.model';
 import { Project } from '../../../../shared/models/project.model';
 import { SessionUser } from '../../../../shared/models/session-user.model';
+import { TeamChatDialogComponent } from '../../../../shared/components/team-chat-dialog/team-chat-dialog.component';
 
 @Component({
   selector: 'app-tutor-workspace',
@@ -15,10 +17,11 @@ import { SessionUser } from '../../../../shared/models/session-user.model';
   imports: [CommonModule, FormsModule, DashboardShellComponent],
   templateUrl: './tutor-workspace.component.html'
 })
-export class TutorWorkspaceComponent implements OnInit {
+export class TutorWorkspaceComponent implements OnInit, OnDestroy {
   private readonly userSessionService = inject(UserSessionService);
   private readonly studentService = inject(StudentService);
   private readonly toast = inject(UiToastService);
+  private readonly dialog = inject(MatDialog);
 
   currentUser: SessionUser | null = null;
   campusTeams: StudentTeam[] = [];
@@ -28,15 +31,22 @@ export class TutorWorkspaceComponent implements OnInit {
   activeTab = 'teams';
 
   navItems: DashboardNavItem[] = [
-    { id: 'teams',    label: 'Equipos',       accent: 'accent-1' },
-    { id: 'projects', label: 'Proyectos',     accent: 'accent-2' },
-    { id: 'notifications', label: 'Notificaciones', accent: 'accent-3' },
-    { id: 'profile',  label: 'Mi perfil',     accent: 'accent-4' },
+    { id: 'my-teams', label: 'Mis equipos',   accent: 'accent-1' },
+    { id: 'teams',    label: 'Sede',          accent: 'accent-2' },
+    { id: 'projects', label: 'Proyectos',     accent: 'accent-3' },
+    { id: 'notifications', label: 'Notificaciones', accent: 'accent-4' },
+    { id: 'profile',  label: 'Mi perfil',     accent: 'accent-1' },
   ];
 
   isLoadingTeams = false;
+  isLoadingMyTutoredTeams = false;
   isLoadingProjects = false;
   isLoadingInvitations = false;
+
+  private notifPollHandle: ReturnType<typeof setInterval> | null = null;
+  private lastKnownPendingCount = -1;
+
+  myTutoredTeams: StudentTeam[] = [];
 
   // Tutor request modal
   requestingTeam: StudentTeam | null = null;
@@ -65,14 +75,56 @@ export class TutorWorkspaceComponent implements OnInit {
         this.profileCity = user.city ?? '';
       }
     });
-    this.loadTeams();
+    this.loadMyTutoredTeams();
+    this.startNotifPolling();
+  }
+
+  ngOnDestroy(): void {
+    this.stopNotifPolling();
+  }
+
+  private startNotifPolling(): void {
+    this.notifPollHandle = setInterval(() => {
+      this.studentService.pendingCount().subscribe({
+        next: ({ count }) => {
+          if (this.lastKnownPendingCount >= 0 && count > this.lastKnownPendingCount) {
+            const diff = count - this.lastKnownPendingCount;
+            this.toast.notify(
+              `${diff === 1 ? 'Nueva solicitud' : `${diff} nuevas solicitudes`} pendiente${diff === 1 ? '' : 's'}`,
+              () => {
+                this.activeTab = 'notifications';
+                this.loadInvitations();
+              },
+              'Ver'
+            );
+          }
+          this.lastKnownPendingCount = count;
+        }
+      });
+    }, 15000);
+  }
+
+  private stopNotifPolling(): void {
+    if (this.notifPollHandle != null) {
+      clearInterval(this.notifPollHandle);
+      this.notifPollHandle = null;
+    }
   }
 
   onTabChange(tab: string): void {
     this.activeTab = tab;
+    if (tab === 'my-teams') this.loadMyTutoredTeams();
     if (tab === 'teams') this.loadTeams();
     if (tab === 'projects') this.loadProjects();
     if (tab === 'notifications') this.loadInvitations();
+  }
+
+  loadMyTutoredTeams(): void {
+    this.isLoadingMyTutoredTeams = true;
+    this.studentService.listMyTutoredTeams().subscribe({
+      next: teams => { this.myTutoredTeams = teams; this.isLoadingMyTutoredTeams = false; },
+      error: () => { this.isLoadingMyTutoredTeams = false; }
+    });
   }
 
   loadTeams(): void {
@@ -176,6 +228,22 @@ export class TutorWorkspaceComponent implements OnInit {
         this.toast.success('Solicitud aceptada');
       },
       error: () => this.toast.error('No se pudo aceptar la solicitud')
+    });
+  }
+
+  openTeamChat(team: StudentTeam): void {
+    if (!this.currentUser) return;
+    this.dialog.open(TeamChatDialogComponent, {
+      width: '680px',
+      maxWidth: '96vw',
+      maxHeight: '88vh',
+      panelClass: 'app-shell-dialog-panel',
+      backdropClass: 'app-shell-dialog-backdrop',
+      data: {
+        teamId: team.id,
+        teamName: team.name,
+        currentUserId: this.currentUser.id
+      }
     });
   }
 

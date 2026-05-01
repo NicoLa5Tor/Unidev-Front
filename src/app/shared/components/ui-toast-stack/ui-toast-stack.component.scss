@@ -36,6 +36,10 @@
   background: linear-gradient(135deg, rgba(127, 29, 29, 0.96), rgba(153, 27, 27, 0.92));
 }
 
+.ui-toast-item--info {
+  background: linear-gradient(135deg, rgba(55, 48, 163, 0.97), rgba(79, 70, 229, 0.93));
+}
+
 .ui-toast-item__badge {
   flex: 0 0 auto;
   border-radius: 999px;
@@ -47,7 +51,17 @@
 }
 
 .ui-toast-item__message {
+  flex: 1;
   min-width: 0;
   font-size: 0.9rem;
   line-height: 1.4;
+}
+
+.ui-toast-item__action {
+  flex: 0 0 auto;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+  white-space: nowrap;
 }

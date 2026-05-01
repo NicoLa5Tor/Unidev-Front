@@ -1,0 +1,72 @@
+<div class="flex flex-col" style="min-width: 520px; max-width: 660px; max-height: 80vh;">
+
+  <!-- Header -->
+  <div class="flex items-start justify-between gap-4 p-6 pb-4">
+    <div>
+      <p class="font-tech text-xs uppercase tracking-[0.24em] text-[var(--accent-2)]">Chat de equipo</p>
+      <h3 class="mt-2 text-xl font-semibold text-[var(--text)]">{{ data.teamName }}</h3>
+    </div>
+    <div class="flex items-center gap-2">
+      <button type="button" (click)="refresh()"
+        class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel)] px-3 py-1.5 font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)] transition hover:text-[var(--text)]">
+        Actualizar
+      </button>
+      <button type="button" (click)="close()"
+        class="rounded-full border border-[color:var(--panel-border)] bg-black/10 px-3 py-2 font-tech text-xs uppercase tracking-[0.18em] text-[var(--muted)] transition hover:bg-black/20">
+        Cerrar
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="flex-1 overflow-y-auto px-6 pb-2" style="min-height: 280px; max-height: 400px;">
+    <div *ngIf="isLoading" class="flex items-center justify-center py-16 text-sm text-[var(--muted)]">
+      Cargando mensajes...
+    </div>
+
+    <div *ngIf="!isLoading && messages.length === 0"
+      class="flex items-center justify-center py-16 rounded-[20px] border border-dashed border-[color:var(--panel-border)] bg-[var(--panel)]">
+      <p class="text-sm text-[var(--muted)]">Ningún mensaje aún. ¡Sé el primero en escribir!</p>
+    </div>
+
+    <div *ngIf="!isLoading && messages.length > 0" class="space-y-3 py-2">
+      <div *ngFor="let msg of messages"
+        class="flex"
+        [ngClass]="isOwn(msg) ? 'justify-end' : 'justify-start'">
+        <div class="max-w-[75%] rounded-[18px] border px-4 py-3"
+          [ngClass]="isOwn(msg)
+            ? 'border-[color:var(--accent-2)]/30 bg-[color:color-mix(in_srgb,var(--accent-2)_10%,transparent)]'
+            : 'border-[color:var(--panel-border)] bg-[var(--panel)]'">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+            <p class="font-tech text-[10px] uppercase tracking-[0.18em]"
+              [ngClass]="isOwn(msg) ? 'text-[var(--accent-2)]' : 'text-[var(--muted)]'">
+              {{ isOwn(msg) ? 'Tú' : msg.senderDisplayName }}
+            </p>
+            <p class="text-[10px] text-[var(--muted)]">{{ msg.createdAt | date:'dd/MM HH:mm' }}</p>
+          </div>
+          <p class="text-sm leading-6 text-[var(--text)]">{{ msg.message }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Send -->
+  <div class="border-t border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">
+    <div class="flex gap-3">
+      <textarea
+        [(ngModel)]="draft"
+        rows="2"
+        placeholder="Escribe un mensaje..."
+        [disabled]="sending"
+        (keydown.enter)="onEnter($event)"
+        class="flex-1 resize-none rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3 text-sm leading-6 text-[var(--text)] outline-none focus:border-[color:var(--accent-2)]/60 disabled:opacity-60"></textarea>
+      <button type="button"
+        [disabled]="!canSend"
+        (click)="send()"
+        class="shrink-0 self-end rounded-full border border-[color:var(--accent-2)] bg-[var(--accent-2)] px-5 py-2.5 font-tech text-xs uppercase tracking-[0.18em] text-[var(--bg)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60">
+        {{ sending ? '...' : 'Enviar' }}
+      </button>
+    </div>
+    <p class="mt-2 text-[10px] text-[var(--muted)]">Enter para enviar · Shift+Enter para nueva línea</p>
+  </div>
+</div>

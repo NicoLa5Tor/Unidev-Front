@@ -20,6 +20,7 @@ export interface StudentTeam {
   campusName: string | null;
   tutorId: number | null;
   tutorDisplayName: string | null;
+  tutorEmail: string | null;
   createdAt: string;
   members: StudentTeamMember[];
 }
@@ -98,4 +99,17 @@ export interface TeamInviteDto {
 
 export interface TeamJoinRequestDto {
   message?: string | null;
+}
+
+export interface TeamMessage {
+  id: number;
+  teamId: number;
+  senderUserId: number;
+  senderDisplayName: string;
+  message: string;
+  createdAt: string;
+}
+
+export interface SendTeamMessageDto {
+  message: string;
 }

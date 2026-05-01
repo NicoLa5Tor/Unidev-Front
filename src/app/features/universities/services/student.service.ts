@@ -4,7 +4,8 @@ import { environment } from '../../../../environments/environment';
 import {
   StudentTeam, CreateStudentTeamDto,
   ProjectApplication, ApplyToProjectDto, StudentProfileUpdateDto,
-  TeamInvitation, TeamInviteDto, TeamJoinRequestDto
+  TeamInvitation, TeamInviteDto, TeamJoinRequestDto,
+  TeamMessage, SendTeamMessageDto
 } from '../../../shared/models/student.model';
 import { ApplicationNegotiationThread } from '../../../shared/models/project-application.model';
 import { Project, ProjectDetail } from '../../../shared/models/project.model';
@@ -73,6 +74,10 @@ export class StudentService {
     return this.http.get<StudentTeam[]>(`${this.baseUrl}/student/teams/campus`);
   }
 
+  listMyTutoredTeams() {
+    return this.http.get<StudentTeam[]>(`${this.baseUrl}/student/teams/my-tutor-teams`);
+  }
+
   removeMember(teamId: number, memberId: number) {
     return this.http.delete<void>(`${this.baseUrl}/student/teams/${teamId}/members/${memberId}`);
   }
@@ -112,5 +117,14 @@ export class StudentService {
 
   rejectInvitation(id: number) {
     return this.http.put<TeamInvitation>(`${this.baseUrl}/student/invitations/${id}/reject`, {});
+  }
+
+  // ── Team Chat ─────────────────────────────────────────
+  getTeamMessages(teamId: number) {
+    return this.http.get<TeamMessage[]>(`${this.baseUrl}/student/teams/${teamId}/messages`);
+  }
+
+  sendTeamMessage(teamId: number, payload: SendTeamMessageDto) {
+    return this.http.post<TeamMessage>(`${this.baseUrl}/student/teams/${teamId}/messages`, payload);
   }
 }

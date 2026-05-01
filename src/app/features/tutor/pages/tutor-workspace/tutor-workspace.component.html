@@ -7,7 +7,59 @@
   [navItems]="navItems"
   (tabChange)="onTabChange($event)">
 
-  <!-- ── EQUIPOS ─────────────────────────────────────── -->
+  <!-- ── MIS EQUIPOS (tutoreados) ────────────────────── -->
+  <ng-container *ngIf="activeTab === 'my-teams'">
+    <div class="mb-6">
+      <h2 class="text-xl font-semibold text-white">Mis equipos</h2>
+      <p class="mt-1 text-sm text-purple-200">Equipos que estás tutoreando actualmente.</p>
+    </div>
+
+    <div *ngIf="isLoadingMyTutoredTeams" class="flex justify-center py-12">
+      <div class="h-10 w-10 animate-spin rounded-full border-2 border-white/20 border-t-purple-400"></div>
+    </div>
+
+    <div *ngIf="!isLoadingMyTutoredTeams && myTutoredTeams.length === 0"
+         class="rounded-2xl border border-white/10 bg-white/5 p-8 text-center text-purple-200">
+      No estás tutoreando ningún equipo aún.
+    </div>
+
+    <div *ngIf="!isLoadingMyTutoredTeams && myTutoredTeams.length > 0" class="grid gap-4 sm:grid-cols-2">
+      <div *ngFor="let team of myTutoredTeams"
+           class="rounded-2xl border border-teal-500/20 bg-teal-500/5 p-5 space-y-3">
+        <div>
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-semibold text-white text-sm">{{ team.name }}</span>
+            <span class="rounded-full bg-teal-500/20 px-2 py-0.5 text-xs text-teal-300">Mi equipo</span>
+          </div>
+          <p *ngIf="team.description" class="mt-1 text-xs text-purple-200 line-clamp-2">{{ team.description }}</p>
+          <p class="mt-1 text-xs text-purple-300">Líder: {{ team.leaderDisplayName }}</p>
+          <p class="text-xs text-purple-300">Sede: {{ team.campusName ?? '—' }}</p>
+        </div>
+
+        <!-- Miembros -->
+        <div *ngIf="team.members?.length">
+          <p class="text-[10px] uppercase tracking-widest text-teal-400 mb-1">Miembros ({{ team.members.length }})</p>
+          <div class="space-y-1">
+            <div *ngFor="let m of team.members" class="flex items-center justify-between rounded-lg bg-white/5 px-3 py-1.5">
+              <div>
+                <p class="text-xs text-white">{{ m.displayName }}</p>
+                <p class="text-[10px] text-purple-300">{{ m.email }}</p>
+              </div>
+              <span class="text-[10px] text-purple-400">{{ m.career ?? '' }}<span *ngIf="m.semester"> · Sem. {{ m.semester }}</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat grupal -->
+        <button (click)="openTeamChat(team)"
+          class="w-full rounded-full border border-teal-400/40 bg-teal-500/10 py-2 font-tech text-xs uppercase tracking-widest text-teal-300 transition hover:bg-teal-500/20">
+          Chat del equipo
+        </button>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ── EQUIPOS DE LA SEDE ───────────────────────────── -->
   <ng-container *ngIf="activeTab === 'teams'">
     <div class="mb-6">
       <h2 class="text-xl font-semibold text-white">Equipos de la sede</h2>

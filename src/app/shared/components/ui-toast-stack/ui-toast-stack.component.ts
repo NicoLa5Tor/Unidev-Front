@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
-import { UiToastService } from '../../services/ui-toast.service';
+import { UiToastItem, UiToastService } from '../../services/ui-toast.service';
 
 @Component({
   selector: 'app-ui-toast-stack',
@@ -14,7 +14,10 @@ import { UiToastService } from '../../services/ui-toast.service';
 export class UiToastStackComponent {
   constructor(public readonly toastService: UiToastService) {}
 
-  dismiss(id: number): void {
-    this.toastService.dismiss(id);
+  handleClick(toast: UiToastItem): void {
+    if (toast.action) {
+      toast.action();
+    }
+    this.toastService.dismiss(toast.id);
   }
 }
