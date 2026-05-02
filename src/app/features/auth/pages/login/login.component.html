@@ -44,6 +44,13 @@
         (providerConfirmed)="onProviderConfirmed($event)"
       ></app-social-login-list>
 
+      <div class="text-center">
+        <button type="button" (click)="openAccessRequest()"
+          class="text-xs text-slate-400 underline-offset-4 hover:text-slate-200 hover:underline transition">
+          ¿Tu dominio institucional no está habilitado? Solicitar acceso
+        </button>
+      </div>
+
       <div *ngIf="isAuthenticated$ | async as isAuthenticated" class="space-y-5 rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl backdrop-blur">
         <p class="text-sm text-emerald-300">Sesión activa en UniDev</p>
         <div class="rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-xs text-slate-200/80">

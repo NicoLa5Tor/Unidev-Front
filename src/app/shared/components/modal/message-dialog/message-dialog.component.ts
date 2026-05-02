@@ -7,6 +7,7 @@ export interface MessageDialogData {
   title?: string;
   message: string;
   confirmLabel?: string;
+  cancelLabel?: string;
   type?: 'info' | 'success' | 'error';
   supportText?: string;
   autoCloseMs?: number;
@@ -75,7 +76,10 @@ export class MessageDialogComponent implements OnInit, OnDestroy {
     if (typeof this.data.showActions === 'boolean') {
       return this.data.showActions;
     }
-
+    // If there's a cancel label, always show actions (it's a confirm/retry dialog)
+    if (this.data.cancelLabel) {
+      return true;
+    }
     return this.type !== 'error';
   }
 
@@ -83,11 +87,18 @@ export class MessageDialogComponent implements OnInit, OnDestroy {
     if (typeof this.data.autoCloseMs === 'number') {
       return this.data.autoCloseMs;
     }
-
+    // Don't auto-close if it's a confirm dialog (has cancelLabel)
+    if (this.data.cancelLabel) {
+      return null;
+    }
     return this.type === 'error' ? 4200 : null;
   }
 
+  confirm(): void {
+    this.dialogRef.close(true);
+  }
+
   close(): void {
-    this.dialogRef.close();
+    this.dialogRef.close(false);
   }
 }

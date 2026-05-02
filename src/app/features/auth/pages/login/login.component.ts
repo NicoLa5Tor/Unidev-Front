@@ -27,6 +27,7 @@ export class LoginComponent {
   private readonly microsoftAccessService = inject(MicrosoftAccessService);
   isRequestingMicrosoftAccess = false;
   private isRedirectingToMicrosoft = false;
+  private lastRequestedEmail: string | null = null;
 
   readonly socialProviders: SocialLoginProvider[] = [
     {
@@ -54,15 +55,14 @@ export class LoginComponent {
 
   onProviderConfirmed(provider: SocialLoginProvider): void {
     if (provider.key === 'microsoft') {
-      if (this.shouldBypassMicrosoftDialog()) {
-        this.authService.federatedSignIn('microsoft');
-      } else {
-        this.openMicrosoftDialog();
-      }
+      this.authService.federatedSignIn('microsoft');
       return;
     }
-
     this.authService.federatedSignIn(provider.key as FederatedProvider);
+  }
+
+  openAccessRequest(): void {
+    this.openMicrosoftDialog();
   }
 
   login(): void {
@@ -97,34 +97,22 @@ export class LoginComponent {
   }
 
   private requestMicrosoftAccess(email: string): void {
-    console.debug('[MicrosoftAccess] Solicitando registro para', email);
+    this.lastRequestedEmail = email;
     this.isRequestingMicrosoftAccess = true;
     this.microsoftAccessService
       .requestAccess(email)
-      .pipe(
-        finalize(() => {
-          this.isRequestingMicrosoftAccess = false;
-        })
-      )
+      .pipe(finalize(() => { this.isRequestingMicrosoftAccess = false; }))
       .subscribe({
-      next: response => {
-        this.handleMicrosoftInviteResponse(response);
-      },
-      error: error => {
-        console.error('Error registrando correo institucional', error);
-        this.openMessageDialog({
-          title: 'No pudimos procesar tu solicitud',
-          message: 'Tuvimos un inconveniente al contactar con Microsoft. Intenta nuevamente en unos segundos.',
-          type: 'error',
-          confirmLabel: 'Reintentar más tarde'
-        });
-      }
+        next: response => { this.handleMicrosoftInviteResponse(response); },
+        error: () => { this.openRetryDialog('No pudimos procesar tu solicitud', 'Tuvimos un inconveniente al contactar con Microsoft. Intenta nuevamente.'); }
       });
   }
 
   private handleMicrosoftInviteResponse(response: MicrosoftAccessResponseDto): void {
     const inviteUrl = response.inviteUrl?.trim();
     if (inviteUrl) {
+      // Domain invited → save bypass so next time user goes straight to Microsoft SSO
+      this.persistMicrosoftBypass();
       this.startMicrosoftRedirect(inviteUrl);
       return;
     }
@@ -143,11 +131,10 @@ export class LoginComponent {
         break;
       case 'ERROR':
       default:
-        this.openMessageDialog({
-          title: 'No pudimos habilitar tu dominio',
-          message: response.message || 'El dominio aún no está disponible para UniDev. Avísanos si crees que se trata de un error.',
-          type: 'error'
-        });
+        this.openRetryDialog(
+          'No pudimos habilitar tu dominio',
+          response.message || 'El dominio aún no está disponible para UniDev. Avísanos si crees que se trata de un error.'
+        );
         break;
     }
   }
@@ -171,6 +158,25 @@ export class LoginComponent {
     }
 
     window.localStorage.setItem('microsoft-bypass', 'true');
+  }
+
+  private openRetryDialog(title: string, message: string): void {
+    this.dialog.open(MessageDialogComponent, {
+      width: '440px',
+      maxWidth: '92vw',
+      panelClass: 'message-dialog-panel',
+      data: {
+        title,
+        message,
+        type: 'error',
+        confirmLabel: 'Reintentar',
+        cancelLabel: 'Cancelar'
+      } satisfies MessageDialogData
+    }).afterClosed().subscribe(confirmed => {
+      if (confirmed && this.lastRequestedEmail) {
+        this.requestMicrosoftAccess(this.lastRequestedEmail);
+      }
+    });
   }
 
   private openMessageDialog(data: MessageDialogData) {

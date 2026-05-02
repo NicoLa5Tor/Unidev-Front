@@ -327,6 +327,16 @@ body.preloader-active .public-header-shell {
   font-size: 0.85rem;
 }
 
+.btn-theme--ghost {
+  --btn-border: rgba(148, 163, 184, 0.25);
+  --btn-hover-border: rgba(148, 163, 184, 0.5);
+  --btn-hover-text: #f8fafc;
+  --btn-blob-one: transparent;
+  --btn-blob-two: transparent;
+  background-color: transparent;
+  color: rgba(148, 163, 184, 0.75);
+}
+
 h1,
 h2,
 h3,

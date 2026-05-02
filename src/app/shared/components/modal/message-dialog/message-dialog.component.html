@@ -11,7 +11,10 @@
     <p>{{ data.message }}</p>
   </div>
   <div mat-dialog-actions class="message-dialog__actions" align="end" *ngIf="showActions">
-    <button type="button" class="btn-theme btn-theme--rose" (click)="close()">
+    <button *ngIf="data.cancelLabel" type="button" class="btn-theme btn-theme--ghost" (click)="close()">
+      {{ data.cancelLabel }}
+    </button>
+    <button type="button" class="btn-theme btn-theme--rose" (click)="data.cancelLabel ? confirm() : close()">
       {{ data.confirmLabel || 'Entendido' }}
     </button>
   </div>
