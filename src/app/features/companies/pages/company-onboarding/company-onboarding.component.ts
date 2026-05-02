@@ -923,7 +923,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     if (!this.isPublishedProject(project) && !this.isInDevelopmentProject(project)) return false;
     if ((project.acceptedApplicationsCount ?? 0) === 0) return false;
     const paid = project.paymentStatus;
-    return paid == null || paid === 'FAILED';
+    return paid == null || paid === 'FAILED' || paid === 'PENDING_PAYMENT';
   }
 
   paymentStatusLabel(project: Project): string {
