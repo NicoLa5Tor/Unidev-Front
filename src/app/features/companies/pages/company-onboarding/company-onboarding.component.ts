@@ -166,6 +166,17 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     if (this.organizationType !== 'UNIVERSITY') {
       this.loadProjectDevelopmentTypes();
     }
+    const paymentResult = this.route.snapshot.queryParamMap.get('payment');
+    if (paymentResult === 'success') {
+      this.activeTab = 'projects';
+      this.uiToastService.success('Pago procesado. Actualizando estado...');
+    } else if (paymentResult === 'failure') {
+      this.activeTab = 'projects';
+      this.uiToastService.error('El pago no pudo completarse. Puedes intentarlo de nuevo.');
+    } else if (paymentResult === 'pending') {
+      this.activeTab = 'projects';
+      this.uiToastService.notify('Pago en proceso. El estado se actualizará cuando sea confirmado.');
+    }
   }
 
   ngOnDestroy(): void {
