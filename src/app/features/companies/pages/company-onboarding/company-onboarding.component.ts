@@ -20,11 +20,14 @@ import { SessionUser } from '../../../../shared/models/session-user.model';
 import { CompanyAllowedEmail } from '../../../../shared/models/company-access.model';
 import { ProjectDetailDialogComponent, ProjectDetailSection } from '../../components/project-detail-dialog/project-detail-dialog.component';
 import { MessageDialogComponent, MessageDialogData } from '../../../../shared/components/modal/message-dialog/message-dialog.component';
+import { RatingDialogComponent, RatingDialogData } from '../../../../shared/components/rating-dialog/rating-dialog.component';
+import { RatingService } from '../../services/rating.service';
+import { RatingResponse, RankingEntry } from '../../../../shared/models/rating.model';
 import { CompanyFormModel, ProjectCreateFormModel } from './company-onboarding.types';
 import { environment } from '../../../../../environments/environment';
 import { PROJECT_CREATE_FORM_EXAMPLES, ProjectCreateFormExample } from '../../examples/project-create-form/project-create-form-examples';
 
-type CompanyTab = 'status' | 'profile' | 'projects' | 'access' | 'sedes';
+type CompanyTab = 'status' | 'profile' | 'projects' | 'access' | 'sedes' | 'ranking';
 type MessageState = { type: 'success' | 'error'; text: string } | null;
 type CreateField = 'companyName' | 'domain' | 'nit' | 'contactEmail';
 type ProjectCreateField = 'name' | 'description' | 'businessObjective' | 'targetUsers' | 'mainModules';
@@ -37,7 +40,8 @@ type ProjectVisibilityFilter = 'ALL' | 'PUBLISHED' | 'EDITING';
   imports: [
     CommonModule,
     FormsModule,
-    DashboardShellComponent
+    DashboardShellComponent,
+    RatingDialogComponent
   ],
   templateUrl: './company-onboarding.component.html',
   styleUrl: './company-onboarding.component.scss'
@@ -114,24 +118,28 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     { id: 'status', label: 'Estado', accent: 'accent-3', mobileBarWidthClass: 'w-20' },
     { id: 'profile', label: 'Perfil', accent: 'accent-1', mobileBarWidthClass: 'w-20' },
     { id: 'projects', label: 'Proyectos', accent: 'accent-4', mobileBarWidthClass: 'w-24' },
-    { id: 'access', label: 'Correos', accent: 'accent-2', mobileBarWidthClass: 'w-20' }
+    { id: 'access', label: 'Correos', accent: 'accent-2', mobileBarWidthClass: 'w-20' },
+    { id: 'ranking', label: 'Ranking', accent: 'accent-1', mobileBarWidthClass: 'w-24' }
   ];
 
   readonly ownerUniversityNavItems: DashboardNavItem[] = [
     { id: 'sedes', label: 'Sedes', accent: 'accent-3', mobileBarWidthClass: 'w-20' },
     { id: 'profile', label: 'Perfil', accent: 'accent-1', mobileBarWidthClass: 'w-20' },
-    { id: 'access', label: 'Admins', accent: 'accent-2', mobileBarWidthClass: 'w-20' }
+    { id: 'access', label: 'Admins', accent: 'accent-2', mobileBarWidthClass: 'w-20' },
+    { id: 'ranking', label: 'Ranking', accent: 'accent-1', mobileBarWidthClass: 'w-24' }
   ];
 
   readonly memberNavItems: DashboardNavItem[] = [
     { id: 'status', label: 'Estado', accent: 'accent-3', mobileBarWidthClass: 'w-20' },
     { id: 'profile', label: 'Perfil', accent: 'accent-1', mobileBarWidthClass: 'w-20' },
-    { id: 'projects', label: 'Proyectos', accent: 'accent-4', mobileBarWidthClass: 'w-24' }
+    { id: 'projects', label: 'Proyectos', accent: 'accent-4', mobileBarWidthClass: 'w-24' },
+    { id: 'ranking', label: 'Ranking', accent: 'accent-1', mobileBarWidthClass: 'w-24' }
   ];
 
   readonly memberUniversityNavItems: DashboardNavItem[] = [
     { id: 'sedes', label: 'Mi sede', accent: 'accent-3', mobileBarWidthClass: 'w-20' },
-    { id: 'profile', label: 'Perfil', accent: 'accent-1', mobileBarWidthClass: 'w-20' }
+    { id: 'profile', label: 'Perfil', accent: 'accent-1', mobileBarWidthClass: 'w-20' },
+    { id: 'ranking', label: 'Ranking', accent: 'accent-1', mobileBarWidthClass: 'w-24' }
   ];
 
   readonly form: CompanyFormModel = {
@@ -161,6 +169,13 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   };
   readonly projectFormExamplesEnabled = !!environment.features.enableProjectFormExamples;
   readonly projectFormExamples: ProjectCreateFormExample[] = PROJECT_CREATE_FORM_EXAMPLES;
+
+  private readonly ratingService = inject(RatingService);
+  projectRatings = new Map<number, RatingResponse | null>();
+  userRanking: RankingEntry[] = [];
+  teamRanking: RankingEntry[] = [];
+  isLoadingRanking = false;
+  rankingTab: 'users' | 'teams' = 'users';
 
   constructor(
     private readonly companyService: CompanyService,
@@ -568,7 +583,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
       this.activeTab = 'sedes';
       return;
     }
-    if (tabId === 'status' || tabId === 'profile' || tabId === 'projects' || tabId === 'access' || tabId === 'sedes') {
+    if (tabId === 'status' || tabId === 'profile' || tabId === 'projects' || tabId === 'access' || tabId === 'sedes' || tabId === 'ranking') {
       this.activeTab = tabId as CompanyTab;
       this.loadTabDataIfNeeded(tabId as CompanyTab);
     }
@@ -993,6 +1008,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
           this.releasingProjectId = null;
           this.uiToastService.success('Pago desembolsado exitosamente.');
           this.loadProjects();
+          this.openRatingDialog(project);
         },
         error: err => {
           this.releasingProjectId = null;
@@ -1026,6 +1042,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
           this.refundingProjectId = null;
           this.uiToastService.success('Pago reembolsado exitosamente.');
           this.loadProjects();
+          this.openRatingDialog(project);
         },
         error: err => {
           this.refundingProjectId = null;
@@ -1060,6 +1077,43 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
         this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos iniciar el pago. Intenta de nuevo.'));
       }
     });
+  }
+
+  canRateProject(project: Project): boolean {
+    return (project.paymentStatus === 'RELEASED' || project.paymentStatus === 'REFUNDED')
+        && !this.projectRatings.get(project.id);
+  }
+
+  loadRatingForProject(project: Project): void {
+    if (this.projectRatings.has(project.id)) return;
+    this.ratingService.getRatingForProject(project.id).subscribe({
+      next: r => this.projectRatings.set(project.id, r),
+      error: () => this.projectRatings.set(project.id, null)
+    });
+  }
+
+  openRatingDialog(project: Project, event?: Event): void {
+    event?.stopPropagation();
+    this.dialog.open(RatingDialogComponent, {
+      width: '460px',
+      maxWidth: '94vw',
+      panelClass: 'app-shell-dialog-panel',
+      backdropClass: 'app-shell-dialog-backdrop',
+      data: { projectName: project.name, devName: 'el equipo/desarrollador' } satisfies RatingDialogData
+    }).afterClosed().subscribe(result => {
+      if (!result) return;
+      this.ratingService.createRating(project.id, { score: result.score, comment: result.comment }).subscribe({
+        next: rating => {
+          this.projectRatings.set(project.id, rating);
+          this.uiToastService.success('¡Calificación enviada!');
+        },
+        error: err => this.uiToastService.error(this.resolveErrorMessage(err, 'No se pudo enviar la calificación.'))
+      });
+    });
+  }
+
+  getProjectRating(projectId: number): RatingResponse | null | undefined {
+    return this.projectRatings.get(projectId);
   }
 
   publishProject(project: Project, event?: Event): void {
@@ -1231,6 +1285,10 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   }
 
   private loadTabDataIfNeeded(tab: CompanyTab): void {
+    if (tab === 'ranking' && this.userRanking.length === 0 && this.teamRanking.length === 0) {
+      this.loadRanking();
+      return;
+    }
     if (this.organizationType === 'UNIVERSITY' && tab === 'projects') {
       return;
     }
@@ -1261,6 +1319,22 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     this.stopProjectsPolling();
   }
 
+  loadRanking(): void {
+    this.isLoadingRanking = true;
+    this.ratingService.getUserRanking().subscribe({
+      next: entries => { this.userRanking = entries; },
+      error: () => {}
+    });
+    this.ratingService.getTeamRanking().subscribe({
+      next: entries => { this.teamRanking = entries; this.isLoadingRanking = false; },
+      error: () => { this.isLoadingRanking = false; }
+    });
+  }
+
+  starsArray(score: number): number[] {
+    return Array.from({ length: 5 }, (_, i) => i + 1);
+  }
+
   private loadProjects(showLoader = true): void {
     if (this.organizationType === 'UNIVERSITY') {
       this.projects = [];
@@ -1281,6 +1355,9 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
           this.selectedProject = null;
         }
         this.syncProjectsPolling();
+        page.content
+          .filter(p => p.paymentStatus === 'RELEASED' || p.paymentStatus === 'REFUNDED')
+          .forEach(p => this.loadRatingForProject(p));
       },
       error: error => {
         this.isProjectsLoading = false;

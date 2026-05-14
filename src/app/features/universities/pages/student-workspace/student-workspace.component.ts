@@ -12,6 +12,8 @@ import { ProjectPaymentResponse } from '../../../../shared/models/payment.model'
 import { SessionUser } from '../../../../shared/models/session-user.model';
 import { CompanyService } from '../../../companies/services/company.service';
 import { PaymentService } from '../../../companies/services/payment.service';
+import { RatingService } from '../../../companies/services/rating.service';
+import { RankingEntry } from '../../../../shared/models/rating.model';
 import { UniversityCampus } from '../../../../shared/models/company.model';
 import { ProjectDetailDialogComponent } from '../../../companies/components/project-detail-dialog/project-detail-dialog.component';
 import { ApplicationNegotiationDialogComponent } from '../../../../shared/components/application-negotiation-dialog/application-negotiation-dialog.component';
@@ -28,6 +30,12 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   private readonly userSessionService = inject(UserSessionService);
   private readonly companyService = inject(CompanyService);
   private readonly paymentService = inject(PaymentService);
+  private readonly ratingService = inject(RatingService);
+
+  userRanking: RankingEntry[] = [];
+  teamRanking: RankingEntry[] = [];
+  isLoadingRanking = false;
+  rankingTab: 'users' | 'teams' = 'users';
   private readonly toast = inject(UiToastService);
   private readonly dialog = inject(MatDialog);
 
@@ -46,6 +54,7 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     { id: 'applications', label: 'Postulaciones',   accent: 'accent-2' },
     { id: 'my-teams',     label: 'Mis equipos',     accent: 'accent-3' },
     { id: 'all-teams',    label: 'Universidad',     accent: 'accent-4' },
+    { id: 'ranking',      label: 'Ranking',         accent: 'accent-1' },
     { id: 'invitations',  label: 'Notificaciones',  accent: 'accent-2' },
     { id: 'profile',      label: 'Mi perfil',       accent: 'accent-3' },
   ];
@@ -185,6 +194,25 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     if (tab === 'all-teams' && this.universityTeams.length === 0) {
       this.loadUniversityTeams();
     }
+    if (tab === 'ranking' && this.userRanking.length === 0 && this.teamRanking.length === 0) {
+      this.loadRanking();
+    }
+  }
+
+  loadRanking(): void {
+    this.isLoadingRanking = true;
+    this.ratingService.getUserRanking().subscribe({
+      next: entries => { this.userRanking = entries; },
+      error: () => { this.toast.error('No pudimos cargar el ranking de desarrolladores.'); }
+    });
+    this.ratingService.getTeamRanking().subscribe({
+      next: entries => { this.teamRanking = entries; this.isLoadingRanking = false; },
+      error: () => { this.isLoadingRanking = false; }
+    });
+  }
+
+  starsArray(score: number): number[] {
+    return Array.from({ length: 5 }, (_, i) => i + 1);
   }
 
   loadProjects(): void {

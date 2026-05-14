@@ -6,7 +6,9 @@ import { UiToastService } from '../../../../shared/services/ui-toast.service';
 import { DashboardShellComponent, DashboardNavItem } from '../../../../shared/components/dashboard-shell/dashboard-shell.component';
 import { CompanyService } from '../../../companies/services/company.service';
 import { StudentService } from '../../../universities/services/student.service';
+import { RatingService } from '../../../companies/services/rating.service';
 import { StudentTeam } from '../../../../shared/models/student.model';
+import { RankingEntry } from '../../../../shared/models/rating.model';
 import { CompanyUser, CreateCompanyUserDto } from '../../../../shared/models/company.model';
 import { SessionUser } from '../../../../shared/models/session-user.model';
 
@@ -20,6 +22,7 @@ export class CampusAdminWorkspaceComponent implements OnInit {
   private readonly userSessionService = inject(UserSessionService);
   private readonly companyService = inject(CompanyService);
   private readonly studentService = inject(StudentService);
+  private readonly ratingService = inject(RatingService);
   private readonly toast = inject(UiToastService);
 
   currentUser: SessionUser | null = null;
@@ -31,10 +34,16 @@ export class CampusAdminWorkspaceComponent implements OnInit {
   navItems: DashboardNavItem[] = [
     { id: 'teams',   label: 'Equipos de sede',  accent: 'accent-1' },
     { id: 'tutors',  label: 'Tutores',           accent: 'accent-2' },
+    { id: 'ranking', label: 'Ranking',           accent: 'accent-3' },
   ];
 
   isLoadingTeams = false;
   isLoadingTutors = false;
+
+  userRanking: RankingEntry[] = [];
+  teamRanking: RankingEntry[] = [];
+  isLoadingRanking = false;
+  rankingTab: 'users' | 'teams' = 'users';
 
   showCreateTutorForm = false;
   isCreatingTutor = false;
@@ -52,6 +61,23 @@ export class CampusAdminWorkspaceComponent implements OnInit {
     this.activeTab = tab;
     if (tab === 'teams') this.loadTeams();
     if (tab === 'tutors') this.loadTutors();
+    if (tab === 'ranking' && this.userRanking.length === 0 && this.teamRanking.length === 0) this.loadRanking();
+  }
+
+  loadRanking(): void {
+    this.isLoadingRanking = true;
+    this.ratingService.getUserRanking().subscribe({
+      next: entries => { this.userRanking = entries; },
+      error: () => {}
+    });
+    this.ratingService.getTeamRanking().subscribe({
+      next: entries => { this.teamRanking = entries; this.isLoadingRanking = false; },
+      error: () => { this.isLoadingRanking = false; }
+    });
+  }
+
+  starsArray(score: number): number[] {
+    return Array.from({ length: 5 }, (_, i) => i + 1);
   }
 
   loadTeams(): void {

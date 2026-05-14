@@ -7,7 +7,9 @@ import { UiToastService } from '../../../../shared/services/ui-toast.service';
 import { DashboardShellComponent, DashboardNavItem } from '../../../../shared/components/dashboard-shell/dashboard-shell.component';
 import { StudentService } from '../../../universities/services/student.service';
 import { PaymentService } from '../../../companies/services/payment.service';
+import { RatingService } from '../../../companies/services/rating.service';
 import { StudentTeam, TeamInvitation, ProjectApplication } from '../../../../shared/models/student.model';
+import { RankingEntry } from '../../../../shared/models/rating.model';
 import { Project } from '../../../../shared/models/project.model';
 import { ProjectPaymentResponse } from '../../../../shared/models/payment.model';
 import { SessionUser } from '../../../../shared/models/session-user.model';
@@ -23,6 +25,7 @@ export class TutorWorkspaceComponent implements OnInit, OnDestroy {
   private readonly userSessionService = inject(UserSessionService);
   private readonly studentService = inject(StudentService);
   private readonly paymentService = inject(PaymentService);
+  private readonly ratingService = inject(RatingService);
   private readonly toast = inject(UiToastService);
   private readonly dialog = inject(MatDialog);
 
@@ -42,9 +45,15 @@ export class TutorWorkspaceComponent implements OnInit, OnDestroy {
     { id: 'teams',         label: 'Sede',             accent: 'accent-2' },
     { id: 'projects',      label: 'Proyectos',        accent: 'accent-3' },
     { id: 'my-projects',   label: 'Mis proyectos',    accent: 'accent-4' },
+    { id: 'ranking',       label: 'Ranking',          accent: 'accent-1' },
     { id: 'notifications', label: 'Notificaciones',   accent: 'accent-4' },
     { id: 'profile',       label: 'Mi perfil',        accent: 'accent-1' },
   ];
+
+  userRanking: RankingEntry[] = [];
+  teamRanking: RankingEntry[] = [];
+  isLoadingRanking = false;
+  rankingTab: 'users' | 'teams' = 'users';
 
   isLoadingTeams = false;
   isLoadingMyTutoredTeams = false;
@@ -130,6 +139,23 @@ export class TutorWorkspaceComponent implements OnInit, OnDestroy {
     if (tab === 'projects') this.loadProjects();
     if (tab === 'my-projects') this.loadMyApplications();
     if (tab === 'notifications') this.loadInvitations();
+    if (tab === 'ranking' && this.userRanking.length === 0 && this.teamRanking.length === 0) this.loadRanking();
+  }
+
+  loadRanking(): void {
+    this.isLoadingRanking = true;
+    this.ratingService.getUserRanking().subscribe({
+      next: entries => { this.userRanking = entries; },
+      error: () => {}
+    });
+    this.ratingService.getTeamRanking().subscribe({
+      next: entries => { this.teamRanking = entries; this.isLoadingRanking = false; },
+      error: () => { this.isLoadingRanking = false; }
+    });
+  }
+
+  starsArray(score: number): number[] {
+    return Array.from({ length: 5 }, (_, i) => i + 1);
   }
 
   loadMyApplications(): void {

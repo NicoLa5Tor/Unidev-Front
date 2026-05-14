@@ -100,4 +100,93 @@
     </div>
   </ng-container>
 
+  <!-- ══ RANKING ══ -->
+  <ng-container *ngIf="activeTab === 'ranking'">
+    <div class="mb-6">
+      <h2 class="font-cyber text-lg font-bold text-[var(--text)]">Ranking de desarrolladores</h2>
+      <p class="mt-1 text-sm text-[var(--muted)]">Clasificación de estudiantes y equipos según calificaciones de empresas.</p>
+    </div>
+
+    <div class="flex gap-2 mb-6">
+      <button type="button" (click)="rankingTab = 'users'"
+        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+        [ngClass]="rankingTab === 'users'
+          ? 'bg-[var(--accent-1)] text-black'
+          : 'bg-[var(--panel-border)]/30 text-[var(--muted)] hover:text-[var(--text)]'">
+        Desarrolladores
+      </button>
+      <button type="button" (click)="rankingTab = 'teams'"
+        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+        [ngClass]="rankingTab === 'teams'
+          ? 'bg-[var(--accent-1)] text-black'
+          : 'bg-[var(--panel-border)]/30 text-[var(--muted)] hover:text-[var(--text)]'">
+        Equipos
+      </button>
+    </div>
+
+    <div *ngIf="isLoadingRanking" class="flex justify-center py-16">
+      <div class="w-8 h-8 border-2 border-[var(--accent-1)] border-t-transparent rounded-full animate-spin"></div>
+    </div>
+
+    <div *ngIf="!isLoadingRanking && rankingTab === 'users'" class="flex flex-col gap-3">
+      <div *ngIf="userRanking.length === 0" class="flex flex-col items-center justify-center py-16 gap-3">
+        <span class="text-4xl opacity-40">🏆</span>
+        <p class="text-[var(--muted)] text-sm">Aún no hay calificaciones de desarrolladores.</p>
+      </div>
+      <article *ngFor="let entry of userRanking; let i = index"
+        class="flex items-center gap-4 p-4 rounded-xl border border-[var(--panel-border)] bg-[var(--panel)]">
+        <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm"
+          [ngClass]="i === 0 ? 'bg-yellow-400/20 text-yellow-400 border border-yellow-400/40'
+                   : i === 1 ? 'bg-slate-400/20 text-slate-400 border border-slate-400/40'
+                   : i === 2 ? 'bg-orange-400/20 text-orange-400 border border-orange-400/40'
+                   : 'bg-[var(--panel-border)]/30 text-[var(--muted)]'">{{ i + 1 }}</div>
+        <div class="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden bg-[var(--accent-1)]/20 flex items-center justify-center">
+          <img *ngIf="entry.photoUrl" [src]="entry.photoUrl" [alt]="entry.displayName" class="w-full h-full object-cover"/>
+          <span *ngIf="!entry.photoUrl" class="text-sm font-bold text-[var(--accent-1)]">{{ entry.displayName?.charAt(0)?.toUpperCase() }}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-[var(--text)] truncate">{{ entry.displayName }}</p>
+          <p *ngIf="entry.universityName" class="text-xs text-[var(--muted)] truncate">{{ entry.universityName }}</p>
+        </div>
+        <div class="flex flex-col items-end gap-1">
+          <div class="flex gap-0.5">
+            <span *ngFor="let s of starsArray(entry.averageScore)" class="text-sm"
+              [ngClass]="s <= entry.averageScore ? 'text-yellow-400' : 'text-[var(--muted)]/30'">★</span>
+          </div>
+          <p class="text-xs text-[var(--muted)]">{{ entry.averageScore | number:'1.1-1' }} · {{ entry.totalRatings }} proyecto{{ entry.totalRatings !== 1 ? 's' : '' }}</p>
+        </div>
+      </article>
+    </div>
+
+    <div *ngIf="!isLoadingRanking && rankingTab === 'teams'" class="flex flex-col gap-3">
+      <div *ngIf="teamRanking.length === 0" class="flex flex-col items-center justify-center py-16 gap-3">
+        <span class="text-4xl opacity-40">🏆</span>
+        <p class="text-[var(--muted)] text-sm">Aún no hay calificaciones de equipos.</p>
+      </div>
+      <article *ngFor="let entry of teamRanking; let i = index"
+        class="flex items-center gap-4 p-4 rounded-xl border border-[var(--panel-border)] bg-[var(--panel)]">
+        <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm"
+          [ngClass]="i === 0 ? 'bg-yellow-400/20 text-yellow-400 border border-yellow-400/40'
+                   : i === 1 ? 'bg-slate-400/20 text-slate-400 border border-slate-400/40'
+                   : i === 2 ? 'bg-orange-400/20 text-orange-400 border border-orange-400/40'
+                   : 'bg-[var(--panel-border)]/30 text-[var(--muted)]'">{{ i + 1 }}</div>
+        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-[var(--accent-3)]/20 flex items-center justify-center">
+          <img *ngIf="entry.photoUrl" [src]="entry.photoUrl" [alt]="entry.displayName" class="w-full h-full object-cover rounded-full"/>
+          <span *ngIf="!entry.photoUrl" class="text-sm font-bold text-[var(--accent-3)]">{{ entry.displayName?.charAt(0)?.toUpperCase() }}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-[var(--text)] truncate">{{ entry.displayName }}</p>
+          <p *ngIf="entry.universityName" class="text-xs text-[var(--muted)] truncate">{{ entry.universityName }}</p>
+        </div>
+        <div class="flex flex-col items-end gap-1">
+          <div class="flex gap-0.5">
+            <span *ngFor="let s of starsArray(entry.averageScore)" class="text-sm"
+              [ngClass]="s <= entry.averageScore ? 'text-yellow-400' : 'text-[var(--muted)]/30'">★</span>
+          </div>
+          <p class="text-xs text-[var(--muted)]">{{ entry.averageScore | number:'1.1-1' }} · {{ entry.totalRatings }} proyecto{{ entry.totalRatings !== 1 ? 's' : '' }}</p>
+        </div>
+      </article>
+    </div>
+  </ng-container>
+
 </app-dashboard-shell>
