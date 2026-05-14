@@ -227,6 +227,7 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
       case 'PENDING_PAYMENT': return 'Pago pendiente';
       case 'PAID_HELD':       return 'Pago recibido — en custodia';
       case 'RELEASED':        return 'Pago desembolsado';
+      case 'REFUNDED':        return 'Pago reembolsado';
       case 'FAILED':          return 'Pago fallido';
       default:                return 'Sin pago registrado';
     }
@@ -236,6 +237,7 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     switch (status) {
       case 'PAID_HELD':  return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400';
       case 'RELEASED':   return 'border-sky-500/30 bg-sky-500/10 text-sky-400';
+      case 'REFUNDED':   return 'border-rose-500/30 bg-rose-500/10 text-rose-400';
       case 'FAILED':     return 'border-red-500/30 bg-red-500/10 text-red-400';
       default:           return 'border-yellow-500/30 bg-yellow-500/10 text-yellow-400';
     }

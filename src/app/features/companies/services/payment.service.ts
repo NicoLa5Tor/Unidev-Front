@@ -26,6 +26,10 @@ export class PaymentService {
     return this.http.post<ProjectPaymentResponse>(`${this.paymentsUrl}/projects/${projectId}/release`, {});
   }
 
+  refundPayment(projectId: number): Observable<ProjectPaymentResponse> {
+    return this.http.post<ProjectPaymentResponse>(`${this.paymentsUrl}/projects/${projectId}/refund`, {});
+  }
+
   // MP OAuth — equipo
   initTeamConnect(teamId: number): Observable<{ teamId: number; authUrl: string | null; status: string }> {
     return this.http.post<{ teamId: number; authUrl: string | null; status: string }>(

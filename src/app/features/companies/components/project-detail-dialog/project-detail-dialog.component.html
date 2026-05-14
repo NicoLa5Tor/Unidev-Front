@@ -1200,16 +1200,38 @@
             </div>
           </div>
 
-          <!-- Botón Desembolsar (admin) -->
-          <div *ngIf="canRelease" class="mt-4 flex justify-end">
+          <!-- Acciones (solo admin/empresa, no vista estudiante) -->
+          <div *ngIf="canRelease" class="mt-4 flex flex-wrap gap-3 justify-end">
             <button
               type="button"
-              [disabled]="releasingPayment"
+              [disabled]="refundingPayment || releasingPayment"
+              class="rounded-full border border-rose-500/50 bg-rose-500/10 px-6 py-2.5 font-tech text-xs uppercase tracking-[0.18em] text-rose-300 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+              (click)="refundPayment()">
+              {{ refundingPayment ? 'Reembolsando...' : 'Reembolsar →' }}
+            </button>
+            <button
+              type="button"
+              [disabled]="releasingPayment || refundingPayment"
               class="rounded-full border border-emerald-500 bg-emerald-500/15 px-6 py-2.5 font-tech text-xs uppercase tracking-[0.18em] text-emerald-300 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
               (click)="releasePayment()">
               {{ releasingPayment ? 'Desembolsando...' : 'Desembolsar pago →' }}
             </button>
           </div>
+        </div>
+
+        <!-- Pago reembolsado (REFUNDED) -->
+        <div *ngIf="!paymentLoading && payment?.status === 'REFUNDED'" class="flex items-start justify-between gap-4">
+          <div>
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-amber-400">Pago reembolsado</p>
+            <p class="mt-2 leading-6 text-[var(--muted)]">
+              El pago fue reembolsado a la empresa. El equipo no recibió ningún monto.
+            </p>
+            <div class="mt-3 rounded-[14px] border border-amber-500/30 bg-amber-500/10 px-4 py-3 inline-block">
+              <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-amber-400">Monto reembolsado</p>
+              <p class="mt-1 font-semibold text-amber-300">{{ formatMoney(payment!.amount, payment!.currency) }}</p>
+            </div>
+          </div>
+          <svg class="mt-0.5 h-5 w-5 shrink-0 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.793 2.232a.75.75 0 01-.025 1.06L3.622 7.25h10.003a5.375 5.375 0 010 10.75H10.75a.75.75 0 010-1.5h2.875a3.875 3.875 0 000-7.75H3.622l4.146 3.957a.75.75 0 01-1.036 1.085l-5.5-5.25a.75.75 0 010-1.085l5.5-5.25a.75.75 0 011.06.025z" clip-rule="evenodd"/></svg>
         </div>
 
         <!-- Pago ya desembolsado (RELEASED) -->

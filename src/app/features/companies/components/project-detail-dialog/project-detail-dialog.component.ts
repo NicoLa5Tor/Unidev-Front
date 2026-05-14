@@ -60,6 +60,7 @@ export class ProjectDetailDialogComponent implements OnDestroy {
   paymentLoading = false;
   checkingOut = false;
   releasingPayment = false;
+  refundingPayment = false;
 
   // Flujo de aprobación de precio
   showPriceApprovalModal = false;
@@ -234,6 +235,7 @@ export class ProjectDetailDialogComponent implements OnDestroy {
       case 'PENDING_PAYMENT': return 'Pago pendiente';
       case 'PAID_HELD':       return 'Pago recibido — en custodia';
       case 'RELEASED':        return 'Pago desembolsado';
+      case 'REFUNDED':        return 'Pago reembolsado';
       case 'FAILED':          return 'Pago fallido';
       default:                return 'Sin pago registrado';
     }
@@ -243,6 +245,7 @@ export class ProjectDetailDialogComponent implements OnDestroy {
     switch (this.payment?.status) {
       case 'PAID_HELD':  return 'app-status-success';
       case 'RELEASED':   return 'app-status-info';
+      case 'REFUNDED':   return 'app-status-warning';
       case 'FAILED':     return 'app-status-danger';
       default:           return 'app-status-warning';
     }
@@ -276,11 +279,27 @@ export class ProjectDetailDialogComponent implements OnDestroy {
       next: payment => {
         this.payment = payment;
         this.releasingPayment = false;
-        this.uiToastService.success('Pago desembolsado correctamente.');
+        this.uiToastService.success('Pago desembolsado correctamente al equipo.');
       },
       error: error => {
         this.releasingPayment = false;
         this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos desembolsar el pago.'));
+      }
+    });
+  }
+
+  refundPayment(): void {
+    if (!this.project || this.refundingPayment || this.payment?.status !== 'PAID_HELD') return;
+    this.refundingPayment = true;
+    this.paymentService.refundPayment(this.project.id).subscribe({
+      next: payment => {
+        this.payment = payment;
+        this.refundingPayment = false;
+        this.uiToastService.success('Reembolso procesado. El dinero será devuelto a la empresa.');
+      },
+      error: error => {
+        this.refundingPayment = false;
+        this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos procesar el reembolso.'));
       }
     });
   }

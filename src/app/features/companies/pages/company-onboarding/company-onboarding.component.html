@@ -633,8 +633,18 @@
                       <p class="font-tech text-xs uppercase tracking-[0.22em] text-[var(--accent-3)]">Proyectos creados</p>
                       <h3 class="mt-2 text-xl font-semibold text-[var(--text)]">Historial de trabajo</h3>
                     </div>
-                    <div class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
-                      {{ projects.length }} total
+                    <div class="flex items-center gap-2">
+                      <button
+                        type="button"
+                        class="rounded-full border px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] transition"
+                        [ngClass]="showArchivedProjects ? 'border-rose-500/40 bg-rose-500/10 text-rose-400' : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] text-[var(--muted)] hover:border-rose-500/30 hover:text-rose-400'"
+                        (click)="toggleArchivedProjects()"
+                      >
+                        {{ showArchivedProjects ? 'Ver activos' : 'Papelera' }}
+                      </button>
+                      <div class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+                        {{ projectsTotalElements }} total
+                      </div>
                     </div>
                   </div>
 
@@ -768,11 +778,77 @@
                             <svg class="h-3 w-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1" y="4" width="14" height="10" rx="2"/><path d="M1 7h14"/></svg>
                             {{ payingProjectId === project.id ? 'Redirigiendo...' : 'Pagar' }}
                           </button>
+                          <!-- Botón desembolsar -->
+                          <button
+                            *ngIf="project.paymentStatus === 'PAID_HELD'"
+                            type="button"
+                            class="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/15 px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-emerald-400 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                            [disabled]="releasingProjectId === project.id"
+                            (click)="releasePayment(project, $event)"
+                          >
+                            <svg class="h-3 w-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2v9M4 8l4 4 4-4M2 13h12"/></svg>
+                            {{ releasingProjectId === project.id ? 'Procesando...' : 'Desembolsar' }}
+                          </button>
+                          <!-- Botón reembolsar -->
+                          <button
+                            *ngIf="project.paymentStatus === 'PAID_HELD'"
+                            type="button"
+                            class="inline-flex items-center gap-1.5 rounded-full border border-rose-500/40 bg-rose-500/10 px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-rose-400 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                            [disabled]="refundingProjectId === project.id"
+                            (click)="refundPayment(project, $event)"
+                          >
+                            <svg class="h-3 w-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 8a6 6 0 1 0 1.5-3.9"/><path d="M2 3v4h4"/></svg>
+                            {{ refundingProjectId === project.id ? 'Procesando...' : 'Reembolsar' }}
+                          </button>
                           <span class="inline-flex items-center rounded-full border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/10 px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-2)]">
                             Ver detalle
                           </span>
+                          <!-- Botón archivar / restaurar -->
+                          <button
+                            *ngIf="!project.archivedAt"
+                            type="button"
+                            class="inline-flex items-center gap-1 rounded-full border border-rose-500/30 bg-rose-500/8 px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-rose-400 transition hover:brightness-110"
+                            (click)="archiveProject(project, $event)"
+                            title="Mover a papelera"
+                          >
+                            <svg class="h-3 w-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 9a1 1 0 001 1h6a1 1 0 001-1l1-9"/></svg>
+                            Archivar
+                          </button>
+                          <button
+                            *ngIf="project.archivedAt"
+                            type="button"
+                            class="inline-flex items-center gap-1 rounded-full border border-[color:var(--accent-3)]/35 bg-[var(--accent-3)]/10 px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-3)] transition hover:brightness-110"
+                            (click)="unarchiveProject(project, $event)"
+                            title="Restaurar proyecto"
+                          >
+                            <svg class="h-3 w-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 8a6 6 0 1012 0A6 6 0 002 8zm6-3v3l2 1"/></svg>
+                            Restaurar
+                          </button>
                         </div>
                       </div>
+                    </button>
+                  </div>
+
+                  <!-- Paginación -->
+                  <div *ngIf="!isProjectsLoading && projectsTotalPages > 1" class="mt-4 flex items-center justify-between">
+                    <button
+                      type="button"
+                      class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)] transition hover:border-[color:var(--accent-2)]/35 disabled:cursor-not-allowed disabled:opacity-40"
+                      [disabled]="projectsPage === 0"
+                      (click)="goToProjectsPage(projectsPage - 1)"
+                    >
+                      ← Anterior
+                    </button>
+                    <span class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+                      {{ projectsPage + 1 }} / {{ projectsTotalPages }}
+                    </span>
+                    <button
+                      type="button"
+                      class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)] transition hover:border-[color:var(--accent-2)]/35 disabled:cursor-not-allowed disabled:opacity-40"
+                      [disabled]="projectsPage >= projectsTotalPages - 1"
+                      (click)="goToProjectsPage(projectsPage + 1)"
+                    >
+                      Siguiente →
                     </button>
                   </div>
                 </section>

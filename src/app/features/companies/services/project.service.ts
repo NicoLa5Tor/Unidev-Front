@@ -6,6 +6,7 @@ import {
   CreateProjectDto,
   Project,
   ProjectDetail,
+  ProjectPage,
   ProjectPublishRequest,
   ProjectRequirementAssistantMessageDto,
   ProjectDevelopmentTypeOption,
@@ -28,8 +29,18 @@ export class ProjectService {
     return this.http.get<ProjectDevelopmentTypeOption[]>(`${environment.apiUrl}/project-development-types`);
   }
 
-  listProjects() {
-    return this.http.get<Project[]>(this.projectsUrl);
+  listProjects(page = 0, size = 3, archived = false) {
+    return this.http.get<ProjectPage>(this.projectsUrl, {
+      params: { page: page.toString(), size: size.toString(), archived: archived.toString() }
+    });
+  }
+
+  archiveProject(id: number) {
+    return this.http.patch<Project>(`${this.projectsUrl}/${id}/archive`, {});
+  }
+
+  unarchiveProject(id: number) {
+    return this.http.patch<Project>(`${this.projectsUrl}/${id}/unarchive`, {});
   }
 
   getProject(id: number) {

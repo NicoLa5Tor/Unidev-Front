@@ -134,9 +134,18 @@ export interface Project {
   companyPriceMinAmount: number | null;
   companyPriceMaxAmount: number | null;
   priceSetAt: string | null;
-  paymentStatus: 'PENDING_PAYMENT' | 'PAID_HELD' | 'RELEASED' | 'FAILED' | null;
+  paymentStatus: 'PENDING_PAYMENT' | 'PAID_HELD' | 'RELEASED' | 'REFUNDED' | 'FAILED' | null;
   applicationsCount: number;
   acceptedApplicationsCount: number;
+  archivedAt: string | null;
+}
+
+export interface ProjectPage {
+  content: Project[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
 }
 
 export interface ProjectRequirement {
@@ -185,5 +194,5 @@ export interface ProjectDetail extends Project {
   companyPriceMinAmount: number | null;
   companyPriceMaxAmount: number | null;
   priceSetAt: string | null;
-  paymentStatus: 'PENDING_PAYMENT' | 'PAID_HELD' | 'RELEASED' | 'FAILED' | null;
+  paymentStatus: 'PENDING_PAYMENT' | 'PAID_HELD' | 'RELEASED' | 'REFUNDED' | 'FAILED' | null;
 }

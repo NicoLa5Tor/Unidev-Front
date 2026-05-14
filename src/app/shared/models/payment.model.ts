@@ -1,4 +1,4 @@
-export type PaymentStatus = 'PENDING_PAYMENT' | 'PAID_HELD' | 'RELEASED' | 'FAILED';
+export type PaymentStatus = 'PENDING_PAYMENT' | 'PAID_HELD' | 'RELEASED' | 'REFUNDED' | 'FAILED';
 
 export interface CheckoutResponse {
   paymentId: number;
@@ -23,4 +23,5 @@ export interface ProjectPaymentResponse {
   createdAt: string;
   paidAt: string | null;
   releasedAt: string | null;
+  mpTransferId: string | null;
 }

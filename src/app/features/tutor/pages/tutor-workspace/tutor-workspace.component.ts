@@ -6,6 +6,7 @@ import { UserSessionService } from '../../../../core/services/user-session.servi
 import { UiToastService } from '../../../../shared/services/ui-toast.service';
 import { DashboardShellComponent, DashboardNavItem } from '../../../../shared/components/dashboard-shell/dashboard-shell.component';
 import { StudentService } from '../../../universities/services/student.service';
+import { PaymentService } from '../../../companies/services/payment.service';
 import { StudentTeam, TeamInvitation } from '../../../../shared/models/student.model';
 import { Project } from '../../../../shared/models/project.model';
 import { SessionUser } from '../../../../shared/models/session-user.model';
@@ -20,6 +21,7 @@ import { TeamChatDialogComponent } from '../../../../shared/components/team-chat
 export class TutorWorkspaceComponent implements OnInit, OnDestroy {
   private readonly userSessionService = inject(UserSessionService);
   private readonly studentService = inject(StudentService);
+  private readonly paymentService = inject(PaymentService);
   private readonly toast = inject(UiToastService);
   private readonly dialog = inject(MatDialog);
 
@@ -27,6 +29,10 @@ export class TutorWorkspaceComponent implements OnInit, OnDestroy {
   campusTeams: StudentTeam[] = [];
   publishedProjects: Project[] = [];
   invitations: TeamInvitation[] = [];
+
+  mpStatus: 'NOT_CONNECTED' | 'PENDING' | 'CONNECTED' | 'DISCONNECTED' | null = null;
+  mpConnecting = false;
+  mpDisconnecting = false;
 
   activeTab = 'teams';
 
@@ -76,6 +82,7 @@ export class TutorWorkspaceComponent implements OnInit, OnDestroy {
       }
     });
     this.loadMyTutoredTeams();
+    this.loadMpStatus();
     this.startNotifPolling();
   }
 
@@ -200,13 +207,86 @@ export class TutorWorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
+  loadMpStatus(): void {
+    this.paymentService.getUserConnectStatus().subscribe({
+      next: res => { this.mpStatus = res.status as any; },
+      error: () => { this.mpStatus = 'NOT_CONNECTED'; }
+    });
+  }
+
+  connectMp(): void {
+    if (this.mpConnecting) return;
+    this.mpConnecting = true;
+    this.paymentService.initUserConnect().subscribe({
+      next: res => {
+        this.mpConnecting = false;
+        if (res.status === 'CONNECTED') {
+          this.mpStatus = 'CONNECTED';
+          this.toast.success('Tu cuenta de Mercado Pago ya está conectada.');
+          return;
+        }
+        if (res.authUrl) {
+          this.mpStatus = 'PENDING';
+          const popup = window.open(res.authUrl, 'mp_oauth', 'width=700,height=600');
+          const onMessage = (event: MessageEvent) => {
+            if (event.data?.type === 'MP_OAUTH_SUCCESS') {
+              window.removeEventListener('message', onMessage);
+              this.loadMpStatus();
+              this.toast.success('¡Cuenta de Mercado Pago conectada correctamente!');
+            } else if (event.data?.type === 'MP_OAUTH_ERROR') {
+              window.removeEventListener('message', onMessage);
+              this.mpStatus = 'NOT_CONNECTED';
+              this.toast.error('No pudimos conectar tu cuenta de Mercado Pago.');
+            }
+          };
+          window.addEventListener('message', onMessage);
+          const pollClose = setInterval(() => {
+            if (popup?.closed) {
+              clearInterval(pollClose);
+              window.removeEventListener('message', onMessage);
+              this.loadMpStatus();
+            }
+          }, 1000);
+        }
+      },
+      error: err => {
+        this.mpConnecting = false;
+        this.toast.error(err?.error?.message ?? 'No pudimos iniciar la conexión con Mercado Pago.');
+      }
+    });
+  }
+
+  disconnectMp(): void {
+    if (this.mpDisconnecting) return;
+    this.mpDisconnecting = true;
+    this.paymentService.disconnectUser().subscribe({
+      next: () => {
+        this.mpStatus = 'DISCONNECTED';
+        this.mpDisconnecting = false;
+        this.toast.success('Cuenta de Mercado Pago desvinculada.');
+      },
+      error: () => {
+        this.mpDisconnecting = false;
+        this.toast.error('No pudimos desvincular la cuenta.');
+      }
+    });
+  }
+
   openTutorRequest(team: StudentTeam): void {
+    if (this.mpStatus !== 'CONNECTED') {
+      this.toast.error('Debes vincular tu cuenta de Mercado Pago antes de solicitar tutoría. Ve a "Mi perfil".');
+      return;
+    }
     this.requestingTeam = team;
     this.tutorRequestMessage = '';
   }
 
   submitTutorRequest(): void {
     if (!this.requestingTeam) return;
+    if (this.mpStatus !== 'CONNECTED') {
+      this.toast.error('Debes vincular tu cuenta de Mercado Pago antes de solicitar tutoría.');
+      return;
+    }
     this.isSubmittingTutorRequest = true;
     this.studentService.requestTutoring(this.requestingTeam.id, { message: this.tutorRequestMessage || null }).subscribe({
       next: () => {

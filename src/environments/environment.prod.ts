@@ -7,7 +7,7 @@ export const environment = {
     enableAnalytics: true,
     enableNotifications: true,
     enableOfflineMode: true,
-    enableProjectFormExamples: false
+    enableProjectFormExamples: true
   },
   unicornEmbed: {
     scriptUrl:

@@ -88,11 +88,17 @@
         <p class="text-xs text-purple-300">Líder: {{ team.leaderDisplayName }}</p>
         <p class="text-xs text-purple-300">Miembros: {{ team.members.length }}</p>
         <p *ngIf="team.tutorDisplayName" class="text-xs text-teal-300">Tutor: {{ team.tutorDisplayName }}</p>
-        <button *ngIf="!team.tutorId && team.tutorId !== currentUser?.id"
-                (click)="openTutorRequest(team)"
-                class="mt-1 rounded-lg bg-purple-600/60 px-3 py-1 text-xs text-white hover:bg-purple-600 transition">
-          Solicitar tutoría
-        </button>
+        <ng-container *ngIf="!team.tutorId && team.tutorId !== currentUser?.id">
+          <div *ngIf="mpStatus !== 'CONNECTED'"
+               class="mt-1 rounded-lg border border-orange-500/30 bg-orange-500/10 px-3 py-2 text-xs text-orange-300">
+            Vincula tu cuenta de Mercado Pago en "Mi perfil" para solicitar tutoría.
+          </div>
+          <button *ngIf="mpStatus === 'CONNECTED'"
+                  (click)="openTutorRequest(team)"
+                  class="mt-1 rounded-lg bg-purple-600/60 px-3 py-1 text-xs text-white hover:bg-purple-600 transition">
+            Solicitar tutoría
+          </button>
+        </ng-container>
       </div>
     </div>
   </ng-container>
@@ -181,6 +187,34 @@
               class="rounded-xl bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500 transition">
         Editar
       </button>
+    </div>
+
+    <!-- Mercado Pago -->
+    <div class="mb-6 rounded-2xl border border-white/10 bg-white/5 p-5 space-y-3">
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <p class="text-sm font-medium text-white">Mercado Pago</p>
+          <p class="text-xs text-purple-300 mt-0.5">Necesario para ser tutor de equipos y recibir pagos.</p>
+        </div>
+        <span *ngIf="mpStatus === 'CONNECTED'"
+              class="rounded-full bg-teal-500/20 px-3 py-1 text-xs font-medium text-teal-300">Conectado</span>
+        <span *ngIf="mpStatus === 'PENDING'"
+              class="rounded-full bg-amber-500/20 px-3 py-1 text-xs font-medium text-amber-300">Pendiente</span>
+        <span *ngIf="mpStatus === 'NOT_CONNECTED' || mpStatus === 'DISCONNECTED' || mpStatus === null"
+              class="rounded-full bg-rose-500/20 px-3 py-1 text-xs font-medium text-rose-300">No conectado</span>
+      </div>
+      <div class="flex gap-2">
+        <button *ngIf="mpStatus !== 'CONNECTED'"
+                (click)="connectMp()" [disabled]="mpConnecting"
+                class="rounded-full bg-blue-600 px-4 py-2 text-xs font-medium text-white hover:bg-blue-500 disabled:opacity-50 transition">
+          {{ mpConnecting ? 'Conectando...' : 'Conectar cuenta MP' }}
+        </button>
+        <button *ngIf="mpStatus === 'CONNECTED'"
+                (click)="disconnectMp()" [disabled]="mpDisconnecting"
+                class="rounded-full border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-xs font-medium text-rose-300 hover:bg-rose-500/20 disabled:opacity-50 transition">
+          {{ mpDisconnecting ? 'Desvinculando...' : 'Desvincular' }}
+        </button>
+      </div>
     </div>
 
     <div *ngIf="!isEditingProfile && currentUser" class="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-6">
@@ -273,12 +307,16 @@
         <textarea [(ngModel)]="tutorRequestMessage" rows="3" placeholder="¿Por qué deseas tutorear este equipo?"
                   class="w-full resize-none rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-purple-500"></textarea>
       </div>
+      <div *ngIf="mpStatus !== 'CONNECTED'"
+           class="rounded-xl border border-orange-500/30 bg-orange-500/10 px-4 py-3 text-xs text-orange-300">
+        Debes vincular tu cuenta de Mercado Pago en "Mi perfil" antes de solicitar tutoría.
+      </div>
       <div class="flex gap-2 pt-2">
         <button (click)="requestingTeam = null"
                 class="rounded-full border border-white/10 px-5 py-2 text-xs text-purple-200 hover:text-white transition">
           Cancelar
         </button>
-        <button (click)="submitTutorRequest()" [disabled]="isSubmittingTutorRequest"
+        <button (click)="submitTutorRequest()" [disabled]="isSubmittingTutorRequest || mpStatus !== 'CONNECTED'"
                 class="flex-1 rounded-full bg-purple-600 px-5 py-2 text-xs font-medium text-white hover:bg-purple-500 disabled:opacity-50 transition">
           {{ isSubmittingTutorRequest ? 'Enviando...' : 'Enviar solicitud' }}
         </button>

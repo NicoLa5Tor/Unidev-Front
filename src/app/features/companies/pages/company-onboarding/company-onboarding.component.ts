@@ -19,6 +19,7 @@ import { CreateProjectDto, Project, ProjectDetail, ProjectDevelopmentTypeOption 
 import { SessionUser } from '../../../../shared/models/session-user.model';
 import { CompanyAllowedEmail } from '../../../../shared/models/company-access.model';
 import { ProjectDetailDialogComponent, ProjectDetailSection } from '../../components/project-detail-dialog/project-detail-dialog.component';
+import { MessageDialogComponent, MessageDialogData } from '../../../../shared/components/modal/message-dialog/message-dialog.component';
 import { CompanyFormModel, ProjectCreateFormModel } from './company-onboarding.types';
 import { environment } from '../../../../../environments/environment';
 import { PROJECT_CREATE_FORM_EXAMPLES, ProjectCreateFormExample } from '../../examples/project-create-form/project-create-form-examples';
@@ -42,7 +43,9 @@ type ProjectVisibilityFilter = 'ALL' | 'PUBLISHED' | 'EDITING';
   styleUrl: './company-onboarding.component.scss'
 })
 export class CompanyOnboardingComponent implements OnInit, OnDestroy {
-  private static readonly PROJECTS_POLL_INTERVAL_MS = 3000;
+  private static readonly PROJECTS_POLL_INTERVAL_MS = 5000;
+  private static readonly PROJECTS_POLL_MAX_RETRIES = 24; // 24 × 5s = 2 min
+  private projectsPollRetryCount = 0;
   activeTab: CompanyTab = 'status';
   isLoading = false;
   isSaving = false;
@@ -56,9 +59,16 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   isSavingRejectedDraft = false;
   isCreatingProject = false;
   isProjectsLoading = false;
+  showArchivedProjects = false;
+  projectsPage = 0;
+  projectsPageSize = 3;
+  projectsTotalPages = 1;
+  projectsTotalElements = 0;
   isProjectCreatePanelOpen = false;
   publishingProjectId: number | null = null;
   payingProjectId: number | null = null;
+  releasingProjectId: number | null = null;
+  refundingProjectId: number | null = null;
   projectVisibilityFilter: ProjectVisibilityFilter = 'ALL';
   message: MessageState = null;
   createFieldErrors: Partial<Record<CreateField, string>> = {};
@@ -942,6 +952,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
       case 'PENDING_PAYMENT': return 'Pago pendiente';
       case 'PAID_HELD': return 'Pago en garantía';
       case 'RELEASED': return 'Pago liberado';
+      case 'REFUNDED': return 'Pago reembolsado';
       case 'FAILED': return 'Pago fallido';
       default: return '';
     }
@@ -952,9 +963,76 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
       case 'PENDING_PAYMENT': return 'app-status-warning';
       case 'PAID_HELD': return 'app-status-success';
       case 'RELEASED': return 'app-status-info';
+      case 'REFUNDED': return 'app-status-danger';
       case 'FAILED': return 'app-status-danger';
       default: return '';
     }
+  }
+
+  releasePayment(project: Project, event?: Event): void {
+    event?.stopPropagation();
+    if (this.releasingProjectId === project.id) return;
+
+    this.dialog.open(MessageDialogComponent, {
+      width: '440px',
+      maxWidth: '92vw',
+      panelClass: 'message-dialog-panel',
+      data: {
+        title: 'Desembolsar pago',
+        message: `¿Confirmas que deseas transferir el pago al equipo/desarrollador del proyecto "${project.name}"? Esta acción no se puede deshacer.`,
+        type: 'info',
+        confirmLabel: 'Sí, desembolsar',
+        cancelLabel: 'Cancelar',
+        supportText: 'El dinero será enviado a la cuenta de Mercado Pago del desarrollador'
+      } satisfies MessageDialogData
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.releasingProjectId = project.id;
+      this.paymentService.releasePayment(project.id).subscribe({
+        next: () => {
+          this.releasingProjectId = null;
+          this.uiToastService.success('Pago desembolsado exitosamente.');
+          this.loadProjects();
+        },
+        error: err => {
+          this.releasingProjectId = null;
+          this.uiToastService.error(this.resolveErrorMessage(err, 'No se pudo desembolsar el pago. Intenta de nuevo.'));
+        }
+      });
+    });
+  }
+
+  refundPayment(project: Project, event?: Event): void {
+    event?.stopPropagation();
+    if (this.refundingProjectId === project.id) return;
+
+    this.dialog.open(MessageDialogComponent, {
+      width: '440px',
+      maxWidth: '92vw',
+      panelClass: 'message-dialog-panel',
+      data: {
+        title: 'Reembolsar pago',
+        message: `¿Confirmas que deseas reembolsar el pago del proyecto "${project.name}"? El desarrollador será notificado por correo.`,
+        type: 'error',
+        confirmLabel: 'Sí, reembolsar',
+        cancelLabel: 'Cancelar',
+        supportText: 'El dinero será devuelto a tu cuenta de Mercado Pago'
+      } satisfies MessageDialogData
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.refundingProjectId = project.id;
+      this.paymentService.refundPayment(project.id).subscribe({
+        next: () => {
+          this.refundingProjectId = null;
+          this.uiToastService.success('Pago reembolsado exitosamente.');
+          this.loadProjects();
+        },
+        error: err => {
+          this.refundingProjectId = null;
+          this.uiToastService.error(this.resolveErrorMessage(err, 'No se pudo procesar el reembolso. Intenta de nuevo.'));
+        }
+      });
+    });
   }
 
   formatMoney(amount: number | null | undefined, currency: string | null | undefined): string {
@@ -1193,9 +1271,11 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     if (showLoader) {
       this.isProjectsLoading = true;
     }
-    this.projectService.listProjects().subscribe({
-      next: projects => {
-        this.projects = [...projects].sort((a, b) => b.id - a.id);
+    this.projectService.listProjects(this.projectsPage, this.projectsPageSize, this.showArchivedProjects).subscribe({
+      next: page => {
+        this.projects = page.content;
+        this.projectsTotalPages = page.totalPages;
+        this.projectsTotalElements = page.totalElements;
         this.isProjectsLoading = false;
         if (!this.projects.some(project => project.id === this.selectedProject?.id)) {
           this.selectedProject = null;
@@ -1207,6 +1287,40 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
         this.stopProjectsPolling();
         this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos cargar los proyectos de la empresa.'));
       }
+    });
+  }
+
+  goToProjectsPage(page: number): void {
+    if (page < 0 || page >= this.projectsTotalPages) return;
+    this.projectsPage = page;
+    this.loadProjects();
+  }
+
+  toggleArchivedProjects(): void {
+    this.showArchivedProjects = !this.showArchivedProjects;
+    this.projectsPage = 0;
+    this.loadProjects();
+  }
+
+  archiveProject(project: Project, event: Event): void {
+    event.stopPropagation();
+    this.projectService.archiveProject(project.id).subscribe({
+      next: () => {
+        this.uiToastService.success(`"${project.name}" movido a la papelera.`);
+        this.loadProjects(false);
+      },
+      error: err => this.uiToastService.error(this.resolveErrorMessage(err, 'No se pudo archivar el proyecto.'))
+    });
+  }
+
+  unarchiveProject(project: Project, event: Event): void {
+    event.stopPropagation();
+    this.projectService.unarchiveProject(project.id).subscribe({
+      next: () => {
+        this.uiToastService.success(`"${project.name}" restaurado.`);
+        this.loadProjects(false);
+      },
+      error: err => this.uiToastService.error(this.resolveErrorMessage(err, 'No se pudo restaurar el proyecto.'))
     });
   }
 
@@ -1483,7 +1597,8 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
       modules: [],
       paymentStatus: project.paymentStatus ?? null,
       applicationsCount: project.applicationsCount ?? 0,
-      acceptedApplicationsCount: project.acceptedApplicationsCount ?? 0
+      acceptedApplicationsCount: project.acceptedApplicationsCount ?? 0,
+      archivedAt: project.archivedAt ?? null
     };
   }
 
@@ -1523,7 +1638,8 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
       priceSetAt: project.priceSetAt,
       paymentStatus: project.paymentStatus ?? null,
       applicationsCount: project.applicationsCount ?? 0,
-      acceptedApplicationsCount: project.acceptedApplicationsCount ?? 0
+      acceptedApplicationsCount: project.acceptedApplicationsCount ?? 0,
+      archivedAt: project.archivedAt ?? null
     };
   }
 
@@ -1582,12 +1698,17 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
       this.stopProjectsPolling();
       return;
     }
+    if (this.projectsPollRetryCount >= CompanyOnboardingComponent.PROJECTS_POLL_MAX_RETRIES) {
+      this.stopProjectsPolling();
+      return;
+    }
     this.scheduleProjectsPoll();
   }
 
   private scheduleProjectsPoll(): void {
     this.stopProjectsPolling();
     this.projectsPollHandle = setTimeout(() => {
+      this.projectsPollRetryCount++;
       this.loadProjects(false);
     }, CompanyOnboardingComponent.PROJECTS_POLL_INTERVAL_MS);
   }
@@ -1597,6 +1718,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
       clearTimeout(this.projectsPollHandle);
       this.projectsPollHandle = null;
     }
+    this.projectsPollRetryCount = 0;
   }
 
   private applyCreateFieldErrorsFromResponse(error: unknown): boolean {

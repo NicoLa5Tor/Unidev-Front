@@ -200,6 +200,16 @@
               class="mt-2 font-tech text-[10px] text-[var(--muted)]">
               Desembolso confirmado: {{ pago.releasedAt | date:'dd/MM/yyyy HH:mm' }}
             </p>
+
+            <p *ngIf="pago.status === 'REFUNDED'"
+              class="mt-2 text-xs text-rose-400">
+              La empresa solicitó el reembolso del pago. El proyecto no continuará bajo los términos acordados. Contacta a soporte si tienes dudas.
+            </p>
+
+            <p *ngIf="pago.status === 'FAILED'"
+              class="mt-2 text-xs text-red-400">
+              El pago no pudo procesarse. La empresa debe reintentar el pago para continuar con el proyecto.
+            </p>
           </ng-container>
         </div>
 
