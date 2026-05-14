@@ -7,8 +7,9 @@ import { UiToastService } from '../../../../shared/services/ui-toast.service';
 import { DashboardShellComponent, DashboardNavItem } from '../../../../shared/components/dashboard-shell/dashboard-shell.component';
 import { StudentService } from '../../../universities/services/student.service';
 import { PaymentService } from '../../../companies/services/payment.service';
-import { StudentTeam, TeamInvitation } from '../../../../shared/models/student.model';
+import { StudentTeam, TeamInvitation, ProjectApplication } from '../../../../shared/models/student.model';
 import { Project } from '../../../../shared/models/project.model';
+import { ProjectPaymentResponse } from '../../../../shared/models/payment.model';
 import { SessionUser } from '../../../../shared/models/session-user.model';
 import { TeamChatDialogComponent } from '../../../../shared/components/team-chat-dialog/team-chat-dialog.component';
 
@@ -37,11 +38,12 @@ export class TutorWorkspaceComponent implements OnInit, OnDestroy {
   activeTab = 'teams';
 
   navItems: DashboardNavItem[] = [
-    { id: 'my-teams', label: 'Mis equipos',   accent: 'accent-1' },
-    { id: 'teams',    label: 'Sede',          accent: 'accent-2' },
-    { id: 'projects', label: 'Proyectos',     accent: 'accent-3' },
-    { id: 'notifications', label: 'Notificaciones', accent: 'accent-4' },
-    { id: 'profile',  label: 'Mi perfil',     accent: 'accent-1' },
+    { id: 'my-teams',      label: 'Mis equipos',      accent: 'accent-1' },
+    { id: 'teams',         label: 'Sede',             accent: 'accent-2' },
+    { id: 'projects',      label: 'Proyectos',        accent: 'accent-3' },
+    { id: 'my-projects',   label: 'Mis proyectos',    accent: 'accent-4' },
+    { id: 'notifications', label: 'Notificaciones',   accent: 'accent-4' },
+    { id: 'profile',       label: 'Mi perfil',        accent: 'accent-1' },
   ];
 
   isLoadingTeams = false;
@@ -53,6 +55,9 @@ export class TutorWorkspaceComponent implements OnInit, OnDestroy {
   private lastKnownPendingCount = -1;
 
   myTutoredTeams: StudentTeam[] = [];
+  myApplications: ProjectApplication[] = [];
+  isLoadingApplications = false;
+  projectPayments = new Map<number, ProjectPaymentResponse>();
 
   // Tutor request modal
   requestingTeam: StudentTeam | null = null;
@@ -123,7 +128,62 @@ export class TutorWorkspaceComponent implements OnInit, OnDestroy {
     if (tab === 'my-teams') this.loadMyTutoredTeams();
     if (tab === 'teams') this.loadTeams();
     if (tab === 'projects') this.loadProjects();
+    if (tab === 'my-projects') this.loadMyApplications();
     if (tab === 'notifications') this.loadInvitations();
+  }
+
+  loadMyApplications(): void {
+    this.isLoadingApplications = true;
+    this.studentService.listMyApplications().subscribe({
+      next: apps => {
+        this.myApplications = apps;
+        this.isLoadingApplications = false;
+        apps.filter(a => a.status === 'ACCEPTED').forEach(a => this.loadProjectPayment(a.projectId));
+      },
+      error: () => { this.isLoadingApplications = false; }
+    });
+  }
+
+  loadProjectPayment(projectId: number): void {
+    this.paymentService.getSellerPaymentStatus(projectId).subscribe({
+      next: payment => { if (payment) this.projectPayments.set(projectId, payment); },
+      error: () => {}
+    });
+  }
+
+  getProjectPayment(projectId: number): ProjectPaymentResponse | null {
+    return this.projectPayments.get(projectId) ?? null;
+  }
+
+  paymentStatusLabel(status: string | undefined): string {
+    switch (status) {
+      case 'PENDING_PAYMENT': return 'Pago pendiente';
+      case 'PAID_HELD':       return 'Pago recibido — en custodia';
+      case 'RELEASED':        return 'Pago desembolsado';
+      case 'REFUNDED':        return 'Pago reembolsado';
+      case 'FAILED':          return 'Pago fallido';
+      default:                return 'Sin pago registrado';
+    }
+  }
+
+  paymentStatusClass(status: string | undefined): string {
+    switch (status) {
+      case 'PAID_HELD':  return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400';
+      case 'RELEASED':   return 'border-sky-500/30 bg-sky-500/10 text-sky-400';
+      case 'REFUNDED':   return 'border-rose-500/30 bg-rose-500/10 text-rose-400';
+      case 'FAILED':     return 'border-red-500/30 bg-red-500/10 text-red-400';
+      default:           return 'border-yellow-500/30 bg-yellow-500/10 text-yellow-400';
+    }
+  }
+
+  formatMoney(amount: number | null | undefined, currency: string | null | undefined): string {
+    if (amount == null || !Number.isFinite(amount)) return 'Pendiente';
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: currency || 'COP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
   }
 
   loadMyTutoredTeams(): void {

@@ -22,6 +22,10 @@ export class PaymentService {
     return this.http.get<ProjectPaymentResponse>(`${this.paymentsUrl}/projects/${projectId}`);
   }
 
+  getSellerPaymentStatus(projectId: number): Observable<ProjectPaymentResponse | null> {
+    return this.http.get<ProjectPaymentResponse>(`${this.paymentsUrl}/projects/${projectId}/seller-status`);
+  }
+
   releasePayment(projectId: number): Observable<ProjectPaymentResponse> {
     return this.http.post<ProjectPaymentResponse>(`${this.paymentsUrl}/projects/${projectId}/release`, {});
   }

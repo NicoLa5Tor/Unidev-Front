@@ -210,7 +210,7 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   loadProjectPayment(projectId: number): void {
-    this.paymentService.getPaymentStatus(projectId).subscribe({
+    this.paymentService.getSellerPaymentStatus(projectId).subscribe({
       next: payment => {
         if (payment) this.projectPayments.set(projectId, payment);
       },
