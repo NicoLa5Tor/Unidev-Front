@@ -8,8 +8,10 @@ import { UiToastService } from '../../../../shared/services/ui-toast.service';
 import { DashboardShellComponent, DashboardNavItem } from '../../../../shared/components/dashboard-shell/dashboard-shell.component';
 import { StudentTeam, ProjectApplication, TeamInvitation } from '../../../../shared/models/student.model';
 import { Project } from '../../../../shared/models/project.model';
+import { ProjectPaymentResponse } from '../../../../shared/models/payment.model';
 import { SessionUser } from '../../../../shared/models/session-user.model';
 import { CompanyService } from '../../../companies/services/company.service';
+import { PaymentService } from '../../../companies/services/payment.service';
 import { UniversityCampus } from '../../../../shared/models/company.model';
 import { ProjectDetailDialogComponent } from '../../../companies/components/project-detail-dialog/project-detail-dialog.component';
 import { ApplicationNegotiationDialogComponent } from '../../../../shared/components/application-negotiation-dialog/application-negotiation-dialog.component';
@@ -25,6 +27,7 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   private readonly studentService = inject(StudentService);
   private readonly userSessionService = inject(UserSessionService);
   private readonly companyService = inject(CompanyService);
+  private readonly paymentService = inject(PaymentService);
   private readonly toast = inject(UiToastService);
   private readonly dialog = inject(MatDialog);
 
@@ -51,6 +54,17 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   isLoadingTeams = false;
   isLoadingApplications = false;
   isLoadingInvitations = false;
+
+  // Pagos: mapa projectId → estado del pago (para postulaciones ACCEPTED)
+  projectPayments = new Map<number, ProjectPaymentResponse>();
+
+  // MP OAuth — cuenta individual del estudiante
+  mpStatus: 'NOT_CONNECTED' | 'PENDING' | 'CONNECTED' | 'DISCONNECTED' | null = null;
+  mpConnecting = false;
+  mpDisconnecting = false;
+
+  // MP OAuth — estado por equipo liderado (teamId → status)
+  teamMpStatuses = new Map<number, string>();
 
   private notifPollHandle: ReturnType<typeof setInterval> | null = null;
   private lastKnownPendingCount = -1;
@@ -131,6 +145,7 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     this.loadMyApplications();
     this.loadInvitations();
     this.startNotifPolling();
+    this.loadMpStatus();
   }
 
   ngOnDestroy(): void {
@@ -187,17 +202,148 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
         this.myApplications = apps;
         this.appliedProjectIds = new Set(apps.map(a => a.projectId));
         this.isLoadingApplications = false;
+        // Cargar estados de pago para postulaciones aceptadas
+        apps.filter(a => a.status === 'ACCEPTED').forEach(a => this.loadProjectPayment(a.projectId));
       },
       error: () => { this.isLoadingApplications = false; }
+    });
+  }
+
+  loadProjectPayment(projectId: number): void {
+    this.paymentService.getPaymentStatus(projectId).subscribe({
+      next: payment => {
+        if (payment) this.projectPayments.set(projectId, payment);
+      },
+      error: () => { /* silencioso — puede no haber pago aún */ }
+    });
+  }
+
+  getProjectPayment(projectId: number): ProjectPaymentResponse | null {
+    return this.projectPayments.get(projectId) ?? null;
+  }
+
+  paymentStatusLabel(status: string | undefined): string {
+    switch (status) {
+      case 'PENDING_PAYMENT': return 'Pago pendiente';
+      case 'PAID_HELD':       return 'Pago recibido — en custodia';
+      case 'RELEASED':        return 'Pago desembolsado';
+      case 'FAILED':          return 'Pago fallido';
+      default:                return 'Sin pago registrado';
+    }
+  }
+
+  paymentStatusClass(status: string | undefined): string {
+    switch (status) {
+      case 'PAID_HELD':  return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400';
+      case 'RELEASED':   return 'border-sky-500/30 bg-sky-500/10 text-sky-400';
+      case 'FAILED':     return 'border-red-500/30 bg-red-500/10 text-red-400';
+      default:           return 'border-yellow-500/30 bg-yellow-500/10 text-yellow-400';
+    }
+  }
+
+  formatMoney(amount: number | null | undefined, currency: string | null | undefined): string {
+    if (amount == null || !Number.isFinite(amount)) return 'Pendiente';
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: currency || 'COP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    }).format(amount);
+  }
+
+  loadMpStatus(): void {
+    this.paymentService.getUserConnectStatus().subscribe({
+      next: res => { this.mpStatus = res.status as any; },
+      error: () => { this.mpStatus = 'NOT_CONNECTED'; }
+    });
+  }
+
+  connectMp(): void {
+    if (this.mpConnecting) return;
+    this.mpConnecting = true;
+    this.paymentService.initUserConnect().subscribe({
+      next: res => {
+        this.mpConnecting = false;
+        if (res.status === 'CONNECTED') {
+          this.mpStatus = 'CONNECTED';
+          this.toast.success('Tu cuenta de Mercado Pago ya está conectada.');
+          return;
+        }
+        if (res.authUrl) {
+          this.mpStatus = 'PENDING';
+          const popup = window.open(res.authUrl, 'mp_oauth', 'width=700,height=600');
+          const onMessage = (event: MessageEvent) => {
+            if (event.data?.type === 'MP_OAUTH_SUCCESS') {
+              window.removeEventListener('message', onMessage);
+              this.loadMpStatus();
+              this.toast.success('¡Cuenta de Mercado Pago conectada correctamente!');
+            } else if (event.data?.type === 'MP_OAUTH_ERROR') {
+              window.removeEventListener('message', onMessage);
+              this.mpStatus = 'NOT_CONNECTED';
+              this.toast.error('No pudimos conectar tu cuenta de Mercado Pago.');
+            }
+          };
+          window.addEventListener('message', onMessage);
+          // Fallback: si el popup se cierra sin postMessage
+          const pollClose = setInterval(() => {
+            if (popup?.closed) {
+              clearInterval(pollClose);
+              window.removeEventListener('message', onMessage);
+              this.loadMpStatus();
+            }
+          }, 1000);
+        }
+      },
+      error: error => {
+        this.mpConnecting = false;
+        const msg = (error?.error?.message) ?? 'No pudimos iniciar la conexión con Mercado Pago.';
+        this.toast.error(msg);
+      }
+    });
+  }
+
+  disconnectMp(): void {
+    if (this.mpDisconnecting) return;
+    this.mpDisconnecting = true;
+    this.paymentService.disconnectUser().subscribe({
+      next: () => {
+        this.mpStatus = 'DISCONNECTED';
+        this.mpDisconnecting = false;
+        this.toast.success('Cuenta de Mercado Pago desvinculada.');
+      },
+      error: () => {
+        this.mpDisconnecting = false;
+        this.toast.error('No pudimos desvincular la cuenta.');
+      }
     });
   }
 
   loadMyTeams(): void {
     this.isLoadingTeams = true;
     this.studentService.listMyTeams().subscribe({
-      next: teams => { this.myTeams = teams; this.isLoadingTeams = false; },
+      next: teams => {
+        this.myTeams = teams;
+        this.isLoadingTeams = false;
+        // Cargar status MP de cada equipo que lidero
+        const ledTeams = teams.filter(t => t.leaderId === this.currentUser?.id);
+        ledTeams.forEach(t => this.loadTeamMpStatus(t.id));
+      },
       error: () => { this.isLoadingTeams = false; }
     });
+  }
+
+  loadTeamMpStatus(teamId: number): void {
+    this.paymentService.getTeamConnectStatus(teamId).subscribe({
+      next: res => this.teamMpStatuses.set(teamId, res.status),
+      error: () => this.teamMpStatuses.set(teamId, 'NOT_CONNECTED')
+    });
+  }
+
+  get mpReadyForApply(): boolean {
+    if (this.applyTeamId != null) {
+      return this.teamMpStatuses.get(this.applyTeamId) === 'CONNECTED';
+    }
+    return this.mpStatus === 'CONNECTED';
   }
 
   loadUniversityTeams(): void {
@@ -288,6 +434,10 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
 
   submitApply(): void {
     if (!this.applyingToProject) return;
+    if (!this.mpReadyForApply) {
+      this.toast.error('Debes vincular tu cuenta de Mercado Pago antes de postularte. Ve a la pestaña Perfil.');
+      return;
+    }
     this.isSubmittingApply = true;
     this.studentService.applyToProject(this.applyingToProject.id, {
       message: this.applyMessage.trim() || null,

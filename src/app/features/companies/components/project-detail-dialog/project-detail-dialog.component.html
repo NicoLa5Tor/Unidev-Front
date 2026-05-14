@@ -1130,6 +1130,115 @@
         </div>
       </div>
 
+      <!-- ══ PANEL DE PAGOS ══ -->
+      <div *ngIf="!isStudentView && isLocked" class="rounded-[24px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-5 text-sm">
+
+        <!-- Cargando -->
+        <div *ngIf="paymentLoading" class="flex items-center gap-3 text-[var(--muted)]">
+          <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+          <span class="font-tech text-[11px] uppercase tracking-[0.18em]">Consultando estado de pago...</span>
+        </div>
+
+        <!-- Sin pago / fallido → botón Pagar -->
+        <div *ngIf="!paymentLoading && canPay" class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-3)]">Pago pendiente</p>
+            <p class="mt-2 leading-6 text-[var(--muted)]">
+              El equipo fue adjudicado. Realiza el pago para asegurar que el proyecto avance.
+              El monto quedará en custodia hasta que se confirme la entrega.
+            </p>
+            <p *ngIf="payment?.status === 'FAILED'" class="mt-2 font-tech text-[10px] uppercase tracking-[0.18em] text-red-400">
+              El pago anterior fue rechazado. Podés intentar de nuevo.
+            </p>
+          </div>
+          <button
+            type="button"
+            [disabled]="checkingOut"
+            class="shrink-0 rounded-full border border-[color:var(--accent-3)] bg-[color:color-mix(in_srgb,var(--accent-3)_18%,transparent)] px-6 py-2.5 font-tech text-xs uppercase tracking-[0.18em] text-[var(--accent-3)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+            (click)="initiateCheckout()">
+            {{ checkingOut ? 'Redirigiendo...' : 'Pagar proyecto →' }}
+          </button>
+        </div>
+
+        <!-- Pago pendiente (esperando confirmación de MP) -->
+        <div *ngIf="!paymentLoading && payment?.status === 'PENDING_PAYMENT'" class="flex items-start justify-between gap-4">
+          <div>
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-yellow-400">Pago en proceso</p>
+            <p class="mt-2 leading-6 text-[var(--muted)]">
+              El pago fue iniciado pero aún no fue confirmado por Mercado Pago.
+              Si ya lo completaste, la confirmación puede tardar unos minutos.
+            </p>
+          </div>
+          <svg class="mt-0.5 h-5 w-5 shrink-0 text-yellow-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd"/></svg>
+        </div>
+
+        <!-- Pago confirmado (PAID_HELD) → mostrar desglose + botón Desembolsar -->
+        <div *ngIf="!paymentLoading && payment?.status === 'PAID_HELD'">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-emerald-400">Pago recibido — en custodia</p>
+              <p class="mt-2 leading-6 text-[var(--muted)]">
+                El pago fue procesado exitosamente. El monto está retenido hasta que se confirme la entrega del proyecto.
+              </p>
+            </div>
+            <svg class="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg>
+          </div>
+
+          <!-- Desglose financiero -->
+          <div class="mt-4 grid gap-2 sm:grid-cols-3">
+            <div class="rounded-[14px] border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3">
+              <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Total pagado</p>
+              <p class="mt-1 font-semibold text-[var(--text)]">{{ formatMoney(payment!.amount, payment!.currency) }}</p>
+            </div>
+            <div class="rounded-[14px] border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3">
+              <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Comisión UniDev ({{ payment!.commissionPercentage }}%)</p>
+              <p class="mt-1 font-semibold text-[var(--muted)]">{{ formatMoney(payment!.commissionAmount, payment!.currency) }}</p>
+            </div>
+            <div class="rounded-[14px] border border-emerald-500/30 bg-emerald-500/10 px-4 py-3">
+              <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-emerald-400">Recibirá el equipo</p>
+              <p class="mt-1 font-semibold text-emerald-300">{{ formatMoney(payment!.freelancerAmount, payment!.currency) }}</p>
+            </div>
+          </div>
+
+          <!-- Botón Desembolsar (admin) -->
+          <div *ngIf="canRelease" class="mt-4 flex justify-end">
+            <button
+              type="button"
+              [disabled]="releasingPayment"
+              class="rounded-full border border-emerald-500 bg-emerald-500/15 px-6 py-2.5 font-tech text-xs uppercase tracking-[0.18em] text-emerald-300 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+              (click)="releasePayment()">
+              {{ releasingPayment ? 'Desembolsando...' : 'Desembolsar pago →' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Pago ya desembolsado (RELEASED) -->
+        <div *ngIf="!paymentLoading && payment?.status === 'RELEASED'" class="flex items-start justify-between gap-4">
+          <div>
+            <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-sky-400">Pago desembolsado</p>
+            <p class="mt-2 leading-6 text-[var(--muted)]">
+              El pago fue desembolsado al equipo.
+              <span *ngIf="payment!.releasedAt"> Desembolso: {{ payment!.releasedAt | date:'dd/MM/yyyy HH:mm' }}.</span>
+            </p>
+            <div class="mt-3 grid gap-2 sm:grid-cols-3">
+              <div class="rounded-[14px] border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3">
+                <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Total</p>
+                <p class="mt-1 font-semibold text-[var(--text)]">{{ formatMoney(payment!.amount, payment!.currency) }}</p>
+              </div>
+              <div class="rounded-[14px] border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-3">
+                <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Comisión UniDev</p>
+                <p class="mt-1 font-semibold text-[var(--muted)]">{{ formatMoney(payment!.commissionAmount, payment!.currency) }}</p>
+              </div>
+              <div class="rounded-[14px] border border-sky-500/30 bg-sky-500/10 px-4 py-3">
+                <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-sky-400">Recibió el equipo</p>
+                <p class="mt-1 font-semibold text-sky-300">{{ formatMoney(payment!.freelancerAmount, payment!.currency) }}</p>
+              </div>
+            </div>
+          </div>
+          <svg class="mt-0.5 h-5 w-5 shrink-0 text-sky-400" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
+        </div>
+      </div>
+
       <!-- Listo para publicar -->
       <div *ngIf="!isLocked && canPublish" class="rounded-[24px] border border-[color:var(--accent-3)] bg-[color:color-mix(in_srgb,var(--accent-3)_8%,transparent)] p-5">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

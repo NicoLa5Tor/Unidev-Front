@@ -83,7 +83,6 @@ export class AuthService {
     window.sessionStorage.clear();
 
     const keysToDelete = Object.keys(window.localStorage).filter(key =>
-      key === 'microsoft-bypass' ||
       key.startsWith('authorizationResult') ||
       key.startsWith('authnResult') ||
       key.startsWith('reusable_route') ||

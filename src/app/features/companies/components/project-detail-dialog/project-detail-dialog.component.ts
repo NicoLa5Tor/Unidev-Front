@@ -6,12 +6,14 @@ import { FormsModule } from '@angular/forms';
 import { ProjectService } from '../../services/project.service';
 import { ApplicationService } from '../../services/application.service';
 import { StudentService } from '../../../universities/services/student.service';
+import { PaymentService } from '../../services/payment.service';
 import {
   ProjectDetail,
   ProjectPublishRequest,
   ProjectRequirement
 } from '../../../../shared/models/project.model';
 import { ApplicantProfile, ProjectApplication } from '../../../../shared/models/project-application.model';
+import { ProjectPaymentResponse } from '../../../../shared/models/payment.model';
 import { UiToastService } from '../../../../shared/services/ui-toast.service';
 import { RequirementAssistantDialogComponent } from '../requirement-assistant-dialog/requirement-assistant-dialog.component';
 import { ApplicationNegotiationDialogComponent } from '../../../../shared/components/application-negotiation-dialog/application-negotiation-dialog.component';
@@ -53,6 +55,12 @@ export class ProjectDetailDialogComponent implements OnDestroy {
   selectedApplicantProfile: ApplicantProfile | null = null;
   applicantProfileLoading = false;
 
+  // Flujo de pago
+  payment: ProjectPaymentResponse | null = null;
+  paymentLoading = false;
+  checkingOut = false;
+  releasingPayment = false;
+
   // Flujo de aprobación de precio
   showPriceApprovalModal = false;
   showCompanyProfileModal = false;
@@ -75,6 +83,7 @@ export class ProjectDetailDialogComponent implements OnDestroy {
     private readonly projectService: ProjectService,
     private readonly applicationService: ApplicationService,
     private readonly studentService: StudentService,
+    private readonly paymentService: PaymentService,
     private readonly uiToastService: UiToastService
   ) {
     this.activeSection = data.initialSection ?? 'detail';
@@ -210,6 +219,69 @@ export class ProjectDetailDialogComponent implements OnDestroy {
         .toLowerCase();
 
       return haystack.includes(query);
+    });
+  }
+
+  get canPay(): boolean {
+    if (this.isStudentView || !this.project) return false;
+    const status = this.project.statusCode;
+    return (status === 'PUBLISHED' || status === 'IN_PROGRESS')
+      && (this.payment == null || this.payment.status === 'FAILED');
+  }
+
+  get paymentStatusLabel(): string {
+    switch (this.payment?.status) {
+      case 'PENDING_PAYMENT': return 'Pago pendiente';
+      case 'PAID_HELD':       return 'Pago recibido — en custodia';
+      case 'RELEASED':        return 'Pago desembolsado';
+      case 'FAILED':          return 'Pago fallido';
+      default:                return 'Sin pago registrado';
+    }
+  }
+
+  get paymentStatusTone(): string {
+    switch (this.payment?.status) {
+      case 'PAID_HELD':  return 'app-status-success';
+      case 'RELEASED':   return 'app-status-info';
+      case 'FAILED':     return 'app-status-danger';
+      default:           return 'app-status-warning';
+    }
+  }
+
+  get canRelease(): boolean {
+    return this.payment?.status === 'PAID_HELD' && !this.isStudentView;
+  }
+
+  initiateCheckout(): void {
+    if (!this.project || this.checkingOut) return;
+    this.checkingOut = true;
+    this.paymentService.createCheckout(this.project.id).subscribe({
+      next: response => {
+        this.checkingOut = false;
+        window.open(response.checkoutUrl, '_blank');
+        // Esperar retorno del usuario y refrescar pago
+        setTimeout(() => this.loadPayment(), 3000);
+      },
+      error: error => {
+        this.checkingOut = false;
+        this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos iniciar el proceso de pago.'));
+      }
+    });
+  }
+
+  releasePayment(): void {
+    if (!this.project || this.releasingPayment || !this.canRelease) return;
+    this.releasingPayment = true;
+    this.paymentService.releasePayment(this.project.id).subscribe({
+      next: payment => {
+        this.payment = payment;
+        this.releasingPayment = false;
+        this.uiToastService.success('Pago desembolsado correctamente.');
+      },
+      error: error => {
+        this.releasingPayment = false;
+        this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos desembolsar el pago.'));
+      }
     });
   }
 
@@ -599,12 +671,31 @@ export class ProjectDetailDialogComponent implements OnDestroy {
         if (this.activeSection === 'applications') {
           this.loadApplications();
         }
+        // Cargar estado de pago para proyectos publicados o en desarrollo (solo vista empresa)
+        if (!this.isStudentView && (project.statusCode === 'PUBLISHED' || project.statusCode === 'IN_PROGRESS')) {
+          this.loadPayment();
+        }
       },
       error: error => {
         this.isLoading = false;
         this.stopPolling();
         this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos cargar el detalle del proyecto.'));
         this.dialogRef.close(null);
+      }
+    });
+  }
+
+  private loadPayment(): void {
+    if (!this.project) return;
+    this.paymentLoading = true;
+    this.paymentService.getPaymentStatus(this.project.id).subscribe({
+      next: payment => {
+        this.payment = payment;
+        this.paymentLoading = false;
+      },
+      error: () => {
+        // No bloquear UI si falla la carga del estado de pago
+        this.paymentLoading = false;
       }
     });
   }

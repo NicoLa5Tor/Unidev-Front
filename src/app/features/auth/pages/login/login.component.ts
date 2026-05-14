@@ -55,7 +55,11 @@ export class LoginComponent {
 
   onProviderConfirmed(provider: SocialLoginProvider): void {
     if (provider.key === 'microsoft') {
-      this.authService.federatedSignIn('microsoft');
+      if (this.shouldBypassMicrosoftDialog()) {
+        this.authService.federatedSignIn('microsoft');
+      } else {
+        this.openMicrosoftDialog();
+      }
       return;
     }
     this.authService.federatedSignIn(provider.key as FederatedProvider);
