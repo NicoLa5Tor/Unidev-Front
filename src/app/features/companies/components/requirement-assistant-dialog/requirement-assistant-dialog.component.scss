@@ -194,7 +194,7 @@
 // ── Chat feed ─────────────────────────────────────────
 .rad__feed {
   flex: 1;
-  min-height: 160px;
+  min-height: 100px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -360,6 +360,16 @@
   background: color-mix(in srgb, var(--accent-2) 7%, var(--panel-2));
   position: relative;
   overflow: hidden;
+  max-height: 320px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--accent-2) 30%, transparent) transparent;
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--accent-2) 30%, transparent);
+    border-radius: 4px;
+  }
 
   // subtle shimmer line at top
   &::before {
@@ -473,6 +483,55 @@
   font-size: 0.82rem;
   line-height: 1.5;
   white-space: pre-line;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+// ── Proposal request ──────────────────────────────────
+.rad__proposal-request {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.rad__ask-proposal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent-2) 50%, var(--panel-border));
+  background: color-mix(in srgb, var(--accent-2) 12%, transparent);
+  color: var(--accent-2);
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: 140ms ease;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--accent-2) 22%, transparent);
+    filter: brightness(1.08);
+  }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+.rad__proposal-hint {
+  color: var(--muted);
+  font-size: 0.72rem;
+  opacity: 0.7;
+}
+
+.rad__send-spinner--inline {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid color-mix(in srgb, var(--accent-2) 40%, transparent);
+  border-top-color: var(--accent-2);
+  border-radius: 999px;
+  animation: rad-spin 0.7s linear infinite;
 }
 
 // ── Composer ──────────────────────────────────────────

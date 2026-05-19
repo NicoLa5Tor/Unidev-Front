@@ -30,11 +30,13 @@ export class RequirementAssistantDialogComponent implements AfterViewChecked {
 
   prompt = '';
   sending = false;
+  requestingProposal = false;
   applying = false;
   proposalExpanded = false;
   requirement: ProjectRequirement;
 
   private shouldScrollToBottom = false;
+  private lastProject: ProjectDetail | null = null;
 
   constructor(
     private readonly dialogRef: MatDialogRef<RequirementAssistantDialogComponent, ProjectDetail | null>,
@@ -52,6 +54,10 @@ export class RequirementAssistantDialogComponent implements AfterViewChecked {
     }
   }
 
+  get isBusy(): boolean {
+    return this.sending || this.requestingProposal;
+  }
+
   get canApplySuggestion(): boolean {
     return !!this.requirement.assistantSuggestion && !this.applying && this.requirement.active;
   }
@@ -66,29 +72,51 @@ export class RequirementAssistantDialogComponent implements AfterViewChecked {
   }
 
   close(): void {
-    this.dialogRef.close(null);
+    this.dialogRef.close(this.lastProject);
   }
 
   send(): void {
     const message = this.prompt.trim();
-    if (!message || this.sending) return;
+    if (!message || this.isBusy) return;
 
     this.sending = true;
     this.shouldScrollToBottom = true;
 
-    this.projectService.sendRequirementAssistantMessage(this.data.projectId, this.requirement.id, { message }).subscribe({
+    this.projectService.sendRequirementAssistantMessage(this.data.projectId, this.requirement.id, { message, requestProposal: false }).subscribe({
       next: project => {
+        this.lastProject = project;
         this.requirement = this.findRequirement(project);
         this.prompt = '';
         this.sending = false;
         this.shouldScrollToBottom = true;
         this.resetTextareaHeight();
-        this.proposalExpanded = true;
-        this.uiToastService.success('La IA respondió y dejó una propuesta actualizada para este requerimiento.');
       },
       error: error => {
         this.sending = false;
         this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos consultar la IA para este requerimiento.'));
+      }
+    });
+  }
+
+  askForProposal(): void {
+    if (this.isBusy || !this.requirement.active) return;
+
+    this.requestingProposal = true;
+    this.shouldScrollToBottom = true;
+
+    const syntheticMessage = 'Genera una propuesta estructurada basada en nuestra conversación.';
+    this.projectService.sendRequirementAssistantMessage(this.data.projectId, this.requirement.id, { message: syntheticMessage, requestProposal: true }).subscribe({
+      next: project => {
+        this.lastProject = project;
+        this.requirement = this.findRequirement(project);
+        this.requestingProposal = false;
+        this.shouldScrollToBottom = true;
+        this.proposalExpanded = true;
+        this.uiToastService.success('La IA generó una propuesta. Revísala y aplícala cuando quieras.');
+      },
+      error: error => {
+        this.requestingProposal = false;
+        this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos generar la propuesta.'));
       }
     });
   }
@@ -116,6 +144,10 @@ export class RequirementAssistantDialogComponent implements AfterViewChecked {
       event.preventDefault();
       this.send();
     }
+  }
+
+  get canRequestProposal(): boolean {
+    return !this.isBusy && this.requirement.active && this.messages.length > 0;
   }
 
   autoResize(event: Event): void {

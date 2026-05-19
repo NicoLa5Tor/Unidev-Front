@@ -49,6 +49,7 @@ export interface UpdateProjectRequirementDto {
 
 export interface ProjectRequirementAssistantMessageDto {
   message: string;
+  requestProposal?: boolean;
 }
 
 export interface ProjectRequirementAssistantMessage {

@@ -116,19 +116,36 @@
       </div>
     </div>
 
+    <!-- ── Proposal request button ── -->
+    <div class="rad__proposal-request">
+      <button
+        type="button"
+        class="rad__ask-proposal"
+        [disabled]="!canRequestProposal"
+        (click)="askForProposal()"
+      >
+        <span *ngIf="!requestingProposal">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="13" height="13"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+          Pedir propuesta
+        </span>
+        <span *ngIf="requestingProposal" class="rad__send-spinner rad__send-spinner--inline"></span>
+      </button>
+      <span class="rad__proposal-hint">La IA genera una propuesta lista para aplicar</span>
+    </div>
+
     <!-- ── Composer ── -->
     <div class="rad__composer" [class.rad__composer--active]="prompt.trim()">
       <textarea
         [(ngModel)]="prompt"
         [ngModelOptions]="{ standalone: true }"
-        [disabled]="sending"
+        [disabled]="isBusy"
         rows="1"
-        placeholder="Cuéntale qué quieres ajustar o mejorar…"
+        placeholder="Conversa con la IA sobre este requerimiento…"
         (keydown.enter)="onEnterKey($event)"
         (input)="autoResize($event)"
         #promptTextarea
       ></textarea>
-      <button type="button" class="rad__send" [disabled]="sending || !prompt.trim()" (click)="send()">
+      <button type="button" class="rad__send" [disabled]="isBusy || !prompt.trim()" (click)="send()">
         <svg *ngIf="!sending" viewBox="0 0 20 20" fill="currentColor" width="17" height="17"><path d="M3.105 2.289a.75.75 0 00-.826.95l1.414 4.925A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086l-1.414 4.926a.75.75 0 00.826.95 28.896 28.896 0 0015.293-7.154.75.75 0 000-1.115A28.897 28.897 0 003.105 2.289z"/></svg>
         <span *ngIf="sending" class="rad__send-spinner"></span>
       </button>
