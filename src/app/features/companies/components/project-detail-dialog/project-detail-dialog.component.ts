@@ -383,6 +383,10 @@ export class ProjectDetailDialogComponent implements OnDestroy {
     }
 
     this.updatingRequirementId = requirement.id;
+    const previousActive = requirement.active;
+    requirement.active = active;
+    this.uiToastService.success(active ? 'Requerimiento reactivado.' : 'Requerimiento excluido del estimado actual.');
+
     this.projectService.updateRequirement(this.project.id, requirement.id, {
       title: requirement.title,
       description: requirement.description,
@@ -398,9 +402,9 @@ export class ProjectDetailDialogComponent implements OnDestroy {
         this.ensureExpandedRequirements(project.requirements);
         this.updatingRequirementId = null;
         this.syncPolling(project);
-        this.uiToastService.success(active ? 'Requerimiento reactivado.' : 'Requerimiento excluido del estimado actual.');
       },
       error: error => {
+        requirement.active = previousActive;
         this.updatingRequirementId = null;
         this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos actualizar el estado del requerimiento.'));
       }
