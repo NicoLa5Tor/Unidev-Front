@@ -1,156 +1,232 @@
 <div class="rad">
-  <!-- Ambient glow -->
   <div class="rad__glow" aria-hidden="true"></div>
 
   <!-- ── Header ── -->
   <div class="rad__header">
     <div class="rad__ai-badge">
       <span class="rad__pulse"></span>
-      <svg viewBox="0 0 20 20" fill="currentColor" class="rad__badge-icon" width="14" height="14"><path d="M10 1a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 1zM5.05 3.05a.75.75 0 011.06 0l1.06 1.06A.75.75 0 016.11 5.17L5.05 4.11a.75.75 0 010-1.06zm9.9 0a.75.75 0 010 1.06L13.89 5.17a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM10 6a4 4 0 100 8 4 4 0 000-8zm-8 3.25a.75.75 0 000 1.5h1.5a.75.75 0 000-1.5H2zm15.5 0a.75.75 0 000 1.5H19a.75.75 0 000-1.5h-1.5zm-10.44 5.33a.75.75 0 011.06 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06zm6.88 0l1.06 1.06a.75.75 0 11-1.06 1.06l-1.06-1.06a.75.75 0 011.06-1.06zM10 17.25a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75z"/></svg>
+      <svg viewBox="0 0 20 20" fill="currentColor" width="13" height="13"><path d="M10 1a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 1zM5.05 3.05a.75.75 0 011.06 0l1.06 1.06A.75.75 0 016.11 5.17L5.05 4.11a.75.75 0 010-1.06zm9.9 0a.75.75 0 010 1.06L13.89 5.17a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM10 6a4 4 0 100 8 4 4 0 000-8zm-8 3.25a.75.75 0 000 1.5h1.5a.75.75 0 000-1.5H2zm15.5 0a.75.75 0 000 1.5H19a.75.75 0 000-1.5h-1.5zm-10.44 5.33a.75.75 0 011.06 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06zm6.88 0l1.06 1.06a.75.75 0 11-1.06 1.06l-1.06-1.06a.75.75 0 011.06-1.06zM10 17.25a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75z"/></svg>
       <span>Asistente IA</span>
     </div>
     <div class="rad__header-info">
       <h3 class="rad__title">{{ requirement.title || requirementDisplayLabel }}</h3>
-      <p class="rad__subtitle">Conversa para refinar este requerimiento</p>
+      <p class="rad__subtitle">{{ requirementDisplayLabel }} · Conversa para refinar este requerimiento</p>
     </div>
-    <button type="button" class="rad__close" (click)="close()">✕</button>
+    <button type="button" class="rad__close" (click)="close()" aria-label="Cerrar">
+      <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/></svg>
+    </button>
   </div>
 
-  <!-- ── Inactive ── -->
+  <!-- ── Inactive warning ── -->
   <div *ngIf="!requirement.active" class="rad__inactive">
     <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd"/></svg>
-    Requerimiento deshabilitado. Reactívalo desde el detalle del proyecto.
+    Requerimiento deshabilitado. Reactívalo desde el detalle del proyecto para usar el asistente.
   </div>
 
-  <!-- ── Active body ── -->
+  <!-- ── Two-column body ── -->
   <div *ngIf="requirement.active" class="rad__body">
 
-    <!-- Context strip -->
-    <div class="rad__context">
-      <span class="rad__context-eyebrow">Contexto actual</span>
-      <p class="rad__context-text">{{ requirement.description || 'Sin descripción cargada.' }}</p>
-      <div class="rad__chips">
-        <span class="rad__chip">{{ requirement.priority || 'Sin prioridad' }}</span>
-        <span class="rad__chip">{{ requirement.devNumber || 1 }} dev</span>
-      </div>
-    </div>
+    <!-- ═══ LEFT: Chat panel ═══ -->
+    <div class="rad__chat-panel">
 
-    <!-- ── Chat feed ── -->
-    <div class="rad__feed" #messagesContainer>
+      <!-- Chat feed -->
+      <div class="rad__feed" #messagesContainer>
 
-      <!-- Empty state -->
-      <div *ngIf="!messages.length && !sending" class="rad__empty">
-        <div class="rad__empty-orb">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+        <div *ngIf="!messages.length && !sending" class="rad__empty">
+          <div class="rad__empty-orb">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+          </div>
+          <p class="rad__empty-title">Inicia la conversación</p>
+          <p class="rad__empty-hint">Cuéntale a la IA qué quieres cambiar en este requerimiento y te ayudará a refinarlo.</p>
         </div>
-        <p class="rad__empty-title">Sin conversación aún</p>
-        <p class="rad__empty-hint">Cuéntale a la IA qué quieres ajustar y te ayudará a refinarlo.</p>
-      </div>
 
-      <!-- Messages -->
-      <ng-container *ngFor="let message of messages; trackBy: trackMessage">
+        <ng-container *ngFor="let message of messages; trackBy: trackMessage">
+          <div *ngIf="message.role === 'USER'" class="rad__row rad__row--user">
+            <div class="rad__bubble rad__bubble--user">
+              <p class="rad__bubble-label">Tú</p>
+              <p class="rad__bubble-text">{{ message.content }}</p>
+            </div>
+          </div>
+          <div *ngIf="message.role !== 'USER'" class="rad__row rad__row--ai">
+            <div class="rad__avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+            </div>
+            <div class="rad__bubble rad__bubble--ai">
+              <p class="rad__bubble-label">Asistente IA</p>
+              <p class="rad__bubble-text">{{ message.content }}</p>
+            </div>
+          </div>
+        </ng-container>
 
-        <!-- User bubble -->
-        <div *ngIf="message.role === 'USER'" class="rad__row rad__row--user">
-          <div class="rad__bubble rad__bubble--user">
-            <p class="rad__bubble-label">Tú</p>
-            <p class="rad__bubble-text">{{ message.content }}</p>
+        <div *ngIf="sending" class="rad__row rad__row--ai">
+          <div class="rad__avatar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+          </div>
+          <div class="rad__bubble rad__bubble--ai rad__bubble--typing">
+            <span></span><span></span><span></span>
           </div>
         </div>
 
-        <!-- AI bubble -->
-        <div *ngIf="message.role !== 'USER'" class="rad__row rad__row--ai">
-          <div class="rad__avatar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+        <div *ngIf="requestingProposal" class="rad__row rad__row--ai">
+          <div class="rad__avatar rad__avatar--spin">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
           </div>
           <div class="rad__bubble rad__bubble--ai">
-            <p class="rad__bubble-label">Respuesta IA</p>
-            <p class="rad__bubble-text">{{ message.content }}</p>
+            <p class="rad__bubble-label">Asistente IA</p>
+            <p class="rad__bubble-text rad__bubble-text--muted">Generando propuesta estructurada…</p>
           </div>
         </div>
 
-      </ng-container>
-
-      <!-- Typing indicator -->
-      <div *ngIf="sending" class="rad__row rad__row--ai">
-        <div class="rad__avatar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
-        </div>
-        <div class="rad__bubble rad__bubble--ai rad__bubble--typing">
-          <span></span><span></span><span></span>
-        </div>
       </div>
 
-    </div>
-
-    <!-- ── AI Suggestion card ── -->
-    <div *ngIf="requirement.assistantSuggestion" class="rad__proposal">
-      <div class="rad__proposal-header">
-        <button type="button" class="rad__proposal-toggle" (click)="proposalExpanded = !proposalExpanded">
-          <div class="rad__proposal-badge">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
-            Propuesta IA
-          </div>
-          <svg class="rad__chevron" [class.rad__chevron--open]="proposalExpanded" viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
-        </button>
-        <button type="button" [disabled]="!canApplySuggestion" class="rad__apply" (click)="applySuggestion()">
-          {{ applying ? 'Aplicando…' : 'Aplicar →' }}
-        </button>
-      </div>
-      <div *ngIf="proposalExpanded">
-      <p class="rad__proposal-summary">{{ requirement.assistantSuggestion.summary || 'La IA dejó una propuesta para este requerimiento.' }}</p>
-      <div class="rad__proposal-grid">
-        <div class="rad__tile">
-          <p class="rad__tile-label">Título</p>
-          <p>{{ requirement.assistantSuggestion.title || 'Sin título' }}</p>
-        </div>
-        <div class="rad__tile">
-          <p class="rad__tile-label">Parámetros</p>
-          <p>{{ requirement.assistantSuggestion.priority || '—' }} · {{ requirement.assistantSuggestion.involvedUser || '—' }} · {{ requirement.assistantSuggestion.devNumber || 1 }} dev</p>
-        </div>
-        <div class="rad__tile rad__tile--wide">
-          <p class="rad__tile-label">Descripción propuesta</p>
-          <p>{{ requirement.assistantSuggestion.description || 'Sin descripción sugerida.' }}</p>
-        </div>
-      </div>
-      </div>
-    </div>
-
-    <!-- ── Proposal request button ── -->
-    <div class="rad__proposal-request">
-      <button
-        type="button"
-        class="rad__ask-proposal"
-        [disabled]="!canRequestProposal"
-        (click)="askForProposal()"
-      >
-        <span *ngIf="!requestingProposal">
-          <svg viewBox="0 0 20 20" fill="currentColor" width="13" height="13"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+      <!-- Bottom toolbar: proposal request + composer -->
+      <div class="rad__toolbar">
+        <button
+          type="button"
+          class="rad__ask-proposal"
+          [disabled]="!canRequestProposal"
+          (click)="askForProposal()"
+          title="Pedir propuesta estructurada"
+        >
+          <svg viewBox="0 0 20 20" fill="currentColor" width="12" height="12"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
           Pedir propuesta
-        </span>
-        <span *ngIf="requestingProposal" class="rad__send-spinner rad__send-spinner--inline"></span>
-      </button>
-      <span class="rad__proposal-hint">La IA genera una propuesta lista para aplicar</span>
+        </button>
+        <span class="rad__toolbar-hint">La IA genera una propuesta lista para aplicar con horas estimadas</span>
+      </div>
+
+      <div class="rad__composer" [class.rad__composer--active]="prompt.trim()">
+        <textarea
+          [(ngModel)]="prompt"
+          [ngModelOptions]="{ standalone: true }"
+          [disabled]="isBusy"
+          rows="1"
+          placeholder="Conversa con la IA sobre este requerimiento…"
+          (keydown.enter)="onEnterKey($event)"
+          (input)="autoResize($event)"
+          #promptTextarea
+        ></textarea>
+        <button type="button" class="rad__send" [disabled]="isBusy || !prompt.trim()" (click)="send()">
+          <svg *ngIf="!sending" viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M3.105 2.289a.75.75 0 00-.826.95l1.414 4.925A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086l-1.414 4.926a.75.75 0 00.826.95 28.896 28.896 0 0015.293-7.154.75.75 0 000-1.115A28.897 28.897 0 003.105 2.289z"/></svg>
+          <span *ngIf="sending" class="rad__spinner"></span>
+        </button>
+      </div>
+      <p class="rad__composer-hint">Enter para enviar · Shift+Enter para nueva línea</p>
+
     </div>
 
-    <!-- ── Composer ── -->
-    <div class="rad__composer" [class.rad__composer--active]="prompt.trim()">
-      <textarea
-        [(ngModel)]="prompt"
-        [ngModelOptions]="{ standalone: true }"
-        [disabled]="isBusy"
-        rows="1"
-        placeholder="Conversa con la IA sobre este requerimiento…"
-        (keydown.enter)="onEnterKey($event)"
-        (input)="autoResize($event)"
-        #promptTextarea
-      ></textarea>
-      <button type="button" class="rad__send" [disabled]="isBusy || !prompt.trim()" (click)="send()">
-        <svg *ngIf="!sending" viewBox="0 0 20 20" fill="currentColor" width="17" height="17"><path d="M3.105 2.289a.75.75 0 00-.826.95l1.414 4.925A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086l-1.414 4.926a.75.75 0 00.826.95 28.896 28.896 0 0015.293-7.154.75.75 0 000-1.115A28.897 28.897 0 003.105 2.289z"/></svg>
-        <span *ngIf="sending" class="rad__send-spinner"></span>
-      </button>
-    </div>
-    <p class="rad__hint">Enter para enviar · Shift+Enter para nueva línea</p>
+    <!-- ═══ RIGHT: Info panel (tabbed) ═══ -->
+    <aside class="rad__side">
 
+      <!-- Tab strip -->
+      <nav class="rad__tabs" role="tablist">
+        <button type="button" class="rad__tab" role="tab"
+                [class.rad__tab--active]="activeTab === 'context'"
+                (click)="activeTab = 'context'">
+          <span>Contexto</span>
+        </button>
+        <button type="button" class="rad__tab" role="tab"
+                [class.rad__tab--active]="activeTab === 'proposal'"
+                [disabled]="!requirement.assistantSuggestion"
+                (click)="activeTab = 'proposal'">
+          <span>Propuesta IA</span>
+          <span *ngIf="requirement.assistantSuggestion?.estimatedHours" class="rad__tab-badge">
+            {{ requirement.assistantSuggestion?.estimatedHours }}h
+          </span>
+        </button>
+      </nav>
+
+      <!-- ── Tab content: CONTEXT ── -->
+      <section *ngIf="activeTab === 'context'" class="rad__tab-pane" role="tabpanel">
+        <p class="rad__card-eyebrow">Requerimiento actual</p>
+
+        <div class="rad__field">
+          <span class="rad__field-label">Descripción</span>
+          <p class="rad__field-value">{{ requirement.description || 'Sin descripción.' }}</p>
+        </div>
+
+        <div class="rad__stats-row">
+          <div class="rad__stat">
+            <span class="rad__stat-label">Prioridad</span>
+            <span class="rad__priority-chip rad__priority-chip--{{ requirement.priority?.toLowerCase() }}">{{ requirement.priority || '—' }}</span>
+          </div>
+          <div class="rad__stat">
+            <span class="rad__stat-label">Devs</span>
+            <span class="rad__stat-value">{{ requirement.devNumber || 1 }}</span>
+          </div>
+          <div class="rad__stat">
+            <span class="rad__stat-label">Horas</span>
+            <span class="rad__stat-value rad__stat-value--hours">{{ requirement.estimatedHours != null ? requirement.estimatedHours + 'h' : '—' }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="requirement.involvedUser" class="rad__field">
+          <span class="rad__field-label">Actor</span>
+          <p class="rad__field-value">{{ requirement.involvedUser }}</p>
+        </div>
+
+        <div class="rad__flags">
+          <span class="rad__flag" [class.rad__flag--on]="requirement.hasExternalConnection">Conexión externa</span>
+          <span class="rad__flag" [class.rad__flag--on]="requirement.requiresVisualScreen">Pantalla visual</span>
+        </div>
+
+        <div *ngIf="!requirement.assistantSuggestion" class="rad__hint">
+          Conversa con la IA y luego pide una propuesta para ver los cambios sugeridos con horas estimadas.
+        </div>
+      </section>
+
+      <!-- ── Tab content: PROPOSAL ── -->
+      <section *ngIf="activeTab === 'proposal' && requirement.assistantSuggestion" class="rad__tab-pane" role="tabpanel">
+        <header class="rad__prop-head">
+          <span class="rad__prop-badge">Propuesta IA</span>
+          <div *ngIf="requirement.assistantSuggestion.estimatedHours" class="rad__prop-hours">
+            <span class="rad__prop-hours-num">{{ requirement.assistantSuggestion.estimatedHours }}</span>
+            <span class="rad__prop-hours-unit">horas</span>
+          </div>
+        </header>
+
+        <p class="rad__prop-summary">{{ requirement.assistantSuggestion.summary || 'La IA generó una propuesta para este requerimiento.' }}</p>
+
+        <div class="rad__field">
+          <span class="rad__field-label">Título propuesto</span>
+          <p class="rad__field-value rad__field-value--strong">{{ requirement.assistantSuggestion.title || '—' }}</p>
+        </div>
+
+        <div class="rad__field">
+          <span class="rad__field-label">Descripción propuesta</span>
+          <p class="rad__field-value">{{ requirement.assistantSuggestion.description || '—' }}</p>
+        </div>
+
+        <div class="rad__stats-row rad__stats-row--four">
+          <div class="rad__stat">
+            <span class="rad__stat-label">Prioridad</span>
+            <span class="rad__priority-chip rad__priority-chip--{{ requirement.assistantSuggestion.priority?.toLowerCase() }}">{{ requirement.assistantSuggestion.priority || '—' }}</span>
+          </div>
+          <div class="rad__stat">
+            <span class="rad__stat-label">Devs</span>
+            <span class="rad__stat-value">{{ requirement.assistantSuggestion.devNumber || 1 }}</span>
+          </div>
+          <div class="rad__stat">
+            <span class="rad__stat-label">Ext.</span>
+            <span class="rad__stat-bool" [class.rad__stat-bool--yes]="requirement.assistantSuggestion.hasExternalConnection">{{ requirement.assistantSuggestion.hasExternalConnection ? 'Sí' : 'No' }}</span>
+          </div>
+          <div class="rad__stat">
+            <span class="rad__stat-label">Visual</span>
+            <span class="rad__stat-bool" [class.rad__stat-bool--yes]="requirement.assistantSuggestion.requiresVisualScreen">{{ requirement.assistantSuggestion.requiresVisualScreen ? 'Sí' : 'No' }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer (sticky) — apply button if on proposal tab -->
+      <footer *ngIf="activeTab === 'proposal' && requirement.assistantSuggestion" class="rad__side-footer">
+        <button type="button" class="rad__apply" [disabled]="!canApplySuggestion" (click)="applySuggestion()">
+          <span *ngIf="!applying">Aplicar propuesta</span>
+          <span *ngIf="applying" class="rad__apply-loading">
+            <span class="rad__spinner rad__spinner--sm"></span>
+            Aplicando…
+          </span>
+        </button>
+      </footer>
+
+    </aside>
   </div>
 </div>

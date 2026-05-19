@@ -67,6 +67,7 @@ export interface ProjectRequirementAssistantSuggestion {
   hasExternalConnection: boolean | null;
   requiresVisualScreen: boolean | null;
   devNumber: number | null;
+  estimatedHours: number | null;
   summary: string | null;
   updatedAt: string | null;
 }

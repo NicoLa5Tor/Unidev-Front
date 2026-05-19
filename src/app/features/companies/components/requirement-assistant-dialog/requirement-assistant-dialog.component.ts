@@ -17,6 +17,8 @@ export interface RequirementAssistantDialogData {
   requirementIndex?: number;
 }
 
+type SideTab = 'context' | 'proposal';
+
 @Component({
   selector: 'app-requirement-assistant-dialog',
   standalone: true,
@@ -32,7 +34,7 @@ export class RequirementAssistantDialogComponent implements AfterViewChecked {
   sending = false;
   requestingProposal = false;
   applying = false;
-  proposalExpanded = false;
+  activeTab: SideTab = 'context';
   requirement: ProjectRequirement;
 
   private shouldScrollToBottom = false;
@@ -45,6 +47,9 @@ export class RequirementAssistantDialogComponent implements AfterViewChecked {
     private readonly uiToastService: UiToastService
   ) {
     this.requirement = data.requirement;
+    if (this.requirement.assistantSuggestion) {
+      this.activeTab = 'proposal';
+    }
   }
 
   ngAfterViewChecked(): void {
@@ -69,6 +74,10 @@ export class RequirementAssistantDialogComponent implements AfterViewChecked {
   get requirementDisplayLabel(): string {
     const index = this.data.requirementIndex ?? -1;
     return index >= 0 ? `Requerimiento ${index + 1}` : 'Requerimiento';
+  }
+
+  get canRequestProposal(): boolean {
+    return !this.isBusy && this.requirement.active && this.messages.length > 0;
   }
 
   close(): void {
@@ -111,7 +120,7 @@ export class RequirementAssistantDialogComponent implements AfterViewChecked {
         this.requirement = this.findRequirement(project);
         this.requestingProposal = false;
         this.shouldScrollToBottom = true;
-        this.proposalExpanded = true;
+        this.activeTab = 'proposal';
         this.uiToastService.success('La IA generó una propuesta. Revísala y aplícala cuando quieras.');
       },
       error: error => {
@@ -128,7 +137,7 @@ export class RequirementAssistantDialogComponent implements AfterViewChecked {
     this.projectService.applyRequirementAssistantSuggestion(this.data.projectId, this.requirement.id).subscribe({
       next: project => {
         this.applying = false;
-        this.uiToastService.success('La propuesta de la IA se aplicó y el proyecto ya está reestimándose.');
+        this.uiToastService.success('Propuesta aplicada. La estimación del proyecto se actualizó.');
         this.dialogRef.close(project);
       },
       error: error => {
@@ -144,10 +153,6 @@ export class RequirementAssistantDialogComponent implements AfterViewChecked {
       event.preventDefault();
       this.send();
     }
-  }
-
-  get canRequestProposal(): boolean {
-    return !this.isBusy && this.requirement.active && this.messages.length > 0;
   }
 
   autoResize(event: Event): void {
