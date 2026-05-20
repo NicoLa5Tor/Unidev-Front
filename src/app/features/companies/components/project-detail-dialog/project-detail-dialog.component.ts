@@ -60,7 +60,6 @@ export class ProjectDetailDialogComponent implements OnDestroy {
   paymentLoading = false;
   checkingOut = false;
   releasingPayment = false;
-  refundingPayment = false;
 
   // Flujo de aprobación de precio
   showPriceApprovalModal = false;
@@ -284,22 +283,6 @@ export class ProjectDetailDialogComponent implements OnDestroy {
       error: error => {
         this.releasingPayment = false;
         this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos desembolsar el pago.'));
-      }
-    });
-  }
-
-  refundPayment(): void {
-    if (!this.project || this.refundingPayment || this.payment?.status !== 'PAID_HELD') return;
-    this.refundingPayment = true;
-    this.paymentService.refundPayment(this.project.id).subscribe({
-      next: payment => {
-        this.payment = payment;
-        this.refundingPayment = false;
-        this.uiToastService.success('Reembolso procesado. El dinero será devuelto a la empresa.');
-      },
-      error: error => {
-        this.refundingPayment = false;
-        this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos procesar el reembolso.'));
       }
     });
   }

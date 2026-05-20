@@ -72,7 +72,6 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   publishingProjectId: number | null = null;
   payingProjectId: number | null = null;
   releasingProjectId: number | null = null;
-  refundingProjectId: number | null = null;
   projectVisibilityFilter: ProjectVisibilityFilter = 'ALL';
   message: MessageState = null;
   createFieldErrors: Partial<Record<CreateField, string>> = {};
@@ -1018,40 +1017,6 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     });
   }
 
-  refundPayment(project: Project, event?: Event): void {
-    event?.stopPropagation();
-    if (this.refundingProjectId === project.id) return;
-
-    this.dialog.open(MessageDialogComponent, {
-      width: '440px',
-      maxWidth: '92vw',
-      panelClass: 'message-dialog-panel',
-      data: {
-        title: 'Reembolsar pago',
-        message: `¿Confirmas que deseas reembolsar el pago del proyecto "${project.name}"? El desarrollador será notificado por correo.`,
-        type: 'error',
-        confirmLabel: 'Sí, reembolsar',
-        cancelLabel: 'Cancelar',
-        supportText: 'El dinero será devuelto a tu cuenta de Mercado Pago'
-      } satisfies MessageDialogData
-    }).afterClosed().subscribe(confirmed => {
-      if (!confirmed) return;
-      this.refundingProjectId = project.id;
-      this.paymentService.refundPayment(project.id).subscribe({
-        next: () => {
-          this.refundingProjectId = null;
-          this.uiToastService.success('Pago reembolsado exitosamente.');
-          this.loadProjects();
-          this.openRatingDialog(project);
-        },
-        error: err => {
-          this.refundingProjectId = null;
-          this.uiToastService.error(this.resolveErrorMessage(err, 'No se pudo procesar el reembolso. Intenta de nuevo.'));
-        }
-      });
-    });
-  }
-
   formatMoney(amount: number | null | undefined, currency: string | null | undefined): string {
     if (amount == null || !Number.isFinite(amount)) return '—';
     return new Intl.NumberFormat('es-CO', {
@@ -1085,9 +1050,10 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   }
 
   loadRatingForProject(project: Project): void {
-    if (this.projectRatings.has(project.id)) return;
     this.ratingService.getRatingForProject(project.id).subscribe({
-      next: r => this.projectRatings.set(project.id, r),
+      next: r => {
+        this.projectRatings.set(project.id, r ?? null);
+      },
       error: () => this.projectRatings.set(project.id, null)
     });
   }

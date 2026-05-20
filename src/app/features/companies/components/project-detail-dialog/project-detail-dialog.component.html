@@ -1204,14 +1204,7 @@
           <div *ngIf="canRelease" class="mt-4 flex flex-wrap gap-3 justify-end">
             <button
               type="button"
-              [disabled]="refundingPayment || releasingPayment"
-              class="rounded-full border border-rose-500/50 bg-rose-500/10 px-6 py-2.5 font-tech text-xs uppercase tracking-[0.18em] text-rose-300 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-              (click)="refundPayment()">
-              {{ refundingPayment ? 'Reembolsando...' : 'Reembolsar →' }}
-            </button>
-            <button
-              type="button"
-              [disabled]="releasingPayment || refundingPayment"
+              [disabled]="releasingPayment"
               class="rounded-full border border-emerald-500 bg-emerald-500/15 px-6 py-2.5 font-tech text-xs uppercase tracking-[0.18em] text-emerald-300 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
               (click)="releasePayment()">
               {{ releasingPayment ? 'Desembolsando...' : 'Desembolsar pago →' }}
