@@ -30,6 +30,10 @@ export interface Company {
   ownerVerificationStatus: string;
   verifiedOwnerEmail: string | null;
   onboardingCompleted: boolean;
+  termsAcceptedAt?: string | null;
+  termsVersion?: string | null;
+  privacyAcceptedAt?: string | null;
+  privacyVersion?: string | null;
 }
 
 export interface CreateCompanyDto {
@@ -51,6 +55,10 @@ export interface CreateCompanyDto {
   ownerVerificationStatus?: string | null;
   verifiedOwnerEmail?: string | null;
   adminMessage?: string | null;
+  termsAcceptedAt?: string | null;
+  termsVersion?: string | null;
+  privacyAcceptedAt?: string | null;
+  privacyVersion?: string | null;
 }
 
 export interface UpdateCompanyProfileDto {

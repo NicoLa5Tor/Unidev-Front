@@ -1,6 +1,6 @@
 <section class="ch" [class.ch--university]="organizationType === 'UNIVERSITY'">
 
-  <!-- ── BACKGROUND LAYER ── -->
+  <!-- BACKGROUND -->
   <div class="ch-bg" aria-hidden="true">
     <div class="ch-bg__orb ch-bg__orb--a"></div>
     <div class="ch-bg__orb ch-bg__orb--b"></div>
@@ -9,310 +9,380 @@
 
   <main class="ch-layout">
 
-    <!-- ══════════════════════════════════
-         FLOW STEPS TRACK
-    ══════════════════════════════════ -->
-    <section class="ch-track-section">
-      <header class="ch-track-section__header">
-        <div>
-          <p class="ch-eyebrow">{{ pageEyebrow }}</p>
-          <h2 class="ch-track-section__title">Así funciona el alta de {{ organizationLabel }}</h2>
+    <!-- ── LEFT SIDEBAR ── -->
+    <aside class="ch-sidebar">
+      <div class="ch-brand">
+        <div class="ch-brand__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
         </div>
-        <p class="ch-track-section__desc">
-          {{ organizationType === 'UNIVERSITY'
-            ? 'Desliza las etapas. Primero registras la universidad, luego administración valida y después quedan listos los accesos institucionales.'
-            : 'Desliza las etapas. Primero registras la empresa, luego administración decide y después se habilitan accesos.' }}
-        </p>
+        <span>UniDev</span>
+      </div>
+
+      <div class="ch-sidebar__body">
+        <p class="ch-eyebrow">{{ pageEyebrow }}</p>
+        <h1 class="ch-sidebar__heading">{{ heroTitle }}</h1>
+        <p class="ch-sidebar__desc">{{ heroCopy }}</p>
+      </div>
+
+      <ol class="ch-steps-list">
+        <li class="ch-step"
+            [class.ch-step--done]="registrationStep === 'otp' || registrationStep === 'company'"
+            [class.ch-step--active]="registrationStep === 'email'">
+          <div class="ch-step__num">
+            <span *ngIf="registrationStep === 'email'">1</span>
+            <svg *ngIf="registrationStep !== 'email'" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3,8 7,12 13,4"/>
+            </svg>
+          </div>
+          <div>
+            <strong>{{ adminEmailLabel }}</strong>
+            <p>Correo de referencia del responsable</p>
+          </div>
+        </li>
+        <li class="ch-step"
+            [class.ch-step--done]="registrationStep === 'company'"
+            [class.ch-step--active]="registrationStep === 'otp'">
+          <div class="ch-step__num">
+            <span *ngIf="registrationStep !== 'company'">2</span>
+            <svg *ngIf="registrationStep === 'company'" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3,8 7,12 13,4"/>
+            </svg>
+          </div>
+          <div>
+            <strong>Verificación OTP</strong>
+            <p>Código enviado a tu correo</p>
+          </div>
+        </li>
+        <li class="ch-step" [class.ch-step--active]="registrationStep === 'company'">
+          <div class="ch-step__num">3</div>
+          <div>
+            <strong>Datos de {{ organizationLabel }}</strong>
+            <p>Dominio, NIT y documentos</p>
+          </div>
+        </li>
+      </ol>
+
+      <div class="ch-sidebar__footer">
+        <a routerLink="/login" class="ch-link">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M10 3H13a1 1 0 011 1v8a1 1 0 01-1 1H10"/>
+            <polyline points="7,11 10,8 7,5"/>
+            <line x1="2" y1="8" x2="10" y2="8"/>
+          </svg>
+          Ya tengo cuenta
+        </a>
+      </div>
+    </aside>
+
+    <!-- ── RIGHT CARD ── -->
+    <section class="ch-card">
+
+      <!-- mobile progress -->
+      <div class="ch-progress">
+        <div class="ch-progress__bar"
+             [style.width]="registrationStep === 'email' ? '33%' : registrationStep === 'otp' ? '66%' : '100%'">
+        </div>
+      </div>
+
+      <header class="ch-card__header">
+        <div>
+          <p class="ch-eyebrow">Solicitud</p>
+          <h2 class="ch-card__title">Alta de {{ organizationLabel }}</h2>
+        </div>
+        <span class="ch-status-badge">{{ pageStatusLabel }}</span>
       </header>
 
-      <div class="ch-track" #flowTrack>
-        <article
-          #flowStepCard
-          *ngFor="let step of steps; let index = index"
-          class="ch-step-card"
-        >
-          <div class="ch-step-card__num">{{ index + 1 }}</div>
-          <div class="ch-step-card__body">
-            <h3 class="ch-step-card__title">{{ step.title }}</h3>
-            <p class="ch-step-card__desc">{{ step.description }}</p>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- ══════════════════════════════════
-         MAIN GRID (hero + form)
-    ══════════════════════════════════ -->
-    <div class="ch-grid">
-
-      <!-- ── HERO ── -->
-      <article class="ch-hero">
-        <p class="ch-eyebrow">{{ heroPill }}</p>
-        <h1 class="ch-hero__title">{{ heroTitle }}</h1>
-        <p class="ch-hero__copy">{{ heroCopy }}</p>
-
-        <div class="ch-hero__actions">
-          <a routerLink="/login" class="ch-btn ch-btn--primary">{{ loginCtaLabel }}</a>
+      <!-- ── EMAIL STEP ── -->
+      <form *ngIf="registrationStep === 'email'" class="ch-form" (ngSubmit)="requestOtp()">
+        <div class="ch-fields">
+          <label class="ch-field ch-field--full">
+            <span class="ch-label">{{ adminEmailLabel }}</span>
+            <input
+              [(ngModel)]="form.email"
+              name="email"
+              type="email"
+              placeholder="admin@empresa.com"
+              class="ch-input"
+            />
+          </label>
+          <label class="ch-field ch-field--full">
+            <span class="ch-label">Confirmar correo</span>
+            <input
+              [(ngModel)]="form.confirmEmail"
+              name="confirmEmail"
+              type="email"
+              placeholder="admin@empresa.com"
+              class="ch-input"
+            />
+          </label>
+          <button
+            type="submit"
+            [disabled]="isRequestingOtp"
+            class="ch-btn ch-btn--primary ch-btn--full"
+          >
+            <span *ngIf="!isRequestingOtp">Enviar código OTP</span>
+            <span *ngIf="isRequestingOtp" class="ch-spinner-wrap">
+              <span class="ch-spinner"></span> Enviando&hellip;
+            </span>
+          </button>
         </div>
+      </form>
 
-        <div *ngIf="organizationType === 'UNIVERSITY'" class="ch-university-cards">
-          <div class="ch-university-card">
-            <p class="ch-university-card__label">Gobierno</p>
-            <p class="ch-university-card__text">El alta queda pensada para administración institucional, no para operación comercial.</p>
+      <!-- ── OTP STEP ── -->
+      <form *ngIf="registrationStep === 'otp'" class="ch-form" (ngSubmit)="verifyOtp()">
+        <div class="ch-fields">
+          <div class="ch-otp-hint">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <rect x="2" y="5" width="16" height="11" rx="2"/>
+              <polyline points="2,5 10,12 18,5"/>
+            </svg>
+            <p>Código enviado a <strong>{{ form.email }}</strong></p>
           </div>
-          <div class="ch-university-card">
-            <p class="ch-university-card__label ch-university-card__label--amber">Comunidad</p>
-            <p class="ch-university-card__text">Esta base prepara el futuro acceso de estudiantes, perfiles personales y equipos entre universidades.</p>
-          </div>
-        </div>
-
-        <ul class="ch-highlights" role="list">
-          <li *ngFor="let highlight of highlights" class="ch-highlight">
-            <span class="ch-highlight__dot" aria-hidden="true"></span>
-            <span>{{ highlight }}</span>
-          </li>
-        </ul>
-      </article>
-
-      <!-- ── FORM ── -->
-      <aside class="ch-form-aside">
-        <form class="ch-form" (ngSubmit)="submit()">
-
-          <!-- Form header -->
-          <div class="ch-form__header">
-            <div>
-              <p class="ch-eyebrow">{{ pageEyebrow }}</p>
-              <h2 class="ch-form__title">Crea tu {{ organizationLabel }}</h2>
-            </div>
-            <span class="ch-status-badge">{{ pageStatusLabel }}</span>
-          </div>
-
-          <p class="ch-form__desc">{{ pageDescription }}</p>
-
-          <!-- University pills -->
-          <div *ngIf="organizationType === 'UNIVERSITY'" class="ch-campus-pills">
-            <span class="ch-campus-pill">Dominio institucional</span>
-            <span class="ch-campus-pill">Correos administrativos</span>
-            <span class="ch-campus-pill">Base para estudiantes</span>
-          </div>
-
-          <!-- Step indicators -->
-          <div class="ch-steps" aria-label="Pasos del registro">
-            <span class="ch-step-dot" [class.ch-step-dot--active]="registrationStep === 'email'">Correo</span>
-            <span class="ch-step-dot__line" aria-hidden="true"></span>
-            <span class="ch-step-dot" [class.ch-step-dot--active]="registrationStep === 'otp'">OTP</span>
-            <span class="ch-step-dot__line" aria-hidden="true"></span>
-            <span class="ch-step-dot" [class.ch-step-dot--active]="registrationStep === 'company'">{{ registrationStepLabel }}</span>
-          </div>
-
-          <!-- ── STEP: EMAIL ── -->
-          <div *ngIf="registrationStep === 'email'" class="ch-fields">
-            <label class="ch-field ch-field--full">
-              <span class="ch-label">{{ adminEmailLabel }}</span>
-              <input
-                [(ngModel)]="form.email"
-                name="email"
-                type="email"
-                placeholder="admin@empresa.com"
-                class="ch-input"
-              />
-            </label>
-            <label class="ch-field ch-field--full">
-              <span class="ch-label">Confirmar correo</span>
-              <input
-                [(ngModel)]="form.confirmEmail"
-                name="confirmEmail"
-                type="email"
-                placeholder="admin@empresa.com"
-                class="ch-input"
-              />
-            </label>
-
-            <button
-              type="button"
-              (click)="requestOtp()"
-              [disabled]="isRequestingOtp"
-              class="ch-btn ch-btn--primary ch-btn--full"
-            >
-              {{ isRequestingOtp ? 'Enviando OTP…' : 'Enviar código OTP' }}
+          <label class="ch-field ch-field--full">
+            <span class="ch-label">Código de verificación</span>
+            <input
+              [(ngModel)]="form.otpCode"
+              name="otpCode"
+              inputmode="numeric"
+              maxlength="6"
+              placeholder="_ _ _ _ _ _"
+              class="ch-input ch-input--otp"
+            />
+          </label>
+          <div class="ch-row">
+            <button type="button" (click)="backToEmail()" class="ch-btn ch-btn--ghost">
+              ← Cambiar correo
             </button>
-          </div>
-
-          <!-- ── STEP: OTP ── -->
-          <div *ngIf="registrationStep === 'otp'" class="ch-fields">
-            <div class="ch-otp-hint">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                <rect x="2" y="5" width="16" height="11" rx="2"/>
-                <polyline points="2,5 10,12 18,5"/>
-              </svg>
-              Código enviado a <strong>{{ form.email }}</strong>
-            </div>
-
-            <label class="ch-field ch-field--full">
-              <span class="ch-label">Código OTP</span>
-              <input
-                [(ngModel)]="form.otpCode"
-                name="otpCode"
-                inputmode="numeric"
-                maxlength="6"
-                placeholder="_ _ _ _ _ _"
-                class="ch-input ch-input--otp"
-              />
-            </label>
-
-            <div class="ch-row">
-              <button type="button" (click)="backToEmail()" class="ch-btn ch-btn--ghost">← Cambiar correo</button>
-              <button
-                type="button"
-                (click)="verifyOtp()"
-                [disabled]="isVerifyingOtp"
-                class="ch-btn ch-btn--primary ch-btn--grow"
-              >
-                {{ isVerifyingOtp ? 'Validando…' : 'Validar código' }}
-              </button>
-            </div>
-          </div>
-
-          <!-- ── STEP: COMPANY ── -->
-          <div *ngIf="registrationStep === 'company'" class="ch-fields">
-            <label class="ch-field ch-field--full">
-              <span class="ch-label">Nombre de {{ organizationLabel }}</span>
-              <input
-                [(ngModel)]="form.companyName"
-                (ngModelChange)="clearCompanyFieldError('companyName')"
-                name="companyName"
-                [placeholder]="organizationType === 'UNIVERSITY' ? 'Universidad Ejemplo' : 'Acme Studio SAS'"
-                class="ch-input"
-                [class.ch-input--error]="hasCompanyFieldError('companyName')"
-              />
-              <p *ngIf="getCompanyFieldError('companyName') as err" class="ch-field-error">{{ err }}</p>
-            </label>
-
-            <label class="ch-field">
-              <span class="ch-label">Dominio</span>
-              <input
-                [(ngModel)]="form.domain"
-                (ngModelChange)="clearCompanyFieldError('domain')"
-                name="domain"
-                placeholder="empresa.com"
-                class="ch-input"
-                [class.ch-input--error]="hasCompanyFieldError('domain')"
-              />
-              <p *ngIf="getCompanyFieldError('domain') as err" class="ch-field-error">{{ err }}</p>
-            </label>
-
-            <label class="ch-field">
-              <span class="ch-label">{{ identifierLabel }}</span>
-              <input
-                [(ngModel)]="form.nit"
-                (ngModelChange)="clearCompanyFieldError('nit')"
-                name="nit"
-                placeholder="900123456-7"
-                class="ch-input"
-                [class.ch-input--error]="hasCompanyFieldError('nit')"
-              />
-              <p *ngIf="getCompanyFieldError('nit') as err" class="ch-field-error">{{ err }}</p>
-            </label>
-
-            <label class="ch-field ch-field--full">
-              <span class="ch-label">{{ adminEmailLabel }} <span class="ch-label__readonly">(solo lectura)</span></span>
-              <input
-                [(ngModel)]="form.contactEmail"
-                name="contactEmail"
-                type="email"
-                readonly
-                class="ch-input ch-input--readonly"
-                [class.ch-input--error]="hasCompanyFieldError('contactEmail')"
-              />
-              <p *ngIf="getCompanyFieldError('contactEmail') as err" class="ch-field-error">{{ err }}</p>
-            </label>
-
-            <!-- Documents -->
-            <div class="ch-docs">
-              <!-- Legal -->
-              <div class="ch-doc" [class.ch-doc--error]="!!companyDocumentsError">
-                <div class="ch-doc__top">
-                  <p class="ch-label">
-                    {{ organizationType === 'UNIVERSITY' ? 'Acreditación institucional' : 'Certificado legal' }}
-                  </p>
-                  <button
-                    type="button"
-                    (click)="openDocumentHelp('LEGAL_CERTIFICATE')"
-                    class="ch-doc__help"
-                    aria-label="Más información"
-                  >?</button>
-                </div>
-                <div class="ch-doc__actions">
-                  <label class="ch-doc__upload">
-                    <input type="file" accept=".pdf,.png,.jpg,.jpeg" class="ch-doc__input" (change)="uploadDocument($event, 'LEGAL_CERTIFICATE')" />
-                    {{ isUploadingLegal ? 'Cargando…' : 'Subir archivo' }}
-                  </label>
-                  <button
-                    *ngIf="getDocument('LEGAL_CERTIFICATE') as legalDoc"
-                    type="button"
-                    (click)="downloadDocument(legalDoc)"
-                    [title]="legalDoc.fileName"
-                    class="ch-doc__file"
-                  >
-                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 2v8m0 0l-3-3m3 3l3-3"/><rect x="2" y="11" width="12" height="3" rx="1"/></svg>
-                    <span class="ch-doc__filename">{{ legalDoc.fileName }}</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Tax -->
-              <div class="ch-doc" [class.ch-doc--error]="!!companyDocumentsError">
-                <div class="ch-doc__top">
-                  <p class="ch-label">
-                    {{ organizationType === 'UNIVERSITY' ? 'Documento tributario o equivalente' : 'Documento tributario' }}
-                  </p>
-                  <button
-                    type="button"
-                    (click)="openDocumentHelp('TAX_DOCUMENT')"
-                    class="ch-doc__help"
-                    aria-label="Más información"
-                  >?</button>
-                </div>
-                <div class="ch-doc__actions">
-                  <label class="ch-doc__upload">
-                    <input type="file" accept=".pdf,.png,.jpg,.jpeg" class="ch-doc__input" (change)="uploadDocument($event, 'TAX_DOCUMENT')" />
-                    {{ isUploadingTax ? 'Cargando…' : 'Subir archivo' }}
-                  </label>
-                  <button
-                    *ngIf="getDocument('TAX_DOCUMENT') as taxDoc"
-                    type="button"
-                    (click)="downloadDocument(taxDoc)"
-                    [title]="taxDoc.fileName"
-                    class="ch-doc__file"
-                  >
-                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 2v8m0 0l-3-3m3 3l3-3"/><rect x="2" y="11" width="12" height="3" rx="1"/></svg>
-                    <span class="ch-doc__filename">{{ taxDoc.fileName }}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <p *ngIf="companyDocumentsError" class="ch-error">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="5" x2="8" y2="9"/><circle cx="8" cy="11.5" r="0.5" fill="currentColor"/></svg>
-              {{ companyDocumentsError }}
-            </p>
-
             <button
               type="submit"
-              [disabled]="isSubmitting"
-              class="ch-btn ch-btn--primary ch-btn--full"
+              [disabled]="isVerifyingOtp"
+              class="ch-btn ch-btn--primary ch-btn--grow"
             >
-              {{ isSubmitting ? 'Enviando…' : 'Enviar solicitud' }}
+              <span *ngIf="!isVerifyingOtp">Validar código</span>
+              <span *ngIf="isVerifyingOtp" class="ch-spinner-wrap">
+                <span class="ch-spinner"></span> Validando&hellip;
+              </span>
             </button>
           </div>
-        </form>
-      </aside>
-    </div>
+        </div>
+      </form>
+
+      <!-- ── COMPANY STEP ── -->
+      <form *ngIf="registrationStep === 'company'" class="ch-form" (ngSubmit)="submit()">
+        <div class="ch-fields">
+          <label class="ch-field ch-field--full">
+            <span class="ch-label">Nombre de {{ organizationLabel }}</span>
+            <input
+              [(ngModel)]="form.companyName"
+              (ngModelChange)="clearCompanyFieldError('companyName')"
+              name="companyName"
+              [placeholder]="organizationType === 'UNIVERSITY' ? 'Universidad Ejemplo' : 'Acme Studio SAS'"
+              class="ch-input"
+              [class.ch-input--error]="hasCompanyFieldError('companyName')"
+            />
+            <p *ngIf="getCompanyFieldError('companyName') as err" class="ch-field-error">{{ err }}</p>
+          </label>
+
+          <label class="ch-field">
+            <span class="ch-label">Dominio</span>
+            <input
+              [(ngModel)]="form.domain"
+              (ngModelChange)="clearCompanyFieldError('domain')"
+              name="domain"
+              placeholder="empresa.com"
+              class="ch-input"
+              [class.ch-input--error]="hasCompanyFieldError('domain')"
+            />
+            <p *ngIf="getCompanyFieldError('domain') as err" class="ch-field-error">{{ err }}</p>
+          </label>
+
+          <label class="ch-field">
+            <span class="ch-label">{{ identifierLabel }}</span>
+            <input
+              [(ngModel)]="form.nit"
+              (ngModelChange)="clearCompanyFieldError('nit')"
+              name="nit"
+              placeholder="900123456-7"
+              class="ch-input"
+              [class.ch-input--error]="hasCompanyFieldError('nit')"
+            />
+            <p *ngIf="getCompanyFieldError('nit') as err" class="ch-field-error">{{ err }}</p>
+          </label>
+
+          <label class="ch-field ch-field--full">
+            <span class="ch-label">{{ adminEmailLabel }} <span class="ch-label__readonly">(solo lectura)</span></span>
+            <input
+              [(ngModel)]="form.contactEmail"
+              name="contactEmail"
+              type="email"
+              readonly
+              class="ch-input ch-input--readonly"
+              [class.ch-input--error]="hasCompanyFieldError('contactEmail')"
+            />
+            <p *ngIf="getCompanyFieldError('contactEmail') as err" class="ch-field-error">{{ err }}</p>
+          </label>
+
+          <!-- Documents -->
+          <div class="ch-docs">
+            <div class="ch-doc" [class.ch-doc--error]="!!companyDocumentsError">
+              <div class="ch-doc__top">
+                <p class="ch-label">
+                  {{ organizationType === 'UNIVERSITY' ? 'Acreditación institucional' : 'Certificado legal' }}
+                </p>
+                <button
+                  type="button"
+                  (click)="openDocumentHelp('LEGAL_CERTIFICATE')"
+                  class="ch-doc__help"
+                  aria-label="Más información"
+                >?</button>
+              </div>
+              <div class="ch-doc__actions">
+                <label class="ch-doc__upload">
+                  <input type="file" accept=".pdf,.png,.jpg,.jpeg" class="ch-doc__input" (change)="uploadDocument($event, 'LEGAL_CERTIFICATE')" />
+                  {{ isUploadingLegal ? 'Cargando…' : 'Subir archivo' }}
+                </label>
+                <button
+                  *ngIf="getDocument('LEGAL_CERTIFICATE') as legalDoc"
+                  type="button"
+                  (click)="downloadDocument(legalDoc)"
+                  [title]="legalDoc.fileName"
+                  class="ch-doc__file"
+                >
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M8 2v8m0 0l-3-3m3 3l3-3"/>
+                    <rect x="2" y="11" width="12" height="3" rx="1"/>
+                  </svg>
+                  <span class="ch-doc__filename">{{ legalDoc.fileName }}</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="ch-doc" [class.ch-doc--error]="!!companyDocumentsError">
+              <div class="ch-doc__top">
+                <p class="ch-label">
+                  {{ organizationType === 'UNIVERSITY' ? 'Documento tributario o equivalente' : 'Documento tributario' }}
+                </p>
+                <button
+                  type="button"
+                  (click)="openDocumentHelp('TAX_DOCUMENT')"
+                  class="ch-doc__help"
+                  aria-label="Más información"
+                >?</button>
+              </div>
+              <div class="ch-doc__actions">
+                <label class="ch-doc__upload">
+                  <input type="file" accept=".pdf,.png,.jpg,.jpeg" class="ch-doc__input" (change)="uploadDocument($event, 'TAX_DOCUMENT')" />
+                  {{ isUploadingTax ? 'Cargando…' : 'Subir archivo' }}
+                </label>
+                <button
+                  *ngIf="getDocument('TAX_DOCUMENT') as taxDoc"
+                  type="button"
+                  (click)="downloadDocument(taxDoc)"
+                  [title]="taxDoc.fileName"
+                  class="ch-doc__file"
+                >
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M8 2v8m0 0l-3-3m3 3l3-3"/>
+                    <rect x="2" y="11" width="12" height="3" rx="1"/>
+                  </svg>
+                  <span class="ch-doc__filename">{{ taxDoc.fileName }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <p *ngIf="companyDocumentsError" class="ch-error">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <circle cx="8" cy="8" r="6.5"/>
+              <line x1="8" y1="5" x2="8" y2="9"/>
+              <circle cx="8" cy="11.5" r="0.5" fill="currentColor"/>
+            </svg>
+            {{ companyDocumentsError }}
+          </p>
+
+          <button
+            type="button"
+            (click)="openConsentModal()"
+            [disabled]="isSubmitting"
+            class="ch-btn ch-btn--primary ch-btn--full"
+          >
+            Enviar solicitud
+          </button>
+        </div>
+      </form>
+
+    </section>
   </main>
 
-  <!-- ══════════════════════════════════
-       DOCUMENT HELP MODAL
-  ══════════════════════════════════ -->
+  <!-- ── CONSENT MODAL ── -->
+  <div
+    *ngIf="showConsentModal"
+    class="ch-modal-backdrop"
+    (click)="closeConsentModal()"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="consent-title"
+  >
+    <div class="ch-modal ch-modal--consent" (click)="$event.stopPropagation()">
+      <div class="ch-modal__header">
+        <div>
+          <p class="ch-eyebrow">Antes de continuar</p>
+          <h3 class="ch-modal__title" id="consent-title">Términos y privacidad</h3>
+        </div>
+        <button type="button" (click)="closeConsentModal()" class="ch-modal__close" aria-label="Cerrar">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="3" x2="13" y2="13"/>
+            <line x1="13" y1="3" x2="3" y2="13"/>
+          </svg>
+        </button>
+      </div>
+
+      <p class="ch-modal__summary">
+        Al enviar tu solicitud de alta de <strong>{{ organizationLabel }}</strong> confirmas haber leído y aceptado los documentos legales de UniDev que regulan el uso de la plataforma, las comisiones aplicables y el tratamiento de tus datos personales.
+      </p>
+
+      <div class="ch-consent-links">
+        <a routerLink="/terms" target="_blank" class="ch-consent-link">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M10 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V5z"/>
+            <polyline points="10,2 10,6 14,6"/>
+            <line x1="5" y1="9" x2="11" y2="9"/>
+            <line x1="5" y1="11" x2="9" y2="11"/>
+          </svg>
+          Términos y condiciones
+        </a>
+        <a routerLink="/privacy" target="_blank" class="ch-consent-link">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M8 1L2 4v4c0 3.3 2.5 6.4 6 7 3.5-.6 6-3.7 6-7V4z"/>
+            <polyline points="5,8 7,10 11,6"/>
+          </svg>
+          Política de privacidad
+        </a>
+      </div>
+
+      <div class="ch-modal__footer">
+        <button type="button" (click)="closeConsentModal()" class="ch-btn ch-btn--ghost">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          (click)="confirmAndSubmit()"
+          [disabled]="isSubmitting"
+          class="ch-btn ch-btn--primary"
+        >
+          <span *ngIf="!isSubmitting">Acepto y envío</span>
+          <span *ngIf="isSubmitting" class="ch-spinner-wrap">
+            <span class="ch-spinner"></span> Enviando&hellip;
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DOCUMENT HELP MODAL ── -->
   <div
     *ngIf="activeDocumentHelp as help"
     class="ch-modal-backdrop"
@@ -327,22 +397,23 @@
           <h3 class="ch-modal__title">{{ help.title }}</h3>
         </div>
         <button type="button" (click)="closeDocumentHelp()" class="ch-modal__close" aria-label="Cerrar">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="3" x2="13" y2="13"/>
+            <line x1="13" y1="3" x2="3" y2="13"/>
+          </svg>
         </button>
       </div>
-
       <p class="ch-modal__summary">{{ help.summary }}</p>
-
       <ul class="ch-modal__bullets" role="list">
         <li *ngFor="let bullet of help.bullets" class="ch-modal__bullet">
           <span class="ch-modal__bullet-dot" aria-hidden="true"></span>
           <span>{{ bullet }}</span>
         </li>
       </ul>
-
       <div class="ch-modal__footer">
         <button type="button" (click)="closeDocumentHelp()" class="ch-btn ch-btn--primary">Entendido</button>
       </div>
     </div>
   </div>
+
 </section>

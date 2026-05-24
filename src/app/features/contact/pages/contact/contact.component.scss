@@ -5,6 +5,14 @@
 .contact-page {
   position: relative;
   overflow: clip;
+  min-height: 100vh;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(2, 6, 23, 0.15) 20%,
+    rgba(2, 6, 23, 0.70) 50%,
+    rgba(2, 6, 23, 0.96) 75%
+  );
 }
 
 .contact-page__backdrop {
@@ -40,10 +48,10 @@
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+    linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
   background-size: 42px 42px;
-  opacity: 0.08;
+  mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.7) 100%);
 }
 
 .contact-page__main {

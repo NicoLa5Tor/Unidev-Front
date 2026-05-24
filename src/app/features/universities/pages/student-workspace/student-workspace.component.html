@@ -1053,3 +1053,99 @@
     </div>
   </div>
 </div>
+
+<!-- ── Consent gate ─────────────────────────────────────── -->
+<div *ngIf="showConsentGate" class="sw-gate" role="dialog" aria-modal="true">
+  <div class="sw-gate__box">
+    <div class="sw-gate__icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+    </div>
+    <p class="sw-gate__eyebrow">Paso requerido</p>
+    <h2 class="sw-gate__title">Acepta los términos legales</h2>
+    <p class="sw-gate__body">
+      Para usar UniDev como estudiante debes aceptar nuestros documentos legales vigentes.
+      Estos regulan el uso de la plataforma y el tratamiento de tus datos personales.
+    </p>
+    <div class="sw-gate__links">
+      <a routerLink="/terms" target="_blank" rel="noopener" class="sw-gate-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+        </svg>
+        Términos y condiciones
+      </a>
+      <a routerLink="/privacy" target="_blank" rel="noopener" class="sw-gate-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        Política de privacidad
+      </a>
+    </div>
+    <button type="button" class="sw-gate__btn" [disabled]="isAcceptingConsent" (click)="acceptConsentGate()">
+      <span *ngIf="!isAcceptingConsent">He leído y acepto</span>
+      <span *ngIf="isAcceptingConsent" class="sw-gate__spinner-wrap">
+        <span class="sw-gate__spinner"></span> Procesando…
+      </span>
+    </button>
+  </div>
+</div>
+
+<!-- ── Age gate ──────────────────────────────────────────── -->
+<div *ngIf="showAgeGate && !showConsentGate" class="sw-gate" role="dialog" aria-modal="true">
+  <div class="sw-gate__box">
+    <div class="sw-gate__icon sw-gate__icon--age">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+    </div>
+    <p class="sw-gate__eyebrow">Verificación de edad</p>
+    <h2 class="sw-gate__title">Confirma tu fecha de nacimiento</h2>
+    <p class="sw-gate__body">
+      UniDev es una plataforma para <strong>mayores de 18 años</strong>.
+      Ingresa tu fecha de nacimiento para verificar que cumples este requisito.
+    </p>
+    <div class="sw-gate__field">
+      <label class="sw-gate__label">Fecha de nacimiento</label>
+      <input type="date" [(ngModel)]="ageBirthDateInput" class="sw-gate__input"
+             [max]="maxBirthDate" />
+      <p *ngIf="ageError" class="sw-gate__error">{{ ageError }}</p>
+    </div>
+    <button type="button" class="sw-gate__btn" [disabled]="!ageBirthDateInput || isVerifyingAge" (click)="submitAgeVerification()">
+      <span *ngIf="!isVerifyingAge">Confirmar edad</span>
+      <span *ngIf="isVerifyingAge" class="sw-gate__spinner-wrap">
+        <span class="sw-gate__spinner"></span> Verificando…
+      </span>
+    </button>
+  </div>
+</div>
+
+<!-- ── Cédula gate ────────────────────────────────────────── -->
+<div *ngIf="showCedulaGate && !showConsentGate && !showAgeGate" class="sw-gate" role="dialog" aria-modal="true">
+  <div class="sw-gate__box">
+    <div class="sw-gate__icon sw-gate__icon--age">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+      </svg>
+    </div>
+    <p class="sw-gate__eyebrow">Verificación de identidad</p>
+    <h2 class="sw-gate__title">Ingresa tu número de cédula</h2>
+    <p class="sw-gate__body">
+      Conforme a los <strong>Términos y Condiciones</strong> (secciones 3.5 y 10), al registrar tu cédula
+      declaras que la información es <strong>completamente verídica</strong>. En caso contrario, UniDev
+      se reserva el derecho de tomar las <strong>acciones legales pertinentes</strong>.
+    </p>
+    <div class="sw-gate__field">
+      <label class="sw-gate__label">Número de cédula</label>
+      <input type="text" inputmode="numeric" pattern="\d*" [(ngModel)]="cedulaInput"
+             class="sw-gate__input" placeholder="Ej: 1234567890" maxlength="30" />
+      <p *ngIf="cedulaError" class="sw-gate__error">{{ cedulaError }}</p>
+    </div>
+    <button type="button" class="sw-gate__btn" [disabled]="!cedulaInput.trim() || isVerifyingCedula" (click)="submitCedulaVerification()">
+      <span *ngIf="!isVerifyingCedula">Confirmar y continuar</span>
+      <span *ngIf="isVerifyingCedula" class="sw-gate__spinner-wrap">
+        <span class="sw-gate__spinner"></span> Guardando…
+      </span>
+    </button>
+  </div>
+</div>

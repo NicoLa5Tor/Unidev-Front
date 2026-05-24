@@ -3,7 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -40,6 +40,7 @@ type ProjectVisibilityFilter = 'ALL' | 'PUBLISHED' | 'EDITING';
   imports: [
     CommonModule,
     FormsModule,
+    RouterLink,
     DashboardShellComponent,
   ],
   templateUrl: './company-onboarding.component.html',
@@ -78,6 +79,8 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   projectFormExampleId = '';
   sessionUser: SessionUser | null = null;
   currentCompany: Company | null = null;
+  showConsentGate = false;
+  isAcceptingConsent = false;
   allowedEmails: CompanyAllowedEmail[] = [];
   registrationDocuments: CompanyRegistrationDocument[] = [];
   reviewItems: CompanyReviewItem[] = [];
@@ -644,6 +647,20 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     });
   }
 
+  acceptConsentGate(): void {
+    this.isAcceptingConsent = true;
+    this.companyService.acceptConsent().subscribe({
+      next: company => {
+        this.currentCompany = company;
+        this.showConsentGate = false;
+        this.isAcceptingConsent = false;
+      },
+      error: () => {
+        this.isAcceptingConsent = false;
+      }
+    });
+  }
+
   saveProfile(): void {
     if (!this.currentCompany) {
       return;
@@ -1142,6 +1159,9 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
         ).subscribe({
           next: company => {
             this.currentCompany = company;
+            if (company && (!company.termsAcceptedAt || !company.privacyAcceptedAt)) {
+              this.showConsentGate = true;
+            }
             if (company) {
               this.patchFormFromCompany(company);
               this.reviewItems = [];

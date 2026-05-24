@@ -654,3 +654,113 @@ $text-dim: #8ba3c0;
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+// ─── Consent modal ────────────────────────────────────────────────────────────
+.u-consent-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(3,7,18,.75);
+  backdrop-filter: blur(8px);
+  animation: fadeUp .2s ease both;
+}
+
+.u-consent-modal {
+  width: 100%;
+  max-width: 520px;
+  border-radius: 1.75rem;
+  border: 1px solid rgba(255,255,255,.1);
+  background: linear-gradient(175deg, rgba(12,20,38,.98), rgba(4,8,20,.99));
+  box-shadow: 0 32px 80px rgba(2,6,23,.6);
+  padding: 1.75rem;
+  animation: fadeUp .25s ease both;
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  &__title {
+    margin: 0.5rem 0 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: $text;
+  }
+
+  &__close {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.1);
+    background: rgba(255,255,255,.04);
+    color: $text-dim;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .18s;
+    margin-top: 0.25rem;
+
+    svg { width: 14px; height: 14px; }
+    &:hover { background: rgba(255,255,255,.1); color: $text; }
+  }
+
+  &__body {
+    margin: 0 0 1.25rem;
+    font-size: 0.875rem;
+    color: $text-dim;
+    line-height: 1.65;
+
+    strong { color: $text; }
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+}
+
+.u-consent-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.u-consent-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba($teal, .18);
+  background: rgba($teal, .05);
+  color: #99f6e4;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: background .18s, border-color .18s;
+
+  svg { width: 15px; height: 15px; flex-shrink: 0; stroke: $teal; }
+
+  &:hover {
+    background: rgba($teal, .1);
+    border-color: rgba($teal, .32);
+  }
+}
+
+.u-btn--sm {
+  height: 44px;
+  font-size: 0.8125rem;
+  padding: 0 1.25rem;
+  width: auto;
+}

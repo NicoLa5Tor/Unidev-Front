@@ -1885,3 +1885,57 @@
 
   </div>
 </section>
+
+<!-- ── CONSENT GATE (bloquea workspace hasta aceptar) ── -->
+<div
+  *ngIf="showConsentGate"
+  class="co-consent-gate"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="consent-gate-title"
+>
+  <div class="co-consent-gate__box">
+    <div class="co-consent-gate__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <polyline points="9,12 11,14 15,10"/>
+      </svg>
+    </div>
+    <p class="co-consent-gate__eyebrow">Paso requerido</p>
+    <h2 class="co-consent-gate__title" id="consent-gate-title">Acepta los términos legales</h2>
+    <p class="co-consent-gate__body">
+      Para continuar usando el workspace de tu <strong>{{ organizationLabel }}</strong> debes aceptar los
+      documentos legales vigentes de UniDev. Estos regulan el uso de la plataforma, las comisiones
+      aplicables y el tratamiento de tus datos personales.
+    </p>
+    <div class="co-consent-gate__links">
+      <a routerLink="/terms" target="_blank" class="co-consent-link">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M10 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V5z"/>
+          <polyline points="10,2 10,6 14,6"/>
+          <line x1="5" y1="9" x2="11" y2="9"/>
+          <line x1="5" y1="11" x2="9" y2="11"/>
+        </svg>
+        Términos y condiciones
+      </a>
+      <a routerLink="/privacy" target="_blank" class="co-consent-link">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M8 1L2 4v4c0 3.3 2.5 6.4 6 7 3.5-.6 6-3.7 6-7V4z"/>
+          <polyline points="5,8 7,10 11,6"/>
+        </svg>
+        Política de privacidad
+      </a>
+    </div>
+    <button
+      type="button"
+      (click)="acceptConsentGate()"
+      [disabled]="isAcceptingConsent"
+      class="co-consent-gate__btn"
+    >
+      <span *ngIf="!isAcceptingConsent">He leído y acepto</span>
+      <span *ngIf="isAcceptingConsent" class="co-consent-gate__spinner-wrap">
+        <span class="co-consent-gate__spinner"></span> Guardando&hellip;
+      </span>
+    </button>
+  </div>
+</div>

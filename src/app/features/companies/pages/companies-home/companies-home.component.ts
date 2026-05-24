@@ -41,6 +41,10 @@ export class CompaniesHomeComponent implements AfterViewInit, OnDestroy {
   } | null = null;
   companyFieldErrors: Partial<Record<CompanyFormField, string>> = {};
   companyDocumentsError: string | null = null;
+  showConsentModal = false;
+  private consentAcceptedAt: string | null = null;
+  private readonly TERMS_VERSION = '1.0';
+  private readonly PRIVACY_VERSION = '1.0';
   private readonly localDocumentUrls: Partial<Record<CompanyRegistrationDocument['documentType'], string>> = {};
   private readonly pendingDocumentFiles: Partial<Record<RegistrationDocumentType, File>> = {};
   message: { type: 'success' | 'error'; text: string } | null = null;
@@ -307,7 +311,11 @@ export class CompaniesHomeComponent implements AfterViewInit, OnDestroy {
         approvalStatus: 'PENDING',
         subscriptionStatus: 'NOT_REQUESTED',
         ownerVerificationStatus: 'EMAIL_VERIFIED',
-        verifiedOwnerEmail: this.verifiedEmail
+        verifiedOwnerEmail: this.verifiedEmail,
+        termsAcceptedAt: this.consentAcceptedAt,
+        termsVersion: this.TERMS_VERSION,
+        privacyAcceptedAt: this.consentAcceptedAt,
+        privacyVersion: this.PRIVACY_VERSION
       }))
     ).subscribe({
       next: () => {
@@ -352,6 +360,20 @@ export class CompaniesHomeComponent implements AfterViewInit, OnDestroy {
 
   getCompanyFieldError(field: CompanyFormField): string | null {
     return this.companyFieldErrors[field] ?? null;
+  }
+
+  openConsentModal(): void {
+    this.showConsentModal = true;
+  }
+
+  closeConsentModal(): void {
+    this.showConsentModal = false;
+  }
+
+  confirmAndSubmit(): void {
+    this.consentAcceptedAt = new Date().toISOString();
+    this.closeConsentModal();
+    this.submit();
   }
 
   openDocumentHelp(type: DocumentHelpType): void {

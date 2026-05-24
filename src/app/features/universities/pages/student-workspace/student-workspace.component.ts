@@ -1,9 +1,11 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { StudentService } from '../../services/student.service';
 import { UserSessionService } from '../../../../core/services/user-session.service';
+import { UserService } from '../../../users/services/user.service';
 import { UiToastService } from '../../../../shared/services/ui-toast.service';
 import { DashboardShellComponent, DashboardNavItem } from '../../../../shared/components/dashboard-shell/dashboard-shell.component';
 import { StudentTeam, ProjectApplication, TeamInvitation } from '../../../../shared/models/student.model';
@@ -22,12 +24,14 @@ import { TeamChatDialogComponent } from '../../../../shared/components/team-chat
 @Component({
   selector: 'app-student-workspace',
   standalone: true,
-  imports: [CommonModule, FormsModule, DashboardShellComponent],
-  templateUrl: './student-workspace.component.html'
+  imports: [CommonModule, FormsModule, RouterLink, DashboardShellComponent],
+  templateUrl: './student-workspace.component.html',
+  styleUrl: './student-workspace.component.scss'
 })
 export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   private readonly studentService = inject(StudentService);
   private readonly userSessionService = inject(UserSessionService);
+  private readonly userService = inject(UserService);
   private readonly companyService = inject(CompanyService);
   private readonly paymentService = inject(PaymentService);
   private readonly ratingService = inject(RatingService);
@@ -127,6 +131,18 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   selectedCampusId: number | null = null;
   isSelectingCampus = false;
 
+  // Legal gates
+  showConsentGate = false;
+  isAcceptingConsent = false;
+  showAgeGate = false;
+  ageBirthDateInput = '';
+  ageError: string | null = null;
+  isVerifyingAge = false;
+  showCedulaGate = false;
+  cedulaInput = '';
+  cedulaError: string | null = null;
+  isVerifyingCedula = false;
+
   get avatarLabel(): string {
     return this.currentUser?.displayName?.charAt(0)?.toUpperCase() ?? 'E';
   }
@@ -135,8 +151,14 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     return this.currentUser?.displayName ?? 'Estudiante';
   }
 
+  get maxBirthDate(): string {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - 18);
+    return d.toISOString().split('T')[0];
+  }
+
   ngOnInit(): void {
-    this.userSessionService.loadCurrentUser().subscribe(user => {
+    this.userSessionService.loadCurrentUser(true).subscribe(user => {
       this.currentUser = user;
       if (user) {
         this.profileCareer = user.career ?? '';
@@ -146,6 +168,13 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
           this.companyService.listCampuses().subscribe({
             next: campuses => { this.availableCampuses = campuses; }
           });
+        }
+        if (!user.termsAcceptedAt || !user.privacyAcceptedAt) {
+          this.showConsentGate = true;
+        } else if (!user.birthDate) {
+          this.showAgeGate = true;
+        } else if (!user.cedula) {
+          this.showCedulaGate = true;
         }
       }
     });
@@ -879,5 +908,65 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
 
   invitationStatusLabel(status: string): string {
     return status === 'PENDING' ? 'Pendiente' : status === 'ACCEPTED' ? 'Aceptada' : 'Rechazada';
+  }
+
+  acceptConsentGate(): void {
+    this.isAcceptingConsent = true;
+    this.userService.acceptStudentConsent().subscribe({
+      next: user => {
+        this.currentUser = user;
+        this.userSessionService.setCurrentUser(user);
+        this.showConsentGate = false;
+        this.isAcceptingConsent = false;
+        if (!user.birthDate) {
+          this.showAgeGate = true;
+        }
+      },
+      error: () => { this.isAcceptingConsent = false; }
+    });
+  }
+
+  submitAgeVerification(): void {
+    if (!this.ageBirthDateInput) return;
+    this.ageError = null;
+    this.isVerifyingAge = true;
+    this.userService.verifyStudentAge(this.ageBirthDateInput).subscribe({
+      next: user => {
+        this.currentUser = user;
+        this.userSessionService.setCurrentUser(user);
+        this.showAgeGate = false;
+        this.isVerifyingAge = false;
+        if (!user.cedula) {
+          this.showCedulaGate = true;
+        }
+      },
+      error: err => {
+        this.isVerifyingAge = false;
+        this.ageError = err?.error?.message ?? 'Debes ser mayor de 18 años para usar UniDev.';
+      }
+    });
+  }
+
+  submitCedulaVerification(): void {
+    const cedula = this.cedulaInput.trim();
+    if (!cedula) return;
+    if (!/^\d+$/.test(cedula)) {
+      this.cedulaError = 'La cédula debe contener solo dígitos.';
+      return;
+    }
+    this.cedulaError = null;
+    this.isVerifyingCedula = true;
+    this.userService.verifyCedula(cedula).subscribe({
+      next: user => {
+        this.currentUser = user;
+        this.userSessionService.setCurrentUser(user);
+        this.showCedulaGate = false;
+        this.isVerifyingCedula = false;
+      },
+      error: err => {
+        this.isVerifyingCedula = false;
+        this.cedulaError = err?.error?.message ?? 'No pudimos registrar tu cédula.';
+      }
+    });
   }
 }

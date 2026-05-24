@@ -16,4 +16,8 @@ export interface SessionUser {
   availableForProjects?: boolean | null;
   campusId?: number | null;
   campusName?: string | null;
+  birthDate?: string | null;
+  termsAcceptedAt?: string | null;
+  privacyAcceptedAt?: string | null;
+  cedula?: string | null;
 }

@@ -25,11 +25,12 @@ export class TermsComponent {
     { id: 'disputas', label: '8. Disputas y devoluciones' },
     { id: 'responsabilidad', label: '9. Limitación de responsabilidad' },
     { id: 'uso', label: '10. Uso aceptable' },
-    { id: 'suspension', label: '11. Suspensión y cancelación' },
-    { id: 'modificaciones', label: '12. Modificaciones' },
-    { id: 'ley', label: '13. Ley aplicable' },
-    { id: 'intermediacion-pagos', label: '14. Intermediación de pagos' },
-    { id: 'contacto', label: '15. Contacto' },
+    { id: 'terminos-organizaciones', label: '11. Términos de Organizaciones' },
+    { id: 'suspension', label: '12. Suspensión y cancelación' },
+    { id: 'modificaciones', label: '13. Modificaciones' },
+    { id: 'ley', label: '14. Ley aplicable' },
+    { id: 'intermediacion-pagos', label: '15. Intermediación de pagos' },
+    { id: 'contacto', label: '16. Contacto' },
   ];
 
   scrollTo(id: string): void {

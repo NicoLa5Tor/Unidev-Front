@@ -58,6 +58,10 @@ export class CompanyService {
     return this.http.post<CompanyOtpFlowResponseDto>(`${this.companyRegistrationUrl}/otp/request`, payload);
   }
 
+  acceptConsent() {
+    return this.http.post<Company>(`${this.companiesUrl}/profile/accept-consent`, {});
+  }
+
   verifyCompanyOtp(payload: CompanyOtpVerifyDto) {
     return this.http.post<{ message: string }>(`${this.companyRegistrationUrl}/otp/verify`, payload);
   }
