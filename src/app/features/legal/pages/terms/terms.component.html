@@ -1,0 +1,398 @@
+<div class="tc">
+
+  <!-- Backdrop -->
+  <div class="tc__backdrop" aria-hidden="true">
+    <div class="tc__orb tc__orb--a"></div>
+    <div class="tc__orb tc__orb--b"></div>
+    <div class="tc__grid"></div>
+  </div>
+
+  <!-- Hero -->
+  <header class="tc__hero">
+    <a routerLink="/" class="tc__brand">
+      <img src="/Logo.png" alt="UniDev" class="tc__logo" />
+      <span class="tc__brand-name">UniDev</span>
+    </a>
+    <p class="tc__eyebrow">Legal</p>
+    <h1 class="tc__title">Términos y Condiciones</h1>
+    <div class="tc__meta">
+      <span class="tc__badge">Versión {{ version }}</span>
+      <span class="tc__date">Vigente desde {{ effectiveDate }}</span>
+    </div>
+  </header>
+
+  <!-- Body -->
+  <div class="tc__body">
+
+    <!-- Sidebar TOC -->
+    <aside class="tc__toc">
+      <p class="tc__toc-label">Contenido</p>
+      <nav>
+        <button
+          *ngFor="let s of sections"
+          type="button"
+          class="tc__toc-item"
+          (click)="scrollTo(s.id)"
+        >{{ s.label }}</button>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="tc__content">
+
+      <!-- 1 -->
+      <section id="identificacion" class="tc__section">
+        <h2 class="tc__section-title">1. Identificación del titular</h2>
+        <p>La plataforma UniDev, disponible en <strong>unidev.site</strong> (en adelante, "la Plataforma"), es operada por:</p>
+        <div class="tc__info-block">
+          <div class="tc__info-row"><span>Titular</span><span>Nicolás Rodríguez Torres</span></div>
+          <div class="tc__info-row"><span>Cédula</span><span>1193602390</span></div>
+          <div class="tc__info-row"><span>Correo</span><span>nicolas&#64;unidev.site</span></div>
+          <div class="tc__info-row"><span>Domicilio</span><span>Facatativá, Cundinamarca, Colombia</span></div>
+        </div>
+        <p>Para efectos de este documento, el titular será referido como <strong>"UniDev"</strong> o <strong>"el Operador"</strong>.</p>
+      </section>
+
+      <!-- 2 -->
+      <section id="definiciones" class="tc__section">
+        <h2 class="tc__section-title">2. Definiciones</h2>
+        <dl class="tc__defs">
+          <div class="tc__def"><dt>Plataforma</dt><dd>El sitio web y servicios disponibles en unidev.site, incluyendo todas sus funcionalidades.</dd></div>
+          <div class="tc__def"><dt>Usuario</dt><dd>Toda persona natural o jurídica que acceda, se registre o haga uso de la Plataforma en cualquiera de sus roles.</dd></div>
+          <div class="tc__def"><dt>Organización</dt><dd>Entidad registrada en la Plataforma que puede ser una Empresa o una Universidad.</dd></div>
+          <div class="tc__def"><dt>Empresa</dt><dd>Organización registrada con tipo EMPRESA que contrata servicios de desarrollo a través de la Plataforma.</dd></div>
+          <div class="tc__def"><dt>Usuario Empresa</dt><dd>Persona natural vinculada a una Empresa registrada, habilitada por ella para operar dentro de la Plataforma en su nombre.</dd></div>
+          <div class="tc__def"><dt>Universidad</dt><dd>Organización registrada con tipo UNIVERSIDAD que habilita el acceso de sus usuarios académicos a la Plataforma.</dd></div>
+          <div class="tc__def"><dt>Usuario Universidad</dt><dd>Persona natural vinculada a una Universidad registrada, habilitada por ella para participar en proyectos como desarrollador o estudiante.</dd></div>
+          <div class="tc__def"><dt>Admin de Sede</dt><dd>Usuario con permisos administrativos sobre un campus o sede específica dentro de una Universidad.</dd></div>
+          <div class="tc__def"><dt>Tutor de Sede</dt><dd>Usuario con rol de acompañamiento académico dentro de un campus universitario, responsable del seguimiento de los Usuarios Universidad bajo su cargo.</dd></div>
+          <div class="tc__def"><dt>Administrador</dt><dd>Usuario con acceso total a la administración de la Plataforma, gestionado exclusivamente por UniDev.</dd></div>
+          <div class="tc__def"><dt>Proyecto</dt><dd>La tarea, trabajo o encargo acordado entre una Empresa y un ejecutor a través de la Plataforma.</dd></div>
+          <div class="tc__def"><dt>Entregable</dt><dd>El producto, código, módulo, documento o resultado final presentado como cumplimiento del Proyecto.</dd></div>
+          <div class="tc__def"><dt>Comisión</dt><dd>El porcentaje o valor fijo que UniDev descuenta al ejecutor del Proyecto sobre su valor, según la tabla de tramos vigente.</dd></div>
+          <div class="tc__def"><dt>Fee adicional</dt><dd>El cargo porcentual que UniDev cobra a la Empresa contratante sobre el valor del Proyecto.</dd></div>
+          <div class="tc__def"><dt>Take rate</dt><dd>La suma de la Comisión y el Fee adicional que constituye el ingreso total de UniDev por la intermediación.</dd></div>
+          <div class="tc__def"><dt>Tramo</dt><dd>Rango de valor del Proyecto que determina la estructura de cobro aplicable.</dd></div>
+          <div class="tc__def"><dt>Escrow</dt><dd>Retención temporal de fondos gestionada a través de MercadoPago, desde el pago hasta su liberación o reembolso.</dd></div>
+        </dl>
+      </section>
+
+      <!-- 3 -->
+      <section id="roles" class="tc__section">
+        <h2 class="tc__section-title">3. Roles y acceso a la Plataforma</h2>
+
+        <h3 class="tc__subsection-title">3.1 Roles disponibles</h3>
+        <p>La Plataforma contempla los siguientes siete (7) roles:</p>
+        <div class="tc__table-wrap">
+          <table class="tc__table">
+            <thead><tr><th>Rol</th><th>Descripción</th></tr></thead>
+            <tbody>
+              <tr><td>Administrador</td><td>Administración total de la Plataforma. Exclusivo de UniDev.</td></tr>
+              <tr><td>Empresa</td><td>Organización contratante de servicios de desarrollo.</td></tr>
+              <tr><td>Usuarios de Empresa</td><td>Usuario interno habilitado por una Empresa.</td></tr>
+              <tr><td>Universidad</td><td>Institución universitaria que habilita a sus usuarios académicos.</td></tr>
+              <tr><td>Usuarios de Universidad</td><td>Usuario académico habilitado por una Universidad.</td></tr>
+              <tr><td>Admin de Sede</td><td>Administrador de un campus o sede universitaria.</td></tr>
+              <tr><td>Tutor de Sede</td><td>Rol de acompañamiento académico en un campus.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="tc__subsection-title">3.2 Acceso condicionado</h3>
+        <p>Los roles Usuarios de Empresa, Usuarios de Universidad, Admin de Sede y Tutor no pueden registrarse de forma independiente. Su acceso está subordinado al registro activo de la Organización a la que pertenecen. Si la Organización es inhabilitada, todos sus usuarios perderán el acceso de forma automática.</p>
+
+        <h3 class="tc__subsection-title">3.3 Responsabilidad de la Organización sobre sus usuarios</h3>
+        <p>Al registrarse, toda Organización:</p>
+        <ul class="tc__list">
+          <li>Garantiza que los usuarios que habilita están efectivamente vinculados a ella.</li>
+          <li>Acepta estos Términos en nombre de sus usuarios internos en lo que les sea aplicable.</li>
+          <li>Asume responsabilidad solidaria por el uso que sus usuarios hagan de la Plataforma.</li>
+          <li>Se compromete a notificar a UniDev cuando un usuario deje de estar vinculado.</li>
+        </ul>
+
+        <h3 class="tc__subsection-title">3.4 Responsabilidad del Tutor de Sede</h3>
+        <p>El Tutor de Sede asume responsabilidad de acompañamiento sobre los Usuarios Universidad bajo su cargo. UniDev no es responsable por el incumplimiento de proyectos derivado de la falta de seguimiento del Tutor, siendo esta responsabilidad atribuible a la Universidad que lo designó.</p>
+
+        <h3 class="tc__subsection-title">3.5 Requisitos generales de registro</h3>
+        <ul class="tc__list">
+          <li>Proporcionar información veraz, completa y actualizada.</li>
+          <li>Contar con un correo electrónico válido y activo.</li>
+          <li>Aceptar expresamente los presentes Términos y Condiciones y la Política de Privacidad vigente.</li>
+          <li>Ser mayor de 18 años.</li>
+          <li>En el caso de Empresas y Universidades: contar con representación legal válida.</li>
+        </ul>
+
+        <h3 class="tc__subsection-title">3.6 Unicidad de la cuenta</h3>
+        <p>Cada persona natural podrá registrar únicamente una cuenta. Cada Organización podrá registrar únicamente una cuenta. La creación de cuentas duplicadas o la suplantación de identidad dará lugar a la suspensión inmediata de todas las cuentas involucradas.</p>
+
+        <h3 class="tc__subsection-title">3.7 Responsabilidad sobre credenciales</h3>
+        <p>El Usuario es el único responsable de mantener la confidencialidad de sus credenciales de acceso. Cualquier actividad realizada desde su cuenta será de su exclusiva responsabilidad. Ante sospechas de acceso no autorizado, debe notificar de inmediato a <strong>nicolas&#64;unidev.site</strong>.</p>
+      </section>
+
+      <!-- 4 -->
+      <section id="intermediacion" class="tc__section">
+        <h2 class="tc__section-title">4. Modelo de intermediación</h2>
+
+        <h3 class="tc__subsection-title">4.1 Naturaleza de UniDev</h3>
+        <p>UniDev actúa exclusivamente como plataforma de intermediación tecnológica. En ningún caso UniDev tiene la condición de:</p>
+        <ul class="tc__list">
+          <li>Empleador de ningún Usuario.</li>
+          <li>Entidad financiera, cooperativa de crédito o captadora de recursos del público.</li>
+          <li>Agencia de empleo o bolsa de trabajo.</li>
+          <li>Garante de los resultados o calidad del trabajo entregado.</li>
+        </ul>
+
+        <h3 class="tc__subsection-title">4.2 Independencia de las partes</h3>
+        <p>La relación comercial se establece directamente entre la Empresa y el ejecutor del Proyecto. UniDev no es parte de ese contrato. El ejecutor actúa como contratista independiente y es el único responsable del cumplimiento de sus obligaciones tributarias, de seguridad social y de cualquier otra obligación legal derivada de su actividad.</p>
+
+        <h3 class="tc__subsection-title">4.3 Procesamiento de pagos</h3>
+        <p>Los pagos son procesados a través de MercadoPago, tercero autorizado y regulado. UniDev no almacena datos financieros de los Usuarios. El procesamiento está sujeto adicionalmente a los Términos y Condiciones de MercadoPago. Las cuentas de MercadoPago vinculadas a la Plataforma son responsabilidad exclusiva de cada Usuario.</p>
+      </section>
+
+      <!-- 5 -->
+      <section id="comisiones" class="tc__section">
+        <h2 class="tc__section-title">5. Comisiones y pagos</h2>
+
+        <h3 class="tc__subsection-title">5.1 Estructura de cobro</h3>
+        <div class="tc__table-wrap">
+          <table class="tc__table">
+            <thead>
+              <tr>
+                <th>Tramo</th>
+                <th>Valor del Proyecto (COP)</th>
+                <th>Comisión al ejecutor</th>
+                <th>Mínimo fijo (COP)</th>
+                <th>Fee Empresa</th>
+                <th>Take rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>$60.000 – $199.999</td><td>6%</td><td>$6.000</td><td>4%</td><td>10%</td></tr>
+              <tr><td>2</td><td>$200.000 – $499.999</td><td>8%</td><td>$12.000</td><td>5%</td><td>13%</td></tr>
+              <tr><td>3</td><td>$500.000 – $1.499.999</td><td>10%</td><td>$25.000</td><td>5%</td><td>15%</td></tr>
+              <tr><td>4</td><td>$1.500.000 en adelante</td><td>12%</td><td>$100.000</td><td>5%</td><td>17%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="tc__note">UniDev se reserva el derecho de actualizar esta tabla con previo aviso de al menos 15 días calendario.</p>
+
+        <h3 class="tc__subsection-title">5.2 Ciclo de vida del pago</h3>
+        <div class="tc__status-list">
+          <div class="tc__status"><span class="tc__status-dot tc__status-dot--pending"></span><div><strong>Pendiente de pago:</strong> El Proyecto fue aceptado pero la Empresa aún no ha realizado el pago.</div></div>
+          <div class="tc__status"><span class="tc__status-dot tc__status-dot--held"></span><div><strong>Fondos retenidos (Escrow):</strong> El pago fue recibido y los fondos están retenidos hasta la aprobación del Entregable.</div></div>
+          <div class="tc__status"><span class="tc__status-dot tc__status-dot--released"></span><div><strong>Liberado:</strong> El Entregable fue aprobado y los fondos fueron transferidos al ejecutor, descontada la Comisión.</div></div>
+          <div class="tc__status"><span class="tc__status-dot tc__status-dot--refunded"></span><div><strong>Reembolsado:</strong> Se ordenó la devolución de fondos a la Empresa tras una disputa resuelta a su favor.</div></div>
+          <div class="tc__status"><span class="tc__status-dot tc__status-dot--failed"></span><div><strong>Fallido:</strong> El pago no pudo procesarse o fue rechazado por MercadoPago.</div></div>
+        </div>
+
+        <h3 class="tc__subsection-title">5.3 Cobro al ejecutor</h3>
+        <p>La Comisión se descuenta automáticamente del monto liberado al ejecutor en el momento en que el pago es liberado. El mínimo fijo aplica cuando el porcentaje calculado resulte inferior a dicho valor.</p>
+
+        <h3 class="tc__subsection-title">5.4 Cobro a la Empresa</h3>
+        <p>El Fee adicional se cobra a la Empresa sobre el valor total del Proyecto al momento de realizar el pago inicial. Este cargo no es reembolsable salvo en los casos expresamente definidos en la cláusula 8.</p>
+
+        <h3 class="tc__subsection-title">5.5 Tiempos de transferencia</h3>
+        <p>Una vez liberado el pago, UniDev gestionará la transferencia al ejecutor en un plazo máximo de <strong>3 días hábiles</strong>, sujeto a los tiempos de procesamiento de MercadoPago.</p>
+
+        <h3 class="tc__subsection-title">5.6 Impuestos</h3>
+        <p>Cada parte es responsable de declarar y pagar los impuestos que correspondan a sus propios ingresos. UniDev no retiene ni declara impuestos a nombre de los Usuarios.</p>
+      </section>
+
+      <!-- 6 -->
+      <section id="propiedad" class="tc__section">
+        <h2 class="tc__section-title">6. Propiedad intelectual del código</h2>
+
+        <h3 class="tc__subsection-title">6.1 Titularidad del Entregable</h3>
+        <p>Todo código, módulo, componente, documentación o cualquier otro producto resultante de la ejecución de un Proyecto es de propiedad exclusiva de la Empresa contratante, desde el momento en que el pago es liberado.</p>
+
+        <h3 class="tc__subsection-title">6.2 Cesión de derechos por parte del ejecutor</h3>
+        <p>Al aceptar un Proyecto, el ejecutor cede irrevocablemente a la Empresa todos los derechos patrimoniales de autor sobre el Entregable, incluyendo los derechos de reproducción, distribución, modificación, comunicación pública y transformación, de conformidad con la Ley 23 de 1982 y normas concordantes.</p>
+
+        <h3 class="tc__subsection-title">6.3 Restricciones al ejecutor</h3>
+        <p>El ejecutor no podrá:</p>
+        <ul class="tc__list">
+          <li>Reutilizar, distribuir, sublicenciar o publicar el código del Entregable en proyectos externos, repositorios públicos o de terceros sin autorización expresa y escrita de la Empresa.</li>
+          <li>Reclamar derechos morales o patrimoniales sobre el Entregable una vez efectuado el pago.</li>
+          <li>Retener el código o cualquier parte del Entregable como mecanismo de presión ante disputas.</li>
+        </ul>
+
+        <h3 class="tc__subsection-title">6.4 Derechos de UniDev</h3>
+        <p>UniDev no adquiere ningún derecho sobre el código producido por los usuarios dentro de la Plataforma.</p>
+      </section>
+
+      <!-- 7 -->
+      <section id="entrega" class="tc__section">
+        <h2 class="tc__section-title">7. Proceso de entrega y aprobación</h2>
+
+        <h3 class="tc__subsection-title">7.1 Entrega del Proyecto</h3>
+        <p>El ejecutor deberá entregar el Entregable a través de los mecanismos habilitados en la Plataforma dentro del plazo acordado con la Empresa al momento de aceptar el Proyecto.</p>
+
+        <h3 class="tc__subsection-title">7.2 Revisión por parte de la Empresa</h3>
+        <p>La Empresa tendrá un plazo de <strong>5 días hábiles</strong> contados desde la notificación de entrega para:</p>
+        <ul class="tc__list">
+          <li>Aprobar el Entregable, lo que liberará el pago al ejecutor.</li>
+          <li>Rechazarlo con justificación escrita detallada, lo que iniciará el proceso de disputa definido en la cláusula 8.</li>
+        </ul>
+
+        <h3 class="tc__subsection-title">7.3 Aprobación tácita</h3>
+        <p>Si la Empresa no manifiesta ninguna decisión dentro del plazo establecido, el Entregable se considerará aprobado de forma tácita y el pago será liberado automáticamente al ejecutor.</p>
+
+        <h3 class="tc__subsection-title">7.4 Modificaciones posteriores</h3>
+        <p>Cualquier solicitud de ajuste o modificación posterior a la aprobación deberá ser tratada como un nuevo Proyecto dentro de la Plataforma.</p>
+      </section>
+
+      <!-- 8 -->
+      <section id="disputas" class="tc__section">
+        <h2 class="tc__section-title">8. Política de disputas y devoluciones</h2>
+
+        <h3 class="tc__subsection-title">8.1 Apertura de disputa</h3>
+        <p>Solo la Empresa podrá abrir una disputa, dentro del plazo de revisión establecido en la cláusula 7.2. Los fondos permanecerán retenidos durante el proceso.</p>
+
+        <h3 class="tc__subsection-title">8.2 Proceso de resolución</h3>
+        <p>UniDev tendrá un plazo de <strong>5 días hábiles</strong> para analizar la disputa y emitir una decisión. Durante este período ambas partes podrán presentar evidencia (capturas de pantalla, conversaciones, especificaciones del Proyecto, etc.).</p>
+
+        <h3 class="tc__subsection-title">8.3 Resultado de la disputa</h3>
+        <ul class="tc__list">
+          <li>Si UniDev falla a favor del ejecutor, los fondos retenidos serán liberados descontando la Comisión correspondiente.</li>
+          <li>Si UniDev falla a favor de la Empresa, se gestionará el reembolso. Los costos de procesamiento de MercadoPago no son reembolsables y serán asumidos por la Empresa.</li>
+        </ul>
+
+        <h3 class="tc__subsection-title">8.4 Decisión final</h3>
+        <p>La decisión de UniDev en el proceso de disputa es final e inapelable dentro de la Plataforma, sin perjuicio del derecho de las partes a acudir a instancias legales ordinarias.</p>
+      </section>
+
+      <!-- 9 -->
+      <section id="responsabilidad" class="tc__section">
+        <h2 class="tc__section-title">9. Limitación de responsabilidad</h2>
+
+        <h3 class="tc__subsection-title">9.1 Calidad del trabajo</h3>
+        <p>UniDev no garantiza la calidad, idoneidad, exactitud ni utilidad del trabajo entregado. La Empresa es la única responsable de verificar y validar los Entregables antes de su aprobación.</p>
+
+        <h3 class="tc__subsection-title">9.2 Disponibilidad de la Plataforma</h3>
+        <p>UniDev no garantiza la disponibilidad ininterrumpida de la Plataforma y no será responsable por interrupciones, fallas técnicas o pérdidas de datos derivadas de causas fuera de su control razonable.</p>
+
+        <h3 class="tc__subsection-title">9.3 Conducta de los Usuarios</h3>
+        <p>UniDev no será responsable por los actos, omisiones o incumplimientos de los Usuarios entre sí.</p>
+
+        <h3 class="tc__subsection-title">9.4 Pérdidas indirectas</h3>
+        <p>En ningún caso UniDev será responsable por lucro cesante, pérdida de oportunidad de negocio, daño a la reputación, pérdidas de datos o cualquier otro daño indirecto, incidental o consecuencial.</p>
+
+        <h3 class="tc__subsection-title">9.5 Límite máximo de responsabilidad</h3>
+        <p>La responsabilidad máxima de UniDev ante cualquier reclamación no excederá el valor del último pago procesado en la cuenta del Usuario afectado.</p>
+      </section>
+
+      <!-- 10 -->
+      <section id="uso" class="tc__section">
+        <h2 class="tc__section-title">10. Uso aceptable</h2>
+        <p>El Usuario se compromete a no utilizar la Plataforma para:</p>
+        <ul class="tc__list">
+          <li>Subir, compartir o ejecutar código malicioso, virus, malware o cualquier software dañino.</li>
+          <li>Suplantar la identidad de otra persona natural o jurídica.</li>
+          <li>Publicar o ejecutar Proyectos relacionados con actividades ilícitas conforme a la legislación colombiana.</li>
+          <li>Evadir el sistema de pagos de la Plataforma contactando directamente a la contraparte para realizar pagos fuera de UniDev, lo cual constituye una violación grave de estos Términos.</li>
+          <li>Acosar, amenazar o intimidar a otros Usuarios.</li>
+          <li>Publicar información falsa, engañosa o fraudulenta en perfiles o Proyectos.</li>
+        </ul>
+        <p class="tc__warning">El incumplimiento de cualquiera de estas restricciones dará lugar a la suspensión o eliminación inmediata de la cuenta, sin perjuicio de las acciones legales que procedan.</p>
+      </section>
+
+      <!-- 11 -->
+      <section id="suspension" class="tc__section">
+        <h2 class="tc__section-title">11. Suspensión y cancelación de cuenta</h2>
+
+        <h3 class="tc__subsection-title">11.1 Causales de suspensión inmediata</h3>
+        <p>UniDev podrá suspender una cuenta sin previo aviso cuando:</p>
+        <ul class="tc__list">
+          <li>El Usuario incurra en alguna de las conductas prohibidas en la cláusula 10.</li>
+          <li>Se detecte fraude, suplantación de identidad o actividad sospechosa.</li>
+          <li>Una autoridad competente así lo ordene.</li>
+          <li>El Usuario tenga pagos retenidos con disputas abiertas sin resolver.</li>
+        </ul>
+
+        <h3 class="tc__subsection-title">11.2 Fondos en tránsito ante suspensión</h3>
+        <p>Si al momento de la suspensión existen fondos retenidos asociados a la cuenta, UniDev definirá su destinación conforme al resultado del proceso de disputa o, en ausencia de este, los devolverá a la Empresa descontando los costos de procesamiento de MercadoPago.</p>
+
+        <h3 class="tc__subsection-title">11.3 Cancelación voluntaria</h3>
+        <p>El Usuario puede solicitar el cierre de su cuenta escribiendo a <strong>nicolas&#64;unidev.site</strong>. El cierre no procederá mientras existan Proyectos activos o pagos pendientes o retenidos.</p>
+      </section>
+
+      <!-- 12 -->
+      <section id="modificaciones" class="tc__section">
+        <h2 class="tc__section-title">12. Modificaciones a los Términos y Condiciones</h2>
+        <p>UniDev se reserva el derecho de modificar los presentes Términos en cualquier momento, notificando al Usuario con al menos <strong>15 días calendario</strong> de anticipación por correo electrónico y mediante aviso visible en la Plataforma.</p>
+        <p>El uso continuado de la Plataforma tras la entrada en vigencia de la nueva versión constituye aceptación tácita de los cambios. Las versiones anteriores quedarán archivadas y disponibles bajo solicitud a <strong>nicolas&#64;unidev.site</strong>.</p>
+      </section>
+
+      <!-- 13 -->
+      <section id="ley" class="tc__section">
+        <h2 class="tc__section-title">13. Ley aplicable y jurisdicción</h2>
+        <p>Los presentes Términos y Condiciones se rigen por las leyes de la República de Colombia, en particular:</p>
+        <ul class="tc__list">
+          <li>El Código de Comercio.</li>
+          <li>La Ley 1480 de 2011 (Estatuto del Consumidor).</li>
+          <li>La Ley 527 de 1999 (Comercio electrónico).</li>
+          <li>La Ley 23 de 1982 y normas concordantes en materia de propiedad intelectual.</li>
+        </ul>
+        <p>Para cualquier controversia, las partes se someten a la jurisdicción de los jueces y tribunales competentes de Facatativá, Cundinamarca, Colombia.</p>
+      </section>
+
+      <!-- 14 -->
+      <section id="intermediacion-pagos" class="tc__section">
+        <h2 class="tc__section-title">14. Intermediación de pagos</h2>
+
+        <h3 class="tc__subsection-title">14.1 Naturaleza del servicio de intermediación</h3>
+        <p>UniDev actúa como intermediario tecnológico en el flujo de pagos entre la Empresa y el Ejecutor. En ningún caso UniDev es una entidad financiera, cooperativa de crédito ni captadora de recursos del público. Los fondos son gestionados y retenidos exclusivamente por MercadoPago bajo su propia regulación. UniDev no tiene acceso directo al dinero de los usuarios.</p>
+
+        <h3 class="tc__subsection-title">14.2 Ejecutor individual o en equipo</h3>
+        <p>El Ejecutor de un Proyecto puede ser una persona individual o un equipo de usuarios dentro de la Plataforma. En ambos casos, la cuenta de MercadoPago receptora del pago debe estar vinculada y activa antes del inicio del Proyecto. La distribución interna del pago dentro de un equipo es responsabilidad exclusiva de sus integrantes y no involucra a UniDev.</p>
+
+        <h3 class="tc__subsection-title">14.3 Flujo del dinero</h3>
+        <p>El ciclo de pago funciona de la siguiente manera:</p>
+        <div class="tc__status-list">
+          <div class="tc__status"><span class="tc__status-dot tc__status-dot--pending"></span><div><strong>Inicio:</strong> La Empresa realiza el pago del Proyecto en el momento que considere oportuno según el avance acordado con el Ejecutor. No existe un momento obligatorio de pago anticipado, salvo que así lo acuerden las partes.</div></div>
+          <div class="tc__status"><span class="tc__status-dot tc__status-dot--held"></span><div><strong>Retención:</strong> Una vez recibido el pago, los fondos quedan retenidos en Escrow a través de MercadoPago hasta que el Entregable sea aprobado.</div></div>
+          <div class="tc__status"><span class="tc__status-dot tc__status-dot--released"></span><div><strong>Liberación:</strong> Aprobado el Entregable de forma expresa o tácita (cláusula 7.3), los fondos son liberados al Ejecutor descontada la Comisión de UniDev.</div></div>
+          <div class="tc__status"><span class="tc__status-dot tc__status-dot--refunded"></span><div><strong>Reembolso:</strong> Si una disputa es resuelta a favor de la Empresa, los fondos son devueltos descontando los costos de procesamiento de MercadoPago, los cuales no son reembolsables bajo ninguna circunstancia.</div></div>
+        </div>
+
+        <h3 class="tc__subsection-title">14.4 Ausencia de penalizaciones o retenciones adicionales</h3>
+        <p>UniDev no aplica penalizaciones económicas ni retiene fondos más allá del Escrow descrito en la cláusula 14.3. El único descuento aplicado sobre el pago del Ejecutor es la Comisión establecida en la tabla de tramos vigente.</p>
+
+        <h3 class="tc__subsection-title">14.5 Obligaciones del Ejecutor en materia de pagos</h3>
+        <ul class="tc__list">
+          <li>Mantener una cuenta de MercadoPago activa y válida para recibir pagos.</li>
+          <li>No acordar ni recibir pagos relacionados con Proyectos de la Plataforma por fuera de UniDev.</li>
+          <li>Notificar a UniDev si detecta cualquier irregularidad en el flujo de su pago.</li>
+        </ul>
+
+        <h3 class="tc__subsection-title">14.6 Obligaciones de la Empresa en materia de pagos</h3>
+        <ul class="tc__list">
+          <li>Realizar los pagos únicamente a través de los mecanismos habilitados en la Plataforma.</li>
+          <li>Revisar y aprobar o rechazar el Entregable dentro del plazo establecido en la cláusula 7.2.</li>
+          <li>No solicitar trabajo adicional fuera del alcance del Proyecto pagado sin generar un nuevo Proyecto.</li>
+        </ul>
+
+        <h3 class="tc__subsection-title">14.7 Eventos fuera del control de UniDev</h3>
+        <p>UniDev no será responsable por demoras o fallas en el procesamiento de pagos causadas por interrupciones en el servicio de MercadoPago, cambios regulatorios que afecten el procesamiento de pagos en Colombia, o cualquier otra causa fuera de su control razonable. En estos casos, UniDev gestionará la situación a la brevedad posible y mantendrá informados a los usuarios afectados.</p>
+      </section>
+
+      <!-- 15 -->
+      <section id="contacto" class="tc__section">
+        <h2 class="tc__section-title">15. Contacto</h2>
+        <div class="tc__info-block">
+          <div class="tc__info-row"><span>Correo electrónico</span><span>nicolas&#64;unidev.site</span></div>
+          <div class="tc__info-row"><span>Plataforma</span><span>unidev.site</span></div>
+        </div>
+      </section>
+
+      <!-- Footer note -->
+      <div class="tc__acceptance">
+        <p>Al registrarse o continuar utilizando la Plataforma, el Usuario declara haber leído, comprendido y aceptado en su totalidad los presentes Términos y Condiciones.</p>
+        <p class="tc__acceptance-footer">UniDev — Operado por Nicolás Rodríguez Torres · Facatativá, Cundinamarca, Colombia</p>
+      </div>
+
+    </main>
+  </div>
+
+  <app-footer></app-footer>
+</div>

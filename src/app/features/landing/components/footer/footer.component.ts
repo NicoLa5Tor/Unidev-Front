@@ -42,7 +42,9 @@ export class FooterComponent implements AfterViewInit {
       { label: 'Login', href: '/login', displayHref: 'unidev.site/login' },
       { label: 'Pricing', href: '/pricing', displayHref: 'unidev.site/pricing' },
       { label: 'Universidades', href: '/universities', displayHref: 'unidev.site/universities' },
-      { label: 'Contacto', href: '/contact', displayHref: 'unidev.site/contact' }
+      { label: 'Contacto', href: '/contact', displayHref: 'unidev.site/contact' },
+      { label: 'Términos y Condiciones', href: '/terms', displayHref: 'unidev.site/terms' },
+      { label: 'Política de Privacidad', href: '/privacy', displayHref: 'unidev.site/privacy' }
     ],
     build: [
       { label: 'NicoLa5Tor', href: 'https://github.com/NicoLa5Tor', displayHref: 'github.com/NicoLa5Tor' },

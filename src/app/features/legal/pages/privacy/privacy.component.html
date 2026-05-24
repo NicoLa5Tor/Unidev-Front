@@ -1,0 +1,229 @@
+<div class="pp">
+
+  <!-- Backdrop -->
+  <div class="pp__backdrop" aria-hidden="true">
+    <div class="pp__orb pp__orb--a"></div>
+    <div class="pp__orb pp__orb--b"></div>
+    <div class="pp__grid"></div>
+  </div>
+
+  <!-- Hero -->
+  <header class="pp__hero">
+    <a routerLink="/" class="pp__brand">
+      <img src="/Logo.png" alt="UniDev" class="pp__logo" />
+      <span class="pp__brand-name">UniDev</span>
+    </a>
+    <p class="pp__eyebrow">Legal</p>
+    <h1 class="pp__title">Política de Privacidad</h1>
+    <div class="pp__meta">
+      <span class="pp__badge">Versión {{ version }}</span>
+      <span class="pp__date">Vigente desde {{ effectiveDate }}</span>
+    </div>
+  </header>
+
+  <!-- Body -->
+  <div class="pp__body">
+
+    <!-- Sidebar TOC -->
+    <aside class="pp__toc">
+      <p class="pp__toc-label">Contenido</p>
+      <nav>
+        <button
+          *ngFor="let s of sections"
+          type="button"
+          class="pp__toc-item"
+          (click)="scrollTo(s.id)"
+        >{{ s.label }}</button>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="pp__content">
+
+      <!-- 1 -->
+      <section id="responsable" class="pp__section">
+        <h2 class="pp__section-title">1. Identificación del responsable del tratamiento</h2>
+        <p>En cumplimiento de la Ley 1581 de 2012 y el Decreto 1377 de 2013, el responsable del tratamiento de los datos personales recopilados a través de la Plataforma UniDev es:</p>
+        <div class="pp__info-block">
+          <div class="pp__info-row"><span>Titular</span><span>Nicolás Rodríguez Torres</span></div>
+          <div class="pp__info-row"><span>Cédula</span><span>1193602390</span></div>
+          <div class="pp__info-row"><span>Correo</span><span>nicolas&#64;unidev.site</span></div>
+          <div class="pp__info-row"><span>Domicilio</span><span>Facatativá, Cundinamarca, Colombia</span></div>
+        </div>
+      </section>
+
+      <!-- 2 -->
+      <section id="datos" class="pp__section">
+        <h2 class="pp__section-title">2. Datos que se recopilan</h2>
+        <p>UniDev recopila los siguientes datos personales según el tipo de usuario:</p>
+
+        <h3 class="pp__subsection-title">2.1 Datos de registro</h3>
+        <ul class="pp__list">
+          <li>Nombre completo</li>
+          <li>Correo electrónico</li>
+          <li>Rol dentro de la Plataforma</li>
+        </ul>
+        <p>UniDev <strong>no solicita ni almacena contraseñas</strong>. El acceso a la Plataforma se realiza exclusivamente mediante inicio de sesión federado a través de <strong>Google</strong> o <strong>Microsoft</strong>. La autenticación es gestionada por estos proveedores bajo sus propias políticas de privacidad y seguridad.</p>
+
+        <h3 class="pp__subsection-title">2.2 Datos de perfil</h3>
+        <ul class="pp__list">
+          <li>Organización o institución a la que pertenece el usuario</li>
+          <li>Campus o sede universitaria, cuando aplique</li>
+          <li>Información profesional o académica que el usuario decida agregar</li>
+        </ul>
+
+        <h3 class="pp__subsection-title">2.3 Datos de pago</h3>
+        <ul class="pp__list">
+          <li>Referencia de la cuenta de MercadoPago vinculada por el usuario</li>
+          <li>Historial de transacciones realizadas dentro de la Plataforma</li>
+        </ul>
+        <p>UniDev <strong>no almacena</strong> números de tarjetas de crédito, débito ni datos bancarios directamente. Esa información es gestionada exclusivamente por MercadoPago.</p>
+
+        <h3 class="pp__subsection-title">2.4 Datos de uso</h3>
+        <ul class="pp__list">
+          <li>Proyectos creados, aplicaciones enviadas y entregas realizadas</li>
+          <li>Historial de interacciones dentro de la Plataforma</li>
+        </ul>
+
+        <h3 class="pp__subsection-title">2.5 Datos técnicos</h3>
+        <ul class="pp__list">
+          <li>Dirección IP</li>
+          <li>Tipo de dispositivo y navegador</li>
+          <li>Registros de sesión (fecha, hora y duración de accesos)</li>
+        </ul>
+      </section>
+
+      <!-- 3 -->
+      <section id="finalidad" class="pp__section">
+        <h2 class="pp__section-title">3. Finalidad del tratamiento</h2>
+        <p>Los datos recopilados se usan exclusivamente para:</p>
+        <ul class="pp__list">
+          <li>Prestar el servicio de intermediación entre usuarios de la Plataforma.</li>
+          <li>Procesar pagos a través de MercadoPago.</li>
+          <li>Enviar comunicaciones relacionadas con la cuenta, proyectos y actualizaciones del servicio.</li>
+          <li>Mejorar el funcionamiento y la experiencia de la Plataforma.</li>
+          <li>Cumplir con obligaciones legales y requerimientos de autoridades competentes.</li>
+        </ul>
+        <p>UniDev <strong>no utiliza</strong> los datos personales de sus usuarios para publicidad de terceros ni los comercializa bajo ninguna forma.</p>
+      </section>
+
+      <!-- 4 -->
+      <section id="base-legal" class="pp__section">
+        <h2 class="pp__section-title">4. Base legal del tratamiento</h2>
+        <p>El tratamiento de datos personales se fundamenta en:</p>
+        <ul class="pp__list">
+          <li>El consentimiento expreso otorgado por el usuario al momento de registrarse y aceptar esta Política.</li>
+          <li>La ejecución del contrato de uso de la Plataforma contenido en los Términos y Condiciones.</li>
+          <li>El cumplimiento de obligaciones legales establecidas en la Ley 1581 de 2012 y normas concordantes.</li>
+        </ul>
+      </section>
+
+      <!-- 5 -->
+      <section id="terceros" class="pp__section">
+        <h2 class="pp__section-title">5. Terceros que intervienen en el tratamiento</h2>
+        <p>Para operar el servicio, UniDev comparte datos con los siguientes terceros en calidad de encargados del tratamiento:</p>
+        <div class="pp__info-block">
+          <div class="pp__info-row pp__info-row--wrap"><span>MercadoPago</span><span>Procesamiento de pagos y gestión de cuentas de cobro.</span></div>
+          <div class="pp__info-row pp__info-row--wrap"><span>Google y Microsoft</span><span>Proveedores de autenticación federada.</span></div>
+          <div class="pp__info-row pp__info-row--wrap"><span>Infraestructura y hosting</span><span>Almacenamiento seguro de la información en servidores.</span></div>
+        </div>
+        <p>Todos los terceros están obligados contractualmente a tratar los datos únicamente para los fines autorizados y a implementar medidas de seguridad adecuadas.</p>
+      </section>
+
+      <!-- 6 -->
+      <section id="transferencia" class="pp__section">
+        <h2 class="pp__section-title">6. Transferencia y compartición de datos</h2>
+        <p>UniDev <strong>no vende, alquila ni cede</strong> datos personales a terceros con fines comerciales.</p>
+        <p>Los datos podrán ser compartidos únicamente en los siguientes casos:</p>
+        <ul class="pp__list">
+          <li>Con los proveedores mencionados en la cláusula 5, en la medida estrictamente necesaria para operar el servicio.</li>
+          <li>Con autoridades judiciales, administrativas o de control cuando así lo exija la ley o una orden judicial.</li>
+          <li>Con el propio usuario titular de los datos, a su solicitud.</li>
+        </ul>
+      </section>
+
+      <!-- 7 -->
+      <section id="retencion" class="pp__section">
+        <h2 class="pp__section-title">7. Tiempo de retención de datos</h2>
+        <div class="pp__info-block">
+          <div class="pp__info-row pp__info-row--wrap"><span>Cuenta activa</span><span>Se conservan mientras la cuenta permanezca activa en la Plataforma.</span></div>
+          <div class="pp__info-row pp__info-row--wrap"><span>Transacciones</span><span>Mínimo 5 años por obligaciones legales tributarias y contables.</span></div>
+          <div class="pp__info-row pp__info-row--wrap"><span>Cierre de cuenta</span><span>Eliminados o anonimizados dentro de los 30 días calendario siguientes a la confirmación del cierre, salvo obligación legal.</span></div>
+        </div>
+      </section>
+
+      <!-- 8 -->
+      <section id="derechos" class="pp__section">
+        <h2 class="pp__section-title">8. Derechos del titular (Habeas Data)</h2>
+        <p>En virtud de la Ley 1581 de 2012, todo titular de datos personales tiene derecho a:</p>
+        <ul class="pp__list">
+          <li><strong>Conocer</strong> los datos personales que UniDev tiene sobre él.</li>
+          <li><strong>Actualizar y rectificar</strong> sus datos cuando sean inexactos, incompletos o desactualizados.</li>
+          <li><strong>Solicitar prueba</strong> del consentimiento otorgado para el tratamiento.</li>
+          <li><strong>Ser informado</strong> sobre el uso que se ha dado a sus datos.</li>
+          <li><strong>Presentar quejas</strong> ante la Superintendencia de Industria y Comercio (SIC) por infracciones a la normativa de protección de datos.</li>
+          <li><strong>Revocar el consentimiento</strong> y solicitar la supresión de sus datos, salvo que exista una obligación legal de conservarlos.</li>
+        </ul>
+        <p>Para ejercer cualquiera de estos derechos, el usuario puede escribir a <strong>nicolas&#64;unidev.site</strong>. UniDev dará respuesta dentro de los <strong>15 días hábiles</strong> siguientes a la recepción.</p>
+      </section>
+
+      <!-- 9 -->
+      <section id="seguridad" class="pp__section">
+        <h2 class="pp__section-title">9. Seguridad de los datos</h2>
+        <p>UniDev implementa las siguientes medidas técnicas para proteger los datos personales:</p>
+        <ul class="pp__list">
+          <li>Autenticación delegada a proveedores certificados (Google y Microsoft), sin manejo directo de contraseñas.</li>
+          <li>Control de acceso a datos según el rol de cada usuario.</li>
+          <li>Comunicaciones cifradas mediante protocolos seguros (HTTPS).</li>
+          <li>Acceso restringido a los datos por parte del personal autorizado.</li>
+        </ul>
+        <p>No obstante, UniDev no puede garantizar seguridad absoluta frente a ataques externos o situaciones fuera de su control razonable. En caso de detectarse una brecha de seguridad que afecte datos personales, UniDev notificará a los usuarios afectados y a la SIC en los plazos establecidos por la ley.</p>
+      </section>
+
+      <!-- 10 -->
+      <section id="cookies" class="pp__section">
+        <h2 class="pp__section-title">10. Cookies y datos de navegación</h2>
+        <p>La Plataforma puede utilizar cookies y tecnologías similares para:</p>
+        <ul class="pp__list">
+          <li>Mantener la sesión activa del usuario.</li>
+          <li>Recordar preferencias de uso.</li>
+          <li>Analizar el comportamiento de navegación de forma agregada para mejorar el servicio.</li>
+        </ul>
+        <p>El usuario puede gestionar o deshabilitar las cookies desde la configuración de su navegador, aunque esto puede afectar el funcionamiento de algunas funciones de la Plataforma.</p>
+      </section>
+
+      <!-- 11 -->
+      <section id="menores" class="pp__section">
+        <h2 class="pp__section-title">11. Menores de edad</h2>
+        <p>La Plataforma está dirigida exclusivamente a personas mayores de 18 años. UniDev no recopila intencionalmente datos personales de menores de edad. Si se detecta que un usuario menor se ha registrado, su cuenta será eliminada de inmediato y sus datos suprimidos.</p>
+        <p>Si usted es padre, madre o tutor de un menor que haya podido registrarse, le pedimos que nos contacte a <strong>nicolas&#64;unidev.site</strong> para gestionar la eliminación de la cuenta.</p>
+      </section>
+
+      <!-- 12 -->
+      <section id="modificaciones" class="pp__section">
+        <h2 class="pp__section-title">12. Modificaciones a esta política</h2>
+        <p>UniDev se reserva el derecho de actualizar esta Política en cualquier momento, notificando al usuario con al menos <strong>15 días calendario</strong> de anticipación por correo electrónico y mediante aviso visible en la Plataforma.</p>
+        <p>El uso continuado de la Plataforma tras la entrada en vigencia de la nueva versión constituye aceptación tácita de los cambios. Las versiones anteriores estarán disponibles bajo solicitud a <strong>nicolas&#64;unidev.site</strong>.</p>
+      </section>
+
+      <!-- 13 -->
+      <section id="contacto" class="pp__section">
+        <h2 class="pp__section-title">13. Contacto y ejercicio de derechos</h2>
+        <div class="pp__info-block">
+          <div class="pp__info-row"><span>Correo electrónico</span><span>nicolas&#64;unidev.site</span></div>
+          <div class="pp__info-row"><span>Plataforma</span><span>unidev.site</span></div>
+          <div class="pp__info-row"><span>Autoridad de control</span><span>Superintendencia de Industria y Comercio (SIC) — sic.gov.co</span></div>
+        </div>
+      </section>
+
+      <!-- Footer note -->
+      <div class="pp__acceptance">
+        <p>Al registrarse en la Plataforma, el usuario declara haber leído y aceptado la presente Política de Privacidad y autoriza expresamente el tratamiento de sus datos personales conforme a los términos aquí descritos.</p>
+        <p class="pp__acceptance-footer">UniDev — Operado por Nicolás Rodríguez Torres · Facatativá, Cundinamarca, Colombia</p>
+      </div>
+
+    </main>
+  </div>
+
+  <app-footer></app-footer>
+</div>

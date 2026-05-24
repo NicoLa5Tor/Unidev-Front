@@ -23,7 +23,9 @@ export class HeaderComponent implements OnDestroy {
     { label: 'Pricing', route: '/pricing' },
     { label: 'Empresas', route: '/companies' },
     { label: 'Universidades', route: '/universities' },
-    { label: 'Contacto', route: '/contact' }
+    { label: 'Contacto', route: '/contact' },
+    { label: 'Términos', route: '/terms' },
+    { label: 'Privacidad', route: '/privacy' }
   ];
 
   private currentPath = '/';

@@ -235,6 +235,30 @@ export const routes: Routes = [
     }
   },
   {
+    path: 'terms',
+    title: 'Términos y Condiciones | UniDev',
+    loadComponent: () =>
+      import('./features/legal/pages/terms/terms.component').then(
+        m => m.TermsComponent
+      ),
+    data: {
+      publicHeader: true,
+      description: 'Términos y Condiciones de uso de la plataforma UniDev.'
+    }
+  },
+  {
+    path: 'privacy',
+    title: 'Política de Privacidad | UniDev',
+    loadComponent: () =>
+      import('./features/legal/pages/privacy/privacy.component').then(
+        m => m.PrivacyComponent
+      ),
+    data: {
+      publicHeader: true,
+      description: 'Política de Privacidad y Tratamiento de Datos de la plataforma UniDev.'
+    }
+  },
+  {
     path: '**',
     redirectTo: ''
   }

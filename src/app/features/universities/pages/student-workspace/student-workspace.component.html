@@ -462,7 +462,7 @@
         <div class="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden bg-[var(--accent-1)]/20 flex items-center justify-center">
           <img *ngIf="entry.photoUrl" [src]="entry.photoUrl" [alt]="entry.displayName" class="w-full h-full object-cover"/>
           <span *ngIf="!entry.photoUrl" class="text-sm font-bold text-[var(--accent-1)]">
-            {{ entry.displayName?.charAt(0)?.toUpperCase() }}
+            {{ entry.displayName.charAt(0).toUpperCase() }}
           </span>
         </div>
         <!-- Info -->
@@ -502,7 +502,7 @@
         <div class="flex-shrink-0 w-10 h-10 rounded-full bg-[var(--accent-3)]/20 flex items-center justify-center">
           <img *ngIf="entry.photoUrl" [src]="entry.photoUrl" [alt]="entry.displayName" class="w-full h-full object-cover rounded-full"/>
           <span *ngIf="!entry.photoUrl" class="text-sm font-bold text-[var(--accent-3)]">
-            {{ entry.displayName?.charAt(0)?.toUpperCase() }}
+            {{ entry.displayName.charAt(0).toUpperCase() }}
           </span>
         </div>
         <!-- Info -->

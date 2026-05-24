@@ -15,7 +15,7 @@ import { HeroStepsSectionComponent } from '../../../landing/components/hero/sect
     HeroIntroSectionComponent,
     HeroFeaturesSectionComponent,
     HeroStepsSectionComponent,
-    HeroFinalCtaSectionComponent
+    HeroFinalCtaSectionComponent,
   ],
   templateUrl: './blackbird-experience.component.html',
   styleUrl: './blackbird-experience.component.scss'
