@@ -2,6 +2,7 @@
   eyebrow="Espacio estudiantil"
   [title]="dashboardTitle"
   [avatarLabel]="avatarLabel"
+  [avatarImageUrl]="currentUser?.photoUrl ?? null"
   [activeTab]="activeTab"
   [navItems]="navItems"
   (tabChange)="setActiveTab($event)"
@@ -861,6 +862,19 @@
   </section>
 
 </app-dashboard-shell>
+
+<!-- ── FAB: Refrescar solo la tab activa ── -->
+<button
+  type="button"
+  (click)="refreshActiveTab()"
+  [disabled]="isRefreshing"
+  class="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full border border-[color:var(--accent-2)]/45 bg-[var(--panel-2)]/95 text-[var(--accent-2)] shadow-[0_8px_24px_rgba(0,0,0,0.4)] backdrop-blur transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+  [attr.aria-label]="'Actualizar ' + activeTab"
+  title="Actualizar esta sección">
+  <svg [class.animate-spin]="isRefreshing" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6M20 20v-6h-6M20 9a8 8 0 0 0-14.93-2M4 15a8 8 0 0 0 14.93 2"/>
+  </svg>
+</button>
 
 <!-- ══════════════════════════════════
      MODAL: POSTULARSE A PROYECTO

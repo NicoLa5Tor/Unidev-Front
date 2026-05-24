@@ -71,7 +71,6 @@ export class CallbackComponent implements OnInit {
     ADMIN_SEDE: '/campus-admin/workspace',
     TUTOR_SEDE: '/tutor/workspace'
   };
-  private isBypassRedirect = false;
   private readonly redirectDelayMs = 1200;
   private readonly loginPath = '/login';
   private oidcConfig: OpenIdConfiguration | null = null;
@@ -99,6 +98,8 @@ export class CallbackComponent implements OnInit {
         this.error = 'No encontramos el código de autorización. Intenta iniciar sesión nuevamente.';
         return;
       }
+
+      history.replaceState({}, '', window.location.pathname);
 
       const codeVerifier = await this.getCodeVerifier();
       if (!codeVerifier) {
@@ -163,14 +164,12 @@ export class CallbackComponent implements OnInit {
         )
       );
       if (this.shouldBypassFromResponse(response)) {
-        this.isBypassRedirect = true;
         this.persistMicrosoftBypass();
         this.authService.federatedSignIn('microsoft');
         throw new Error('BYPASS_REDIRECT');
       }
     } catch (error) {
       if (this.shouldBypassMicrosoftDialog(error)) {
-        this.isBypassRedirect = true;
         this.persistMicrosoftBypass();
         void this.router.navigateByUrl(this.loginPath);
         throw new Error('BYPASS_REDIRECT');

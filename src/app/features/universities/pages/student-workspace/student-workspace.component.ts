@@ -154,11 +154,72 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     this.loadMyApplications();
     this.loadInvitations();
     this.startNotifPolling();
+    this.startDataPolling();
     this.loadMpStatus();
   }
 
   ngOnDestroy(): void {
     this.stopNotifPolling();
+    this.stopDataPolling();
+  }
+
+  private dataPollHandle: ReturnType<typeof setInterval> | null = null;
+  isRefreshing = false;
+
+  refreshActiveTab(): void {
+    if (this.isRefreshing) return;
+    this.isRefreshing = true;
+    const done = () => { this.isRefreshing = false; };
+    switch (this.activeTab) {
+      case 'projects':
+        this.loadProjects();
+        setTimeout(done, 600);
+        break;
+      case 'applications':
+        this.loadMyApplications();
+        setTimeout(done, 600);
+        break;
+      case 'my-teams':
+        this.loadMyTeams();
+        setTimeout(done, 600);
+        break;
+      case 'all-teams':
+        this.loadUniversityTeams();
+        setTimeout(done, 600);
+        break;
+      case 'ranking':
+        this.loadRanking();
+        setTimeout(done, 600);
+        break;
+      case 'invitations':
+        this.loadInvitations();
+        setTimeout(done, 600);
+        break;
+      case 'profile':
+        this.userSessionService.loadCurrentUser().subscribe({
+          next: u => { this.currentUser = u; done(); },
+          error: done
+        });
+        break;
+      default:
+        done();
+    }
+  }
+
+  private startDataPolling(): void {
+    this.dataPollHandle = setInterval(() => {
+      this.loadProjects();
+      this.loadMyApplications();
+      this.loadMyTeams();
+      if (this.activeTab === 'invitations') this.loadInvitations();
+    }, 30000);
+  }
+
+  private stopDataPolling(): void {
+    if (this.dataPollHandle != null) {
+      clearInterval(this.dataPollHandle);
+      this.dataPollHandle = null;
+    }
   }
 
   private startNotifPolling(): void {
