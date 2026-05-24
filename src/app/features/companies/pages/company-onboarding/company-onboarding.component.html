@@ -1614,7 +1614,7 @@
                            : 'bg-[var(--panel-border)]/30 text-[var(--muted)]'">{{ i + 1 }}</div>
                 <div class="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden bg-[var(--accent-1)]/20 flex items-center justify-center">
                   <img *ngIf="entry.photoUrl" [src]="entry.photoUrl" [alt]="entry.displayName" class="w-full h-full object-cover"/>
-                  <span *ngIf="!entry.photoUrl" class="text-sm font-bold text-[var(--accent-1)]">{{ entry.displayName?.charAt(0)?.toUpperCase() }}</span>
+                  <span *ngIf="!entry.photoUrl" class="text-sm font-bold text-[var(--accent-1)]">{{ entry.displayName.charAt(0).toUpperCase() }}</span>
                 </div>
                 <div class="flex-1 min-w-0">
                   <p class="font-semibold text-[var(--text)] truncate">{{ entry.displayName }}</p>
@@ -1644,7 +1644,7 @@
                            : 'bg-[var(--panel-border)]/30 text-[var(--muted)]'">{{ i + 1 }}</div>
                 <div class="flex-shrink-0 w-10 h-10 rounded-full bg-[var(--accent-3)]/20 flex items-center justify-center">
                   <img *ngIf="entry.photoUrl" [src]="entry.photoUrl" [alt]="entry.displayName" class="w-full h-full object-cover rounded-full"/>
-                  <span *ngIf="!entry.photoUrl" class="text-sm font-bold text-[var(--accent-3)]">{{ entry.displayName?.charAt(0)?.toUpperCase() }}</span>
+                  <span *ngIf="!entry.photoUrl" class="text-sm font-bold text-[var(--accent-3)]">{{ entry.displayName.charAt(0).toUpperCase() }}</span>
                 </div>
                 <div class="flex-1 min-w-0">
                   <p class="font-semibold text-[var(--text)] truncate">{{ entry.displayName }}</p>

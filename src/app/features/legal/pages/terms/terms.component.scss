@@ -2,14 +2,20 @@
 .tc {
   position: relative;
   min-height: 100vh;
-  background: #0a0a0f;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(10, 10, 15, 0.15) 20%,
+    rgba(10, 10, 15, 0.70) 50%,
+    #0a0a0f 75%
+  );
   color: #e2e8f0;
   font-family: 'Inter', sans-serif;
 }
 
 // ── Backdrop ──────────────────────────────────────────────────
 .tc__backdrop {
-  position: fixed;
+  position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 0;
@@ -43,9 +49,10 @@
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(168, 85, 247, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(168, 85, 247, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(168, 85, 247, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(168, 85, 247, 0.05) 1px, transparent 1px);
   background-size: 40px 40px;
+  mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.8) 100%);
 }
 
 // ── Hero ──────────────────────────────────────────────────────
@@ -135,7 +142,13 @@
   @media (max-width: 860px) {
     grid-template-columns: 1fr;
   }
+
+  @media (max-width: 480px) {
+    padding: 0 0.75rem;
+    gap: 1rem;
+  }
 }
+
 
 // ── TOC Sidebar ───────────────────────────────────────────────
 .tc__toc {
@@ -179,6 +192,7 @@
 // ── Content ───────────────────────────────────────────────────
 .tc__content {
   padding: 2.5rem 0 4rem;
+  min-width: 0; // grid item must collapse or tables overflow viewport
 }
 
 // ── Section ───────────────────────────────────────────────────
@@ -196,7 +210,7 @@
 
 .tc__section-title {
   margin: 0 0 1.25rem;
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 3vw, 1.25rem);
   font-weight: 700;
   color: #f1f5f9;
   padding-bottom: 0.6rem;
@@ -296,20 +310,28 @@
   &:last-child { border-bottom: none; }
   &:nth-child(even) { background: rgba(168, 85, 247, 0.03); }
 
-  span:first-child { color: #64748b; }
-  span:last-child { color: #e2e8f0; font-weight: 500; }
+  span:first-child { color: #64748b; flex-shrink: 0; }
+  span:last-child { color: #e2e8f0; font-weight: 500; text-align: right; }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 0.2rem;
+    span:last-child { text-align: left; }
+  }
 }
 
 // ── Tables ────────────────────────────────────────────────────
 .tc__table-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border-radius: 14px;
   border: 1px solid rgba(168, 85, 247, 0.2);
   margin: 1rem 0;
+  max-width: 100%;
 }
 
 .tc__table {
-  width: 100%;
+  min-width: 480px; // forces scroll on small screens instead of squishing
   border-collapse: collapse;
   font-size: 0.82rem;
 

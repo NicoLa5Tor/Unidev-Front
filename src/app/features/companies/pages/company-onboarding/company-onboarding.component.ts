@@ -41,7 +41,6 @@ type ProjectVisibilityFilter = 'ALL' | 'PUBLISHED' | 'EDITING';
     CommonModule,
     FormsModule,
     DashboardShellComponent,
-    RatingDialogComponent
   ],
   templateUrl: './company-onboarding.component.html',
   styleUrl: './company-onboarding.component.scss'

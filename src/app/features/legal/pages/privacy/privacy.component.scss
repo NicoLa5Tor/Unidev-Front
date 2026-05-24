@@ -2,14 +2,20 @@
 .pp {
   position: relative;
   min-height: 100vh;
-  background: #0a0a0f;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(10, 10, 15, 0.15) 20%,
+    rgba(10, 10, 15, 0.70) 50%,
+    #0a0a0f 75%
+  );
   color: #e2e8f0;
   font-family: 'Inter', sans-serif;
 }
 
 // ── Backdrop ──────────────────────────────────────────────────
 .pp__backdrop {
-  position: fixed;
+  position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 0;
@@ -43,9 +49,10 @@
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(6, 182, 212, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(6, 182, 212, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(6, 182, 212, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 182, 212, 0.05) 1px, transparent 1px);
   background-size: 40px 40px;
+  mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.8) 100%);
 }
 
 // ── Hero ──────────────────────────────────────────────────────
@@ -135,6 +142,11 @@
   @media (max-width: 860px) {
     grid-template-columns: 1fr;
   }
+
+  @media (max-width: 480px) {
+    padding: 0 0.75rem;
+    gap: 1rem;
+  }
 }
 
 // ── TOC Sidebar ───────────────────────────────────────────────
@@ -179,6 +191,7 @@
 // ── Content ───────────────────────────────────────────────────
 .pp__content {
   padding: 2.5rem 0 4rem;
+  min-width: 0;
 }
 
 // ── Section ───────────────────────────────────────────────────
@@ -196,7 +209,7 @@
 
 .pp__section-title {
   margin: 0 0 1.25rem;
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 3vw, 1.25rem);
   font-weight: 700;
   color: #f1f5f9;
   padding-bottom: 0.6rem;
@@ -256,11 +269,17 @@
   &:nth-child(even) { background: rgba(6, 182, 212, 0.03); }
 
   span:first-child { color: #64748b; flex-shrink: 0; }
-  span:last-child { color: #e2e8f0; font-weight: 500; }
+  span:last-child { color: #e2e8f0; font-weight: 500; text-align: right; }
 
   &--wrap {
     flex-wrap: wrap;
     span:last-child { font-weight: 400; color: #94a3b8; }
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 0.2rem;
+    span:last-child { text-align: left; }
   }
 }
 
