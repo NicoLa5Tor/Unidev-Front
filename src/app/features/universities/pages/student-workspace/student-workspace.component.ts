@@ -20,6 +20,7 @@ import { UniversityCampus } from '../../../../shared/models/company.model';
 import { ProjectDetailDialogComponent } from '../../../companies/components/project-detail-dialog/project-detail-dialog.component';
 import { ApplicationNegotiationDialogComponent } from '../../../../shared/components/application-negotiation-dialog/application-negotiation-dialog.component';
 import { TeamChatDialogComponent } from '../../../../shared/components/team-chat-dialog/team-chat-dialog.component';
+import { CertificateModalComponent } from '../../../../shared/components/certificate-modal/certificate-modal.component';
 
 @Component({
   selector: 'app-student-workspace',
@@ -960,6 +961,16 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
         this.isVerifyingCedula = false;
         this.cedulaError = err?.error?.message ?? 'No pudimos registrar tu cédula.';
       }
+    });
+  }
+
+  openCertificateModal(): void {
+    this.dialog.open(CertificateModalComponent, {
+      width: '560px',
+      maxWidth: '96vw',
+      maxHeight: '90vh',
+      panelClass: 'app-shell-dialog-panel',
+      backdropClass: 'app-shell-dialog-backdrop'
     });
   }
 }

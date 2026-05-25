@@ -127,4 +127,9 @@ export class StudentService {
   sendTeamMessage(teamId: number, payload: SendTeamMessageDto) {
     return this.http.post<TeamMessage>(`${this.baseUrl}/student/teams/${teamId}/messages`, payload);
   }
+
+  // ── Certificate ───────────────────────────────────────
+  downloadCertificate(applicationIds: number[]) {
+    return this.http.post(`${this.baseUrl}/student/certificate`, { applicationIds }, { responseType: 'blob' });
+  }
 }
