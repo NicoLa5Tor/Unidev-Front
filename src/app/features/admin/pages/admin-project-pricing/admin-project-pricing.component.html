@@ -510,4 +510,103 @@
       </div>
     </aside>
   </section>
+
+  <!-- ── Tramos de comisión ───────────────────────────────────────────────────── -->
+  <section *ngIf="activeTab === 'tiers'" class="flex gap-6">
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-[var(--text)]">Tramos de comisión</h2>
+        <button type="button" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-[var(--accent-1)] text-[var(--bg)] hover:opacity-90" (click)="openCreateTierEditor()">
+          + Nuevo tramo
+        </button>
+      </div>
+
+      <div *ngIf="isLoadingTiers" class="text-[var(--muted)] text-sm">Cargando tramos…</div>
+
+      <div *ngIf="!isLoadingTiers && tiers.length === 0" class="text-[var(--muted)] text-sm">No hay tramos configurados.</div>
+
+      <div *ngIf="!isLoadingTiers && tiers.length > 0" class="overflow-x-auto rounded-xl border border-white/8">
+        <table class="w-full text-sm text-left">
+          <thead class="border-b border-white/8 text-[var(--muted)]">
+            <tr>
+              <th class="px-4 py-3">Tramo</th>
+              <th class="px-4 py-3">Rango (COP)</th>
+              <th class="px-4 py-3">Comisión ejecutor</th>
+              <th class="px-4 py-3">Fee empresa</th>
+              <th class="px-4 py-3">Take rate</th>
+              <th class="px-4 py-3">Estado</th>
+              <th class="px-4 py-3"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let tier of tiers" class="border-b border-white/5 hover:bg-white/2">
+              <td class="px-4 py-3 font-medium text-[var(--text)]">{{ tier.displayName }}</td>
+              <td class="px-4 py-3 text-[var(--muted)]">
+                {{ formatMoney(tier.minAmount, tier.currency) }} –
+                {{ tier.maxAmount != null ? formatMoney(tier.maxAmount, tier.currency) : '∞' }}
+              </td>
+              <td class="px-4 py-3 text-emerald-400">{{ tier.executorCommissionPct }}%</td>
+              <td class="px-4 py-3 text-sky-400">{{ tier.companyFeePct }}%</td>
+              <td class="px-4 py-3 text-amber-400 font-semibold">{{ tier.totalTakeRate }}%</td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-0.5 rounded text-xs font-medium" [class]="tier.active ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'">
+                  {{ tier.active ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="px-4 py-3 flex gap-2">
+                <button type="button" class="text-xs px-2 py-1 rounded bg-white/6 hover:bg-white/10 text-[var(--text)]" (click)="editTier(tier)">Editar</button>
+                <button type="button" class="text-xs px-2 py-1 rounded bg-rose-500/15 hover:bg-rose-500/25 text-rose-400" (click)="deleteTier(tier)">Desactivar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Editor inline -->
+      <div class="mt-6 p-5 rounded-xl border border-white/8 bg-white/2">
+        <h3 class="text-base font-semibold text-[var(--text)] mb-4">{{ tierEditorMode === 'create' ? 'Nuevo tramo' : 'Editar tramo' }}</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="col-span-2 flex flex-col gap-1">
+            <label class="text-xs text-[var(--muted)]">Nombre (ej: Tramo 1)</label>
+            <input type="text" [(ngModel)]="tierEditor.displayName" class="admin-input" placeholder="Tramo 1" />
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs text-[var(--muted)]">Monto mínimo (inclusive)</label>
+            <input type="number" [(ngModel)]="tierEditor.minAmount" class="admin-input" placeholder="60000" />
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs text-[var(--muted)]">Monto máximo (exclusive, vacío = sin límite)</label>
+            <input type="number" [(ngModel)]="tierEditor.maxAmount" class="admin-input" placeholder="200000" />
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs text-[var(--muted)]">Comisión ejecutor (%)</label>
+            <input type="number" step="0.01" [(ngModel)]="tierEditor.executorCommissionPct" class="admin-input" placeholder="6" />
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs text-[var(--muted)]">Fee empresa (% adicional ON TOP)</label>
+            <input type="number" step="0.01" [(ngModel)]="tierEditor.companyFeePct" class="admin-input" placeholder="4" />
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs text-[var(--muted)]">Moneda</label>
+            <input type="text" [(ngModel)]="tierEditor.currency" class="admin-input" placeholder="COP" maxlength="10" />
+          </div>
+        </div>
+        <div class="mt-4 flex justify-end">
+          <button type="button" class="px-4 py-2 rounded-lg text-sm font-medium bg-[var(--accent-1)] text-[var(--bg)] hover:opacity-90 disabled:opacity-50" [disabled]="isSavingTier" (click)="saveTier()">
+            {{ isSavingTier ? 'Guardando…' : 'Guardar tramo' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="w-72 shrink-0">
+      <div class="mt-4 space-y-4 text-sm text-[var(--muted)]">
+        <p>Los tramos determinan qué porcentaje se cobra a cada parte según el valor del proyecto.</p>
+        <p><span class="text-emerald-400">Comisión ejecutor</span>: se descuenta del valor del proyecto antes de pagar al freelancer.</p>
+        <p><span class="text-sky-400">Fee empresa</span>: se <strong>suma por encima</strong> del valor del proyecto. La empresa paga más del precio acordado.</p>
+        <p><span class="text-amber-400">Take rate</span>: ingreso total de UniDev = comisión + fee.</p>
+        <p>Rangos se evalúan por el valor base del proyecto. Si no hay tramo que aplique, se usa el último (mayor rango).</p>
+      </div>
+    </aside>
+  </section>
 </app-dashboard-shell>

@@ -13,8 +13,18 @@ import {
   ProjectPricingRatePayload
 } from '../../../../shared/models/project-pricing-rate.model';
 import { ProjectPricingRateService } from '../../services/project-pricing-rate.service';
+import { CommissionTier } from '../../../../shared/models/payment.model';
 
-type AdminTab = 'rates' | 'levels' | 'editor' | 'level-editor' | 'smlv';
+type AdminTab = 'rates' | 'levels' | 'editor' | 'level-editor' | 'smlv' | 'tiers';
+
+interface TierEditorModel {
+  displayName: string;
+  minAmount: string;
+  maxAmount: string;
+  executorCommissionPct: string;
+  companyFeePct: string;
+  currency: string;
+}
 
 interface PricingRateEditorModel {
   id: number | null;
@@ -58,6 +68,13 @@ export class AdminProjectPricingComponent implements OnInit {
 
   smlvEditor = { smlvAmount: '', smlvCurrency: 'COP', workingHoursPerMonth: '192' };
 
+  tiers: CommissionTier[] = [];
+  isLoadingTiers = false;
+  isSavingTier = false;
+  tierEditorMode: 'create' | 'edit' = 'create';
+  editingTierId: number | null = null;
+  tierEditor: TierEditorModel = this.createEmptyTierEditor();
+
   readonly navItems: DashboardNavItem[] = [
     { id: 'admin-users', label: 'Usuarios', accent: 'accent-1', route: '/admin/users' },
     { id: 'admin-companies', label: 'Empresas', accent: 'accent-3', route: '/admin/companies' },
@@ -71,6 +88,7 @@ export class AdminProjectPricingComponent implements OnInit {
         { id: 'level-editor', label: 'Editar nivel', accent: 'accent-2', mobileBarWidthClass: 'w-28' }
       ]
     },
+    { id: 'tiers', label: 'Tramos comisión', accent: 'accent-3' },
     { id: 'admin-emails', label: 'Correos', accent: 'accent-4', route: '/admin/email-templates' }
   ];
 
@@ -86,6 +104,7 @@ export class AdminProjectPricingComponent implements OnInit {
     this.refreshLevels();
     this.refreshRates();
     this.refreshPlatformConfig();
+    this.refreshTiers();
   }
 
   get activeRatesCount(): number {
@@ -116,7 +135,7 @@ export class AdminProjectPricingComponent implements OnInit {
   }
 
   setActiveTab(tabId: string): void {
-    if (tabId === 'rates' || tabId === 'levels' || tabId === 'editor' || tabId === 'level-editor' || tabId === 'smlv') {
+    if (tabId === 'rates' || tabId === 'levels' || tabId === 'editor' || tabId === 'level-editor' || tabId === 'smlv' || tabId === 'tiers') {
       this.activeTab = tabId as AdminTab;
     }
   }
@@ -410,6 +429,73 @@ export class AdminProjectPricingComponent implements OnInit {
       active: level.active,
       productivityPercentage: String(level.productivityPercentage ?? '')
     };
+  }
+
+  refreshTiers(): void {
+    this.isLoadingTiers = true;
+    this.pricingRateService.getCommissionTiers().subscribe({
+      next: tiers => { this.tiers = tiers; this.isLoadingTiers = false; },
+      error: () => { this.isLoadingTiers = false; this.uiToastService.error('No pudimos cargar los tramos.'); }
+    });
+  }
+
+  openCreateTierEditor(): void {
+    this.tierEditorMode = 'create';
+    this.editingTierId = null;
+    this.tierEditor = this.createEmptyTierEditor();
+  }
+
+  editTier(tier: CommissionTier): void {
+    this.tierEditorMode = 'edit';
+    this.editingTierId = tier.id;
+    this.tierEditor = {
+      displayName: tier.displayName,
+      minAmount: String(tier.minAmount),
+      maxAmount: tier.maxAmount != null ? String(tier.maxAmount) : '',
+      executorCommissionPct: String(tier.executorCommissionPct),
+      companyFeePct: String(tier.companyFeePct),
+      currency: tier.currency
+    };
+  }
+
+  saveTier(): void {
+    const minAmount = Number(this.tierEditor.minAmount);
+    const maxAmount = this.tierEditor.maxAmount.trim() ? Number(this.tierEditor.maxAmount) : null;
+    const execPct = Number(this.tierEditor.executorCommissionPct);
+    const feePct = Number(this.tierEditor.companyFeePct);
+
+    if (!this.tierEditor.displayName.trim()) { this.uiToastService.error('El nombre es obligatorio.'); return; }
+    if (!Number.isFinite(minAmount) || minAmount < 0) { this.uiToastService.error('El monto mínimo debe ser ≥ 0.'); return; }
+    if (!Number.isFinite(execPct) || execPct < 0) { this.uiToastService.error('La comisión al ejecutor debe ser ≥ 0.'); return; }
+    if (!Number.isFinite(feePct) || feePct < 0) { this.uiToastService.error('El fee de empresa debe ser ≥ 0.'); return; }
+
+    this.isSavingTier = true;
+    const payload = { displayName: this.tierEditor.displayName.trim(), minAmount, maxAmount, executorCommissionPct: execPct, companyFeePct: feePct, currency: this.tierEditor.currency.toUpperCase() };
+    const req$ = this.tierEditorMode === 'edit' && this.editingTierId != null
+      ? this.pricingRateService.updateCommissionTier(this.editingTierId, payload)
+      : this.pricingRateService.createCommissionTier(payload);
+
+    req$.subscribe({
+      next: tier => {
+        this.isSavingTier = false;
+        this.tierEditorMode = 'edit';
+        this.editingTierId = tier.id;
+        this.uiToastService.success('Tramo guardado.');
+        this.refreshTiers();
+      },
+      error: err => { this.isSavingTier = false; this.uiToastService.error(err?.error?.message || 'No pudimos guardar el tramo.'); }
+    });
+  }
+
+  deleteTier(tier: CommissionTier): void {
+    this.pricingRateService.deleteCommissionTier(tier.id).subscribe({
+      next: () => { this.uiToastService.success('Tramo desactivado.'); this.refreshTiers(); },
+      error: err => { this.uiToastService.error(err?.error?.message || 'No pudimos eliminar el tramo.'); }
+    });
+  }
+
+  private createEmptyTierEditor(): TierEditorModel {
+    return { displayName: '', minAmount: '', maxAmount: '', executorCommissionPct: '', companyFeePct: '', currency: 'COP' };
   }
 
   private toDatetimeLocal(value: string): string {

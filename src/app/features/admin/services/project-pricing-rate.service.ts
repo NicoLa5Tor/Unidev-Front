@@ -10,6 +10,7 @@ import {
   ProjectPricingRate,
   ProjectPricingRatePayload
 } from '../../../shared/models/project-pricing-rate.model';
+import { CommissionTier, CommissionTierPayload } from '../../../shared/models/payment.model';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +19,7 @@ export class ProjectPricingRateService {
   private readonly pricingRatesUrl = `${environment.apiUrl}/project-pricing-rates`;
   private readonly pricingLevelsUrl = `${environment.apiUrl}/project-pricing-levels`;
   private readonly platformConfigUrl = `${environment.apiUrl}/platform-config`;
+  private readonly commissionTiersUrl = `${environment.apiUrl}/commission-tiers`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -51,5 +53,21 @@ export class ProjectPricingRateService {
 
   updatePlatformConfig(payload: PlatformConfigPayload) {
     return this.http.put<PlatformConfig>(this.platformConfigUrl, payload);
+  }
+
+  getCommissionTiers() {
+    return this.http.get<CommissionTier[]>(this.commissionTiersUrl);
+  }
+
+  createCommissionTier(payload: CommissionTierPayload) {
+    return this.http.post<CommissionTier>(this.commissionTiersUrl, payload);
+  }
+
+  updateCommissionTier(id: number, payload: CommissionTierPayload) {
+    return this.http.put<CommissionTier>(`${this.commissionTiersUrl}/${id}`, payload);
+  }
+
+  deleteCommissionTier(id: number) {
+    return this.http.delete<void>(`${this.commissionTiersUrl}/${id}`);
   }
 }

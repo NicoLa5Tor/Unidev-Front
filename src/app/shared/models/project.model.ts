@@ -140,6 +140,9 @@ export interface Project {
   applicationsCount: number;
   acceptedApplicationsCount: number;
   archivedAt: string | null;
+  companyFeePct: number | null;
+  companyFeeAmount: number | null;
+  companyTotalAmount: number | null;
 }
 
 export interface ProjectPage {

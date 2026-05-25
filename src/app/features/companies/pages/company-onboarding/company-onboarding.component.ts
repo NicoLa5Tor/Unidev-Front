@@ -1660,7 +1660,10 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
       paymentStatus: project.paymentStatus ?? null,
       applicationsCount: project.applicationsCount ?? 0,
       acceptedApplicationsCount: project.acceptedApplicationsCount ?? 0,
-      archivedAt: project.archivedAt ?? null
+      archivedAt: project.archivedAt ?? null,
+      companyFeePct: null,
+      companyFeeAmount: null,
+      companyTotalAmount: null
     };
   }
 
@@ -1701,7 +1704,10 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
       paymentStatus: project.paymentStatus ?? null,
       applicationsCount: project.applicationsCount ?? 0,
       acceptedApplicationsCount: project.acceptedApplicationsCount ?? 0,
-      archivedAt: project.archivedAt ?? null
+      archivedAt: project.archivedAt ?? null,
+      companyFeePct: null,
+      companyFeeAmount: null,
+      companyTotalAmount: null
     };
   }
 

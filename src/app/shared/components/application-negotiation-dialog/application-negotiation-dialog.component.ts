@@ -4,8 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
 import { ApplicationService } from '../../../features/companies/services/application.service';
+import { PaymentService } from '../../../features/companies/services/payment.service';
 import { StudentService } from '../../../features/universities/services/student.service';
 import { UiToastService } from '../../services/ui-toast.service';
+import { FeePreview } from '../../models/payment.model';
 import { ApplicationNegotiationMessage, ApplicationNegotiationThread } from '../../models/project-application.model';
 
 export interface ApplicationNegotiationDialogData {
@@ -31,13 +33,20 @@ export class ApplicationNegotiationDialogComponent implements OnDestroy {
   thread: ApplicationNegotiationThread | null = null;
   draftMessage = '';
   draftAmount: number | null = null;
+  officialFeePreview: FeePreview | null = null;
+  acceptedFeePreview: FeePreview | null = null;
+  messageFeePreviewMap = new Map<number, FeePreview>();
+  draftFeePreview: FeePreview | null = null;
+  draftFeePreviewLoading = false;
   private pollHandle: ReturnType<typeof setTimeout> | null = null;
+  private draftFeeDebounce: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private readonly dialogRef: MatDialogRef<ApplicationNegotiationDialogComponent>,
     @Inject(MAT_DIALOG_DATA) readonly data: ApplicationNegotiationDialogData,
     private readonly applicationService: ApplicationService,
     private readonly studentService: StudentService,
+    private readonly paymentService: PaymentService,
     private readonly toast: UiToastService
   ) {
     this.loadThread();
@@ -45,6 +54,7 @@ export class ApplicationNegotiationDialogComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.stopPolling();
+    if (this.draftFeeDebounce) clearTimeout(this.draftFeeDebounce);
   }
 
   get isStudentView(): boolean {
@@ -154,6 +164,25 @@ export class ApplicationNegotiationDialogComponent implements OnDestroy {
     });
   }
 
+  onDraftAmountChange(): void {
+    this.draftFeePreview = null;
+    if (this.draftFeeDebounce) clearTimeout(this.draftFeeDebounce);
+    const amount = this.draftAmount;
+    const currency = this.thread?.negotiationCurrency ?? 'COP';
+    if (!amount || amount <= 0) return;
+    this.draftFeePreviewLoading = true;
+    this.draftFeeDebounce = setTimeout(() => {
+      this.paymentService.getFeePreview(amount, currency).subscribe({
+        next: preview => { this.draftFeePreview = preview; this.draftFeePreviewLoading = false; },
+        error: () => { this.draftFeePreviewLoading = false; }
+      });
+    }, 500);
+  }
+
+  private loadAcceptedFeePreview(amount: number, currency: string) {
+    return this.paymentService.getFeePreview(amount, currency);
+  }
+
   formatMoney(amount: number | null | undefined, currency: string | null | undefined): string {
     if (amount == null) {
       return 'Sin monto';
@@ -229,7 +258,11 @@ export class ApplicationNegotiationDialogComponent implements OnDestroy {
       : this.applicationService.getNegotiation(this.data.projectId!, this.data.applicationId);
 
     request$.subscribe({
-      next: thread => { this.thread = thread; this.syncPolling(); },
+      next: thread => {
+        this.thread = thread;
+        this.syncPolling();
+        this.syncAcceptedFeePreview(thread);
+      },
       error: () => { /* silent background refresh */ }
     });
   }
@@ -250,6 +283,32 @@ export class ApplicationNegotiationDialogComponent implements OnDestroy {
     }
   }
 
+  messageFeePreview(messageId: number): FeePreview | null {
+    return this.messageFeePreviewMap.get(messageId) ?? null;
+  }
+
+  private syncAcceptedFeePreview(thread: ApplicationNegotiationThread): void {
+    const currency = thread.negotiationCurrency ?? 'COP';
+
+    if (thread.officialPriceAmount != null && this.officialFeePreview == null) {
+      this.loadAcceptedFeePreview(thread.officialPriceAmount, currency)
+        .subscribe({ next: p => this.officialFeePreview = p, error: () => {} });
+    }
+    if (thread.acceptedProposalAmount != null && this.acceptedFeePreview == null) {
+      this.loadAcceptedFeePreview(
+        thread.acceptedProposalAmount,
+        thread.acceptedProposalCurrency ?? currency
+      ).subscribe({ next: p => this.acceptedFeePreview = p, error: () => {} });
+    }
+    for (const msg of thread.messages) {
+      if (msg.proposedAmount != null && !this.messageFeePreviewMap.has(msg.id)) {
+        const msgCurrency = msg.proposedCurrency ?? currency;
+        this.loadAcceptedFeePreview(msg.proposedAmount, msgCurrency)
+          .subscribe({ next: p => this.messageFeePreviewMap.set(msg.id, p), error: () => {} });
+      }
+    }
+  }
+
   private loadThread(): void {
     this.isLoading = true;
     const request$ = this.isStudentView
@@ -261,6 +320,7 @@ export class ApplicationNegotiationDialogComponent implements OnDestroy {
         this.thread = thread;
         this.isLoading = false;
         this.syncPolling();
+        this.syncAcceptedFeePreview(thread);
       },
       error: error => {
         this.isLoading = false;

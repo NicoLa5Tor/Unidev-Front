@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-import { CheckoutResponse, ProjectPaymentResponse } from '../../../shared/models/payment.model';
+import { CheckoutResponse, FeePreview, ProjectPaymentResponse } from '../../../shared/models/payment.model';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +13,10 @@ export class PaymentService {
   private readonly mpUrl = `${environment.apiUrl}/mp`;
 
   constructor(private readonly http: HttpClient) {}
+
+  getFeePreview(amount: number, currency: string): Observable<FeePreview> {
+    return this.http.get<FeePreview>(`${this.paymentsUrl}/fee-preview`, { params: { amount, currency } });
+  }
 
   createCheckout(projectId: number): Observable<CheckoutResponse> {
     return this.http.post<CheckoutResponse>(`${this.paymentsUrl}/projects/${projectId}/checkout`, {});

@@ -13,7 +13,7 @@ import {
   ProjectRequirement
 } from '../../../../shared/models/project.model';
 import { ApplicantProfile, ProjectApplication } from '../../../../shared/models/project-application.model';
-import { ProjectPaymentResponse } from '../../../../shared/models/payment.model';
+import { CheckoutResponse, FeePreview, ProjectPaymentResponse } from '../../../../shared/models/payment.model';
 import { UiToastService } from '../../../../shared/services/ui-toast.service';
 import { RequirementAssistantDialogComponent } from '../requirement-assistant-dialog/requirement-assistant-dialog.component';
 import { ApplicationNegotiationDialogComponent } from '../../../../shared/components/application-negotiation-dialog/application-negotiation-dialog.component';
@@ -59,6 +59,7 @@ export class ProjectDetailDialogComponent implements OnDestroy {
   payment: ProjectPaymentResponse | null = null;
   paymentLoading = false;
   checkingOut = false;
+  pendingCheckout: CheckoutResponse | null = null;
   releasingPayment = false;
 
   // Flujo de aprobación de precio
@@ -66,6 +67,9 @@ export class ProjectDetailDialogComponent implements OnDestroy {
   showCompanyProfileModal = false;
   priceDecision: 'agreed' | 'custom' | null = null;
   customPriceAmount: number | null = null;
+  feePreview: FeePreview | null = null;
+  feePreviewLoading = false;
+  private feePreviewDebounce: ReturnType<typeof setTimeout> | null = null;
 
   // Info panels en modal de precio
   infoOpen: Record<string, boolean> = {};
@@ -260,15 +264,25 @@ export class ProjectDetailDialogComponent implements OnDestroy {
     this.paymentService.createCheckout(this.project.id).subscribe({
       next: response => {
         this.checkingOut = false;
-        window.open(response.checkoutUrl, '_blank');
-        // Esperar retorno del usuario y refrescar pago
-        setTimeout(() => this.loadPayment(), 3000);
+        this.pendingCheckout = response;
       },
       error: error => {
         this.checkingOut = false;
         this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos iniciar el proceso de pago.'));
       }
     });
+  }
+
+  confirmGoToCheckout(): void {
+    if (!this.pendingCheckout) return;
+    const url = this.pendingCheckout.checkoutUrl;
+    this.pendingCheckout = null;
+    window.open(url, '_blank');
+    setTimeout(() => this.loadPayment(), 3000);
+  }
+
+  cancelPendingCheckout(): void {
+    this.pendingCheckout = null;
   }
 
   releasePayment(): void {
@@ -305,6 +319,7 @@ export class ProjectDetailDialogComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.stopPolling();
+    if (this.feePreviewDebounce) clearTimeout(this.feePreviewDebounce);
   }
 
   requirementLabel(requirement: ProjectRequirement): string {
@@ -426,6 +441,46 @@ export class ProjectDetailDialogComponent implements OnDestroy {
 
   closePriceApproval(): void {
     this.showPriceApprovalModal = false;
+    this.feePreview = null;
+    this.feePreviewLoading = false;
+    if (this.feePreviewDebounce) clearTimeout(this.feePreviewDebounce);
+  }
+
+  onPriceDecisionChange(): void {
+    this.feePreview = null;
+    if (this.priceDecision === 'agreed') {
+      const amount = this.project?.quote?.baseAmount ?? null;
+      const currency = this.project?.quote?.currency ?? 'COP';
+      if (amount) this.loadFeePreview(amount, currency);
+    } else if (this.priceDecision === 'custom' && this.customPriceAmount) {
+      this.scheduleFeePreview();
+    }
+  }
+
+  onCustomPriceChange(): void {
+    this.feePreview = null;
+    this.scheduleFeePreview();
+  }
+
+  private scheduleFeePreview(): void {
+    if (this.feePreviewDebounce) clearTimeout(this.feePreviewDebounce);
+    const amount = this.customPriceAmount;
+    const currency = this.project?.quote?.currency ?? 'COP';
+    if (!amount || amount <= 0) return;
+    this.feePreviewDebounce = setTimeout(() => this.loadFeePreview(amount, currency), 500);
+  }
+
+  private loadFeePreview(amount: number, currency: string): void {
+    this.feePreviewLoading = true;
+    this.paymentService.getFeePreview(amount, currency).subscribe({
+      next: preview => {
+        this.feePreview = preview;
+        this.feePreviewLoading = false;
+      },
+      error: () => {
+        this.feePreviewLoading = false;
+      }
+    });
   }
 
   confirmPriceAndPublish(): void {

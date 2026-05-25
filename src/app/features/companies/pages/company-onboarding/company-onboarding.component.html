@@ -738,6 +738,12 @@
                             {{ formatMoney(project.companyPriceMinAmount, project.companyPriceCurrency) }}
                           </p>
                           <p class="text-[10px] text-[var(--muted)]">{{ project.companyPriceCurrency || 'COP' }} · precio empresa</p>
+                          <ng-container *ngIf="project.companyTotalAmount != null">
+                            <div class="mt-2 border-t border-[color:var(--accent-3)]/20 pt-2 space-y-0.5">
+                              <p class="text-[10px] text-[var(--muted)]">+ Fee UniDev ({{ project.companyFeePct }}%): {{ formatMoney(project.companyFeeAmount, project.companyPriceCurrency) }}</p>
+                              <p class="font-tech text-[10px] font-semibold text-[var(--accent-3)]">Total a pagar: {{ formatMoney(project.companyTotalAmount, project.companyPriceCurrency) }}</p>
+                            </div>
+                          </ng-container>
                         </div>
                       </div>
 
