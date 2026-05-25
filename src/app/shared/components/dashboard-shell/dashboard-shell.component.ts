@@ -2,9 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 import { AuthService } from '../../../core/services/auth.service';
 import { ThemeName, ThemeService } from '../../../core/services/theme.service';
+import { UserSessionService } from '../../../core/services/user-session.service';
+import { PqrsDialogComponent } from '../pqrs-dialog/pqrs-dialog.component';
 
 export interface DashboardNavItem {
   id: string;
@@ -18,7 +21,7 @@ export interface DashboardNavItem {
 @Component({
   selector: 'app-dashboard-shell',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatDialogModule],
   templateUrl: './dashboard-shell.component.html'
 })
 export class DashboardShellComponent implements OnChanges {
@@ -43,8 +46,14 @@ export class DashboardShellComponent implements OnChanges {
   constructor(
     private readonly themeService: ThemeService,
     private readonly authService: AuthService,
-    private readonly router: Router
+    private readonly userSessionService: UserSessionService,
+    private readonly router: Router,
+    private readonly dialog: MatDialog
   ) {}
+
+  get isAdmin(): boolean {
+    return this.userSessionService.snapshot?.roleName === 'ADMINISTRADORES';
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['navItems'] || changes['activeTab']) {
@@ -84,6 +93,16 @@ export class DashboardShellComponent implements OnChanges {
 
   logout(): void {
     this.authService.logout();
+  }
+
+  openPqrs(): void {
+    this.isMobileMenuOpen = false;
+    this.dialog.open(PqrsDialogComponent, {
+      width: '520px',
+      maxWidth: '94vw',
+      panelClass: 'pqrs-dialog-panel',
+      backdropClass: 'app-shell-dialog-backdrop'
+    });
   }
 
   isNavGroupExpanded(item: DashboardNavItem): boolean {

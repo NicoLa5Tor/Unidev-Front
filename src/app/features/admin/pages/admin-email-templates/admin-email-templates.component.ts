@@ -46,7 +46,8 @@ export class AdminEmailTemplatesComponent implements OnInit {
         { id: 'library', label: 'Biblioteca', accent: 'accent-3', mobileBarWidthClass: 'w-24' },
         { id: 'editor', label: 'Editor', accent: 'accent-1', mobileBarWidthClass: 'w-20' }
       ]
-    }
+    },
+    { id: 'admin-pqrs', label: 'PQRS', accent: 'accent-3', route: '/admin/pqrs' }
   ];
 
   editor: EmailTemplateEditorModel = this.createEmptyEditor();

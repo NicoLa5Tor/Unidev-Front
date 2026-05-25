@@ -41,7 +41,8 @@ export class AdminCompaniesComponent implements OnInit {
       ]
     },
     { id: 'admin-pricing', label: 'Pricing', accent: 'accent-2', route: '/admin/project-pricing' },
-    { id: 'admin-emails', label: 'Correos', accent: 'accent-4', route: '/admin/email-templates' }
+    { id: 'admin-emails', label: 'Correos', accent: 'accent-4', route: '/admin/email-templates' },
+    { id: 'admin-pqrs', label: 'PQRS', accent: 'accent-3', route: '/admin/pqrs' }
   ];
 
   constructor(

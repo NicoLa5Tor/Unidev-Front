@@ -99,6 +99,19 @@ export const routes: Routes = [
     }
   },
   {
+    path: 'admin/pqrs',
+    title: 'PQRS | UniDev',
+    loadComponent: () =>
+      import('./features/admin/pages/admin-pqrs/admin-pqrs.component').then(
+        m => m.AdminPqrsComponent
+      ),
+    canActivate: [authGuard, roleGuard],
+    data: {
+      roles: ['ADMINISTRADORES'],
+      description: 'Gestión de peticiones, quejas, reclamos y sugerencias de los usuarios.'
+    }
+  },
+  {
     path: 'companies',
     title: 'Empresas | UniDev',
     loadComponent: () =>

@@ -45,6 +45,10 @@ export class UserSessionService {
     );
   }
 
+  get snapshot(): SessionUser | null {
+    return this.currentUserSubject.value;
+  }
+
   setCurrentUser(user: SessionUser): void {
     this.currentUserSubject.next(user);
   }

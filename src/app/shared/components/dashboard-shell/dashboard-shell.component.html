@@ -133,6 +133,17 @@
       </div>
 
       <button
+        *ngIf="!isAdmin"
+        (click)="openPqrs()"
+        class="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 font-tech text-xs uppercase tracking-[0.18em] text-[var(--muted)] transition-colors hover:bg-[var(--accent-2)]/10 hover:text-[var(--accent-2)]"
+      >
+        <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M2 3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H9l-3 2v-2H3a1 1 0 0 1-1-1V3z"/>
+        </svg>
+        PQRS
+      </button>
+
+      <button
         (click)="logout()"
         class="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 font-tech text-xs uppercase tracking-[0.18em] text-[var(--muted)] transition-colors hover:bg-rose-500/10 hover:text-rose-400"
       >
