@@ -564,36 +564,46 @@
 
       <!-- Editor inline -->
       <div class="mt-6 p-5 rounded-xl border border-white/8 bg-white/2">
-        <h3 class="text-base font-semibold text-[var(--text)] mb-4">{{ tierEditorMode === 'create' ? 'Nuevo tramo' : 'Editar tramo' }}</h3>
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-base font-semibold text-[var(--text)]">{{ tierEditorMode === 'create' ? 'Nuevo tramo' : 'Editando: ' + tierEditor.displayName }}</h3>
+          <button *ngIf="tierEditorMode === 'edit'" type="button"
+            (click)="openCreateTierEditor()"
+            class="px-3 py-1 rounded-lg text-xs font-medium border border-[color:var(--panel-border)] text-[var(--muted)] hover:text-[var(--text)]">
+            + Crear nuevo
+          </button>
+        </div>
         <div class="grid grid-cols-2 gap-4">
           <div class="col-span-2 flex flex-col gap-1">
             <label class="text-xs text-[var(--muted)]">Nombre (ej: Tramo 1)</label>
-            <input type="text" [(ngModel)]="tierEditor.displayName" class="admin-input" placeholder="Tramo 1" />
+            <input type="text" [(ngModel)]="tierEditor.displayName" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-3)]" placeholder="Tramo 1" />
           </div>
           <div class="flex flex-col gap-1">
             <label class="text-xs text-[var(--muted)]">Monto mínimo (inclusive)</label>
-            <input type="number" [(ngModel)]="tierEditor.minAmount" class="admin-input" placeholder="60000" />
+            <input type="number" [(ngModel)]="tierEditor.minAmount" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-3)]" placeholder="60000" />
           </div>
           <div class="flex flex-col gap-1">
             <label class="text-xs text-[var(--muted)]">Monto máximo (exclusive, vacío = sin límite)</label>
-            <input type="number" [(ngModel)]="tierEditor.maxAmount" class="admin-input" placeholder="200000" />
+            <input type="number" [(ngModel)]="tierEditor.maxAmount" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-3)]" placeholder="200000" />
           </div>
           <div class="flex flex-col gap-1">
             <label class="text-xs text-[var(--muted)]">Comisión ejecutor (%)</label>
-            <input type="number" step="0.01" [(ngModel)]="tierEditor.executorCommissionPct" class="admin-input" placeholder="6" />
+            <input type="number" step="0.01" [(ngModel)]="tierEditor.executorCommissionPct" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-3)]" placeholder="6" />
           </div>
           <div class="flex flex-col gap-1">
             <label class="text-xs text-[var(--muted)]">Fee empresa (% adicional ON TOP)</label>
-            <input type="number" step="0.01" [(ngModel)]="tierEditor.companyFeePct" class="admin-input" placeholder="4" />
+            <input type="number" step="0.01" [(ngModel)]="tierEditor.companyFeePct" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-3)]" placeholder="4" />
           </div>
           <div class="flex flex-col gap-1">
             <label class="text-xs text-[var(--muted)]">Moneda</label>
-            <input type="text" [(ngModel)]="tierEditor.currency" class="admin-input" placeholder="COP" maxlength="10" />
+            <input type="text" [(ngModel)]="tierEditor.currency" class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-3)]" placeholder="COP" maxlength="10" />
           </div>
         </div>
         <div class="mt-4 flex justify-end">
-          <button type="button" class="px-4 py-2 rounded-lg text-sm font-medium bg-[var(--accent-1)] text-[var(--bg)] hover:opacity-90 disabled:opacity-50" [disabled]="isSavingTier" (click)="saveTier()">
-            {{ isSavingTier ? 'Guardando…' : 'Guardar tramo' }}
+          <button type="button"
+            class="px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50 text-[var(--bg)]"
+            [ngClass]="tierEditorMode === 'create' ? 'bg-[var(--accent-1)]' : 'bg-[var(--accent-3)]'"
+            [disabled]="isSavingTier" (click)="saveTier()">
+            {{ isSavingTier ? 'Guardando…' : (tierEditorMode === 'create' ? 'Crear tramo' : 'Guardar cambios') }}
           </button>
         </div>
       </div>

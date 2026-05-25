@@ -85,10 +85,10 @@ export class AdminProjectPricingComponent implements OnInit {
       children: [
         { id: 'smlv', label: 'SMLV', accent: 'accent-2', mobileBarWidthClass: 'w-20' },
         { id: 'levels', label: 'Niveles', accent: 'accent-4', mobileBarWidthClass: 'w-24' },
-        { id: 'level-editor', label: 'Editar nivel', accent: 'accent-2', mobileBarWidthClass: 'w-28' }
+        { id: 'level-editor', label: 'Editar nivel', accent: 'accent-2', mobileBarWidthClass: 'w-28' },
+        { id: 'tiers', label: 'Tramos comisión', accent: 'accent-3', mobileBarWidthClass: 'w-32' }
       ]
     },
-    { id: 'tiers', label: 'Tramos comisión', accent: 'accent-3' },
     { id: 'admin-emails', label: 'Correos', accent: 'accent-4', route: '/admin/email-templates' },
     { id: 'admin-pqrs', label: 'PQRS', accent: 'accent-3', route: '/admin/pqrs' }
   ];
@@ -461,17 +461,18 @@ export class AdminProjectPricingComponent implements OnInit {
 
   saveTier(): void {
     const minAmount = Number(this.tierEditor.minAmount);
-    const maxAmount = this.tierEditor.maxAmount.trim() ? Number(this.tierEditor.maxAmount) : null;
+    const maxRaw = this.tierEditor.maxAmount;
+    const maxAmount = maxRaw != null && String(maxRaw).trim() !== '' ? Number(maxRaw) : null;
     const execPct = Number(this.tierEditor.executorCommissionPct);
     const feePct = Number(this.tierEditor.companyFeePct);
 
-    if (!this.tierEditor.displayName.trim()) { this.uiToastService.error('El nombre es obligatorio.'); return; }
+    if (!String(this.tierEditor.displayName ?? '').trim()) { this.uiToastService.error('El nombre es obligatorio.'); return; }
     if (!Number.isFinite(minAmount) || minAmount < 0) { this.uiToastService.error('El monto mínimo debe ser ≥ 0.'); return; }
     if (!Number.isFinite(execPct) || execPct < 0) { this.uiToastService.error('La comisión al ejecutor debe ser ≥ 0.'); return; }
     if (!Number.isFinite(feePct) || feePct < 0) { this.uiToastService.error('El fee de empresa debe ser ≥ 0.'); return; }
 
     this.isSavingTier = true;
-    const payload = { displayName: this.tierEditor.displayName.trim(), minAmount, maxAmount, executorCommissionPct: execPct, companyFeePct: feePct, currency: this.tierEditor.currency.toUpperCase() };
+    const payload = { displayName: String(this.tierEditor.displayName).trim(), minAmount, maxAmount, executorCommissionPct: execPct, companyFeePct: feePct, currency: String(this.tierEditor.currency).toUpperCase() };
     const req$ = this.tierEditorMode === 'edit' && this.editingTierId != null
       ? this.pricingRateService.updateCommissionTier(this.editingTierId, payload)
       : this.pricingRateService.createCommissionTier(payload);
