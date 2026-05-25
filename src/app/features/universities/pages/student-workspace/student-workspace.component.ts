@@ -54,13 +54,12 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   activeTab = 'projects';
 
   navItems: DashboardNavItem[] = [
-    { id: 'projects',     label: 'Proyectos',       accent: 'accent-1' },
-    { id: 'applications', label: 'Postulaciones',   accent: 'accent-2' },
-    { id: 'my-teams',     label: 'Mis equipos',     accent: 'accent-3' },
-    { id: 'all-teams',    label: 'Universidad',     accent: 'accent-4' },
-    { id: 'ranking',      label: 'Ranking',         accent: 'accent-1' },
-    { id: 'invitations',  label: 'Notificaciones',  accent: 'accent-2' },
-    { id: 'profile',      label: 'Mi perfil',       accent: 'accent-3' },
+    { id: 'projects',     label: 'Proyectos',     accent: 'accent-1' },
+    { id: 'applications', label: 'Postulaciones', accent: 'accent-2' },
+    { id: 'my-teams',     label: 'Mis equipos',   accent: 'accent-3' },
+    { id: 'all-teams',    label: 'Universidad',   accent: 'accent-4' },
+    { id: 'ranking',      label: 'Ranking',       accent: 'accent-1' },
+    { id: 'profile',      label: 'Mi perfil',     accent: 'accent-3' },
   ];
 
   isLoadingProjects = false;
@@ -220,10 +219,6 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
         this.loadRanking();
         setTimeout(done, 600);
         break;
-      case 'invitations':
-        this.loadInvitations();
-        setTimeout(done, 600);
-        break;
       case 'profile':
         this.userSessionService.loadCurrentUser().subscribe({
           next: u => { this.currentUser = u; done(); },
@@ -258,15 +253,13 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
           if (this.lastKnownPendingCount >= 0 && count > this.lastKnownPendingCount) {
             const diff = count - this.lastKnownPendingCount;
             this.toast.notify(
-              `${diff === 1 ? 'Nueva solicitud' : `${diff} nuevas solicitudes`} pendiente${diff === 1 ? '' : 's'}`,
-              () => {
-                this.activeTab = 'invitations';
-                this.loadInvitations();
-              },
+              `${diff === 1 ? 'Nueva invitación' : `${diff} nuevas invitaciones`} pendiente${diff === 1 ? '' : 's'}`,
+              () => {},
               'Ver'
             );
           }
           this.lastKnownPendingCount = count;
+          this.pendingCount = count;
         }
       });
     }, 15000);
@@ -287,6 +280,11 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     if (tab === 'ranking' && this.userRanking.length === 0 && this.teamRanking.length === 0) {
       this.loadRanking();
     }
+  }
+
+  onNotifDialogClosed(): void {
+    this.loadMyTeams();
+    this.loadInvitations();
   }
 
   loadRanking(): void {
@@ -505,11 +503,6 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
         (i.type === 'JOIN_REQUEST' && i.toUserId === uid)
       )
     ).length;
-    // Update label on the existing array item (no new array reference)
-    const notifItem = this.navItems.find(n => n.id === 'invitations');
-    if (notifItem) {
-      notifItem.label = this.pendingCount > 0 ? `Notificaciones (${this.pendingCount})` : 'Notificaciones';
-    }
   }
 
   // ── Apply ─────────────────────────────────────────────

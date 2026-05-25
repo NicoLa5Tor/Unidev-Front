@@ -112,6 +112,19 @@ export const routes: Routes = [
     }
   },
   {
+    path: 'admin/announcements',
+    title: 'Anuncios | UniDev',
+    loadComponent: () =>
+      import('./features/admin/pages/admin-announcements/admin-announcements.component').then(
+        m => m.AdminAnnouncementsComponent
+      ),
+    canActivate: [authGuard, roleGuard],
+    data: {
+      roles: ['ADMINISTRADORES'],
+      description: 'Envía comunicados y anuncios a todos los usuarios o grupos específicos.'
+    }
+  },
+  {
     path: 'companies',
     title: 'Empresas | UniDev',
     loadComponent: () =>

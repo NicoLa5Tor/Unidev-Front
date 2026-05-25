@@ -5,7 +5,9 @@
   [avatarImageUrl]="currentUser?.photoUrl ?? null"
   [activeTab]="activeTab"
   [navItems]="navItems"
-  (tabChange)="onTabChange($event)">
+  [extraNotifCount]="pendingCount"
+  (tabChange)="onTabChange($event)"
+  (notificationsDialogClosed)="onNotifDialogClosed()">
 
   <!-- ── MIS EQUIPOS (tutoreados) ────────────────────── -->
   <ng-container *ngIf="activeTab === 'my-teams'">
@@ -310,53 +312,6 @@
           <p class="text-xs text-[var(--muted)]">{{ entry.averageScore | number:'1.1-1' }} · {{ entry.totalRatings }} proyecto{{ entry.totalRatings !== 1 ? 's' : '' }}</p>
         </div>
       </article>
-    </div>
-  </ng-container>
-
-  <ng-container *ngIf="activeTab === 'notifications'">
-    <div class="mb-6">
-      <h2 class="text-xl font-semibold text-white">Notificaciones</h2>
-      <p class="mt-1 text-sm text-purple-200">Solicitudes de tutoría y notificaciones del equipo.</p>
-    </div>
-
-    <div *ngIf="isLoadingInvitations" class="flex justify-center py-12">
-      <div class="h-10 w-10 animate-spin rounded-full border-2 border-white/20 border-t-purple-400"></div>
-    </div>
-
-    <div *ngIf="!isLoadingInvitations && invitations.length === 0"
-         class="rounded-2xl border border-white/10 bg-white/5 p-8 text-center text-purple-200">
-      No tienes notificaciones pendientes.
-    </div>
-
-    <div *ngIf="!isLoadingInvitations && invitations.length > 0" class="space-y-3">
-      <div *ngFor="let inv of invitations"
-           class="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
-        <div class="flex items-start justify-between gap-2">
-          <div>
-            <p class="text-sm font-medium text-white">{{ inv.teamName }}</p>
-            <p class="text-xs text-purple-200">De: {{ inv.fromUserDisplayName }}</p>
-            <p *ngIf="inv.message" class="text-xs text-purple-300 mt-1">{{ inv.message }}</p>
-          </div>
-          <span class="rounded-full px-2 py-0.5 text-xs"
-                [ngClass]="{
-                  'bg-amber-500/20 text-amber-300': inv.status === 'PENDING',
-                  'bg-teal-500/20 text-teal-300': inv.status === 'ACCEPTED',
-                  'bg-rose-500/20 text-rose-300': inv.status === 'REJECTED'
-                }">
-            {{ inv.status }}
-          </span>
-        </div>
-        <div *ngIf="inv.status === 'PENDING'" class="flex gap-2">
-          <button (click)="acceptInvitation(inv.id)"
-                  class="rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-500 transition">
-            Aceptar
-          </button>
-          <button (click)="rejectInvitation(inv.id)"
-                  class="rounded-lg bg-rose-600/60 px-3 py-1.5 text-xs font-medium text-white hover:bg-rose-600 transition">
-            Rechazar
-          </button>
-        </div>
-      </div>
     </div>
   </ng-container>
 

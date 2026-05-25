@@ -5,7 +5,9 @@
   [avatarImageUrl]="currentUser?.photoUrl ?? null"
   [activeTab]="activeTab"
   [navItems]="navItems"
+  [extraNotifCount]="pendingCount"
   (tabChange)="setActiveTab($event)"
+  (notificationsDialogClosed)="onNotifDialogClosed()"
 >
 
   <!-- ══════════════════════════════════
@@ -518,77 +520,6 @@
               [ngClass]="s <= entry.averageScore ? 'text-yellow-400' : 'text-[var(--muted)]/30'">★</span>
           </div>
           <p class="text-xs text-[var(--muted)]">{{ entry.averageScore | number:'1.1-1' }} · {{ entry.totalRatings }} proyecto{{ entry.totalRatings !== 1 ? 's' : '' }}</p>
-        </div>
-      </article>
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════
-       TAB: NOTIFICACIONES
-  ══════════════════════════════════ -->
-  <section *ngIf="activeTab === 'invitations'">
-    <div class="mb-6">
-      <h2 class="font-cyber text-lg font-bold text-[var(--text)]">Notificaciones</h2>
-      <p class="mt-1 text-sm text-[var(--muted)]">Invitaciones recibidas, solicitudes de ingreso y estado de tus solicitudes enviadas.</p>
-    </div>
-
-    <div *ngIf="isLoadingInvitations" class="flex items-center justify-center py-16">
-      <div class="h-8 w-8 animate-spin rounded-full border-2 border-[color:var(--accent-2)] border-t-transparent"></div>
-    </div>
-
-    <div *ngIf="!isLoadingInvitations && invitations.length === 0" class="flex flex-col items-center justify-center py-16 gap-3">
-      <div class="flex h-14 w-14 items-center justify-center rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)]">
-        <svg class="h-6 w-6 text-[var(--muted)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      </div>
-      <p class="font-tech text-sm text-[var(--text)]">Sin notificaciones</p>
-      <p class="text-xs text-[var(--muted)]">Aquí aparecerán invitaciones a equipos y solicitudes de ingreso.</p>
-    </div>
-
-    <div *ngIf="!isLoadingInvitations && invitations.length > 0" class="flex flex-col gap-3">
-      <article *ngFor="let inv of invitations"
-        class="rounded-3xl border bg-[var(--panel-2)]/70 p-5 shadow-[var(--shadow)] transition-colors"
-        [ngClass]="inv.status === 'PENDING' && canRespond(inv) ? 'border-[color:var(--accent-2)]/40' : 'border-[color:var(--panel-border)]'">
-
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div class="flex-1 min-w-0">
-            <div class="flex flex-wrap items-center gap-2">
-              <span class="rounded-full border border-[color:var(--panel-border)] bg-[var(--panel)] px-2 py-0.5 font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">
-                {{ invitationLabel(inv) }}
-              </span>
-              <span class="rounded-full border px-2 py-0.5 font-tech text-xs" [ngClass]="invitationStatusClass(inv.status)">
-                {{ invitationStatusLabel(inv.status) }}
-              </span>
-            </div>
-            <h3 class="mt-2 font-cyber text-sm font-bold text-[var(--text)]">{{ inv.teamName }}</h3>
-
-            <!-- LEADER_INVITE: "X te invitó" -->
-            <p *ngIf="inv.type === 'LEADER_INVITE'" class="mt-1 text-xs text-[var(--muted)]">
-              <span class="text-[var(--text)]">{{ inv.fromUserDisplayName }}</span> te invitó a unirte al equipo.
-            </p>
-            <!-- JOIN_REQUEST received (I'm leader): "X quiere unirse" -->
-            <p *ngIf="inv.type === 'JOIN_REQUEST' && inv.toUserId === currentUser?.id" class="mt-1 text-xs text-[var(--muted)]">
-              <span class="text-[var(--text)]">{{ inv.fromUserDisplayName }}</span> quiere unirse a tu equipo.
-            </p>
-            <!-- JOIN_REQUEST sent (I'm student): "Solicitaste unirte" -->
-            <p *ngIf="inv.type === 'JOIN_REQUEST' && inv.fromUserId === currentUser?.id && inv.toUserId !== currentUser?.id" class="mt-1 text-xs text-[var(--muted)]">
-              Solicitaste unirte — el líder <span class="text-[var(--text)]">{{ inv.toUserDisplayName }}</span> debe aceptar.
-            </p>
-
-            <p *ngIf="inv.message" class="mt-2 text-xs italic text-[var(--muted)]">"{{ inv.message }}"</p>
-            <p class="mt-2 font-tech text-xs text-[var(--muted)]">{{ inv.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
-          </div>
-
-          <!-- Action buttons: only for pending items where I'm the recipient -->
-          <div *ngIf="canRespond(inv)" class="flex shrink-0 flex-wrap gap-2 sm:flex-col">
-            <button (click)="acceptInvitation(inv)"
-              class="flex-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 font-tech text-xs text-emerald-400 transition-colors hover:bg-emerald-500/20 sm:flex-none">
-              Aceptar
-            </button>
-            <button (click)="rejectInvitation(inv)"
-              class="flex-1 rounded-full border border-rose-500/20 bg-rose-500/10 px-4 py-2 font-tech text-xs text-rose-400 transition-colors hover:bg-rose-500/20 sm:flex-none">
-              Rechazar
-            </button>
-          </div>
         </div>
       </article>
     </div>

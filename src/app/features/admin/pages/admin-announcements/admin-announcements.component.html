@@ -1,0 +1,114 @@
+<app-dashboard-shell
+  title="Admin UniDev"
+  eyebrow="Sistema"
+  [navItems]="navItems"
+  contentWidthClass="max-w-5xl"
+>
+
+  <!-- Header -->
+  <div class="mb-8">
+    <p class="font-tech text-[10px] uppercase tracking-[0.3em] text-[var(--accent-1)]">Comunicaciones</p>
+    <h2 class="mt-1 font-cyber text-2xl font-bold text-[var(--text)]">Anuncios</h2>
+    <p class="mt-0.5 text-sm text-[var(--muted)]">Envía notificaciones por correo a todos los usuarios o grupos específicos</p>
+  </div>
+
+  <div class="grid gap-8 lg:grid-cols-[1fr_380px]">
+
+    <!-- ── Formulario de envío ── -->
+    <div class="rounded-[24px] border border-[color:var(--panel-border)] bg-[var(--panel)] p-6">
+      <p class="mb-4 font-tech text-[11px] uppercase tracking-[0.2em] text-[var(--accent-1)]">Nuevo anuncio</p>
+
+      <!-- Target selector -->
+      <div class="mb-4">
+        <label class="mb-2 block font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Destinatarios *</label>
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <label *ngFor="let opt of targetOptions"
+            class="flex cursor-pointer items-start gap-2.5 rounded-[14px] border px-3 py-2.5 transition"
+            [ngClass]="targetRole === opt.value
+              ? 'border-[color:var(--accent-1)] bg-[color:color-mix(in_srgb,var(--accent-1)_10%,transparent)]'
+              : 'border-[color:var(--panel-border)] bg-[var(--panel-2)] hover:border-[color:var(--accent-1)]/40'">
+            <input type="radio" [value]="opt.value" [(ngModel)]="targetRole" class="mt-0.5 shrink-0 accent-[var(--accent-1)]" />
+            <div class="min-w-0">
+              <p class="text-xs font-medium text-[var(--text)]">{{ opt.label }}</p>
+              <p class="text-[10px] text-[var(--muted)]">{{ opt.description }}</p>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Título -->
+      <div class="mb-4">
+        <label class="mb-1 block font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Título *</label>
+        <input type="text" [(ngModel)]="title" maxlength="200" placeholder="Ej: Actualización de la plataforma"
+          class="w-full rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-1)]" />
+        <p class="mt-1 text-right font-tech text-[9px] text-[var(--muted)]">{{ title.length }}/200</p>
+      </div>
+
+      <!-- Mensaje -->
+      <div class="mb-5">
+        <label class="mb-1 block font-tech text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Mensaje *</label>
+        <textarea [(ngModel)]="body" maxlength="4000" rows="7"
+          placeholder="Escribe el contenido del anuncio..."
+          class="w-full resize-none rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3 text-sm leading-6 text-[var(--text)] outline-none focus:border-[color:var(--accent-1)]"></textarea>
+        <p class="mt-1 text-right font-tech text-[9px] text-[var(--muted)]">{{ body.length }}/4000</p>
+      </div>
+
+      <!-- Preview pill -->
+      <div *ngIf="title.trim() || body.trim()"
+        class="mb-5 rounded-[14px] border border-[color:var(--accent-1)]/20 bg-[color:color-mix(in_srgb,var(--accent-1)_6%,transparent)] px-4 py-3">
+        <p class="font-tech text-[9px] uppercase tracking-[0.2em] text-[var(--accent-1)]">Vista previa · Para: {{ targetLabel }}</p>
+        <p class="mt-1.5 text-sm font-semibold text-[var(--text)]">{{ title || '—' }}</p>
+        <p class="mt-1 text-sm text-[var(--muted)] whitespace-pre-wrap">{{ body || '—' }}</p>
+      </div>
+
+      <!-- Send button -->
+      <button type="button" [disabled]="!canSend" (click)="send()"
+        class="w-full rounded-full bg-[var(--accent-1)] px-6 py-3 font-tech text-xs uppercase tracking-[0.18em] text-[var(--bg)] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">
+        {{ sending ? 'Enviando...' : 'Enviar anuncio' }}
+      </button>
+    </div>
+
+    <!-- ── Historial ── -->
+    <div>
+      <p class="mb-4 font-tech text-[11px] uppercase tracking-[0.2em] text-[var(--accent-1)]">Historial de envíos</p>
+
+      <div *ngIf="isLoading" class="flex justify-center py-8">
+        <div class="h-6 w-6 animate-spin rounded-full border-2 border-[color:var(--accent-1)] border-t-transparent"></div>
+      </div>
+
+      <div *ngIf="!isLoading && history.length === 0"
+        class="rounded-[18px] border border-dashed border-[color:var(--panel-border)] px-5 py-10 text-center">
+        <p class="font-tech text-xs uppercase tracking-[0.18em] text-[var(--muted)]">Sin envíos aún</p>
+      </div>
+
+      <div *ngIf="!isLoading && history.length > 0" class="space-y-3">
+        <div *ngFor="let ann of history"
+          class="rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel)] px-4 py-4">
+
+          <!-- Top -->
+          <div class="flex items-start justify-between gap-2">
+            <p class="text-sm font-semibold text-[var(--text)] leading-snug">{{ ann.title }}</p>
+            <span class="shrink-0 rounded-full border border-[color:var(--accent-1)]/30 bg-[color:color-mix(in_srgb,var(--accent-1)_10%,transparent)] px-2 py-0.5 font-tech text-[9px] uppercase tracking-[0.1em] text-[var(--accent-1)]">
+              {{ ann.recipientCount }} enviados
+            </span>
+          </div>
+
+          <!-- Body preview -->
+          <p class="mt-1.5 line-clamp-2 text-sm text-[var(--muted)]">{{ ann.body }}</p>
+
+          <!-- Meta -->
+          <div class="mt-2.5 flex flex-wrap items-center gap-2">
+            <span class="rounded-full border border-[color:var(--panel-border)] px-2 py-0.5 font-tech text-[9px] text-[var(--muted)]">
+              {{ roleLabel(ann.targetRole) }}
+            </span>
+            <span class="font-tech text-[9px] text-[var(--muted)]/60">
+              {{ ann.sentAt | date:'dd/MM/yyyy HH:mm' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</app-dashboard-shell>

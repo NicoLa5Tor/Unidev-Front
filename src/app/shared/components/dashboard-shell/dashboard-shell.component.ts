@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -7,7 +7,9 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AuthService } from '../../../core/services/auth.service';
 import { ThemeName, ThemeService } from '../../../core/services/theme.service';
 import { UserSessionService } from '../../../core/services/user-session.service';
-import { PqrsDialogComponent } from '../pqrs-dialog/pqrs-dialog.component';
+import { PqrsService } from '../../services/pqrs.service';
+import { NotificationsDialogComponent } from '../notifications-dialog/notifications-dialog.component';
+import { AnnouncementService } from '../../../features/admin/services/announcement.service';
 
 export interface DashboardNavItem {
   id: string;
@@ -24,7 +26,7 @@ export interface DashboardNavItem {
   imports: [CommonModule, FormsModule, MatDialogModule],
   templateUrl: './dashboard-shell.component.html'
 })
-export class DashboardShellComponent implements OnChanges {
+export class DashboardShellComponent implements OnChanges, OnInit {
   @Input({ required: true }) title = '';
   @Input() eyebrow = '';
   @Input() avatarLabel = 'UD';
@@ -32,9 +34,12 @@ export class DashboardShellComponent implements OnChanges {
   @Input() activeTab = '';
   @Input() navItems: DashboardNavItem[] = [];
   @Input() contentWidthClass = 'max-w-6xl';
+  @Input() extraNotifCount = 0;
   @Output() readonly tabChange = new EventEmitter<string>();
+  @Output() readonly notificationsDialogClosed = new EventEmitter<void>();
 
   isMobileMenuOpen = false;
+  notifUnreadCount = 0;
   private readonly expandedNavIds = new Set<string>();
 
   readonly themes: Array<{ id: ThemeName; label: string }> = [
@@ -47,9 +52,40 @@ export class DashboardShellComponent implements OnChanges {
     private readonly themeService: ThemeService,
     private readonly authService: AuthService,
     private readonly userSessionService: UserSessionService,
+    private readonly pqrsService: PqrsService,
+    private readonly announcementService: AnnouncementService,
     private readonly router: Router,
     private readonly dialog: MatDialog
   ) {}
+
+  ngOnInit(): void {
+    if (!this.isAdmin) {
+      this.refreshNotifCount();
+    }
+  }
+
+  private refreshNotifCount(): void {
+    const userId = this.userSessionService.snapshot?.id ?? 'anon';
+    const lastSeenId = Number(localStorage.getItem(`lastSeenAnnouncement_${userId}`) ?? 0);
+    let pqrsUnread = 0;
+    let announcementUnread = 0;
+
+    this.pqrsService.mine().subscribe({
+      next: tickets => {
+        pqrsUnread = tickets.filter(t => t.adminResponse != null).length;
+        this.notifUnreadCount = pqrsUnread + announcementUnread;
+      },
+      error: () => {}
+    });
+
+    this.announcementService.inbox().subscribe({
+      next: announcements => {
+        announcementUnread = announcements.filter(a => a.id > lastSeenId).length;
+        this.notifUnreadCount = pqrsUnread + announcementUnread;
+      },
+      error: () => {}
+    });
+  }
 
   get isAdmin(): boolean {
     return this.userSessionService.snapshot?.roleName === 'ADMINISTRADORES';
@@ -95,14 +131,21 @@ export class DashboardShellComponent implements OnChanges {
     this.authService.logout();
   }
 
-  openPqrs(): void {
+  openNotifications(): void {
     this.isMobileMenuOpen = false;
-    this.dialog.open(PqrsDialogComponent, {
-      width: '520px',
+    this.dialog.open(NotificationsDialogComponent, {
+      width: '540px',
       maxWidth: '94vw',
       panelClass: 'pqrs-dialog-panel',
       backdropClass: 'app-shell-dialog-backdrop'
+    }).afterClosed().subscribe(() => {
+      this.notificationsDialogClosed.emit();
+      this.refreshNotifCount();
     });
+  }
+
+  get totalNotifCount(): number {
+    return this.notifUnreadCount + this.extraNotifCount;
   }
 
   isNavGroupExpanded(item: DashboardNavItem): boolean {

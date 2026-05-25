@@ -134,13 +134,18 @@
 
       <button
         *ngIf="!isAdmin"
-        (click)="openPqrs()"
-        class="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 font-tech text-xs uppercase tracking-[0.18em] text-[var(--muted)] transition-colors hover:bg-[var(--accent-2)]/10 hover:text-[var(--accent-2)]"
+        (click)="openNotifications()"
+        class="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 font-tech text-xs uppercase tracking-[0.18em] text-[var(--muted)] transition-colors hover:bg-[var(--accent-1)]/10 hover:text-[var(--accent-1)]"
       >
         <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M2 3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H9l-3 2v-2H3a1 1 0 0 1-1-1V3z"/>
+          <path d="M8 1.5A3.5 3.5 0 0 0 4.5 5c0 4-2 5.5-2 5.5h11S11.5 9 11.5 5A3.5 3.5 0 0 0 8 1.5z"/>
+          <path d="M9.16 13a1.33 1.33 0 0 1-2.32 0"/>
         </svg>
-        PQRS
+        <span class="flex-1 text-left">Notificaciones</span>
+        <span *ngIf="totalNotifCount > 0"
+          class="flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-[var(--accent-1)] px-1 font-tech text-[9px] font-bold text-[var(--bg)]">
+          {{ totalNotifCount }}
+        </span>
       </button>
 
       <button

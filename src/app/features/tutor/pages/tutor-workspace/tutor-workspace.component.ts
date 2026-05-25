@@ -40,14 +40,15 @@ export class TutorWorkspaceComponent implements OnInit, OnDestroy {
 
   activeTab = 'teams';
 
+  pendingCount = 0;
+
   navItems: DashboardNavItem[] = [
-    { id: 'my-teams',      label: 'Mis equipos',      accent: 'accent-1' },
-    { id: 'teams',         label: 'Sede',             accent: 'accent-2' },
-    { id: 'projects',      label: 'Proyectos',        accent: 'accent-3' },
-    { id: 'my-projects',   label: 'Mis proyectos',    accent: 'accent-4' },
-    { id: 'ranking',       label: 'Ranking',          accent: 'accent-1' },
-    { id: 'notifications', label: 'Notificaciones',   accent: 'accent-4' },
-    { id: 'profile',       label: 'Mi perfil',        accent: 'accent-1' },
+    { id: 'my-teams',    label: 'Mis equipos',   accent: 'accent-1' },
+    { id: 'teams',       label: 'Sede',          accent: 'accent-2' },
+    { id: 'projects',    label: 'Proyectos',     accent: 'accent-3' },
+    { id: 'my-projects', label: 'Mis proyectos', accent: 'accent-4' },
+    { id: 'ranking',     label: 'Ranking',       accent: 'accent-1' },
+    { id: 'profile',     label: 'Mi perfil',     accent: 'accent-1' },
   ];
 
   userRanking: RankingEntry[] = [];
@@ -111,15 +112,13 @@ export class TutorWorkspaceComponent implements OnInit, OnDestroy {
           if (this.lastKnownPendingCount >= 0 && count > this.lastKnownPendingCount) {
             const diff = count - this.lastKnownPendingCount;
             this.toast.notify(
-              `${diff === 1 ? 'Nueva solicitud' : `${diff} nuevas solicitudes`} pendiente${diff === 1 ? '' : 's'}`,
-              () => {
-                this.activeTab = 'notifications';
-                this.loadInvitations();
-              },
+              `${diff === 1 ? 'Nueva invitación' : `${diff} nuevas invitaciones`} pendiente${diff === 1 ? '' : 's'}`,
+              () => {},
               'Ver'
             );
           }
           this.lastKnownPendingCount = count;
+          this.pendingCount = count;
         }
       });
     }, 15000);
@@ -138,8 +137,16 @@ export class TutorWorkspaceComponent implements OnInit, OnDestroy {
     if (tab === 'teams') this.loadTeams();
     if (tab === 'projects') this.loadProjects();
     if (tab === 'my-projects') this.loadMyApplications();
-    if (tab === 'notifications') this.loadInvitations();
     if (tab === 'ranking' && this.userRanking.length === 0 && this.teamRanking.length === 0) this.loadRanking();
+  }
+
+  onNotifDialogClosed(): void {
+    this.loadInvitations();
+    this.loadMyTutoredTeams();
+    this.studentService.pendingCount().subscribe({
+      next: ({ count }) => { this.pendingCount = count; this.lastKnownPendingCount = count; },
+      error: () => {}
+    });
   }
 
   loadRanking(): void {

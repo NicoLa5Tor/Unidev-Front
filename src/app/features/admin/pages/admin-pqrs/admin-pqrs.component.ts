@@ -21,7 +21,8 @@ export class AdminPqrsComponent implements OnInit {
     { id: 'user-management', label: 'Usuarios', accent: 'accent-1', route: '/admin/users' },
     { id: 'admin-pricing', label: 'Pricing', accent: 'accent-2', route: '/admin/project-pricing' },
     { id: 'admin-emails', label: 'Correos', accent: 'accent-4', route: '/admin/email-templates' },
-    { id: 'admin-pqrs', label: 'PQRS', accent: 'accent-3', route: '/admin/pqrs' }
+    { id: 'admin-pqrs', label: 'PQRS', accent: 'accent-3', route: '/admin/pqrs' },
+    { id: 'admin-announcements', label: 'Anuncios', accent: 'accent-1', route: '/admin/announcements' }
   ];
 
   isLoading = false;
