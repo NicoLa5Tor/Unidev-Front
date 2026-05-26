@@ -1,0 +1,263 @@
+<div class="flex flex-col w-full max-w-2xl rounded-[28px] border border-[color:var(--panel-border)] bg-[var(--panel)] shadow-2xl overflow-hidden" style="max-height:90vh">
+
+  <!-- Header -->
+  <div class="flex items-start justify-between gap-4 px-6 pt-6 pb-4 border-b border-[color:var(--panel-border)]">
+    <div class="flex-1">
+      <p class="font-tech text-xs uppercase tracking-[0.24em] text-[var(--accent-3)]">UniDev</p>
+      <h3 class="mt-1 text-xl font-semibold text-[var(--text)]">Despliegue temporal</h3>
+      <p class="mt-1 text-xs text-[var(--muted)]">
+        Subimos su repositorio y lo desplegamos por 5 días en
+        <code>{{ deployment?.subdomain || 'subdominio' }}.unidev.site</code>.
+      </p>
+    </div>
+    <div class="flex items-center gap-2 mt-1">
+      <button *ngIf="step === 'form'" type="button" (click)="openInfoDialog()"
+        class="flex h-8 w-8 items-center justify-center rounded-full border border-amber-500/40 bg-amber-500/10 font-cyber text-base font-bold text-amber-400 hover:bg-amber-500/20 transition-colors"
+        title="Cómo preparar el repositorio">
+        i
+      </button>
+      <button type="button" (click)="close()"
+        class="rounded-full border border-[color:var(--panel-border)] px-3 py-1 font-tech text-xs text-[var(--muted)] hover:text-[var(--text)]">✕</button>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="flex-1 min-h-0 px-6 py-5 overflow-y-auto">
+
+    <!-- ── FORM ── -->
+    <div *ngIf="step === 'form'" class="flex flex-col gap-4">
+
+      <!-- Repo URL -->
+      <div>
+        <label class="block font-tech text-[10px] uppercase tracking-[0.22em] text-[var(--muted)] mb-1.5">URL del repositorio</label>
+        <input type="url" [(ngModel)]="repoUrl" name="repoUrl"
+          placeholder="https://github.com/usuario/repositorio.git"
+          class="w-full rounded-xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-3)]" />
+        <p class="mt-1 text-[10px] text-[var(--muted)]">URL HTTPS del repositorio en GitHub, GitLab o Bitbucket.</p>
+      </div>
+
+      <!-- Git token -->
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="font-tech text-[10px] uppercase tracking-[0.22em] text-[var(--muted)]">
+            Token de Git <span class="opacity-60">(solo para repositorios privados)</span>
+          </label>
+          <button type="button" (click)="openTokenGuideDialog()"
+            class="font-tech text-[10px] text-[var(--accent-3)] hover:underline">
+            ¿Cómo obtengo un token?
+          </button>
+        </div>
+        <input type="password" [(ngModel)]="gitToken" name="gitToken"
+          placeholder="github_pat_..."
+          autocomplete="off"
+          class="w-full rounded-xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-3)]" />
+        <p class="mt-1 text-[10px] text-[var(--muted)]">
+          Si su repositorio es público, deje este campo vacío. El token se cifra con AES-256-GCM antes de guardarse.
+        </p>
+      </div>
+
+      <!-- Subdomain -->
+      <div>
+        <label class="block font-tech text-[10px] uppercase tracking-[0.22em] text-[var(--muted)] mb-1.5">
+          Subdominio deseado <span class="opacity-60">(opcional, se asigna automáticamente si lo deja vacío)</span>
+        </label>
+        <div class="flex items-stretch gap-0 rounded-xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] overflow-hidden focus-within:border-[color:var(--accent-3)]">
+          <input type="text" [ngModel]="subdomain" (ngModelChange)="onSubdomainInput($event)" name="subdomain"
+            placeholder="mi-aplicacion"
+            maxlength="30"
+            class="flex-1 bg-transparent px-3 py-2 text-sm text-[var(--text)] outline-none" />
+          <span class="flex items-center px-3 text-xs text-[var(--muted)] border-l border-[color:var(--panel-border)]">.unidev.site</span>
+        </div>
+        <p *ngIf="subdomainStatus === 'CHECKING'" class="mt-1 text-[10px] text-[var(--muted)]">Verificando disponibilidad…</p>
+        <p *ngIf="subdomainStatus === 'AVAILABLE'" class="mt-1 text-[10px] text-emerald-400">Subdominio disponible.</p>
+        <p *ngIf="subdomainStatus === 'IN_USE'"    class="mt-1 text-[10px] text-rose-400">{{ subdomainError }}</p>
+        <p *ngIf="subdomainStatus === 'RESERVED'"  class="mt-1 text-[10px] text-rose-400">{{ subdomainError }}</p>
+      </div>
+
+      <!-- Container port -->
+      <div>
+        <label class="block font-tech text-[10px] uppercase tracking-[0.22em] text-[var(--muted)] mb-1.5">
+          Puerto del contenedor <span class="opacity-60">(requerido solo si su repositorio no incluye docker-compose.yml)</span>
+        </label>
+        <input type="number" [(ngModel)]="containerPort" name="containerPort"
+          min="1" max="65535"
+          placeholder="3000"
+          class="w-full rounded-xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[color:var(--accent-3)]" />
+        <p class="mt-1 text-[10px] text-[var(--muted)]">
+          Si su repositorio solo incluye un <code>Dockerfile</code> en la raíz, generamos el
+          <code>docker-compose.yml</code> automáticamente usando este puerto. Corresponde al puerto que su
+          aplicación escucha <strong>dentro del contenedor</strong> (por ejemplo: 3000 para Node, 8080 para
+          Spring, 80 para Nginx). Si incluye su propio compose, deje el campo vacío.
+        </p>
+      </div>
+
+      <!-- .env file -->
+      <div>
+        <label class="block font-tech text-[10px] uppercase tracking-[0.22em] text-[var(--muted)] mb-1.5">
+          Archivo .env <span class="opacity-60">(máximo 64 KB)</span>
+        </label>
+        <label class="block rounded-xl border border-dashed border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-5 text-center text-xs text-[var(--muted)] cursor-pointer hover:border-[color:var(--accent-3)]/40 hover:text-[var(--text)] transition-colors">
+          <ng-container *ngIf="!envFile">Haga clic para seleccionar el archivo .env</ng-container>
+          <ng-container *ngIf="envFile">
+            <span class="font-tech text-[var(--accent-3)]">{{ envFile.name }}</span>
+            <span class="ml-2 text-[10px] opacity-60">({{ (envFile.size / 1024).toFixed(1) }} KB)</span>
+          </ng-container>
+          <input type="file" accept=".env,text/plain" class="sr-only" (change)="onEnvFileSelected($event)" />
+        </label>
+      </div>
+
+    </div>
+
+    <!-- ── BUILDING / READY / ACTIVE / FAILED ── -->
+    <div *ngIf="step !== 'form'" class="flex flex-col gap-4">
+
+      <!-- Status badge + URL -->
+      <div class="rounded-2xl border border-[color:var(--panel-border)] bg-[var(--panel-2)] px-4 py-3">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="rounded-full border px-2.5 py-0.5 font-tech text-[10px] uppercase tracking-[0.16em]"
+            [ngClass]="{
+              'border-yellow-500/30 bg-yellow-500/10 text-yellow-400': deployment?.status === 'PENDING' || deployment?.status === 'BUILDING',
+              'border-sky-500/30 bg-sky-500/10 text-sky-400': deployment?.status === 'READY',
+              'border-emerald-500/30 bg-emerald-500/10 text-emerald-400': deployment?.status === 'ACTIVE',
+              'border-rose-500/30 bg-rose-500/10 text-rose-400': deployment?.status === 'FAILED'
+            }">
+            {{ deployment?.status }}
+          </span>
+          <code class="text-xs text-[var(--text)]">{{ deployment?.url }}</code>
+          <button *ngIf="deployment?.status === 'ACTIVE'" (click)="copyUrl()"
+            class="ml-auto rounded-full border border-[color:var(--panel-border)] px-2.5 py-0.5 font-tech text-[10px] text-[var(--muted)] hover:text-[var(--text)]">
+            Copiar
+          </button>
+        </div>
+        <p *ngIf="step === 'building'" class="mt-2 text-[11px] text-[var(--muted)]">
+          Clonando el repositorio y construyendo las imágenes. Este proceso puede tardar varios minutos.
+        </p>
+        <p *ngIf="step === 'ready'" class="mt-2 text-[11px] text-sky-400">
+          Construcción completada. Active el despliegue después de confirmar el pago para habilitar el enlace.
+        </p>
+        <p *ngIf="step === 'active'" class="mt-2 text-[11px] text-emerald-400">
+          Despliegue activo. El enlace expira el {{ deployment?.expiresAt | date:'dd/MM/yyyy HH:mm' }}.
+        </p>
+        <p *ngIf="step === 'failed'" class="mt-2 text-[11px] text-rose-400">
+          El despliegue falló: {{ deployment?.errorMessage || 'error desconocido.' }}
+        </p>
+      </div>
+
+      <!-- Phase timeline -->
+      <div *ngIf="deployment?.phases?.length">
+        <p class="font-tech text-[10px] uppercase tracking-[0.22em] text-[var(--muted)] mb-2">Fases de la construcción</p>
+        <ol class="flex flex-col">
+          <li *ngFor="let p of deployment!.phases; let i = index; let last = last; trackBy: trackPhase"
+              class="relative pl-7">
+
+            <!-- Vertical connector (between bullets) -->
+            <span *ngIf="!last" class="absolute left-[10px] top-5 bottom-0 w-px bg-[color:var(--panel-border)]"></span>
+
+            <!-- Bullet -->
+            <span class="absolute left-0 top-2 flex items-center justify-center">
+              <span class="block h-5 w-5 rounded-full"
+                    [ngClass]="phaseClasses(p.status).bullet"></span>
+            </span>
+
+            <!-- Phase card -->
+            <div class="mb-2 rounded-xl border px-3 py-2 transition-colors"
+                 [ngClass]="phaseClasses(p.status).border">
+              <button type="button" (click)="togglePhase(p.name)"
+                      class="flex w-full items-center justify-between gap-2 text-left">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="font-tech text-[9px] uppercase tracking-[0.2em] text-[var(--muted)]">
+                    {{ i + 1 }} / {{ deployment!.phases.length }}
+                  </span>
+                  <span class="text-[13px] font-medium text-[var(--text)] truncate">{{ p.label }}</span>
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                  <span class="rounded-full border px-2 py-0.5 font-tech text-[9px] uppercase tracking-[0.16em]"
+                        [ngClass]="phaseClasses(p.status).text">
+                    {{ p.status }}
+                  </span>
+                  <span *ngIf="phaseDuration(p)" class="font-tech text-[10px] text-[var(--muted)]">
+                    {{ phaseDuration(p) }}
+                  </span>
+                  <span *ngIf="p.logs || p.message"
+                        class="font-tech text-[10px] text-[var(--muted)]">
+                    {{ expandedPhases.has(p.name) ? '▾' : '▸' }}
+                  </span>
+                </div>
+              </button>
+
+              <!-- Failure message — always visible if failed -->
+              <p *ngIf="p.status === 'FAILED' && p.message"
+                 class="mt-1.5 text-[11px] leading-snug text-rose-300">
+                {{ p.message }}
+              </p>
+
+              <!-- Skipped reason -->
+              <p *ngIf="p.status === 'SKIPPED' && p.message"
+                 class="mt-1.5 text-[11px] leading-snug text-[var(--muted)]">
+                {{ p.message }}
+              </p>
+
+              <!-- Expanded logs -->
+              <pre *ngIf="expandedPhases.has(p.name) && p.logs"
+                   #logBox
+                   [attr.data-phase]="p.name"
+                   (scroll)="onLogScroll(p.name, logBox)"
+                   class="mt-2 rounded-md border border-[color:var(--panel-border)] bg-[#0a0a14] px-2.5 py-1.5 text-[10.5px] leading-relaxed text-green-300 overflow-auto max-h-56 whitespace-pre-wrap">{{ p.logs }}</pre>
+            </div>
+          </li>
+        </ol>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Footer actions -->
+  <div class="flex items-center justify-end gap-2 px-6 py-4 border-t border-[color:var(--panel-border)]">
+
+    <ng-container *ngIf="step === 'form'">
+      <button type="button" (click)="close()"
+        class="rounded-full border border-[color:var(--panel-border)] px-4 py-1.5 font-tech text-xs text-[var(--muted)] hover:text-[var(--text)]">
+        Cancelar
+      </button>
+      <button type="button" (click)="submit()" [disabled]="!canSubmit"
+        class="rounded-full bg-[color:var(--accent-3)] px-5 py-1.5 font-tech text-xs text-white disabled:opacity-40">
+        {{ isSubmitting ? 'Enviando…' : 'Desplegar' }}
+      </button>
+    </ng-container>
+
+    <ng-container *ngIf="step === 'building'">
+      <button type="button" (click)="cancelDeployment()"
+        class="rounded-full border border-rose-500/40 bg-rose-500/10 px-4 py-1.5 font-tech text-xs text-rose-400 hover:bg-rose-500/20">
+        Cancelar construcción
+      </button>
+    </ng-container>
+
+    <ng-container *ngIf="step === 'ready'">
+      <button type="button" (click)="cancelDeployment()"
+        class="rounded-full border border-[color:var(--panel-border)] px-4 py-1.5 font-tech text-xs text-[var(--muted)]">
+        Descartar
+      </button>
+      <button type="button" (click)="activate()" [disabled]="isActivating"
+        class="rounded-full bg-emerald-500 px-5 py-1.5 font-tech text-xs text-white disabled:opacity-40">
+        {{ isActivating ? 'Activando…' : 'Activar (pago confirmado)' }}
+      </button>
+    </ng-container>
+
+    <ng-container *ngIf="step === 'active'">
+      <button type="button" (click)="close()"
+        class="rounded-full bg-[color:var(--accent-3)] px-5 py-1.5 font-tech text-xs text-white">
+        Cerrar
+      </button>
+    </ng-container>
+
+    <ng-container *ngIf="step === 'failed'">
+      <button type="button" (click)="cancelDeployment()"
+        class="rounded-full border border-[color:var(--panel-border)] px-4 py-1.5 font-tech text-xs text-[var(--muted)]">
+        Cerrar
+      </button>
+    </ng-container>
+
+  </div>
+
+</div>

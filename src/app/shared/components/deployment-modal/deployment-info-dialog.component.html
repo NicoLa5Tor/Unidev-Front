@@ -1,0 +1,89 @@
+<div class="flex flex-col w-full max-w-xl rounded-[24px] border border-amber-500/30 bg-[var(--panel)] shadow-2xl overflow-hidden" style="max-height:85vh">
+
+  <!-- Header -->
+  <div class="flex items-start justify-between gap-4 px-5 pt-5 pb-3 border-b border-amber-500/20 bg-amber-500/5">
+    <div>
+      <p class="font-tech text-[10px] uppercase tracking-[0.24em] text-amber-400">Cómo preparar el repositorio</p>
+      <h3 class="mt-0.5 text-base font-semibold text-[var(--text)]">Antes de desplegar</h3>
+    </div>
+    <button type="button" (click)="close()"
+      class="rounded-full border border-[color:var(--panel-border)] px-2.5 py-0.5 font-tech text-xs text-[var(--muted)] hover:text-[var(--text)]">✕</button>
+  </div>
+
+  <!-- Body -->
+  <div class="flex-1 min-h-0 overflow-y-auto px-5 py-4 text-[12.5px] text-[var(--text)]/90 leading-relaxed">
+
+    <p class="mb-2">
+      Buscamos archivos en este orden, siempre <strong>en la raíz del repositorio</strong>
+      (al mismo nivel que el archivo <code>README.md</code>):
+    </p>
+
+    <ol class="ml-4 list-decimal space-y-3.5">
+
+      <li>
+        <strong>Primero buscamos <code>docker-compose.yml</code></strong> en la raíz.
+        <div class="mt-1 ml-1 text-[11.5px] text-[var(--muted)]">
+          Use esta opción si su aplicación es un stack completo (por ejemplo: backend +
+          frontend + base de datos, o varios microservicios). Al menos uno de los
+          servicios definidos debe exponer un puerto HTTP mediante <code>ports:</code> o
+          <code>expose:</code>.
+        </div>
+        <pre class="mt-1.5 ml-1 rounded-md bg-[#0a0a14] px-2.5 py-1.5 text-[10px] text-green-300 leading-relaxed">mi-repo/
+├── docker-compose.yml   ← aquí
+├── backend/
+└── frontend/</pre>
+      </li>
+
+      <li>
+        <strong>Si no existe el <code>docker-compose.yml</code>, buscamos un
+        <code>Dockerfile</code></strong> en la raíz y generamos el compose
+        automáticamente.
+        <div class="mt-1 ml-1 text-[11.5px] text-[var(--muted)]">
+          Para esto necesitamos que diligencie el campo
+          <strong>"Puerto del contenedor"</strong> en el formulario (el puerto que su
+          aplicación escucha dentro del contenedor, por ejemplo 3000, 8080 u 80).
+        </div>
+        <pre class="mt-1.5 ml-1 rounded-md bg-[#0a0a14] px-2.5 py-1.5 text-[10px] text-green-300 leading-relaxed">mi-repo/
+├── Dockerfile           ← aquí
+└── src/</pre>
+      </li>
+
+      <li>
+        Si no encontramos ninguno de los dos en la raíz, el despliegue
+        <span class="text-rose-400">falla con un mensaje claro</span> para que pueda corregirlo.
+      </li>
+    </ol>
+
+    <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)] mt-5 mb-1">Archivo .env</p>
+    <ul class="ml-4 list-disc space-y-1">
+      <li>Cárguelo en el campo correspondiente del formulario. <strong>No lo incluya en el repositorio.</strong></li>
+      <li>Se escribe en la raíz del repositorio como <code>.env</code> antes de construir las imágenes.</li>
+      <li>Tamaño máximo: 64 KB.</li>
+    </ul>
+
+    <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)] mt-5 mb-1">Tokens y secretos</p>
+    <ul class="ml-4 list-disc space-y-1">
+      <li>Este despliegue es <strong>público y temporal</strong>. No utilice claves de producción.</li>
+      <li>Use credenciales de prueba o entornos <em>sandbox</em>: Mercado Pago test, Stripe test keys, etc.</li>
+      <li>Si por error subió un token de producción, <strong>rótelo inmediatamente</strong> en el panel del proveedor.</li>
+      <li>El token de Git se cifra con AES-256-GCM antes de almacenarse. Use un token con permisos mínimos (solo lectura del repositorio).</li>
+    </ul>
+
+    <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)] mt-5 mb-1">Ciclo de vida</p>
+    <ul class="ml-4 list-disc space-y-1">
+      <li>Construcción → READY → Activación (tras confirmar el pago) → <strong>5 días</strong> activo.</li>
+      <li>Al expirar, el contenedor se destruye y el subdominio queda disponible nuevamente.</li>
+      <li>Puede mantener varios despliegues simultáneos, pero todos deben pertenecer al mismo proyecto.</li>
+    </ul>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="flex items-center justify-end px-5 py-3 border-t border-[color:var(--panel-border)]">
+    <button type="button" (click)="close()"
+      class="rounded-full bg-amber-500 px-4 py-1.5 font-tech text-xs text-white hover:bg-amber-400">
+      Entendido
+    </button>
+  </div>
+
+</div>

@@ -21,6 +21,7 @@ import { ProjectDetailDialogComponent } from '../../../companies/components/proj
 import { ApplicationNegotiationDialogComponent } from '../../../../shared/components/application-negotiation-dialog/application-negotiation-dialog.component';
 import { TeamChatDialogComponent } from '../../../../shared/components/team-chat-dialog/team-chat-dialog.component';
 import { CertificateModalComponent } from '../../../../shared/components/certificate-modal/certificate-modal.component';
+import { DeploymentModalComponent } from '../../../../shared/components/deployment-modal/deployment-modal.component';
 
 @Component({
   selector: 'app-student-workspace',
@@ -971,6 +972,18 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
       maxHeight: '90vh',
       panelClass: 'app-shell-dialog-panel',
       backdropClass: 'app-shell-dialog-backdrop'
+    });
+  }
+
+  openDeploymentModal(applicationId: number): void {
+    this.dialog.open(DeploymentModalComponent, {
+      width: '720px',
+      maxWidth: '96vw',
+      maxHeight: '92vh',
+      panelClass: 'app-shell-dialog-panel',
+      backdropClass: 'app-shell-dialog-backdrop',
+      disableClose: false,
+      data: { applicationId }
     });
   }
 }

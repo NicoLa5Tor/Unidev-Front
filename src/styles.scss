@@ -212,6 +212,17 @@ body.preloader-active .public-header-shell {
   backdrop-filter: blur(12px);
 }
 
+// Ensure ui-toast-stack always wins against Angular CDK overlays (default z-index 1000).
+// The :host rule in the component sets z-index 10000, this guards against any parent
+// stacking context limiting it.
+app-ui-toast-stack {
+  position: fixed !important;
+  top: 1rem !important;
+  right: 1rem !important;
+  z-index: 10000 !important;
+  pointer-events: none;
+}
+
 .app-status-success {
   border-color: var(--status-success-border) !important;
   background: var(--status-success-bg) !important;

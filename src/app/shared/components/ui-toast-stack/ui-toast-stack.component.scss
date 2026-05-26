@@ -2,7 +2,7 @@
   position: fixed;
   top: 1rem;
   right: 1rem;
-  z-index: 120;
+  z-index: 10000; // Above Angular Material CDK overlay (default 1000) so toasts surface in front of dialogs
   pointer-events: none;
 }
 
