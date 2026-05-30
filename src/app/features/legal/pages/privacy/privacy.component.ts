@@ -15,7 +15,7 @@ export class PrivacyComponent {
   readonly effectiveDate = '23 de mayo de 2026';
 
   readonly sections = [
-    { id: 'responsable',    label: '1. Responsable del tratamiento' },
+    { id: 'responsable',    label: '1. Responsables del tratamiento' },
     { id: 'datos',          label: '2. Datos que se recopilan' },
     { id: 'finalidad',      label: '3. Finalidad del tratamiento' },
     { id: 'base-legal',     label: '4. Base legal' },

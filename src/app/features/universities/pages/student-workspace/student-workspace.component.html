@@ -14,12 +14,17 @@
        TAB: PROYECTOS PUBLICADOS
   ══════════════════════════════════ -->
   <section *ngIf="activeTab === 'projects'">
-    <div class="mb-6">
-      <h2 class="font-cyber text-lg font-bold text-[var(--text)]">Proyectos publicados</h2>
-      <p class="mt-1 text-sm text-[var(--muted)]">Explora proyectos activos de empresas y postúlate.</p>
+    <div class="mb-6 flex items-start justify-between gap-3">
+      <div>
+        <h2 class="font-cyber text-lg font-bold text-[var(--text)]">Proyectos publicados</h2>
+        <p class="mt-1 text-sm text-[var(--muted)]">Explora proyectos activos de empresas y postúlate.</p>
+      </div>
+      <div *ngIf="isLoadingProjects && publishedProjects.length > 0"
+        class="h-4 w-4 animate-spin rounded-full border-2 border-[color:var(--accent-1)] border-t-transparent shrink-0 mt-1"
+        aria-label="Actualizando"></div>
     </div>
 
-    <div *ngIf="isLoadingProjects" class="flex items-center justify-center py-20">
+    <div *ngIf="isLoadingProjects && publishedProjects.length === 0" class="flex items-center justify-center py-20">
       <div class="h-8 w-8 animate-spin rounded-full border-2 border-[color:var(--accent-1)] border-t-transparent"></div>
     </div>
 
@@ -31,7 +36,7 @@
       <p class="text-xs text-[var(--muted)]">Cuando una empresa publique un proyecto, aparecerá aquí.</p>
     </div>
 
-    <div *ngIf="!isLoadingProjects && publishedProjects.length > 0" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div *ngIf="publishedProjects.length > 0" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <article *ngFor="let project of publishedProjects"
         class="flex cursor-pointer flex-col gap-4 rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel-2)]/70 p-5 shadow-[var(--shadow)] transition-colors hover:border-[color:var(--accent-1)]/40"
         (click)="openProjectDetail(project)">
@@ -89,12 +94,17 @@
        TAB: MIS POSTULACIONES
   ══════════════════════════════════ -->
   <section *ngIf="activeTab === 'applications'">
-    <div class="mb-6">
-      <h2 class="font-cyber text-lg font-bold text-[var(--text)]">Mis postulaciones</h2>
-      <p class="mt-1 text-sm text-[var(--muted)]">Historial de proyectos a los que te has postulado.</p>
+    <div class="mb-6 flex items-start justify-between gap-3">
+      <div>
+        <h2 class="font-cyber text-lg font-bold text-[var(--text)]">Mis postulaciones</h2>
+        <p class="mt-1 text-sm text-[var(--muted)]">Historial de proyectos a los que te has postulado.</p>
+      </div>
+      <div *ngIf="isLoadingApplications && myApplications.length > 0"
+        class="h-4 w-4 animate-spin rounded-full border-2 border-[color:var(--accent-2)] border-t-transparent shrink-0 mt-1"
+        aria-label="Actualizando"></div>
     </div>
 
-    <div *ngIf="isLoadingApplications" class="flex items-center justify-center py-16">
+    <div *ngIf="isLoadingApplications && myApplications.length === 0" class="flex items-center justify-center py-16">
       <div class="h-8 w-8 animate-spin rounded-full border-2 border-[color:var(--accent-2)] border-t-transparent"></div>
     </div>
 
@@ -106,7 +116,7 @@
       <p class="text-xs text-[var(--muted)]">Explora los proyectos y envía tu postulación.</p>
     </div>
 
-    <div *ngIf="!isLoadingApplications && myApplications.length > 0" class="flex flex-col gap-3">
+    <div *ngIf="myApplications.length > 0" class="flex flex-col gap-3">
       <article *ngFor="let app of myApplications"
         class="rounded-3xl border bg-[var(--panel-2)]/70 p-5 shadow-[var(--shadow)] transition-colors"
         [ngClass]="app.status === 'NEGOTIATING'
@@ -266,7 +276,13 @@
       </div>
     </div>
 
-    <div *ngIf="isLoadingTeams" class="flex items-center justify-center py-16">
+    <div *ngIf="isLoadingTeams && myTeams.length > 0"
+      class="mb-4 flex items-center gap-2 text-xs text-[var(--muted)]">
+      <div class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[color:var(--accent-3)] border-t-transparent"></div>
+      <span>Actualizando…</span>
+    </div>
+
+    <div *ngIf="isLoadingTeams && myTeams.length === 0" class="flex items-center justify-center py-16">
       <div class="h-8 w-8 animate-spin rounded-full border-2 border-[color:var(--accent-3)] border-t-transparent"></div>
     </div>
 
@@ -278,7 +294,7 @@
       <p class="text-xs text-[var(--muted)]">Crea un equipo o explora los equipos de tu universidad para unirte.</p>
     </div>
 
-    <div *ngIf="!isLoadingTeams && myTeams.length > 0" class="flex flex-col gap-5">
+    <div *ngIf="myTeams.length > 0" class="flex flex-col gap-5">
       <article *ngFor="let team of myTeams" class="rounded-3xl border border-[color:var(--panel-border)] bg-[var(--panel-2)]/70 p-5 shadow-[var(--shadow)]">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div class="flex-1 min-w-0">
@@ -451,13 +467,20 @@
       </button>
     </div>
 
-    <!-- Loading -->
-    <div *ngIf="isLoadingRanking" class="flex justify-center py-16">
+    <!-- Loading (solo cuando ambos rankings vacíos = primera carga) -->
+    <div *ngIf="isLoadingRanking && userRanking.length === 0 && teamRanking.length === 0" class="flex justify-center py-16">
       <div class="w-8 h-8 border-2 border-[var(--accent-1)] border-t-transparent rounded-full animate-spin"></div>
     </div>
 
+    <!-- Refresh sutil cuando hay data -->
+    <div *ngIf="isLoadingRanking && (userRanking.length > 0 || teamRanking.length > 0)"
+      class="mb-4 flex items-center gap-2 text-xs text-[var(--muted)]">
+      <div class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[color:var(--accent-1)] border-t-transparent"></div>
+      <span>Actualizando…</span>
+    </div>
+
     <!-- Desarrolladores -->
-    <div *ngIf="!isLoadingRanking && rankingTab === 'users'" class="flex flex-col gap-3">
+    <div *ngIf="rankingTab === 'users'" class="flex flex-col gap-3">
       <div *ngIf="userRanking.length === 0" class="flex flex-col items-center justify-center py-16 gap-3">
         <span class="text-4xl opacity-40">🏆</span>
         <p class="text-[var(--muted)] text-sm">Aún no hay calificaciones de desarrolladores.</p>
@@ -497,7 +520,7 @@
     </div>
 
     <!-- Equipos -->
-    <div *ngIf="!isLoadingRanking && rankingTab === 'teams'" class="flex flex-col gap-3">
+    <div *ngIf="rankingTab === 'teams'" class="flex flex-col gap-3">
       <div *ngIf="teamRanking.length === 0" class="flex flex-col items-center justify-center py-16 gap-3">
         <span class="text-4xl opacity-40">🏆</span>
         <p class="text-[var(--muted)] text-sm">Aún no hay calificaciones de equipos.</p>

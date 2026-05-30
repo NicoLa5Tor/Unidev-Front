@@ -1602,11 +1602,17 @@
               </button>
             </div>
 
-            <div *ngIf="isLoadingRanking" class="flex justify-center py-16">
+            <div *ngIf="isLoadingRanking && userRanking.length === 0 && teamRanking.length === 0" class="flex justify-center py-16">
               <div class="w-8 h-8 border-2 border-[var(--accent-1)] border-t-transparent rounded-full animate-spin"></div>
             </div>
 
-            <div *ngIf="!isLoadingRanking && rankingTab === 'users'" class="flex flex-col gap-3">
+            <div *ngIf="isLoadingRanking && (userRanking.length > 0 || teamRanking.length > 0)"
+              class="mb-4 flex items-center gap-2 text-xs text-[var(--muted)]">
+              <div class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[color:var(--accent-1)] border-t-transparent"></div>
+              <span>Actualizando…</span>
+            </div>
+
+            <div *ngIf="rankingTab === 'users'" class="flex flex-col gap-3">
               <div *ngIf="userRanking.length === 0" class="flex flex-col items-center justify-center py-16 gap-3">
                 <span class="text-4xl opacity-40">🏆</span>
                 <p class="text-[var(--muted)] text-sm">Aún no hay calificaciones de desarrolladores.</p>
@@ -1636,7 +1642,7 @@
               </article>
             </div>
 
-            <div *ngIf="!isLoadingRanking && rankingTab === 'teams'" class="flex flex-col gap-3">
+            <div *ngIf="rankingTab === 'teams'" class="flex flex-col gap-3">
               <div *ngIf="teamRanking.length === 0" class="flex flex-col items-center justify-center py-16 gap-3">
                 <span class="text-4xl opacity-40">🏆</span>
                 <p class="text-[var(--muted)] text-sm">Aún no hay calificaciones de equipos.</p>

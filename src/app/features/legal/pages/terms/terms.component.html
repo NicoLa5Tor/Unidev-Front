@@ -21,6 +21,20 @@
     </div>
   </header>
 
+  <!-- Chapter switcher -->
+  <nav class="tc__chapters-nav" aria-label="Capítulos">
+    <button
+      *ngFor="let c of chapters"
+      type="button"
+      class="tc__chapter-tab"
+      [class.tc__chapter-tab--active]="activeChapter === c.num"
+      (click)="setChapter(c.num)"
+    >
+      <span class="tc__chapter-tab-roman">{{ c.roman }}</span>
+      <span class="tc__chapter-tab-title">{{ c.title }}</span>
+    </button>
+  </nav>
+
   <!-- Body -->
   <div class="tc__body">
 
@@ -29,393 +43,1031 @@
       <p class="tc__toc-label">Contenido</p>
       <nav>
         <button
-          *ngFor="let s of sections"
+          *ngFor="let s of activeChapterData?.sections"
           type="button"
           class="tc__toc-item"
           (click)="scrollTo(s.id)"
         >{{ s.label }}</button>
+        <p *ngIf="!activeChapterData?.sections?.length" class="tc__toc-empty">Sin secciones aún</p>
       </nav>
     </aside>
 
     <!-- Main content -->
     <main class="tc__content">
 
-      <!-- 1 -->
-      <section id="identificacion" class="tc__section">
-        <h2 class="tc__section-title">1. Identificación del titular</h2>
-        <p>La plataforma UniDev, disponible en <strong>unidev.site</strong> (en adelante, "la Plataforma"), es operada por:</p>
+      <!-- CAPÍTULO I -->
+      <ng-container *ngIf="activeChapter === 1">
+      <section id="marco-normativo" class="tc__section">
+        <h2 class="tc__section-title">1. Marco normativo aplicable</h2>
+        <p>Los presentes Términos y Condiciones se interpretan conforme a la legislación colombiana vigente, especialmente las normas sobre comercio electrónico, mensajes de datos, protección al consumidor, protección de datos personales, derecho de autor, contratación civil y comercial, contratación estatal cuando participen entidades públicas, régimen laboral y seguridad social cuando corresponda.</p>
+        <p>La Ley 527 de 1999 reconoce efectos jurídicos a los mensajes de datos, comercio electrónico y firmas digitales; el Decreto 2364 de 2012 reglamenta la firma electrónica. Por ello, la aceptación digital de estos términos, las órdenes de servicio, las propuestas, los mensajes, los soportes de entrega, las aprobaciones y las comunicaciones electrónicas tendrán validez probatoria, siempre que permitan identificar al usuario y conservar la información para consulta posterior.</p>
+        <p>La Ley 1480 de 2011, el Decreto 1499 de 2014, el Decreto 587 de 2016 y la Ley 2439 de 2024 regulan aspectos de protección al consumidor, ventas a distancia, comercio electrónico, derecho de retracto, reversión del pago, deber de información y devolución de dinero cuando proceda.</p>
+        <p>La Ley 1581 de 2012 y el Decreto 1377 de 2013 regulan el tratamiento de datos personales en Colombia, incluyendo autorización, finalidades, derechos de los titulares, deberes del responsable y canales para consultas o reclamos.</p>
+        <p>La Ley 23 de 1982, la Decisión Andina 351 de 1993, la Ley 1915 de 2018 y las reglas sobre cesión de derechos patrimoniales de autor son referentes centrales para regular software, diseños, contenidos digitales, recursos educativos, piezas gráficas, código fuente, documentación técnica y demás obras creadas por los estudiantes.</p>
+        <p>Cuando la empresa usuaria sea una entidad pública, la contratación, pago, ejecución y supervisión deberán sujetarse al régimen que le resulte aplicable, incluyendo Ley 80 de 1993, Ley 1150 de 2007, Decreto 1082 de 2015, reglas presupuestales, SECOP y manuales internos de contratación. UNIDEV no reemplaza ni sustituye el procedimiento contractual público que corresponda.</p>
+      </section>
+
+      <div class="tc__chapter">
+        <p class="tc__chapter-eyebrow">CAPÍTULO I</p>
+        <h2 class="tc__chapter-title">DISPOSICIONES GENERALES DE LA PLATAFORMA</h2>
+      </div>
+
+      <section id="responsables" class="tc__section">
+        <h2 class="tc__section-title">Responsables de la plataforma</h2>
+        <p>UNIDEV es operada de forma conjunta y solidaria por las siguientes personas, quienes actúan como responsables del tratamiento de datos y de la operación de la plataforma:</p>
         <div class="tc__info-block">
-          <div class="tc__info-row"><span>Titular</span><span>Nicolás Rodríguez Torres</span></div>
+          <div class="tc__info-row"><span>Responsable</span><span>Nicolás Rodríguez Torres</span></div>
           <div class="tc__info-row"><span>Cédula</span><span>1193602390</span></div>
           <div class="tc__info-row"><span>Correo</span><span>nicolas&#64;unidev.site</span></div>
           <div class="tc__info-row"><span>Domicilio</span><span>Facatativá, Cundinamarca, Colombia</span></div>
         </div>
-        <p>Para efectos de este documento, el titular será referido como <strong>"UniDev"</strong> o <strong>"el Operador"</strong>.</p>
-      </section>
-
-      <!-- 2 -->
-      <section id="definiciones" class="tc__section">
-        <h2 class="tc__section-title">2. Definiciones</h2>
-        <dl class="tc__defs">
-          <div class="tc__def"><dt>Plataforma</dt><dd>El sitio web y servicios disponibles en unidev.site, incluyendo todas sus funcionalidades.</dd></div>
-          <div class="tc__def"><dt>Usuario</dt><dd>Toda persona natural o jurídica que acceda, se registre o haga uso de la Plataforma en cualquiera de sus roles.</dd></div>
-          <div class="tc__def"><dt>Organización</dt><dd>Entidad registrada en la Plataforma que puede ser una Empresa o una Universidad.</dd></div>
-          <div class="tc__def"><dt>Empresa</dt><dd>Organización registrada con tipo EMPRESA que contrata servicios de desarrollo a través de la Plataforma.</dd></div>
-          <div class="tc__def"><dt>Usuario Empresa</dt><dd>Persona natural vinculada a una Empresa registrada, habilitada por ella para operar dentro de la Plataforma en su nombre.</dd></div>
-          <div class="tc__def"><dt>Universidad</dt><dd>Organización registrada con tipo UNIVERSIDAD que habilita el acceso de sus usuarios académicos a la Plataforma.</dd></div>
-          <div class="tc__def"><dt>Usuario Universidad</dt><dd>Persona natural vinculada a una Universidad registrada, habilitada por ella para participar en proyectos como desarrollador o estudiante.</dd></div>
-          <div class="tc__def"><dt>Admin de Sede</dt><dd>Usuario con permisos administrativos sobre un campus o sede específica dentro de una Universidad.</dd></div>
-          <div class="tc__def"><dt>Tutor de Sede</dt><dd>Usuario con rol de acompañamiento académico dentro de un campus universitario, responsable del seguimiento de los Usuarios Universidad bajo su cargo.</dd></div>
-          <div class="tc__def"><dt>Administrador</dt><dd>Usuario con acceso total a la administración de la Plataforma, gestionado exclusivamente por UniDev.</dd></div>
-          <div class="tc__def"><dt>Proyecto</dt><dd>La tarea, trabajo o encargo acordado entre una Empresa y un ejecutor a través de la Plataforma.</dd></div>
-          <div class="tc__def"><dt>Entregable</dt><dd>El producto, código, módulo, documento o resultado final presentado como cumplimiento del Proyecto.</dd></div>
-          <div class="tc__def"><dt>Comisión</dt><dd>El porcentaje o valor fijo que UniDev descuenta al ejecutor del Proyecto sobre su valor, según la tabla de tramos vigente.</dd></div>
-          <div class="tc__def"><dt>Fee adicional</dt><dd>El cargo porcentual que UniDev cobra a la Empresa contratante sobre el valor del Proyecto.</dd></div>
-          <div class="tc__def"><dt>Take rate</dt><dd>La suma de la Comisión y el Fee adicional que constituye el ingreso total de UniDev por la intermediación.</dd></div>
-          <div class="tc__def"><dt>Tramo</dt><dd>Rango de valor del Proyecto que determina la estructura de cobro aplicable.</dd></div>
-          <div class="tc__def"><dt>Escrow</dt><dd>Retención temporal de fondos gestionada a través de MercadoPago, desde el pago hasta su liberación o reembolso.</dd></div>
-        </dl>
-      </section>
-
-      <!-- 3 -->
-      <section id="roles" class="tc__section">
-        <h2 class="tc__section-title">3. Roles y acceso a la Plataforma</h2>
-
-        <h3 class="tc__subsection-title">3.1 Roles disponibles</h3>
-        <p>La Plataforma contempla los siguientes siete (7) roles:</p>
-        <div class="tc__table-wrap">
-          <table class="tc__table">
-            <thead><tr><th>Rol</th><th>Descripción</th></tr></thead>
-            <tbody>
-              <tr><td>Administrador</td><td>Administración total de la Plataforma. Exclusivo de UniDev.</td></tr>
-              <tr><td>Empresa</td><td>Organización contratante de servicios de desarrollo.</td></tr>
-              <tr><td>Usuarios de Empresa</td><td>Usuario interno habilitado por una Empresa.</td></tr>
-              <tr><td>Universidad</td><td>Institución universitaria que habilita a sus usuarios académicos.</td></tr>
-              <tr><td>Usuarios de Universidad</td><td>Usuario académico habilitado por una Universidad.</td></tr>
-              <tr><td>Admin de Sede</td><td>Administrador de un campus o sede universitaria.</td></tr>
-              <tr><td>Tutor de Sede</td><td>Rol de acompañamiento académico en un campus.</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h3 class="tc__subsection-title">3.2 Acceso condicionado</h3>
-        <p>Los roles Usuarios de Empresa, Usuarios de Universidad, Admin de Sede y Tutor no pueden registrarse de forma independiente. Su acceso está subordinado al registro activo de la Organización a la que pertenecen. Si la Organización es inhabilitada, todos sus usuarios perderán el acceso de forma automática.</p>
-
-        <h3 class="tc__subsection-title">3.3 Responsabilidad de la Organización sobre sus usuarios</h3>
-        <p>Al registrarse, toda Organización:</p>
-        <ul class="tc__list">
-          <li>Garantiza que los usuarios que habilita están efectivamente vinculados a ella.</li>
-          <li>Acepta estos Términos en nombre de sus usuarios internos en lo que les sea aplicable.</li>
-          <li>Asume responsabilidad solidaria por el uso que sus usuarios hagan de la Plataforma.</li>
-          <li>Se compromete a notificar a UniDev cuando un usuario deje de estar vinculado.</li>
-        </ul>
-
-        <h3 class="tc__subsection-title">3.4 Responsabilidad del Tutor de Sede</h3>
-        <p>El Tutor de Sede asume responsabilidad de acompañamiento sobre los Usuarios Universidad bajo su cargo. UniDev no es responsable por el incumplimiento de proyectos derivado de la falta de seguimiento del Tutor, siendo esta responsabilidad atribuible a la Universidad que lo designó.</p>
-
-        <h3 class="tc__subsection-title">3.5 Requisitos generales de registro</h3>
-        <ul class="tc__list">
-          <li>Proporcionar información veraz, completa y actualizada.</li>
-          <li>Contar con un correo electrónico válido y activo.</li>
-          <li>Aceptar expresamente los presentes Términos y Condiciones y la Política de Privacidad vigente.</li>
-          <li>Ser mayor de 18 años.</li>
-          <li>En el caso de Empresas y Universidades: contar con representación legal válida.</li>
-        </ul>
-
-        <h3 class="tc__subsection-title">3.6 Unicidad de la cuenta</h3>
-        <p>Cada persona natural podrá registrar únicamente una cuenta. Cada Organización podrá registrar únicamente una cuenta. La creación de cuentas duplicadas o la suplantación de identidad dará lugar a la suspensión inmediata de todas las cuentas involucradas.</p>
-
-        <h3 class="tc__subsection-title">3.7 Responsabilidad sobre credenciales</h3>
-        <p>El Usuario es el único responsable de mantener la confidencialidad de sus credenciales de acceso. Cualquier actividad realizada desde su cuenta será de su exclusiva responsabilidad. Ante sospechas de acceso no autorizado, debe notificar de inmediato a <strong>nicolas&#64;unidev.site</strong>.</p>
-      </section>
-
-      <!-- 4 -->
-      <section id="intermediacion" class="tc__section">
-        <h2 class="tc__section-title">4. Modelo de intermediación</h2>
-
-        <h3 class="tc__subsection-title">4.1 Naturaleza de UniDev</h3>
-        <p>UniDev actúa exclusivamente como plataforma de intermediación tecnológica. En ningún caso UniDev tiene la condición de:</p>
-        <ul class="tc__list">
-          <li>Empleador de ningún Usuario.</li>
-          <li>Entidad financiera, cooperativa de crédito o captadora de recursos del público.</li>
-          <li>Agencia de empleo o bolsa de trabajo.</li>
-          <li>Garante de los resultados o calidad del trabajo entregado.</li>
-        </ul>
-
-        <h3 class="tc__subsection-title">4.2 Independencia de las partes</h3>
-        <p>La relación comercial se establece directamente entre la Empresa y el ejecutor del Proyecto. UniDev no es parte de ese contrato. El ejecutor actúa como contratista independiente y es el único responsable del cumplimiento de sus obligaciones tributarias, de seguridad social y de cualquier otra obligación legal derivada de su actividad.</p>
-
-        <h3 class="tc__subsection-title">4.3 Procesamiento de pagos</h3>
-        <p>Los pagos son procesados a través de MercadoPago, tercero autorizado y regulado. UniDev no almacena datos financieros de los Usuarios. El procesamiento está sujeto adicionalmente a los Términos y Condiciones de MercadoPago. Las cuentas de MercadoPago vinculadas a la Plataforma son responsabilidad exclusiva de cada Usuario.</p>
-      </section>
-
-      <!-- 5 -->
-      <section id="comisiones" class="tc__section">
-        <h2 class="tc__section-title">5. Comisiones y pagos</h2>
-
-        <h3 class="tc__subsection-title">5.1 Estructura de cobro</h3>
-        <div class="tc__table-wrap">
-          <table class="tc__table">
-            <thead>
-              <tr>
-                <th>Tramo</th>
-                <th>Valor del Proyecto (COP)</th>
-                <th>Comisión al ejecutor</th>
-                <th>Mínimo fijo (COP)</th>
-                <th>Fee Empresa</th>
-                <th>Take rate</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>1</td><td>$60.000 – $199.999</td><td>6%</td><td>$6.000</td><td>4%</td><td>10%</td></tr>
-              <tr><td>2</td><td>$200.000 – $499.999</td><td>8%</td><td>$12.000</td><td>5%</td><td>13%</td></tr>
-              <tr><td>3</td><td>$500.000 – $1.499.999</td><td>10%</td><td>$25.000</td><td>5%</td><td>15%</td></tr>
-              <tr><td>4</td><td>$1.500.000 en adelante</td><td>12%</td><td>$100.000</td><td>5%</td><td>17%</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="tc__note">UniDev se reserva el derecho de actualizar esta tabla con previo aviso de al menos 15 días calendario.</p>
-
-        <h3 class="tc__subsection-title">5.2 Ciclo de vida del pago</h3>
-        <div class="tc__status-list">
-          <div class="tc__status"><span class="tc__status-dot tc__status-dot--pending"></span><div><strong>Pendiente de pago:</strong> El Proyecto fue aceptado pero la Empresa aún no ha realizado el pago.</div></div>
-          <div class="tc__status"><span class="tc__status-dot tc__status-dot--held"></span><div><strong>Fondos retenidos (Escrow):</strong> El pago fue recibido y los fondos están retenidos hasta la aprobación del Entregable.</div></div>
-          <div class="tc__status"><span class="tc__status-dot tc__status-dot--released"></span><div><strong>Liberado:</strong> El Entregable fue aprobado y los fondos fueron transferidos al ejecutor, descontada la Comisión.</div></div>
-          <div class="tc__status"><span class="tc__status-dot tc__status-dot--refunded"></span><div><strong>Reembolsado:</strong> Se ordenó la devolución de fondos a la Empresa tras una disputa resuelta a su favor.</div></div>
-          <div class="tc__status"><span class="tc__status-dot tc__status-dot--failed"></span><div><strong>Fallido:</strong> El pago no pudo procesarse o fue rechazado por MercadoPago.</div></div>
-        </div>
-
-        <h3 class="tc__subsection-title">5.3 Cobro al ejecutor</h3>
-        <p>La Comisión se descuenta automáticamente del monto liberado al ejecutor en el momento en que el pago es liberado. El mínimo fijo aplica cuando el porcentaje calculado resulte inferior a dicho valor.</p>
-
-        <h3 class="tc__subsection-title">5.4 Cobro a la Empresa</h3>
-        <p>El Fee adicional se cobra a la Empresa sobre el valor total del Proyecto al momento de realizar el pago inicial. Este cargo no es reembolsable salvo en los casos expresamente definidos en la cláusula 8.</p>
-
-        <h3 class="tc__subsection-title">5.5 Tiempos de transferencia</h3>
-        <p>Una vez liberado el pago, UniDev gestionará la transferencia al ejecutor en un plazo máximo de <strong>3 días hábiles</strong>, sujeto a los tiempos de procesamiento de MercadoPago.</p>
-
-        <h3 class="tc__subsection-title">5.6 Impuestos</h3>
-        <p>Cada parte es responsable de declarar y pagar los impuestos que correspondan a sus propios ingresos. UniDev no retiene ni declara impuestos a nombre de los Usuarios.</p>
-      </section>
-
-      <!-- 6 -->
-      <section id="propiedad" class="tc__section">
-        <h2 class="tc__section-title">6. Propiedad intelectual del código</h2>
-
-        <h3 class="tc__subsection-title">6.1 Titularidad del Entregable</h3>
-        <p>Todo código, módulo, componente, documentación o cualquier otro producto resultante de la ejecución de un Proyecto es de propiedad exclusiva de la Empresa contratante, desde el momento en que el pago es liberado.</p>
-
-        <h3 class="tc__subsection-title">6.2 Cesión de derechos por parte del ejecutor</h3>
-        <p>Al aceptar un Proyecto, el ejecutor cede irrevocablemente a la Empresa todos los derechos patrimoniales de autor sobre el Entregable, incluyendo los derechos de reproducción, distribución, modificación, comunicación pública y transformación, de conformidad con la Ley 23 de 1982 y normas concordantes.</p>
-
-        <h3 class="tc__subsection-title">6.3 Restricciones al ejecutor</h3>
-        <p>El ejecutor no podrá:</p>
-        <ul class="tc__list">
-          <li>Reutilizar, distribuir, sublicenciar o publicar el código del Entregable en proyectos externos, repositorios públicos o de terceros sin autorización expresa y escrita de la Empresa.</li>
-          <li>Reclamar derechos morales o patrimoniales sobre el Entregable una vez efectuado el pago.</li>
-          <li>Retener el código o cualquier parte del Entregable como mecanismo de presión ante disputas.</li>
-        </ul>
-
-        <h3 class="tc__subsection-title">6.4 Derechos de UniDev</h3>
-        <p>UniDev no adquiere ningún derecho sobre el código producido por los usuarios dentro de la Plataforma.</p>
-      </section>
-
-      <!-- 7 -->
-      <section id="entrega" class="tc__section">
-        <h2 class="tc__section-title">7. Proceso de entrega y aprobación</h2>
-
-        <h3 class="tc__subsection-title">7.1 Entrega del Proyecto</h3>
-        <p>El ejecutor deberá entregar el Entregable a través de los mecanismos habilitados en la Plataforma dentro del plazo acordado con la Empresa al momento de aceptar el Proyecto.</p>
-
-        <h3 class="tc__subsection-title">7.2 Revisión por parte de la Empresa</h3>
-        <p>La Empresa tendrá un plazo de <strong>5 días hábiles</strong> contados desde la notificación de entrega para:</p>
-        <ul class="tc__list">
-          <li>Aprobar el Entregable, lo que liberará el pago al ejecutor.</li>
-          <li>Rechazarlo con justificación escrita detallada, lo que iniciará el proceso de disputa definido en la cláusula 8.</li>
-        </ul>
-
-        <h3 class="tc__subsection-title">7.3 Aprobación tácita</h3>
-        <p>Si la Empresa no manifiesta ninguna decisión dentro del plazo establecido, el Entregable se considerará aprobado de forma tácita y el pago será liberado automáticamente al ejecutor.</p>
-
-        <h3 class="tc__subsection-title">7.4 Modificaciones posteriores</h3>
-        <p>Cualquier solicitud de ajuste o modificación posterior a la aprobación deberá ser tratada como un nuevo Proyecto dentro de la Plataforma.</p>
-      </section>
-
-      <!-- 8 -->
-      <section id="disputas" class="tc__section">
-        <h2 class="tc__section-title">8. Política de disputas y devoluciones</h2>
-
-        <h3 class="tc__subsection-title">8.1 Apertura de disputa</h3>
-        <p>Solo la Empresa podrá abrir una disputa, dentro del plazo de revisión establecido en la cláusula 7.2. Los fondos permanecerán retenidos durante el proceso.</p>
-
-        <h3 class="tc__subsection-title">8.2 Proceso de resolución</h3>
-        <p>UniDev tendrá un plazo de <strong>5 días hábiles</strong> para analizar la disputa y emitir una decisión. Durante este período ambas partes podrán presentar evidencia (capturas de pantalla, conversaciones, especificaciones del Proyecto, etc.).</p>
-
-        <h3 class="tc__subsection-title">8.3 Resultado de la disputa</h3>
-        <ul class="tc__list">
-          <li>Si UniDev falla a favor del ejecutor, los fondos retenidos serán liberados descontando la Comisión correspondiente.</li>
-          <li>Si UniDev falla a favor de la Empresa, se gestionará el reembolso. Los costos de procesamiento de MercadoPago no son reembolsables y serán asumidos por la Empresa.</li>
-        </ul>
-
-        <h3 class="tc__subsection-title">8.4 Decisión final</h3>
-        <p>La decisión de UniDev en el proceso de disputa es final e inapelable dentro de la Plataforma, sin perjuicio del derecho de las partes a acudir a instancias legales ordinarias.</p>
-      </section>
-
-      <!-- 9 -->
-      <section id="responsabilidad" class="tc__section">
-        <h2 class="tc__section-title">9. Limitación de responsabilidad</h2>
-
-        <h3 class="tc__subsection-title">9.1 Calidad del trabajo</h3>
-        <p>UniDev no garantiza la calidad, idoneidad, exactitud ni utilidad del trabajo entregado. La Empresa es la única responsable de verificar y validar los Entregables antes de su aprobación.</p>
-
-        <h3 class="tc__subsection-title">9.2 Disponibilidad de la Plataforma</h3>
-        <p>UniDev no garantiza la disponibilidad ininterrumpida de la Plataforma y no será responsable por interrupciones, fallas técnicas o pérdidas de datos derivadas de causas fuera de su control razonable.</p>
-
-        <h3 class="tc__subsection-title">9.3 Conducta de los Usuarios</h3>
-        <p>UniDev no será responsable por los actos, omisiones o incumplimientos de los Usuarios entre sí.</p>
-
-        <h3 class="tc__subsection-title">9.4 Pérdidas indirectas</h3>
-        <p>En ningún caso UniDev será responsable por lucro cesante, pérdida de oportunidad de negocio, daño a la reputación, pérdidas de datos o cualquier otro daño indirecto, incidental o consecuencial.</p>
-
-        <h3 class="tc__subsection-title">9.5 Límite máximo de responsabilidad</h3>
-        <p>La responsabilidad máxima de UniDev ante cualquier reclamación no excederá el valor del último pago procesado en la cuenta del Usuario afectado.</p>
-      </section>
-
-      <!-- 10 -->
-      <section id="uso" class="tc__section">
-        <h2 class="tc__section-title">10. Uso aceptable</h2>
-        <p>El Usuario se compromete a no utilizar la Plataforma para:</p>
-        <ul class="tc__list">
-          <li>Subir, compartir o ejecutar código malicioso, virus, malware o cualquier software dañino.</li>
-          <li>Suplantar la identidad de otra persona natural o jurídica.</li>
-          <li>Publicar o ejecutar Proyectos relacionados con actividades ilícitas conforme a la legislación colombiana.</li>
-          <li>Evadir el sistema de pagos de la Plataforma contactando directamente a la contraparte para realizar pagos fuera de UniDev, lo cual constituye una violación grave de estos Términos.</li>
-          <li>Acosar, amenazar o intimidar a otros Usuarios.</li>
-          <li>Publicar información falsa, engañosa o fraudulenta en perfiles o Proyectos.</li>
-        </ul>
-        <p class="tc__warning">El incumplimiento de cualquiera de estas restricciones dará lugar a la suspensión o eliminación inmediata de la cuenta, sin perjuicio de las acciones legales que procedan.</p>
-      </section>
-
-      <!-- 11 -->
-      <section id="terminos-organizaciones" class="tc__section">
-        <h2 class="tc__section-title">11. Términos y Condiciones de las Empresas</h2>
-
-        <h3 class="tc__subsection-title">11.1 Facultad de las Empresas</h3>
-        <p>Las Empresas registradas en la Plataforma podrán publicar sus propios Términos y Condiciones internos, los cuales serán presentados a los usuarios vinculados a ellas para su aceptación expresa antes de operar dentro de dicha empresa.</p>
-
-        <h3 class="tc__subsection-title">11.2 Aceptación en cascada</h3>
-        <p>Al vincularse a una Empresa dentro de la Plataforma, el usuario deberá aceptar tanto los presentes Términos y Condiciones de UniDev como los términos propios de dicha Empresa. Ambas aceptaciones quedarán registradas en la Plataforma con fecha y versión.</p>
-
-        <h3 class="tc__subsection-title">11.3 Límites de los términos de las Empresas</h3>
-        <p>Los Términos y Condiciones propios de cada Empresa no podrán:</p>
-        <ul class="tc__list">
-          <li>Contradecir ni reemplazar ninguna cláusula de los presentes Términos y Condiciones de UniDev.</li>
-          <li>Eximir a la Empresa de sus responsabilidades frente a UniDev o frente a sus usuarios.</li>
-          <li>Imponer al usuario obligaciones que vulneren sus derechos como consumidor o titular de datos personales según la legislación colombiana.</li>
-        </ul>
-        <p>En caso de contradicción entre los términos de una Empresa y los presentes Términos de UniDev, prevalecerán siempre los de UniDev.</p>
-
-        <h3 class="tc__subsection-title">11.4 Responsabilidad sobre los términos de las Empresas</h3>
-        <p>UniDev no es responsable del contenido de los Términos y Condiciones publicados por las Empresas. Cada Empresa es la única responsable de la legalidad, claridad y cumplimiento de sus propios términos frente a sus usuarios.</p>
-
-        <h3 class="tc__subsection-title">11.5 Actualización de términos por parte de las Empresas</h3>
-        <p>Cuando una Empresa actualice sus Términos y Condiciones, deberá notificar a sus usuarios con al menos <strong>10 días calendario</strong> de anticipación. UniDev proveerá los mecanismos técnicos para gestionar dicha notificación y re-aceptación dentro de la Plataforma.</p>
-      </section>
-
-      <!-- 12 -->
-      <section id="suspension" class="tc__section">
-        <h2 class="tc__section-title">12. Suspensión y cancelación de cuenta</h2>
-
-        <h3 class="tc__subsection-title">12.1 Causales de suspensión inmediata</h3>
-        <p>UniDev podrá suspender una cuenta sin previo aviso cuando:</p>
-        <ul class="tc__list">
-          <li>El Usuario incurra en alguna de las conductas prohibidas en la cláusula 10.</li>
-          <li>Se detecte fraude, suplantación de identidad o actividad sospechosa.</li>
-          <li>Una autoridad competente así lo ordene.</li>
-          <li>El Usuario tenga pagos retenidos con disputas abiertas sin resolver.</li>
-        </ul>
-
-        <h3 class="tc__subsection-title">12.2 Fondos en tránsito ante suspensión</h3>
-        <p>Si al momento de la suspensión existen fondos retenidos asociados a la cuenta, UniDev definirá su destinación conforme al resultado del proceso de disputa o, en ausencia de este, los devolverá a la Empresa descontando los costos de procesamiento de MercadoPago.</p>
-
-        <h3 class="tc__subsection-title">12.3 Cancelación voluntaria</h3>
-        <p>El Usuario puede solicitar el cierre de su cuenta escribiendo a <strong>nicolas&#64;unidev.site</strong>. El cierre no procederá mientras existan Proyectos activos o pagos pendientes o retenidos.</p>
-      </section>
-
-      <!-- 13 -->
-      <section id="modificaciones" class="tc__section">
-        <h2 class="tc__section-title">13. Modificaciones a los Términos y Condiciones</h2>
-        <p>UniDev se reserva el derecho de modificar los presentes Términos en cualquier momento, notificando al Usuario con al menos <strong>15 días calendario</strong> de anticipación por correo electrónico y mediante aviso visible en la Plataforma.</p>
-        <p>El uso continuado de la Plataforma tras la entrada en vigencia de la nueva versión constituye aceptación tácita de los cambios. Las versiones anteriores quedarán archivadas y disponibles bajo solicitud a <strong>nicolas&#64;unidev.site</strong>.</p>
-      </section>
-
-      <!-- 14 -->
-      <section id="ley" class="tc__section">
-        <h2 class="tc__section-title">14. Ley aplicable y jurisdicción</h2>
-        <p>Los presentes Términos y Condiciones se rigen por las leyes de la República de Colombia, en particular:</p>
-        <ul class="tc__list">
-          <li>El Código de Comercio.</li>
-          <li>La Ley 1480 de 2011 (Estatuto del Consumidor).</li>
-          <li>La Ley 527 de 1999 (Comercio electrónico).</li>
-          <li>La Ley 23 de 1982 y normas concordantes en materia de propiedad intelectual.</li>
-        </ul>
-        <p>Para cualquier controversia, las partes se someten a la jurisdicción de los jueces y tribunales competentes de Facatativá, Cundinamarca, Colombia.</p>
-      </section>
-
-      <!-- 15 -->
-      <section id="intermediacion-pagos" class="tc__section">
-        <h2 class="tc__section-title">15. Intermediación de pagos</h2>
-
-        <h3 class="tc__subsection-title">15.1 Naturaleza del servicio de intermediación</h3>
-        <p>UniDev actúa como intermediario tecnológico en el flujo de pagos entre la Empresa y el Ejecutor. En ningún caso UniDev es una entidad financiera, cooperativa de crédito ni captadora de recursos del público. Los fondos son gestionados y retenidos exclusivamente por MercadoPago bajo su propia regulación. UniDev no tiene acceso directo al dinero de los usuarios.</p>
-
-        <h3 class="tc__subsection-title">15.2 Ejecutor individual o en equipo</h3>
-        <p>El Ejecutor de un Proyecto puede ser una persona individual o un equipo de usuarios dentro de la Plataforma. En ambos casos, la cuenta de MercadoPago receptora del pago debe estar vinculada y activa antes del inicio del Proyecto. La distribución interna del pago dentro de un equipo es responsabilidad exclusiva de sus integrantes y no involucra a UniDev.</p>
-
-        <h3 class="tc__subsection-title">15.3 Flujo del dinero</h3>
-        <p>El ciclo de pago funciona de la siguiente manera:</p>
-        <div class="tc__status-list">
-          <div class="tc__status"><span class="tc__status-dot tc__status-dot--pending"></span><div><strong>Inicio:</strong> La Empresa realiza el pago del Proyecto en el momento que considere oportuno según el avance acordado con el Ejecutor. No existe un momento obligatorio de pago anticipado, salvo que así lo acuerden las partes.</div></div>
-          <div class="tc__status"><span class="tc__status-dot tc__status-dot--held"></span><div><strong>Retención:</strong> Una vez recibido el pago, los fondos quedan retenidos en Escrow a través de MercadoPago hasta que el Entregable sea aprobado.</div></div>
-          <div class="tc__status"><span class="tc__status-dot tc__status-dot--released"></span><div><strong>Liberación:</strong> Aprobado el Entregable de forma expresa o tácita (cláusula 7.3), los fondos son liberados al Ejecutor descontada la Comisión de UniDev.</div></div>
-          <div class="tc__status"><span class="tc__status-dot tc__status-dot--refunded"></span><div><strong>Reembolso:</strong> Si una disputa es resuelta a favor de la Empresa, los fondos son devueltos descontando los costos de procesamiento de MercadoPago, los cuales no son reembolsables bajo ninguna circunstancia.</div></div>
-        </div>
-
-        <h3 class="tc__subsection-title">15.4 Ausencia de penalizaciones o retenciones adicionales</h3>
-        <p>UniDev no aplica penalizaciones económicas ni retiene fondos más allá del Escrow descrito en la cláusula 15.3. El único descuento aplicado sobre el pago del Ejecutor es la Comisión establecida en la tabla de tramos vigente.</p>
-
-        <h3 class="tc__subsection-title">15.5 Obligaciones del Ejecutor en materia de pagos</h3>
-        <ul class="tc__list">
-          <li>Mantener una cuenta de MercadoPago activa y válida para recibir pagos.</li>
-          <li>No acordar ni recibir pagos relacionados con Proyectos de la Plataforma por fuera de UniDev.</li>
-          <li>Notificar a UniDev si detecta cualquier irregularidad en el flujo de su pago.</li>
-        </ul>
-
-        <h3 class="tc__subsection-title">15.6 Obligaciones de la Empresa en materia de pagos</h3>
-        <ul class="tc__list">
-          <li>Realizar los pagos únicamente a través de los mecanismos habilitados en la Plataforma.</li>
-          <li>Revisar y aprobar o rechazar el Entregable dentro del plazo establecido en la cláusula 7.2.</li>
-          <li>No solicitar trabajo adicional fuera del alcance del Proyecto pagado sin generar un nuevo Proyecto.</li>
-        </ul>
-
-        <h3 class="tc__subsection-title">15.7 Eventos fuera del control de UniDev</h3>
-        <p>UniDev no será responsable por demoras o fallas en el procesamiento de pagos causadas por interrupciones en el servicio de MercadoPago, cambios regulatorios que afecten el procesamiento de pagos en Colombia, o cualquier otra causa fuera de su control razonable. En estos casos, UniDev gestionará la situación a la brevedad posible y mantendrá informados a los usuarios afectados.</p>
-      </section>
-
-      <!-- 16 -->
-      <section id="contacto" class="tc__section">
-        <h2 class="tc__section-title">16. Contacto</h2>
         <div class="tc__info-block">
-          <div class="tc__info-row"><span>Correo electrónico</span><span>nicolas&#64;unidev.site</span></div>
-          <div class="tc__info-row"><span>Plataforma</span><span>unidev.site</span></div>
+          <div class="tc__info-row"><span>Responsable</span><span>Yamid Felipe Quiroga Gonzales</span></div>
+          <div class="tc__info-row"><span>Cédula</span><span>1000327084</span></div>
+          <div class="tc__info-row"><span>Correo</span><span>yamidfelipe123&#64;gmail.com</span></div>
+          <div class="tc__info-row"><span>Domicilio</span><span>Facatativá, Cundinamarca, Colombia</span></div>
+        </div>
+        <p>Ambos responsables responden de manera solidaria por las obligaciones derivadas de la operación de UNIDEV frente a los usuarios y autoridades competentes.</p>
+      </section>
+
+      <section id="naturaleza-unidev" class="tc__section">
+        <h2 class="tc__section-title">2. Naturaleza de UNIDEV</h2>
+        <p>UNIDEV es una plataforma tecnológica que facilita la conexión entre:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Empresas, entidades, organizaciones o clientes contratantes, públicas o privadas, interesadas en adquirir servicios digitales.</li>
+          <li>Estudiantes universitarios, integrantes de semilleros y equipos académicos, todos con matrícula activa en una institución de educación superior, interesados en ofrecer servicios relacionados con desarrollo de software, recursos digitales, contenidos educativos, diseño web, automatización, bases de datos, prototipos tecnológicos, aplicaciones, consultoría tecnológica básica, soporte digital y actividades afines.</li>
+          <li>La plataforma UNIDEV, que actúa como facilitadora tecnológica, canal de publicación, contacto, gestión, trazabilidad, aceptación de proyectos, administración de reglas de pago y cobro de comisiones por uso de la plataforma.</li>
+        </ol>
+        <p>UNIDEV no es empleador de los estudiantes, no es empresa de servicios temporales, no suministra personal en misión, no ejerce subordinación laboral, no garantiza vinculación laboral, no actúa como agencia pública de empleo, salvo que obtenga las autorizaciones legales correspondientes, y no sustituye la voluntad contractual entre la empresa y el estudiante.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Ley 527 de 1999, artículo 2, sobre mensajes de datos y comercio electrónico; Ley 1480 de 2011, artículos 5 y 50, sobre proveedor, consumidor, información e identificación del proveedor en comercio electrónico; Código Sustantivo del Trabajo, artículo 23, sobre elementos del contrato de trabajo; Ley 50 de 1990, artículos 71 y 77, sobre empresas de servicios temporales y trabajadores en misión; Decreto 4369 de 2006, artículos 2 y 20, sobre autorización y sanciones a quienes desarrollen actividades propias de empresas de servicios temporales sin autorización; Ley 1636 de 2013, artículos 29 y 30, sobre servicios de gestión y colocación de empleo y red de prestadores del Servicio Público de Empleo.</p>
         </div>
       </section>
 
-      <!-- Footer note -->
-      <div class="tc__acceptance">
-        <p>Al registrarse o continuar utilizando la Plataforma, el Usuario declara haber leído, comprendido y aceptado en su totalidad los presentes Términos y Condiciones.</p>
-        <p class="tc__acceptance-footer">UniDev — Operado por Nicolás Rodríguez Torres · Facatativá, Cundinamarca, Colombia</p>
+      <section id="objeto" class="tc__section">
+        <h2 class="tc__section-title">3. Objeto de los Términos y Condiciones</h2>
+        <p>Estos Términos y Condiciones regulan el acceso, registro, publicación, postulación, selección, ejecución, entrega, revisión, pago, liberación de recursos, comisiones, responsabilidades, confidencialidad, propiedad intelectual, protección de datos y solución de controversias dentro de UNIDEV.</p>
+        <p>Su aceptación es obligatoria para toda persona natural o jurídica que use la plataforma en cualquier rol, incluyendo empresa cliente, usuario de empresa, estudiante prestador, universidad, admin de sede, tutor de sede, usuario visitante, aliado, administrador o intermediario operativo.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Código Civil, artículos 1502, 1602 y 1603, sobre requisitos para obligarse, fuerza obligatoria del contrato y ejecución de buena fe; Código de Comercio, artículo 871, sobre buena fe en los contratos mercantiles; Ley 1480 de 2011, artículos 23, 24 y 50, sobre información clara, características del servicio y deberes en comercio electrónico; Ley 527 de 1999, artículos 14 y 15, sobre formación y validez de los contratos por medios electrónicos.</p>
+        </div>
+      </section>
+
+      <section id="definiciones" class="tc__section">
+        <h2 class="tc__section-title">4. Definiciones</h2>
+        <p>Para efectos de estos términos:</p>
+        <dl class="tc__defs">
+          <div class="tc__def"><dt>UNIDEV</dt><dd>Plataforma tecnológica que facilita el contacto y gestión de proyectos digitales entre empresas y estudiantes prestadores.</dd></div>
+          <div class="tc__def"><dt>Empresa cliente o contratante</dt><dd>Persona jurídica privada, entidad pública, organización, institución, emprendimiento o persona natural comerciante que publica o contrata un proyecto mediante UNIDEV.</dd></div>
+          <div class="tc__def"><dt>Estudiante prestador</dt><dd>Persona natural con matrícula activa en un programa de educación superior técnica, tecnológica o universitaria en Colombia, incluyendo integrantes de semilleros de investigación o equipos de desarrollo vinculados a una institución de educación superior. UNIDEV verificará la condición de estudiante activo y podrá rechazar o suspender perfiles que no la acrediten.</dd></div>
+          <div class="tc__def"><dt>Proyecto</dt><dd>Encargo, solicitud, actividad o servicio publicado por una empresa y aceptado por uno o varios estudiantes.</dd></div>
+          <div class="tc__def"><dt>Entregable</dt><dd>Resultado concreto del proyecto, compuesto por dos componentes distintos: (i) Producto desplegado: versión funcional del proyecto publicada por el estudiante en un subdominio habilitado por UNIDEV, que permite a la empresa verificar el funcionamiento del producto sin acceso al código fuente, y cuya visualización queda habilitada únicamente después de que la empresa haya realizado el pago correspondiente; (ii) Código fuente y archivos técnicos: repositorio, archivos, documentación técnica, bases de datos, manuales y demás componentes del desarrollo, que se transfieren a la empresa únicamente después de que esta haya aprobado el producto desplegado y UNIDEV haya emitido la instrucción de liberación del pago. El producto desplegado y el código fuente son componentes separados; la empresa no accede al código fuente durante la fase de revisión.</dd></div>
+          <div class="tc__def"><dt>Pago retenido o pago en custodia operativa</dt><dd>Mecanismo operativo basado en el modelo marketplace del proveedor de pagos habilitado por UNIDEV, mediante el cual el valor pagado por la empresa es recibido y mantenido directamente por dicho proveedor, sin que UNIDEV reciba, retenga ni administre los recursos. UNIDEV únicamente emite la instrucción de liberación al proveedor de pagos una vez se cumplan las condiciones del proyecto. Este mecanismo no constituye captación de dinero, actividad financiera, fiduciaria ni aseguradora por parte de UNIDEV.</dd></div>
+          <div class="tc__def"><dt>Comisión de plataforma</dt><dd>Valor cobrado por UNIDEV a la empresa, al estudiante o a ambos, por el uso de la plataforma, intermediación tecnológica, gestión, publicación, administración transaccional, soporte, trazabilidad y servicios asociados.</dd></div>
+          <div class="tc__def"><dt>Aceptación del proyecto</dt><dd>Manifestación expresa de la empresa mediante la cual aprueba el producto desplegado en el subdominio habilitado por UNIDEV, o silencio que se entiende como aceptación una vez vencido el término de revisión sin objeción técnica justificada. La aceptación del producto desplegado activa simultáneamente la instrucción de liberación del pago al proveedor de pagos y la entrega automática del código fuente y archivos técnicos a la empresa, proceso gestionado por UNIDEV sin intervención manual del estudiante.</dd></div>
+        </dl>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Ley 1480 de 2011, artículo 5, sobre definiciones de consumidor, proveedor, producto y relación de consumo; Ley 527 de 1999, artículo 2, sobre mensajes de datos, comercio electrónico y sistemas de información; Ley 1581 de 2012, artículo 3, sobre definiciones de dato personal, titular, responsable y encargado del tratamiento; Ley 23 de 1982, artículos 1 y 12, sobre protección de obras literarias, científicas y artísticas y derechos patrimoniales de autor; Ley 1955 de 2019, artículo 181, que modifica el artículo 183 de la Ley 23 de 1982 sobre acuerdos de derechos patrimoniales de autor.</p>
+        </div>
+      </section>
+
+      <section id="aceptacion-digital" class="tc__section">
+        <h2 class="tc__section-title">5. Aceptación digital</h2>
+        <p>El usuario acepta estos Términos y Condiciones cuando:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Crea una cuenta.</li>
+          <li>Marca una casilla de aceptación.</li>
+          <li>Publica un proyecto.</li>
+          <li>Se postula a un proyecto.</li>
+          <li>Acepta una propuesta.</li>
+          <li>Realiza un pago.</li>
+          <li>Recibe un pago.</li>
+          <li>Sube, descarga o aprueba entregables.</li>
+          <li>Utiliza cualquier funcionalidad de UNIDEV.</li>
+        </ol>
+        <p>La aceptación electrónica tendrá valor jurídico conforme a la Ley 527 de 1999 y al Decreto 2364 de 2012 sobre firma electrónica y mensajes de datos.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Ley 527 de 1999, artículos 6, 7, 10, 14 y 15, sobre equivalencia funcional del escrito, firma, admisibilidad y fuerza probatoria de mensajes de datos, formación y validez de contratos electrónicos; Decreto 2364 de 2012, artículos 3 y 5, sobre confiabilidad de la firma electrónica y sus efectos jurídicos; Ley 1480 de 2011, artículo 50, sobre deberes de los proveedores que ofrecen productos o servicios mediante comercio electrónico.</p>
+        </div>
+      </section>
+
+      <section id="independencia-servicios" class="tc__section">
+        <h2 class="tc__section-title">6. Independencia de los servicios</h2>
+        <p>Los servicios contratados mediante UNIDEV son de naturaleza independiente, civil o comercial, según corresponda. La publicación de un proyecto, postulación, aceptación o pago no crea por sí misma relación laboral entre UNIDEV y el estudiante, ni entre la empresa y el estudiante.</p>
+        <p>No obstante, si durante la ejecución del proyecto la empresa impone subordinación continuada, horarios rígidos, órdenes permanentes propias de empleador, exclusividad, reglamento interno laboral, dependencia funcional o integración del estudiante a su estructura ordinaria de personal, la relación podrá ser valorada por la autoridad competente conforme al principio de primacía de la realidad.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Código Sustantivo del Trabajo, artículos 23 y 24, sobre elementos del contrato de trabajo y presunción de existencia de contrato de trabajo cuando hay prestación personal del servicio; Constitución Política, artículo 53, sobre primacía de la realidad sobre las formalidades; Código Civil, artículos 1602 y 1603, sobre obligatoriedad de los contratos y ejecución de buena fe; Código de Comercio, artículo 871, sobre buena fe contractual.</p>
+        </div>
+      </section>
+
+      <section id="prohibicion-intermediacion" class="tc__section">
+        <h2 class="tc__section-title">7. Prohibición de intermediación laboral indebida</h2>
+        <p>UNIDEV no suministra trabajadores ni administra personal para terceros. La empresa no podrá usar la plataforma para reemplazar cargos permanentes, evadir obligaciones laborales, ocultar relaciones de trabajo, desconocer prestaciones sociales, evitar afiliaciones a seguridad social o simular contratos civiles cuando exista una verdadera relación laboral.</p>
+        <p>Cuando la empresa requiera subordinación, horario, permanencia, exclusividad o integración del estudiante a su estructura organizacional, deberá celebrar directamente el contrato laboral, de aprendizaje, práctica, pasantía o modalidad legal que corresponda, sin trasladar esa responsabilidad a UNIDEV.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Código Sustantivo del Trabajo, artículo 23, sobre elementos esenciales del contrato de trabajo; Constitución Política, artículos 25 y 53, sobre protección especial del trabajo y primacía de la realidad; Ley 50 de 1990, artículos 71 y 77, sobre empresas de servicios temporales y trabajadores en misión; Decreto 4369 de 2006, artículos 2, 20 y 21, sobre autorización, multas y sanciones por ejercer actividades propias de empresas de servicios temporales sin autorización; Ley 1636 de 2013, artículos 29, 30 y 31, sobre gestión y colocación de empleo y red de prestadores del Servicio Público de Empleo; Decreto 1072 de 2015, reglas sobre agencias de gestión y colocación de empleo y autorización de prestadores.</p>
+        </div>
+      </section>
+      </ng-container>
+
+      <!-- CAPÍTULO II -->
+      <ng-container *ngIf="activeChapter === 2">
+      <section id="marco-normativo-empresas" class="tc__section">
+        <h2 class="tc__section-title">Marco normativo</h2>
+        <p>El presente capítulo se fundamenta en el ordenamiento jurídico colombiano aplicable a las relaciones contractuales, comerciales, digitales, laborales, de consumo, propiedad intelectual, protección de datos personales, contratación pública y competencia leal, en la medida en que UNIDEV permite que empresas privadas, entidades públicas, organizaciones o clientes contratantes publiquen proyectos digitales y contraten servicios independientes ofrecidos por estudiantes prestadores.</p>
+        <p>En primer lugar, el capítulo se apoya en los principios de autonomía de la voluntad privada, fuerza obligatoria del contrato y buena fe contractual, previstos en el Código Civil, especialmente en los artículos 1502, 1530, 1546, 1592, 1602, 1603, 1609 y 1626. Estas normas permiten que las partes definan condiciones de registro, publicación, aceptación, pago, revisión, ajustes, penalidades y liberación condicionada de recursos, siempre que el objeto sea lícito y no se desconozcan normas imperativas. El artículo 1602 establece que el contrato legalmente celebrado es ley para las partes, mientras que el artículo 1603 exige su ejecución de buena fe.</p>
+        <p>De igual manera, resulta aplicable el Código de Comercio, en especial el artículo 871, que ordena celebrar y ejecutar los contratos mercantiles de buena fe. Esta regla fundamenta las obligaciones de la empresa contratante de publicar proyectos claros, suministrar información suficiente, no modificar unilateralmente el alcance, revisar entregables de manera objetiva, pagar oportunamente y abstenerse de utilizar la plataforma para evadir comisiones o contactar estudiantes por fuera de UNIDEV.</p>
+        <p>En materia de protección al consumidor y comercio electrónico, el capítulo se soporta en la Ley 1480 de 2011, particularmente en los artículos 23, 24, 26, 47, 50 y 51. Estas disposiciones exigen información clara, veraz, suficiente, oportuna, verificable, comprensible, precisa e idónea sobre los servicios ofrecidos; regulan la información pública de precios; el derecho de retracto cuando proceda; los deberes especiales del comercio electrónico; y la reversión del pago en operaciones realizadas por canales electrónicos. Esto justifica que UNIDEV exija a la empresa publicar el proyecto con alcance, precio, plazo, entregables, condiciones de aceptación, reglas de pago y mecanismos de reclamación.</p>
+        <p>En cuanto a la contratación electrónica y prueba digital, se aplica la Ley 527 de 1999, especialmente los artículos 6, 7, 10, 14 y 15, porque las propuestas, aceptaciones, publicaciones de proyecto, aprobaciones, rechazos, soportes de entrega, comunicaciones, pagos y aceptaciones digitales pueden constar como mensajes de datos. En particular, los artículos 14 y 15 reconocen que la oferta y aceptación pueden expresarse por mensajes de datos y que no se puede negar validez jurídica a una manifestación de voluntad por haberse realizado electrónicamente.</p>
+        <p>Respecto de las empresas públicas y entidades estatales, el capítulo se fundamenta en la Ley 80 de 1993, artículos 3, 23, 24, 25, 26 y 32; en la Ley 1150 de 2007, artículos 2 y 5; y en el Decreto 1082 de 2015, especialmente las reglas sobre Plan Anual de Adquisiciones, estudios y documentos previos, análisis del sector, publicidad y documentos del proceso. Estas normas justifican que UNIDEV advierta expresamente que el uso de la plataforma no sustituye estudios previos, CDP, RP, SECOP, selección objetiva, supervisión, interventoría, régimen de inhabilidades e incompatibilidades ni demás requisitos propios de la contratación estatal.</p>
+        <p>En materia de prevención de intermediación laboral indebida, se aplican el artículo 25 de la Constitución Política, el artículo 53 sobre primacía de la realidad, y el artículo 23 del Código Sustantivo del Trabajo, que identifica los elementos del contrato de trabajo: prestación personal del servicio, remuneración y subordinación. Estas normas justifican que la empresa no pueda imponer horarios rígidos, exclusividad, subordinación, disponibilidad permanente o integración del estudiante a su planta ordinaria, pues ello podría convertir la relación independiente en una relación laboral valorada por la autoridad competente.</p>
+        <p>En materia de protección del estudiante prestador, el capítulo se apoya en la Constitución Política, especialmente en los artículos 13, 25 y 83, que reconocen la igualdad, la protección del trabajo en condiciones dignas y la buena fe. También sirve como referente la Ley 1010 de 2006, artículo 2, en cuanto prohíbe conductas de maltrato, persecución, discriminación, entorpecimiento, inequidad y desprotección en contextos laborales o de prestación de servicios. Por ello, la empresa no debe exigir tareas distintas a las pactadas, favores, desplazamientos no acordados, acceso innecesario a información sensible ni conductas que afecten la dignidad, seguridad o formación del estudiante.</p>
+        <p>En relación con la protección de datos personales, son aplicables la Ley 1581 de 2012, artículos 3, 4, 8, 9, 12, 17 y 18, y sus normas reglamentarias. Estas disposiciones regulan los conceptos de dato personal, titular, responsable y encargado del tratamiento; los principios aplicables al tratamiento; la autorización previa e informada; los derechos de los titulares; y los deberes de responsables y encargados. Esto fundamenta las obligaciones de la empresa de suministrar información veraz en el registro, proteger los datos del estudiante y abstenerse de solicitar información personal o sensible que no sea necesaria para el proyecto.</p>
+        <p>En materia de confidencialidad y secretos empresariales, resulta aplicable la Decisión Andina 486 de 2000, artículos 260 a 264, que protege la información no divulgada con valor comercial, técnico o empresarial, siempre que se hayan adoptado medidas razonables para mantenerla reservada. Esta regulación justifica que la empresa y el estudiante deban respetar información técnica, comercial, financiera, estratégica, académica o personal conocida durante la ejecución del proyecto.</p>
+        <p>En cuanto a la propiedad intelectual de los entregables, se aplican la Constitución Política, artículo 61; la Ley 23 de 1982, artículos 1, 12, 30 y 183; la Decisión Andina 351 de 1993, artículos 4, 11, 13, 23 y 31; y la Ley 1915 de 2018. Estas normas protegen las obras literarias, artísticas, científicas, software, diseños, contenidos digitales, bases de datos, manuales y demás creaciones desarrolladas por el estudiante. Por ello, el uso empresarial del entregable solo debe permitirse cuando exista pago, aprobación y pacto expreso de cesión o licencia de derechos patrimoniales, respetando siempre los derechos morales del autor.</p>
+        <p>En relación con la seguridad informática y uso lícito de los servicios digitales, se aplica la Ley 1273 de 2009, que incorporó delitos contra la protección de la información y de los datos, entre ellos el acceso abusivo a sistema informático y la violación de datos personales. Esta norma justifica que la empresa no pueda solicitar actividades ilegales, fraudulentas, invasivas, inseguras o contrarias a la ética digital, ni exigir al estudiante acciones como acceso no autorizado a sistemas, manipulación de datos, extracción irregular de información o desarrollo de herramientas ilícitas.</p>
+        <p>Finalmente, respecto de la prohibición de contacto externo para evadir comisiones, el capítulo se fundamenta en el Código Civil, artículos 1592, 1602 y 1603, sobre cláusula penal, obligatoriedad del contrato y buena fe; en el Código de Comercio, artículo 871; y en la Ley 256 de 1996, artículos 7, 8, 16 y 17, sobre prohibición general de actos de competencia desleal, desviación de clientela, violación de secretos e inducción a la ruptura contractual. Estas normas permiten que UNIDEV establezca una regla de permanencia, comisión o penalidad previamente informada cuando una empresa utilice la plataforma para identificar estudiantes y luego los contrate directamente con el fin de evadir tarifas, controles o trazabilidad.</p>
+      </section>
+
+      <div class="tc__chapter">
+        <p class="tc__chapter-eyebrow">CAPÍTULO II</p>
+        <h2 class="tc__chapter-title">TÉRMINOS PARA EMPRESAS CLIENTES O CONTRATANTES</h2>
       </div>
+
+      <section id="registro-empresas" class="tc__section">
+        <h2 class="tc__section-title">8. Registro de empresas</h2>
+        <p>Para publicar proyectos, la empresa deberá crear una cuenta y suministrar información veraz, completa y actualizada, incluyendo:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Correo electrónico verificado mediante código OTP.</li>
+          <li>Nombre de la empresa o razón social.</li>
+          <li>NIT.</li>
+          <li>Correo electrónico de contacto.</li>
+          <li>Dominio principal de la empresa. Este campo es obligatorio y constituye el mecanismo mediante el cual los Usuarios de Empresa vinculados a la organización acceden a la plataforma. UNIDEV validará que el dominio sea válido y esté activo.</li>
+          <li>Documento legal: cámara de comercio vigente.</li>
+          <li>Documento tributario: RUT.</li>
+          <li>Aceptación de los Términos y Condiciones y la Política de Privacidad.</li>
+        </ol>
+        <p>La cuenta de la empresa no quedará activa de forma inmediata. UNIDEV revisará la información y documentos suministrados y notificará la aprobación o rechazo del registro. Hasta tanto UNIDEV no apruebe el registro, la empresa no podrá publicar proyectos ni acceder a las funcionalidades de la plataforma.</p>
+        <p>La empresa será responsable por la autenticidad, suficiencia y vigencia de la información suministrada.</p>
+        <p>Los usuarios que la empresa habilite para operar en su nombre dentro de la plataforma se denominan Usuarios de Empresa. Su acceso está subordinado al registro activo y aprobado de la empresa a la que pertenecen. Si la empresa es inhabilitada, todos sus usuarios perderán el acceso de forma automática. La empresa responde solidariamente por el uso que sus Usuarios de Empresa hagan de la plataforma.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Aplica la Ley 1480 de 2011, artículos 23, 24 y 50, porque el proveedor o plataforma que ofrece servicios mediante comercio electrónico debe suministrar información clara, veraz, suficiente, verificable y comprensible sobre la identidad del proveedor, las condiciones del servicio y los medios de contacto. También aplica la Ley 1581 de 2012, artículos 4, 8, 9, 12 y 17, porque el registro implica recolección y tratamiento de datos personales de representantes, contactos empresariales y usuarios vinculados a la cuenta.</p>
+        </div>
+      </section>
+
+      <section id="obligaciones-empresa" class="tc__section">
+        <h2 class="tc__section-title">9. Obligaciones de la empresa</h2>
+        <p>La empresa se obliga a:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Publicar proyectos lícitos, claros y técnicamente posibles.</li>
+          <li>Definir alcance, plazo, presupuesto, criterios de aceptación y requisitos técnicos del proyecto, incluyendo las condiciones bajo las cuales aprobará el producto desplegado en el subdominio habilitado por UNIDEV.</li>
+          <li>No solicitar actividades ilegales, fraudulentas, discriminatorias, inseguras o contrarias a la ética profesional.</li>
+          <li>Respetar la dignidad, autonomía, formación académica y derechos del estudiante.</li>
+          <li>No imponer subordinación laboral al estudiante.</li>
+          <li>No exigir horarios propios de una relación laboral, salvo reuniones razonables de coordinación.</li>
+          <li>No exigir exclusividad, permanencia o disponibilidad ilimitada.</li>
+          <li>Pagar el valor pactado mediante los medios habilitados por UNIDEV.</li>
+          <li>Revisar el producto desplegado en el subdominio habilitado por UNIDEV dentro del término establecido.</li>
+          <li>Informar oportunamente defectos, incumplimientos o ajustes requeridos.</li>
+          <li>Mantener confidencialidad sobre información académica, personal o técnica del estudiante.</li>
+          <li>Abstenerse de contratar por fuera de la plataforma proyectos originados en UNIDEV, salvo autorización expresa.</li>
+          <li>Cumplir sus obligaciones tributarias, contables, presupuestales y contractuales.</li>
+        </ol>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Código Civil, artículos 1602 y 1603, porque los contratos legalmente celebrados son ley para las partes y deben ejecutarse de buena fe. También aplica el Código de Comercio, artículo 871, que exige buena fe en la celebración y ejecución de contratos mercantiles. En materia de consumo y comercio electrónico, aplican la Ley 1480 de 2011, artículos 23, 24, 26 y 50, por el deber de información clara sobre el servicio, precio, condiciones y medios electrónicos de contratación. En materia laboral, aplica el Código Sustantivo del Trabajo, artículo 23, porque si la empresa impone subordinación, horario, dependencia o reglamentos propios de empleador, podría configurarse una relación laboral.</p>
+        </div>
+      </section>
+
+      <section id="empresas-publicas" class="tc__section">
+        <h2 class="tc__section-title">10. Empresas públicas y entidades estatales</h2>
+        <p>Cuando la empresa cliente sea una entidad pública o administre recursos públicos, declara que:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Tiene competencia legal, contractual y presupuestal para contratar.</li>
+          <li>El uso de UNIDEV no sustituye estudios previos, CDP, RP, SECOP, supervisión, interventoría, selección objetiva, régimen de inhabilidades e incompatibilidades ni demás requisitos aplicables.</li>
+          <li>La contratación deberá sujetarse a la Ley 80 de 1993, Ley 1150 de 2007, Decreto 1082 de 2015, manual de contratación y normas especiales de la entidad.</li>
+          <li>La publicación de un proyecto en UNIDEV no constituye adjudicación estatal, contrato estatal ni compromiso presupuestal, salvo que se perfeccione conforme al régimen aplicable.</li>
+          <li>La entidad será responsable de verificar si requiere proceso de selección, contratación directa, mínima cuantía, convenio, orden de compra, contrato de prestación de servicios o cualquier otra modalidad válida.</li>
+        </ol>
+        <p>UNIDEV no será responsable por el incumplimiento de normas de contratación pública, planeación contractual, ejecución presupuestal, supervisión o publicidad en SECOP por parte de la entidad estatal.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Aplica la Ley 80 de 1993, artículos 3, 23, 24, 25, 26 y 32, sobre fines de la contratación estatal, principios de transparencia, economía, responsabilidad y modalidades contractuales. También aplica la Ley 1150 de 2007, artículos 2 y 5, sobre modalidades de selección y selección objetiva. El Decreto 1082 de 2015 regula los procesos de contratación pública, incluyendo estudios y documentos previos, publicidad en el SECOP y reglas procedimentales aplicables a entidades estatales.</p>
+        </div>
+      </section>
+
+      <section id="terminos-empresas" class="tc__section">
+        <h2 class="tc__section-title">11. Términos y Condiciones de las Empresas</h2>
+        <p>Las Empresas registradas en la Plataforma podrán publicar sus propios Términos y Condiciones internos, los cuales serán presentados a los estudiantes vinculados a sus proyectos para su aceptación expresa antes de operar. Al vincularse a un proyecto, el estudiante deberá aceptar tanto los presentes Términos y Condiciones de UNIDEV como los términos propios de la Empresa. Ambas aceptaciones quedarán registradas en la Plataforma con fecha y versión.</p>
+        <p>Los términos propios de cada Empresa no podrán contradecir ni reemplazar los presentes Términos de UNIDEV, eximir a la Empresa de sus responsabilidades, ni imponer al estudiante obligaciones que vulneren sus derechos como titular de datos personales o que configuren subordinación laboral. En caso de contradicción, prevalecerán siempre los Términos de UNIDEV. UNIDEV no es responsable del contenido de los términos publicados por las Empresas; cada Empresa es la única responsable de su legalidad y cumplimiento frente a los estudiantes.</p>
+        <p>Cuando una Empresa actualice sus Términos y Condiciones, será su exclusiva responsabilidad notificar a los estudiantes vinculados con al menos 10 días calendario de anticipación, por los medios que considere pertinentes. UNIDEV no asume obligación de gestionar dicha notificación ni de garantizar la re-aceptación dentro de la Plataforma, aunque podrá proveer mecanismos técnicos para ello si lo estima conveniente.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Código Civil, artículos 1602 y 1603, sobre fuerza obligatoria del contrato y ejecución de buena fe. Ley 527 de 1999, artículos 14 y 15, sobre validez de la aceptación electrónica y formación de contratos por medios digitales. Ley 1480 de 2011, artículos 42 y 43, sobre cláusulas abusivas en relaciones de consumo. Ley 1581 de 2012, artículos 4 y 8, sobre principios del tratamiento y derechos del titular de datos personales.</p>
+        </div>
+      </section>
+
+      <section id="publicacion-proyecto" class="tc__section">
+        <h2 class="tc__section-title">12. Publicación del proyecto</h2>
+        <p>La empresa deberá publicar cada proyecto con información clara, verificable y suficiente, incluyendo:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Nombre del proyecto.</li>
+          <li>Descripción del problema o necesidad.</li>
+          <li>Entregables esperados.</li>
+          <li>Plazo de ejecución.</li>
+          <li>Presupuesto ofrecido.</li>
+          <li>Condiciones de confidencialidad.</li>
+          <li>Condiciones de propiedad intelectual.</li>
+          <li>Alcance o requerimientos del proyecto.</li>
+        </ol>
+        <p>La empresa no podrá modificar unilateralmente el alcance del proyecto después de aceptada la propuesta, salvo acuerdo expreso con el estudiante y, cuando corresponda, reajuste del precio.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Aplica la Ley 1480 de 2011, artículos 23, 24, 26 y 50, porque la empresa debe publicar información clara, suficiente, verificable y comprensible sobre el servicio requerido, precio, condiciones de ejecución y restricciones. También aplica el Código Civil, artículos 1602 y 1603, porque el alcance publicado y aceptado obliga a las partes y debe ejecutarse conforme a la buena fe. El Código de Comercio, artículo 871, refuerza el deber de buena fe en contratos mercantiles.</p>
+        </div>
+      </section>
+
+      <section id="proteccion-estudiante" class="tc__section">
+        <h2 class="tc__section-title">13. Protección del estudiante prestador</h2>
+        <p>La empresa deberá tratar al estudiante con respeto, buena fe, igualdad y no discriminación. Se prohíbe cualquier trato abusivo, acoso, hostigamiento, presión indebida, discriminación por género, edad, raza, origen, orientación, condición económica, discapacidad, universidad de procedencia, ideología o cualquier otro criterio constitucionalmente protegido.</p>
+        <p>La empresa no podrá solicitar al estudiante tareas distintas a las pactadas, actividades personales, favores, desplazamientos no acordados, manejo de dinero externo, acceso a información sensible sin necesidad contractual o conductas que puedan comprometer su seguridad, integridad o formación.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Aplica la Constitución Política, artículos 13, 25 y 83, sobre igualdad, no discriminación, protección del trabajo en condiciones dignas y principio de buena fe. También aplica la Ley 1010 de 2006, artículo 2, como referente de prevención frente a conductas de acoso, maltrato, persecución u hostigamiento en contextos de trabajo, sin perjuicio de que la relación sea independiente o civil. Además, aplica el Código Civil, artículo 1603, y el Código de Comercio, artículo 871, por el deber de buena fe en la ejecución contractual.</p>
+        </div>
+      </section>
+
+      <section id="derecho-pago" class="tc__section">
+        <h2 class="tc__section-title">14. Derecho al pago del estudiante</h2>
+        <p>La empresa reconoce que el estudiante tiene derecho a recibir el pago pactado cuando entregue el servicio conforme al alcance aprobado, los criterios de aceptación y las condiciones del proyecto.</p>
+        <p>La empresa no podrá retener, negar o dilatar injustificadamente la aprobación del entregable ni usar el resultado del trabajo sin pagar el valor correspondiente. Si utiliza, publica, implementa, instala, entrega a terceros o explota el entregable, se entenderá que existe aceptación tácita, salvo prueba técnica de defectos graves comunicados dentro del término de revisión.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Aplica el Código Civil, artículos 1602, 1603, 1609 y 1626, porque el contrato obliga a las partes, debe ejecutarse de buena fe, permite oponer el incumplimiento recíproco y define el pago como la prestación de lo debido. También aplica el Código de Comercio, artículo 871, por el principio de buena fe en contratos mercantiles. En caso de relación de consumo o comercio electrónico, aplica la Ley 1480 de 2011, artículos 23, 26 y 50, por la exigencia de informar precio, condiciones de pago y condiciones del servicio.</p>
+        </div>
+      </section>
+
+      <section id="pago-previo" class="tc__section">
+        <h2 class="tc__section-title">15. Pago previo y retención operativa del valor</h2>
+        <p>Una vez el estudiante suba el proyecto a la plataforma y UNIDEV lo despliegue en el subdominio habilitado, la empresa deberá realizar el pago acordado para obtener acceso al subdominio y verificar el producto funcionando, mediante el proveedor de pagos habilitado por UNIDEV. El pago se procesa bajo el modelo marketplace, por lo que los recursos son recibidos y administrados directamente por el proveedor de pagos, sin que UNIDEV reciba, retenga ni administre dinero de los usuarios.</p>
+        <p>Los recursos pagados por la empresa permanecerán en custodia del proveedor de pagos, pendientes de liberación, hasta que:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>La empresa apruebe el producto desplegado en dicho subdominio.</li>
+          <li>Se venza el término de revisión sin objeción técnica justificada.</li>
+          <li>UNIDEV verifique el cumplimiento mínimo del proyecto.</li>
+          <li>Se resuelva una controversia de entrega, si la hubiere.</li>
+        </ol>
+        <p>El proveedor de pagos habilitado por UNIDEV opera bajo sus propias condiciones, las cuales pueden incluir comisiones, plazos de disponibilidad, retenciones tributarias y reglas operativas propias. UNIDEV no controla las decisiones internas, validaciones, bloqueos, contracargos, retenciones o tiempos de disponibilidad definidos por dicho proveedor.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Aplica el Código Civil, artículos 1530, 1546, 1602 y 1603, porque las partes pueden pactar obligaciones condicionales, efectos por incumplimiento, fuerza obligatoria del contrato y ejecución de buena fe. También aplica la Ley 527 de 1999, artículos 14 y 15, sobre formación y validez de contratos por medios electrónicos. En comercio electrónico, aplica la Ley 1480 de 2011, artículos 50 y 51, sobre deberes del proveedor y reversión del pago.</p>
+        </div>
+      </section>
+
+      <section id="revision-entregable" class="tc__section">
+        <h2 class="tc__section-title">16. Revisión del entregable por la empresa</h2>
+        <p>Una vez el estudiante despliegue el proyecto en el subdominio habilitado por UNIDEV, la empresa tendrá un plazo de 5 días hábiles para:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Aprobarlo.</li>
+          <li>Solicitar ajustes razonables dentro del alcance pactado.</li>
+          <li>Rechazarlo de forma motivada, técnica y comprobable.</li>
+          <li>Abrir una controversia ante UNIDEV.</li>
+        </ol>
+        <p>Si la empresa guarda silencio vencido el plazo de revisión, el producto desplegado se entenderá aceptado y UNIDEV emitirá la instrucción de liberación al proveedor de pagos, descontando las comisiones, costos, retenciones o cargos aplicables. Simultáneamente UNIDEV gestionará de forma automática la entrega del código fuente y archivos técnicos a la empresa.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Aplica el Código Civil, artículos 1546, 1602, 1603 y 1609, porque regulan los efectos del incumplimiento, la obligatoriedad del contrato, la buena fe y la excepción de contrato no cumplido. También aplica la Ley 527 de 1999, artículos 10 y 11, porque los mensajes, entregas digitales, aprobaciones, rechazos y soportes electrónicos pueden servir como prueba. En caso de relación de consumo o servicio digital, aplica la Ley 1480 de 2011, artículos 7, 23 y 50, sobre garantía legal, información y comercio electrónico.</p>
+        </div>
+      </section>
+
+      <section id="ajustes-correcciones" class="tc__section">
+        <h2 class="tc__section-title">17. Ajustes y correcciones</h2>
+        <p>El estudiante estará obligado a realizar ajustes únicamente cuando:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>El ajuste esté dentro del alcance pactado.</li>
+          <li>El entregable incumpla criterios técnicos previamente definidos.</li>
+          <li>Existan errores atribuibles al estudiante.</li>
+          <li>La solicitud se haga dentro del plazo de revisión.</li>
+          <li>La empresa explique con claridad el defecto o incumplimiento.</li>
+        </ol>
+        <p>No se consideran ajustes incluidos:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Nuevas funcionalidades.</li>
+          <li>Cambio total de diseño.</li>
+          <li>Ampliación del alcance.</li>
+          <li>Integraciones no pactadas.</li>
+          <li>Migraciones adicionales.</li>
+          <li>Correcciones por información errónea entregada por la empresa.</li>
+          <li>Modificaciones solicitadas después de la aprobación.</li>
+        </ol>
+        <p>Estos cambios deberán cotizarse como proyecto adicional o modificación del proyecto original.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Aplica el Código Civil, artículos 1602 y 1603, porque el alcance pactado obliga a las partes y debe ejecutarse de buena fe. También aplica el Código de Comercio, artículo 871, sobre buena fe mercantil. En servicios ofrecidos por medios electrónicos, aplica la Ley 1480 de 2011, artículos 7, 11, 23 y 50, sobre garantía, efectividad de garantía, información clara y comercio electrónico.</p>
+        </div>
+      </section>
+
+      <section id="uso-entregable" class="tc__section">
+        <h2 class="tc__section-title">18. Uso empresarial del entregable</h2>
+        <p>La empresa solo podrá usar el entregable cuando:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Haya pagado el valor correspondiente.</li>
+          <li>El entregable haya sido aprobado.</li>
+          <li>Los derechos patrimoniales hayan sido cedidos automáticamente conforme a los Términos y Condiciones de UNIDEV, cesión que opera con el pago sin necesidad de documento adicional.</li>
+          <li>Se respeten los derechos morales del estudiante autor.</li>
+          <li>Se cumplan las restricciones de software, librerías, licencias de terceros o componentes open source.</li>
+        </ol>
+        <p>El pago del proyecto implica la transferencia automática de los derechos patrimoniales sobre el entregable a la empresa, conforme a lo establecido en los Términos y Condiciones de UNIDEV, los cuales constituyen el instrumento escrito de cesión. Los derechos morales del estudiante son irrenunciables e inalienables y se conservan en todo caso. Las restricciones derivadas de componentes de código abierto o licencias de terceros informadas por el estudiante son las únicas limitaciones aplicables al uso del entregable.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Aplica la Constitución Política, artículo 61, sobre protección de la propiedad intelectual. También aplica la Ley 23 de 1982, artículos 1, 12, 30 y 183, sobre protección de obras, derechos patrimoniales, derechos morales y transferencia de derechos. La Decisión Andina 351 de 1993, artículos 4, 11, 13, 23 y 31, protege obras literarias, artísticas y de software, reconoce derechos morales y regula autorizaciones o licencias de explotación. La Ley 1915 de 2018 modifica disposiciones de la Ley 23 de 1982 en materia de derecho de autor y derechos conexos.</p>
+        </div>
+      </section>
+
+      <section id="prohibicion-contacto" class="tc__section">
+        <h2 class="tc__section-title">19. Prohibición de contacto externo para evadir comisiones</h2>
+        <p>La empresa no podrá usar UNIDEV para identificar estudiantes y luego contratarlos directamente por fuera de la plataforma con el fin de evadir comisiones, tarifas, controles, trazabilidad o reglas de pago.</p>
+        <p>Si la empresa contrata por fuera de UNIDEV a un estudiante conocido mediante la plataforma dentro de los 6 meses siguientes al contacto inicial, deberá pagar a UNIDEV la comisión de intermediación o penalidad previamente informada, salvo autorización escrita de UNIDEV.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Aplica el Código Civil, artículos 1592, 1602 y 1603, sobre cláusula penal, fuerza obligatoria del contrato y buena fe contractual. También aplica el Código de Comercio, artículo 871, sobre buena fe en contratos mercantiles. En materia de competencia, aplica la Ley 256 de 1996, artículos 7, 8, 16 y 17, sobre prohibición general de actos de competencia desleal, desviación de clientela, violación de secretos e inducción a la ruptura contractual.</p>
+        </div>
+      </section>
+      </ng-container>
+
+      <!-- CAPÍTULO III -->
+      <ng-container *ngIf="activeChapter === 3">
+      <section id="marco-normativo-estudiantes" class="tc__section">
+        <h2 class="tc__section-title">Marco normativo</h2>
+        <p>El presente capítulo se fundamenta en el ordenamiento jurídico colombiano aplicable a la participación de estudiantes prestadores en plataformas digitales de intermediación tecnológica, especialmente en materia de protección de datos personales, contratación electrónica, autonomía contractual, buena fe, independencia del servicio, prevención de relaciones laborales encubiertas, propiedad intelectual, confidencialidad, seguridad informática, pagos, comisiones, obligaciones tributarias y seguridad social de trabajadores independientes.</p>
+        <p>En primer lugar, el capítulo se apoya en la Constitución Política de Colombia, especialmente en los artículos 15, 25, 53, 61 y 83. El artículo 15 protege el derecho al habeas data y a la protección de datos personales; el artículo 25 reconoce el trabajo como derecho y obligación social; el artículo 53 incorpora el principio de primacía de la realidad sobre las formalidades; el artículo 61 protege la propiedad intelectual; y el artículo 83 consagra la buena fe en las actuaciones de particulares y autoridades. Estos principios justifican que UNIDEV exija información veraz, proteja los datos del estudiante, evite subordinación laboral encubierta, respete la autoría de las creaciones y exija comportamientos éticos en la plataforma.</p>
+        <p>En materia de registro del estudiante y protección de datos personales, se aplica la Ley 1581 de 2012, especialmente los artículos 3, 4, 8, 9, 12 y 17. Estas normas regulan las definiciones de dato personal, titular, responsable y encargado del tratamiento; los principios del tratamiento; los derechos del titular; la autorización previa e informada; el deber de informar al titular; y los deberes del responsable del tratamiento. Por ello, UNIDEV puede recolectar datos como nombre, documento, correo, teléfono, universidad, programa académico, portafolio, certificaciones y datos de pago, siempre que informe las finalidades, solicite autorización y habilite canales para el ejercicio de derechos de consulta, actualización, rectificación o supresión.</p>
+        <p>En cuanto a la aceptación electrónica, trazabilidad digital y prueba de actuaciones dentro de la plataforma, resulta aplicable la Ley 527 de 1999, artículos 6, 7, 10, 14 y 15. Estas disposiciones reconocen la equivalencia funcional del escrito y la firma, la admisibilidad y fuerza probatoria de los mensajes de datos, y la validez de la oferta y aceptación expresadas por medios electrónicos. En consecuencia, el registro del estudiante, la aceptación de términos, la postulación, la aceptación de proyectos, la entrega de archivos, la aprobación de entregables, las solicitudes de corrección y la liberación de pagos pueden documentarse electrónicamente y tener valor probatorio.</p>
+        <p>Respecto de la naturaleza independiente del estudiante, se aplican los artículos 23 y 24 del Código Sustantivo del Trabajo y el artículo 53 de la Constitución Política. El artículo 23 del Código Sustantivo del Trabajo identifica los elementos esenciales del contrato de trabajo: prestación personal del servicio, remuneración y subordinación continuada; el artículo 24 establece la presunción de contrato de trabajo cuando existe prestación personal del servicio. Por ello, UNIDEV debe aclarar que el estudiante actúa como prestador independiente, pero también debe advertir que, si la empresa impone horarios rígidos, exclusividad, subordinación, permanencia o integración a su estructura ordinaria, la autoridad competente podría declarar la existencia de una relación laboral.</p>
+        <p>Desde el punto de vista de la contratación civil y comercial, el capítulo se soporta en el Código Civil, artículos 1502, 1530, 1602, 1603 y 1626, y en el Código de Comercio, artículo 871. Estas normas permiten que las partes se obliguen válidamente, pacten condiciones para la ejecución y pago de los proyectos, definan obligaciones sujetas a condición, acuerden comisiones, exijan cumplimiento y ejecuten el contrato de buena fe. El artículo 1602 del Código Civil establece que el contrato legalmente celebrado es ley para las partes, mientras que el artículo 1603 exige su ejecución de buena fe; por su parte, el artículo 871 del Código de Comercio exige buena fe en la celebración y ejecución de contratos mercantiles.</p>
+        <p>En materia de obligaciones, ética y seguridad digital del estudiante, se aplica la Ley 1273 de 2009, que incorporó al Código Penal colombiano delitos contra la protección de la información y de los datos. Esta norma resulta relevante para prohibir el acceso abusivo a sistemas informáticos, la violación de datos personales, la interceptación de datos informáticos, el daño informático, el uso de software malicioso, la suplantación en entornos digitales y demás conductas que afecten la seguridad de los sistemas o la información de empresas, estudiantes o terceros. Por ello, UNIDEV puede calificar como faltas graves el plagio, la suplantación, el uso de software robado, la inclusión de malware, la manipulación de entregables, la retención abusiva de claves o el uso no autorizado de información empresarial.</p>
+        <p>En relación con la propiedad intelectual del estudiante y de la empresa, son aplicables la Constitución Política, artículo 61; la Ley 23 de 1982, artículos 1, 12, 30 y 183; la Decisión Andina 351 de 1993, artículos 4, 11, 13, 23, 31 y 54; y la Ley 1915 de 2018 en lo pertinente. La Ley 23 protege las obras literarias, científicas y artísticas, y reconoce derechos patrimoniales y morales de autor; la Decisión Andina 351 protege obras como programas de ordenador, bases de datos, diseños, contenidos digitales y demás creaciones intelectuales. Por ello, el estudiante conserva sus derechos morales, mientras que los derechos patrimoniales se transfieren a la empresa de forma automática con el pago, siendo los presentes Términos y Condiciones el instrumento escrito que sustenta dicha cesión.</p>
+        <p>En cuanto a componentes previos, librerías, frameworks, APIs, recursos gráficos, plantillas, modelos de inteligencia artificial y software de terceros, el capítulo se fundamenta en la Ley 23 de 1982 y la Decisión Andina 351 de 1993. Estas normas reconocen que el titular de derechos puede autorizar o prohibir la reproducción, transformación, distribución, comunicación pública o cualquier forma de explotación de la obra. Por esta razón, el estudiante debe informar si el entregable incorpora código propio preexistente, software de código abierto, librerías con licencias restrictivas o recursos de terceros, ya que dichos elementos pueden limitar el uso, modificación, comercialización o sublicenciamiento del entregable por parte de la empresa.</p>
+        <p>En materia de confidencialidad, secretos empresariales e información reservada, se aplica la Decisión Andina 486 de 2000, artículos 260 a 264, que regulan la protección del secreto empresarial y la obligación del tercero autorizado de no divulgar información confidencial. También resulta aplicable la Ley 256 de 1996, artículo 16, sobre violación de secretos. Estas normas justifican que el estudiante deba mantener reserva sobre bases de datos, usuarios, contraseñas, código fuente, documentos internos, información de clientes, información financiera, estrategias de negocio, información contractual pública o privada y datos personales que conozca por razón del proyecto.</p>
+        <p>En relación con el pago al estudiante y la comisión de UNIDEV, se aplican el Código Civil, artículos 1530, 1602, 1603 y 1626; la Ley 527 de 1999, artículos 14 y 15; y la Ley 1480 de 2011, artículos 23, 26, 50 y 51, cuando la operación se realiza por medios electrónicos y existe deber de información clara sobre precios, tarifas, comisiones, condiciones del servicio y reversión de pagos. Esto permite que UNIDEV pacte comisiones, descuentos, cargos de pasarela, retenciones y reglas de liberación del pago, siempre que el estudiante conozca previamente el valor bruto, la comisión aplicable y el valor neto estimado a recibir.</p>
+        <p>Finalmente, en materia de seguridad social, obligaciones tributarias, cuenta de cobro y facturación, son aplicables el Decreto 1273 de 2018, que regula el pago mes vencido de cotizaciones al Sistema de Seguridad Social Integral de trabajadores independientes, y el Estatuto Tributario, artículos 615 y 616-1, sobre obligación de expedir factura o documento equivalente y sistema de facturación. Por ello, cuando el estudiante actúe como prestador independiente, deberá asumir las obligaciones tributarias, de seguridad social y de facturación que le correspondan según la naturaleza del servicio, el monto del ingreso, su calidad tributaria y las exigencias legales o contractuales del proyecto. UNIDEV podrá solicitar RUT, cuenta de cobro, factura electrónica, certificación bancaria o soportes de seguridad social cuando sean necesarios para liberar pagos o soportar la operación.</p>
+      </section>
+
+      <div class="tc__chapter">
+        <p class="tc__chapter-eyebrow">CAPÍTULO III</p>
+        <h2 class="tc__chapter-title">TÉRMINOS PARA ESTUDIANTES PRESTADORES</h2>
+      </div>
+
+      <section id="registro-estudiante" class="tc__section">
+        <h2 class="tc__section-title">19. Registro del estudiante</h2>
+        <p>El estudiante deberá crear una cuenta y suministrar información veraz, completa y actualizada, incluyendo:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Correo electrónico institucional con dominio de una universidad habilitada por UNIDEV. El dominio del correo es el mecanismo de verificación de la condición de estudiante activo; sin este requisito el registro no procede.</li>
+          <li>Consentimiento expreso: aceptación de los Términos y Condiciones y la Política de Privacidad de UNIDEV.</li>
+          <li>Fecha de nacimiento: el estudiante debe acreditar mayoría de edad. El acceso a la plataforma está restringido a mayores de 18 años.</li>
+          <li>Cédula de ciudadanía: ratifica la mayoría de edad y la identidad del estudiante, en el marco del principio de buena fe.</li>
+        </ol>
+        <p>Los campos adicionales del perfil como carrera, semestre, biografía, habilidades, ciudad, enlaces y disponibilidad para proyectos son opcionales y no constituyen requisito para el registro ni para el acceso a la plataforma.</p>
+        <p>UNIDEV valida la condición de estudiante activo mediante el dominio del correo institucional. La verificación de mayoría de edad y cédula son requisitos de habilitación que el estudiante debe completar antes de poder operar en la plataforma. El incumplimiento de cualquiera de estos gates bloqueará el acceso a las funcionalidades de UNIDEV.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica la Ley 1581 de 2012, artículos 3, 4, 8, 9, 12 y 17, porque el registro del estudiante implica recolección, almacenamiento, uso y circulación de datos personales como nombre, documento, correo, teléfono, universidad, programa académico, portafolio y datos de pago. El artículo 3 define dato personal, titular, responsable y encargado del tratamiento; el artículo 4 establece los principios del tratamiento; el artículo 8 reconoce los derechos del titular; el artículo 9 exige autorización previa e informada; el artículo 12 impone el deber de informar al titular; y el artículo 17 señala los deberes del responsable del tratamiento. También aplica la Ley 527 de 1999, artículos 10, 14 y 15, porque el registro, aceptación de términos y creación de cuenta pueden constar como mensajes de datos con valor jurídico y probatorio.</p>
+        </div>
+      </section>
+
+      <section id="naturaleza-estudiante" class="tc__section">
+        <h2 class="tc__section-title">20. Naturaleza independiente del estudiante</h2>
+        <p>El estudiante actúa como prestador independiente. No existe contrato laboral entre el estudiante y UNIDEV. Tampoco existirá contrato laboral con la empresa por el solo hecho de ejecutar un proyecto mediante la plataforma.</p>
+        <p>El estudiante conserva autonomía técnica, intelectual y metodológica para desarrollar el encargo, dentro del alcance, plazo y criterios de calidad pactados.</p>
+        <p>Cuando el proyecto implique una prestación personal prolongada, subordinación, horario, exclusividad o integración a la estructura de la empresa, el estudiante deberá reportarlo a UNIDEV y podrá exigir que la empresa adopte la modalidad contractual legal correspondiente.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica el Código Sustantivo del Trabajo, artículos 23 y 24. El artículo 23 establece los elementos esenciales del contrato de trabajo: prestación personal del servicio, subordinación o dependencia y salario. El artículo 24 consagra la presunción de que toda relación de trabajo personal está regida por un contrato de trabajo, salvo prueba en contrario. También aplica la Constitución Política, artículo 53, que reconoce el principio de primacía de la realidad sobre las formalidades. De manera complementaria, aplican el Código Civil, artículos 1602 y 1603, y el Código de Comercio, artículo 871, sobre fuerza obligatoria del contrato y buena fe contractual.</p>
+        </div>
+      </section>
+
+      <section id="obligaciones-estudiante" class="tc__section">
+        <h2 class="tc__section-title">21. Obligaciones del estudiante</h2>
+        <p>El estudiante se obliga a:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Presentar información real sobre sus capacidades.</li>
+          <li>Postularse únicamente a proyectos que pueda ejecutar.</li>
+          <li>Cumplir el alcance, plazo y entregables aceptados.</li>
+          <li>Actuar con buena fe, diligencia, transparencia y ética.</li>
+          <li>No plagiar, copiar ni entregar trabajos de terceros como propios.</li>
+          <li>No incorporar código, diseños, imágenes, plantillas, datos o software sin licencia válida.</li>
+          <li>Mantener confidencialidad sobre información de la empresa.</li>
+          <li>No divulgar datos, documentos, credenciales, bases de datos o secretos empresariales.</li>
+          <li>No introducir malware, puertas traseras, código malicioso, vulnerabilidades intencionales o herramientas de espionaje.</li>
+          <li>Documentar el trabajo cuando sea necesario.</li>
+          <li>Subir el proyecto completo a la plataforma de UNIDEV. El despliegue en el subdominio habilitado, la liberación del pago y la entrega del código fuente a la empresa son procesos automáticos gestionados por UNIDEV una vez la empresa realice el pago y apruebe el producto desplegado.</li>
+          <li>Informar oportunamente retrasos, bloqueos técnicos o riesgos.</li>
+          <li>Corregir defectos imputables dentro del alcance.</li>
+          <li>Aceptar expresamente los Términos y Condiciones propios de la Empresa antes de operar en un proyecto de dicha Empresa, conforme al mecanismo de aceptación en cascada establecido en el Capítulo II.</li>
+          <li>Respetar las políticas de UNIDEV y de la empresa cuando sean razonables, legales y no impliquen subordinación laboral.</li>
+        </ol>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica el Código Civil, artículos 1602 y 1603, porque el estudiante queda obligado a cumplir lo pactado y a ejecutar el contrato de buena fe. También aplica el Código de Comercio, artículo 871, sobre buena fe en los contratos mercantiles. En materia de propiedad intelectual, aplican la Ley 23 de 1982, artículos 1, 12 y 30, porque los entregables pueden ser obras protegidas por derecho de autor, como software, diseños, textos, contenidos, bases de datos, manuales y piezas digitales. En materia de seguridad informática, aplica la Ley 1273 de 2009, que incorporó delitos contra la protección de la información y de los datos, incluyendo el acceso abusivo a sistema informático y la violación de datos personales.</p>
+        </div>
+      </section>
+
+      <section id="etica-estudiante" class="tc__section">
+        <h2 class="tc__section-title">22. Ética profesional del estudiante</h2>
+        <p>El estudiante deberá actuar conforme a principios de honestidad, confidencialidad, responsabilidad, respeto, transparencia, seguridad digital y uso legítimo de la información.</p>
+        <p>Se consideran faltas graves:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Plagio.</li>
+          <li>Entrega de software robado o sin licencia.</li>
+          <li>Uso no autorizado de datos personales.</li>
+          <li>Divulgación de información confidencial.</li>
+          <li>Suplantación.</li>
+          <li>Manipulación de entregables.</li>
+          <li>Cobro externo para evadir la plataforma.</li>
+          <li>Abandono injustificado del proyecto.</li>
+          <li>Inclusión de código malicioso.</li>
+          <li>Retención abusiva de claves, repositorios o archivos.</li>
+          <li>Uso de información de la empresa para fines personales o comerciales no autorizados.</li>
+        </ol>
+        <p>Estas conductas podrán generar suspensión, cancelación de cuenta, no liberación del pago, reporte interno, reclamaciones civiles, denuncias o acciones legales.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica la Constitución Política, artículo 83, sobre presunción de buena fe en las actuaciones de los particulares. También aplica el Código Civil, artículo 1603, y el Código de Comercio, artículo 871, sobre ejecución contractual de buena fe. En materia de seguridad digital, aplica la Ley 1273 de 2009, especialmente los artículos 269A y 269F del Código Penal, relativos al acceso abusivo a sistema informático y a la violación de datos personales. En materia de propiedad intelectual, aplican la Ley 23 de 1982, artículos 1, 12 y 30, y la Decisión Andina 351 de 1993, artículos 4, 11 y 13.</p>
+        </div>
+      </section>
+
+      <section id="propiedad-intelectual" class="tc__section">
+        <h2 class="tc__section-title">23. Propiedad intelectual del estudiante y de la empresa</h2>
+        <p>El estudiante conserva sus derechos morales de autor sobre las obras que cree en el marco de los proyectos ejecutados mediante UNIDEV. Los derechos morales son perpetuos, irrenunciables e inalienables conforme a la Ley 23 de 1982 y la Decisión Andina 351 de 1993.</p>
+        <p>Al aceptar los presentes Términos y Condiciones y recibir el pago correspondiente al proyecto, el estudiante cede a la empresa los derechos patrimoniales sobre el entregable, incluyendo los derechos de reproducción, distribución, transformación, comunicación pública y cualquier otra modalidad de explotación. Esta cesión opera de forma automática con el pago y no requiere documento adicional, siendo los presentes Términos y Condiciones el instrumento escrito que la sustenta, conforme a la Ley 23 de 1982 y la Decisión Andina 351 de 1993.</p>
+        <p>La cesión cubre software, diseños, contenidos, recursos digitales, bases de datos, manuales, piezas gráficas, documentos técnicos y cualquier otra obra creada en el proyecto. No obstante, si el entregable incorpora componentes previos del estudiante, librerías de código abierto o recursos de terceros con licencias restrictivas, la empresa reconoce que dichos componentes pueden estar sujetos a condiciones de uso propias que limiten la explotación del entregable, conforme a lo declarado por el estudiante en el artículo 24.</p>
+        <p>Los presentes Términos y Condiciones constituyen el instrumento escrito de cesión de derechos patrimoniales exigido por la Ley 23 de 1982. La empresa podrá usar, reproducir, distribuir, transformar y explotar el entregable en cualquier territorio y por el tiempo que establezca la ley, sin restricción adicional salvo las derivadas de componentes de terceros informados conforme al artículo 24.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica la Constitución Política, artículo 61, que ordena al Estado proteger la propiedad intelectual. También aplica la Ley 23 de 1982, artículos 1, 12, 30 y 183. El artículo 30 reconoce los derechos morales del autor como perpetuos, inalienables e irrenunciables. El artículo 183, modificado por el artículo 30 de la Ley 1450 de 2011, establece que los derechos patrimoniales de autor o conexos pueden transferirse por acto entre vivos, pero dicha transferencia queda limitada a las modalidades de explotación, tiempo y territorio determinados contractualmente; además, los actos de transferencia deben constar por escrito como condición de validez. También aplica la Decisión Andina 351 de 1993, artículos 4, 11, 13, 23 y 31, sobre protección de obras, derechos morales, derechos patrimoniales, programas de ordenador y licencias o autorizaciones de uso.</p>
+        </div>
+      </section>
+
+      <section id="componentes-previos" class="tc__section">
+        <h2 class="tc__section-title">24. Componentes previos, librerías y código abierto</h2>
+        <p>El estudiante deberá informar si el entregable incorpora:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Librerías open source.</li>
+          <li>Frameworks.</li>
+          <li>Plantillas.</li>
+          <li>Código propio preexistente.</li>
+          <li>APIs de terceros.</li>
+          <li>Imágenes, íconos o recursos de bancos digitales.</li>
+          <li>Modelos de inteligencia artificial.</li>
+          <li>Software sujeto a licencias restrictivas.</li>
+        </ol>
+        <p>La empresa acepta que algunos componentes pueden estar sujetos a licencias externas que limitan su uso, modificación, distribución, explotación comercial o sub-licenciamiento.</p>
+        <p>El estudiante será responsable por ocultar, falsear o usar indebidamente materiales de terceros.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica la Ley 23 de 1982, artículos 1 y 12, sobre protección de obras y derechos patrimoniales. También aplica la Decisión Andina 351 de 1993, artículos 13 y 23, porque el autor o titular tiene derecho a autorizar o prohibir reproducción, distribución, transformación y demás formas de explotación de la obra; además, los programas de ordenador se protegen como obras literarias. La misma Decisión Andina 351, artículo 54, establece que ninguna autoridad ni persona natural o jurídica podrá autorizar la utilización de una obra si el usuario no cuenta con autorización previa y expresa del titular del derecho.</p>
+        </div>
+      </section>
+
+      <section id="confidencialidad-estudiante" class="tc__section">
+        <h2 class="tc__section-title">25. Confidencialidad del estudiante</h2>
+        <p>El estudiante se obliga a mantener en reserva toda información técnica, financiera, comercial, estratégica, operativa, personal o institucional que reciba de la empresa o de UNIDEV.</p>
+        <p>La obligación de confidencialidad incluye:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Bases de datos.</li>
+          <li>Usuarios y contraseñas.</li>
+          <li>Código fuente.</li>
+          <li>Documentos internos.</li>
+          <li>Información de clientes.</li>
+          <li>Información financiera.</li>
+          <li>Secretos empresariales.</li>
+          <li>Estrategias de negocio.</li>
+          <li>Información de contratación pública o privada.</li>
+          <li>Información protegida por datos personales.</li>
+        </ol>
+        <p>La confidencialidad se mantendrá durante la ejecución del proyecto y por un término de 3 años después de finalizado, o indefinidamente cuando se trate de secretos empresariales o datos personales.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica la Ley 1581 de 2012, artículos 4, 17 y 18, sobre principios del tratamiento y deberes de responsables y encargados en la protección de datos personales. También aplica la Decisión Andina 486 de 2000, artículos 260, 261, 262, 263 y 264, sobre secreto empresarial, información no divulgada, adquisición contraria a los usos comerciales honestos, duración de la protección y obligación de no divulgar secretos empresariales transmitidos o autorizados a un tercero. De forma complementaria, aplica la Ley 256 de 1996, artículo 16, sobre violación de secretos.</p>
+        </div>
+      </section>
+
+      <section id="pago-estudiante" class="tc__section">
+        <h2 class="tc__section-title">26. Pago al estudiante</h2>
+        <p>El estudiante tendrá derecho al pago cuando:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Haya aceptado formalmente el proyecto.</li>
+          <li>Haya entregado el trabajo conforme al alcance pactado.</li>
+          <li>La empresa apruebe el producto desplegado en el subdominio o venza el plazo de revisión sin objeción técnica justificada.</li>
+          <li>No exista controversia pendiente.</li>
+          <li>Se hayan descontado comisiones, retenciones, cargos de pasarela y demás valores previamente aceptados.</li>
+        </ol>
+        <p>El pago se realizará mediante el proveedor de pagos habilitado por UNIDEV, bajo el modelo marketplace, por lo que los recursos son administrados directamente por dicho proveedor. UNIDEV emitirá la instrucción de liberación al proveedor una vez se cumplan las condiciones del proyecto, sujeto a los tiempos de procesamiento, validación, disponibilidad, comisiones, impuestos y políticas propias del proveedor de pagos.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica el Código Civil, artículos 1530, 1602, 1603 y 1626. El artículo 1530 permite pactar obligaciones condicionales; el artículo 1602 establece que el contrato es ley para las partes; el artículo 1603 exige ejecución de buena fe; y el artículo 1626 define el pago como la prestación de lo que se debe. También aplica la Ley 527 de 1999, artículos 14 y 15, porque la aceptación del proyecto, la entrega, la aprobación y la liberación del pago pueden documentarse electrónicamente. En materia de comercio electrónico y pagos digitales, aplica la Ley 1480 de 2011, artículos 50 y 51, sobre deberes de los proveedores en comercio electrónico y reversión del pago.</p>
+        </div>
+      </section>
+
+      <section id="comision-estudiante" class="tc__section">
+        <h2 class="tc__section-title">27. Comisión o tarifa aplicable al estudiante</h2>
+        <p>UNIDEV podrá cobrar al estudiante una comisión por uso de la plataforma, acceso a oportunidades, administración del proyecto, trazabilidad, soporte, gestión de pago, validación de entregables o servicios complementarios.</p>
+        <p>La comisión deberá ser informada antes de que el estudiante acepte el proyecto. Podrá consistir en:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Porcentaje sobre el valor del proyecto.</li>
+          <li>Tarifa fija.</li>
+          <li>Tarifa mixta.</li>
+          <li>Membresía.</li>
+          <li>Comisión por liberación exitosa del pago.</li>
+          <li>Comisión por servicios adicionales.</li>
+        </ol>
+        <p>El estudiante acepta que UNIDEV descuente dicha comisión del valor a liberar antes de emitir la instrucción de pago al proveedor.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica el Código Civil, artículos 1602 y 1603, porque la comisión aceptada por el estudiante hace parte del acuerdo contractual y debe ejecutarse de buena fe. También aplica la Ley 1480 de 2011, artículos 23, 26 y 50, en cuanto exige información clara, suficiente y previa sobre precios, tarifas, costos, comisiones y condiciones económicas en operaciones realizadas mediante comercio electrónico. La Ley 527 de 1999, artículos 14 y 15, respalda la aceptación electrónica de dichas tarifas o comisiones.</p>
+        </div>
+      </section>
+
+      <section id="seguridad-social" class="tc__section">
+        <h2 class="tc__section-title">28. Seguridad social y obligaciones tributarias del estudiante</h2>
+        <p>Cuando el estudiante actúe como prestador independiente, será responsable de sus obligaciones tributarias, seguridad social, facturación, cuenta de cobro, RUT, aportes y demás cargas que le resulten aplicables.</p>
+        <p>En Colombia existen reglas específicas sobre afiliación y cotización de independientes y contratistas de prestación de servicios, incluyendo disposiciones sobre riesgos laborales y pago mes vencido de aportes al Sistema de Seguridad Social Integral.</p>
+        <p>UNIDEV podrá solicitar soportes de pago de seguridad social, RUT, cuenta de cobro, factura electrónica o documentos equivalentes cuando la ley, la empresa o el tipo de proyecto lo exijan.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica el Decreto 1273 de 2018, que modificó reglas del Decreto 780 de 2016 y estableció que el pago de cotizaciones al Sistema de Seguridad Social Integral de los trabajadores independientes se realiza mes vencido, por periodos mensuales, a través de la PILA y teniendo en cuenta los ingresos percibidos en el periodo de cotización. También aplican el Estatuto Tributario, artículos 615 y 616-1, sobre obligación de expedir factura o documento equivalente y sistema de facturación. Cuando el estudiante actúe como prestador independiente y esté legalmente obligado, podrá requerirse RUT, cuenta de cobro, factura electrónica, documento equivalente, certificación bancaria o soportes de seguridad social.</p>
+        </div>
+      </section>
+      </ng-container>
+
+      <!-- CAPÍTULO IV -->
+      <ng-container *ngIf="activeChapter === 4">
+      <section id="marco-normativo-unidev" class="tc__section">
+        <h2 class="tc__section-title">Marco normativo</h2>
+        <p>El presente capítulo se fundamenta en el régimen jurídico colombiano aplicable a las plataformas tecnológicas de contacto, intermediación digital, comercio electrónico, contratación privada, protección al consumidor, tratamiento de datos personales, responsabilidad contractual, propiedad intelectual, seguridad informática, contratación pública y cobro de comisiones por servicios digitales.</p>
+        <p>UNIDEV actúa como una plataforma tecnológica que facilita el registro de usuarios, publicación de proyectos, postulación de estudiantes, contacto entre empresas y estudiantes, trazabilidad de actuaciones, habilitación de pagos, administración de reglas internas de liberación de recursos, cobro de comisiones y gestión operativa de controversias. Esta función debe entenderse bajo un modelo de facilitación tecnológica, sin que ello implique garantía absoluta del resultado, suministro de personal, relación laboral, certificación plena de idoneidad, responsabilidad por hechos de terceros o asunción de obligaciones que correspondan directamente a empresas, estudiantes, pasarelas de pago o entidades públicas.</p>
+        <p>En materia de comercio electrónico y plataformas de contacto, resulta aplicable la Ley 1480 de 2011, especialmente los artículos 5, 23, 24, 42, 43, 49, 50 y 51, que regulan las definiciones de proveedor, consumidor y servicio, el deber de información clara, suficiente, verificable y comprensible, las cláusulas abusivas, la protección en ventas a distancia y los deberes especiales de quienes ofrecen productos o servicios por medios electrónicos. Estas normas justifican que UNIDEV informe de manera expresa cuál es su rol, qué servicios presta, cuáles son sus tarifas, qué responsabilidades asume, cuáles son sus límites y cuáles son los canales para reclamaciones o controversias.</p>
+        <p>Adicionalmente, debe tenerse en cuenta la Ley 2439 de 2024, que modificó disposiciones del Estatuto del Consumidor en materia de comercio electrónico e incorporó la noción de portal de contacto, entendido como una plataforma electrónica que pone en contacto a proveedores o productores con consumidores para concretar relaciones de consumo. Esta norma resulta relevante para UNIDEV en la medida en que su modelo conecta empresas con estudiantes prestadores, por lo que debe fortalecer los deberes de información, trazabilidad, claridad en las condiciones comerciales y tratamiento de devoluciones cuando exista una relación de consumo protegida.</p>
+        <p>En materia de contratación electrónica, mensajes de datos y prueba digital, el capítulo se soporta en la Ley 527 de 1999, artículos 2, 6, 7, 10, 14 y 15. Esta norma reconoce efectos jurídicos a los mensajes de datos, permite que la oferta y aceptación se expresen por medios electrónicos, y otorga valor probatorio a los registros digitales. Por ello, las actuaciones de UNIDEV, como registro de usuarios, publicación de proyectos, postulaciones, aprobaciones, reportes de incumplimiento, suspensión de usuarios, aceptación de comisiones y decisiones operativas, pueden documentarse electrónicamente y conservarse como evidencia válida.</p>
+        <p>Desde el punto de vista de la autonomía contractual, fuerza obligatoria del contrato y buena fe, se aplican los artículos 1602, 1603, 1604, 1613 y 1616 del Código Civil, así como el artículo 871 del Código de Comercio. Estas normas permiten que UNIDEV defina contractualmente su rol, obligaciones, limitaciones de responsabilidad, condiciones de uso, reglas de verificación, tarifas, comisiones, causales de suspensión y consecuencias por incumplimiento, siempre que no desconozca normas imperativas ni incurra en cláusulas abusivas. El artículo 871 del Código de Comercio exige que los contratos mercantiles se celebren y ejecuten de buena fe.</p>
+        <p>En cuanto a los eximentes y limitaciones de responsabilidad, resultan aplicables los artículos 64, 1604, 1613 y 1616 del Código Civil, que regulan fuerza mayor o caso fortuito, responsabilidad contractual y límites de indemnización. Sin embargo, estas cláusulas deben armonizarse con la Ley 1480 de 2011, artículos 42 y 43, que prohíben cláusulas abusivas en relaciones de consumo. Por tanto, UNIDEV puede limitar su responsabilidad frente a incumplimientos de estudiantes, empresas, terceros, pasarelas de pago o fallas externas, pero no puede exonerarse de responsabilidad por dolo, culpa grave, incumplimiento directo, vulneración de datos personales o desconocimiento de derechos irrenunciables del consumidor.</p>
+        <p>En materia de protección de datos personales y verificación de usuarios, se aplica la Ley 1581 de 2012, especialmente los artículos 3, 4, 8, 9, 12, 17 y 18. Estas disposiciones regulan los conceptos de dato personal, titular, responsable y encargado del tratamiento; los principios de legalidad, finalidad, libertad, veracidad, transparencia, acceso restringido, seguridad y confidencialidad; la autorización del titular; los derechos de los titulares; y los deberes de responsables y encargados. Esto fundamenta que UNIDEV pueda verificar identidad, portafolios, documentos, antecedentes básicos, experiencia e información académica, siempre que exista autorización, finalidad legítima y medidas razonables de seguridad.</p>
+        <p>En materia de propiedad intelectual, son aplicables la Constitución Política, artículo 61; la Ley 23 de 1982, artículos 1, 12, 30 y 183; y la Decisión Andina 351 de 1993, especialmente en lo relacionado con obras, software, derechos morales, derechos patrimoniales, autorizaciones y licencias. Estas normas justifican que UNIDEV limite su responsabilidad frente a infracciones de derechos de autor cometidas por estudiantes o empresas, siempre que haya establecido reglas claras sobre propiedad intelectual, uso de entregables, licencias, cesión de derechos, componentes previos y recursos de terceros.</p>
+        <p>En materia de seguridad informática, resulta aplicable la Ley 1273 de 2009, que incorporó delitos relacionados con la protección de la información y de los datos, como acceso abusivo a sistemas informáticos, violación de datos personales, interceptación de datos informáticos, daño informático, uso de software malicioso y suplantación. Esta regulación permite que UNIDEV establezca reglas de suspensión o cancelación de usuarios, reporte de incumplimientos y limitación de responsabilidad frente a conductas ilícitas cometidas por estudiantes, empresas o terceros externos.</p>
+        <p>En relación con las comisiones de plataforma, se aplican el Código Civil, artículos 1602 y 1603, el Código de Comercio, artículo 871, y la Ley 1480 de 2011, artículos 23, 26 y 50. Estas normas sustentan la posibilidad de cobrar tarifas por publicación de proyectos, acceso a perfiles, gestión transaccional, soporte, trazabilidad, administración del proceso de selección, liberación condicionada del pago y servicios premium, siempre que la comisión sea informada previamente de manera clara, completa y verificable. En consecuencia, la empresa y el estudiante deben conocer el valor bruto, descuentos, cargos de pasarela, comisiones, retenciones aplicables y valor neto aproximado antes de aceptar el proyecto o realizar el pago.</p>
+        <p>Respecto de la no garantía de resultado, el marco normativo se apoya en los artículos 1604 y 1616 del Código Civil, que permiten diferenciar el estándar de responsabilidad y los perjuicios indemnizables conforme al tipo de obligación asumida. UNIDEV debe ser entendida como obligada a desplegar medios razonables de funcionamiento, disponibilidad, trazabilidad y gestión operativa, pero no como garante de que el estudiante sea seleccionado, de que la empresa consiga siempre un prestador idóneo, de que el software quede libre de todo error, o de que el proyecto genere beneficios económicos o institucionales específicos.</p>
+        <p>Cuando participen empresas públicas o entidades estatales, son aplicables la Ley 80 de 1993, artículos 3, 23, 24, 25, 26 y 32, la Ley 1150 de 2007 y el Decreto 1082 de 2015. Estas normas sustentan que UNIDEV no sea responsable por el uso de la plataforma por entidades públicas sin cumplimiento del régimen de contratación estatal, estudios previos, disponibilidad presupuestal, SECOP, selección objetiva, supervisión, interventoría, régimen de inhabilidades e incompatibilidades o manuales internos de contratación. La contratación pública conserva su régimen propio, aun cuando el contacto o la gestión se realice mediante una plataforma tecnológica.</p>
+        <p>Finalmente, el capítulo debe interpretarse bajo el principio de buena fe contractual, transparencia, información clara y distribución razonable de riesgos. UNIDEV puede establecer límites de responsabilidad, reglas de verificación, comisiones y mecanismos internos de controversia, pero dichas cláusulas deben ser visibles, aceptadas previamente, proporcionales y compatibles con normas imperativas de protección al consumidor, protección de datos personales, derecho de autor, contratación estatal, comercio electrónico y responsabilidad contractual.</p>
+      </section>
+
+      <div class="tc__chapter">
+        <p class="tc__chapter-eyebrow">CAPÍTULO IV</p>
+        <h2 class="tc__chapter-title">TÉRMINOS PARA UNIDEV COMO PLATAFORMA FACILITADORA</h2>
+      </div>
+
+      <section id="rol-unidev" class="tc__section">
+        <h2 class="tc__section-title">29. Rol de UNIDEV</h2>
+        <p>UNIDEV actúa como plataforma tecnológica de facilitación. Sus funciones pueden incluir:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Registrar usuarios.</li>
+          <li>Publicar proyectos.</li>
+          <li>Permitir postulaciones.</li>
+          <li>Facilitar contacto entre empresa y estudiante.</li>
+          <li>Servir como canal de trazabilidad.</li>
+          <li>Habilitar pagos mediante el proveedor de pagos habilitado bajo modelo marketplace, sin recibir ni administrar directamente los recursos de los usuarios.</li>
+          <li>Emitir instrucciones de liberación de pago al proveedor de pagos una vez se cumplan las condiciones del proyecto.</li>
+          <li>Desplegar automáticamente el proyecto del estudiante en un subdominio habilitado por UNIDEV una vez el estudiante lo suba a la plataforma. El acceso de la empresa al subdominio queda habilitado únicamente después de que esta realice el pago.</li>
+          <li>Cobrar comisiones de plataforma.</li>
+          <li>Recibir reportes de incumplimiento.</li>
+          <li>Suspender usuarios por violación de términos.</li>
+          <li>Facilitar mecanismos de solución interna de controversias.</li>
+        </ol>
+        <p>UNIDEV no garantiza la obtención de proyectos para estudiantes ni la disponibilidad permanente de estudiantes para empresas.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica la Ley 1480 de 2011, artículos 5, 23, 24 y 50, porque UNIDEV actúa como proveedor de una plataforma digital y debe informar de manera clara su identidad, funciones, condiciones del servicio, medios de contacto, precio, reglas de operación y condiciones de comercio electrónico. También aplica la Ley 527 de 1999, artículos 2, 10, 14 y 15, en cuanto las actuaciones dentro de la plataforma pueden realizarse mediante mensajes de datos con valor jurídico y probatorio. De igual forma, aplican el Código Civil, artículos 1602 y 1603, y el Código de Comercio, artículo 871, sobre fuerza obligatoria del contrato y buena fe contractual.</p>
+        </div>
+      </section>
+
+      <section id="eximentes-responsabilidad" class="tc__section">
+        <h2 class="tc__section-title">30. Eximentes y limitaciones de responsabilidad de UNIDEV</h2>
+        <p>UNIDEV no será responsable por:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Incumplimientos técnicos, contractuales o éticos del estudiante.</li>
+          <li>Incumplimientos de pago, revisión o aprobación de la empresa.</li>
+          <li>Información falsa suministrada por usuarios.</li>
+          <li>Relación laboral que se configure por conducta directa de la empresa y el estudiante.</li>
+          <li>Uso indebido de entregables después de aprobados.</li>
+          <li>Infracción de derechos de autor cometida por estudiantes o empresas.</li>
+          <li>Pérdida de información causada por usuarios.</li>
+          <li>Fallas de servidores, internet, dispositivos, navegadores o terceros.</li>
+          <li>Bloqueos, retenciones, contracargos, validaciones o decisiones del proveedor de pagos habilitado por UNIDEV.</li>
+          <li>Daños indirectos, lucro cesante, pérdida de oportunidad, pérdida de datos, pérdida reputacional o afectaciones comerciales derivadas del uso de la plataforma, salvo culpa grave o dolo probado de UNIDEV.</li>
+          <li>Disputas externas entre empresa y estudiante no sometidas a los canales de UNIDEV.</li>
+          <li>Uso de UNIDEV por entidades públicas sin cumplimiento del régimen de contratación estatal.</li>
+        </ol>
+        <p>UNIDEV responderá únicamente por fallas directamente imputables a la plataforma y dentro de los límites permitidos por la legislación colombiana.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica el Código Civil, artículos 64, 1602, 1603, 1604, 1613 y 1616, sobre fuerza mayor o caso fortuito, fuerza obligatoria del contrato, buena fe, responsabilidad contractual y límites de indemnización. También aplica la Ley 1480 de 2011, artículos 42 y 43, sobre cláusulas abusivas, por lo cual las limitaciones de responsabilidad no pueden desconocer derechos mínimos del consumidor, excluir responsabilidad por dolo o culpa grave ni imponer renuncias irrazonables. En materia de datos personales aplica la Ley 1581 de 2012, artículos 17 y 18, sobre deberes de responsables y encargados. En propiedad intelectual aplica la Ley 23 de 1982, artículos 1, 12, 30 y 183, y en delitos informáticos la Ley 1273 de 2009.</p>
+        </div>
+      </section>
+
+      <section id="no-garantia" class="tc__section">
+        <h2 class="tc__section-title">31. No garantía de resultado</h2>
+        <p>UNIDEV no garantiza que:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>El estudiante sea seleccionado.</li>
+          <li>La empresa consiga siempre un prestador idóneo.</li>
+          <li>El proyecto genere resultados comerciales, financieros o institucionales específicos.</li>
+          <li>El software quede libre de todo error, vulnerabilidad o incompatibilidad.</li>
+          <li>La empresa obtenga beneficios económicos por el entregable.</li>
+          <li>El estudiante obtenga ingresos permanentes.</li>
+          <li>Las partes mantengan relación posterior.</li>
+        </ol>
+        <p>La obligación de UNIDEV es de medio, no de resultado, salvo compromisos específicos asumidos por escrito.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica el Código Civil, artículos 1602, 1603, 1604 y 1616, porque las partes pueden delimitar el alcance de sus obligaciones, su estándar de diligencia y las consecuencias del incumplimiento. También aplica la Ley 1480 de 2011, artículos 7, 23, 42 y 43, porque en relaciones de consumo la información debe ser clara y las cláusulas no pueden excluir garantías legales ni resultar abusivas.</p>
+        </div>
+      </section>
+
+      <section id="verificacion-limitada" class="tc__section">
+        <h2 class="tc__section-title">32. Verificación limitada</h2>
+        <p>UNIDEV podrá realizar verificaciones razonables sobre usuarios, identidad, portafolios, documentos, antecedentes básicos, experiencia o información académica. Sin embargo, dichas verificaciones no constituyen certificación absoluta de idoneidad, solvencia, legalidad, experiencia, calidad profesional o capacidad de cumplimiento.</p>
+        <p>La empresa conserva el deber de revisar el perfil del estudiante antes de contratarlo. El estudiante conserva el deber de revisar las condiciones del proyecto antes de aceptarlo.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica la Ley 1581 de 2012, artículos 3, 4, 8, 9, 12, 17 y 18, porque la verificación de identidad, antecedentes básicos, portafolio, datos académicos y documentos implica tratamiento de datos personales. También aplica la Ley 1480 de 2011, artículos 23 y 50, por el deber de información clara en plataformas de comercio electrónico. De igual forma, aplican el Código Civil, artículo 1603, y el Código de Comercio, artículo 871, por el principio de buena fe.</p>
+        </div>
+      </section>
+
+      <section id="comision-empresa" class="tc__section">
+        <h2 class="tc__section-title">33. Comisión de plataforma a la empresa</h2>
+        <p>UNIDEV podrá cobrar a la empresa una comisión o tarifa por:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Publicación de proyectos.</li>
+          <li>Acceso a perfiles.</li>
+          <li>Uso de la plataforma.</li>
+          <li>Gestión transaccional.</li>
+          <li>Administración del proceso de selección.</li>
+          <li>Acompañamiento operativo.</li>
+          <li>Soporte.</li>
+          <li>Trazabilidad.</li>
+          <li>Liberación condicionada del pago.</li>
+          <li>Servicios premium.</li>
+        </ol>
+        <p>La comisión será informada antes de la aceptación del proyecto o antes del pago. La empresa acepta que dicha comisión es independiente del valor pactado con el estudiante y puede no ser reembolsable cuando corresponda a servicios efectivamente prestados por UNIDEV.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica la Ley 1480 de 2011, artículos 23, 24, 26, 47, 50 y 51, porque la empresa debe conocer previamente el precio, tarifa, comisión, cargos adicionales, condiciones de pago, retracto y reversión cuando corresponda. También aplica la Ley 2439 de 2024, artículos 1, 2, 3, 4 y 5, en cuanto modifica el marco de protección del consumidor en comercio electrónico y reglas de devolución de dinero. En contratación electrónica aplica la Ley 527 de 1999, artículos 14 y 15.</p>
+        </div>
+      </section>
+
+      <section id="comision-plataforma-estudiante" class="tc__section">
+        <h2 class="tc__section-title">34. Comisión de plataforma al estudiante</h2>
+        <p>UNIDEV podrá descontar del pago del estudiante una comisión previamente informada y aceptada. El valor neto a recibir por el estudiante será el resultado de restar:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Comisión de UNIDEV.</li>
+          <li>Cargos del proveedor de pagos habilitado por UNIDEV.</li>
+          <li>Retenciones tributarias aplicables.</li>
+          <li>Descuentos autorizados.</li>
+          <li>Ajustes por controversias resueltas.</li>
+          <li>Cualquier otro cargo informado previamente.</li>
+        </ol>
+        <p>UNIDEV deberá mostrar al estudiante, antes de aceptar el proyecto, el valor bruto, comisión estimada, descuentos aplicables y valor neto aproximado.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica el Código Civil, artículos 1602 y 1603, porque las comisiones y descuentos aceptados por el estudiante hacen parte del acuerdo contractual y deben ejecutarse de buena fe. También aplica la Ley 1480 de 2011, artículos 23, 26 y 50, por el deber de informar de manera clara el precio, comisiones, cargos, deducciones y condiciones económicas en comercio electrónico. En materia tributaria aplican el Estatuto Tributario, artículos 615 y 616-1, relacionados con facturación o documento equivalente cuando corresponda.</p>
+        </div>
+      </section>
+      </ng-container>
+
+      <!-- CAPÍTULO V -->
+      <ng-container *ngIf="activeChapter === 5">
+      <section id="marco-normativo-pagos" class="tc__section">
+        <h2 class="tc__section-title">Marco normativo</h2>
+        <p>El presente capítulo se fundamenta en el régimen jurídico colombiano aplicable a los pagos electrónicos, comercio electrónico, contratos digitales, obligaciones condicionales, protección del consumidor, reversión del pago, derecho de retracto, devolución de dinero, retenciones, facturación, soportes tributarios y responsabilidades derivadas del uso de pasarelas o proveedores externos de pago.</p>
+        <p>En el caso de UNIDEV, el sistema de pagos opera bajo el modelo marketplace del proveedor de pagos habilitado, de forma que los recursos son recibidos y administrados directamente por dicho proveedor, sin que UNIDEV reciba ni retenga dinero de los usuarios. UNIDEV únicamente emite instrucciones de liberación al proveedor una vez se cumplan las condiciones pactadas. Esta estructura debe redactarse como una condición contractual de liberación del pago, no como actividad financiera, fiduciaria, aseguradora, bancaria o de captación de recursos.</p>
+
+        <h3 class="tc__subsection-title">A. Contratación electrónica, mensajes de datos y prueba digital</h3>
+        <p>El Capítulo V se apoya en la Ley 527 de 1999, especialmente en los artículos 2, 10, 14 y 15. Estas normas reconocen los mensajes de datos, el comercio electrónico, la validez jurídica de las comunicaciones electrónicas, la admisibilidad probatoria de los mensajes de datos y la formación de contratos mediante oferta y aceptación electrónica.</p>
+        <p>En UNIDEV, esto justifica que pagos, comprobantes, aceptación de tarifas, aprobación de entregables, solicitudes de devolución, reclamaciones, controversias y liberaciones de pago puedan realizarse y conservarse mediante registros electrónicos. La plataforma debe guardar trazabilidad de la operación para acreditar quién pagó, cuándo pagó, qué proyecto se activó, cuándo se entregó, si fue aprobado y cuándo se liberó el pago.</p>
+
+        <h3 class="tc__subsection-title">B. Obligaciones condicionales y liberación del pago</h3>
+        <p>El sistema de retención y liberación se fundamenta en el Código Civil, especialmente en los artículos 1530, 1546, 1602, 1603 y 1626. El artículo 1530 permite pactar obligaciones condicionales; el artículo 1546 regula efectos del incumplimiento en contratos bilaterales; el artículo 1602 establece que el contrato legalmente celebrado es ley para las partes; el artículo 1603 exige ejecución de buena fe; y el artículo 1626 define el pago como la prestación de lo que se debe.</p>
+        <p>Esto permite que UNIDEV establezca que la instrucción de liberación al proveedor de pagos no se emite automáticamente, sino cuando se cumplan condiciones objetivas: despliegue del proyecto en el subdominio, aprobación expresa de la empresa, aceptación tácita por vencimiento del plazo de revisión, inexistencia de controversia, cumplimiento documental y disponibilidad de los recursos por parte del proveedor de pagos.</p>
+
+        <h3 class="tc__subsection-title">C. Protección al consumidor y comercio electrónico</h3>
+        <p>Cuando exista una relación de consumo, son aplicables las reglas de la Ley 1480 de 2011, especialmente los artículos 23, 26, 47, 50 y 51. Estas normas regulan el deber de información clara, veraz, suficiente, oportuna y verificable; la información pública de precios; el derecho de retracto; los deberes especiales en comercio electrónico; y la reversión del pago.</p>
+        <p>En consecuencia, UNIDEV debe informar antes del pago el valor del servicio del estudiante, comisión de la plataforma, cargos de procesamiento, impuestos, retenciones, condiciones de liberación, causales de devolución, derecho de retracto cuando proceda, causales de reversión y canales de reclamación.</p>
+
+        <h3 class="tc__subsection-title">D. Reversión del pago</h3>
+        <p>El Capítulo V se soporta especialmente en el artículo 51 de la Ley 1480 de 2011 y en el Decreto 587 de 2016, incorporado al régimen de comercio electrónico. Estas normas regulan la reversión del pago cuando la operación se realiza mediante mecanismos electrónicos y se presenta fraude, operación no solicitada, no prestación del servicio, prestación defectuosa o cobro no autorizado. El Decreto 587 de 2016 desarrolla el procedimiento y señala reglas para los participantes del proceso de pago; por ejemplo, contempla el trámite de reversión y términos para hacerla efectiva.</p>
+        <p>Para UNIDEV, esto justifica que el usuario pueda reclamar ante la plataforma y ante el emisor del instrumento de pago cuando se configure una causal legal. También permite que UNIDEV suspenda temporalmente la instrucción de liberación de recursos mientras se estudia una reclamación o se tramita una reversión ante el proveedor de pagos, banco, emisor o proveedor externo.</p>
+
+        <h3 class="tc__subsection-title">E. Derecho de retracto y devolución de dinero</h3>
+        <p>El derecho de retracto se fundamenta en el artículo 47 de la Ley 1480 de 2011, aplicable a ventas a distancia, métodos no tradicionales y ciertos escenarios de comercio electrónico. La Ley 2439 de 2024 actualizó el marco de protección del consumidor en comercio electrónico y reafirmó reglas sobre devolución de dinero en relaciones de consumo electrónicas.</p>
+        <p>En UNIDEV, esta regulación debe aplicarse con cuidado porque los proyectos pueden ser servicios digitales personalizados o desarrollos a la medida. Por eso, el capítulo debe indicar cuándo procede el retracto, cuándo puede limitarse por inicio autorizado del servicio o por personalización del encargo, y cómo se tramita la devolución cuando exista una relación de consumo protegida.</p>
+
+        <h3 class="tc__subsection-title">F. Retención condicionada y no apropiación de recursos</h3>
+        <p>La retención condicionada del pago se justifica jurídicamente como una figura contractual basada en la autonomía privada, la buena fe y las obligaciones sujetas a condición. No debe presentarse como fiducia, captación, actividad bancaria, aseguramiento del resultado ni garantía financiera universal. Su fundamento principal está en el Código Civil, artículos 1530, 1602 y 1603, y en las reglas de comercio electrónico de la Ley 1480 de 2011, artículos 50 y 51.</p>
+        <p>Esto permite que UNIDEV retenga operativamente el valor hasta que el estudiante entregue, la empresa apruebe o se resuelva una controversia. La retención no implica apropiación de recursos por parte de UNIDEV, sino administración de reglas internas de liberación conforme a los términos aceptados y a las condiciones del proveedor externo de pagos.</p>
+
+        <h3 class="tc__subsection-title">G. Suspensión temporal de pagos</h3>
+        <p>La suspensión temporal de la liberación del pago se fundamenta en los artículos 1546, 1602, 1603 y 1609 del Código Civil, relativos al incumplimiento, fuerza obligatoria del contrato, buena fe y excepción de contrato no cumplido. También se relaciona con normas sobre propiedad intelectual, datos personales y seguridad informática cuando la suspensión obedece a plagio, fraude, suplantación, uso de material no autorizado, falta de documentos o requerimientos de autoridad.</p>
+        <p>En UNIDEV, esta cláusula permite suspender la instrucción de liberación del pago cuando exista incumplimiento grave, disputa técnica, entregable incompleto, sospecha de fraude, bloqueo del proveedor de pagos, falta de factura, falta de RUT, ausencia de cuenta de cobro o requerimiento legal. La suspensión debe ser temporal, proporcional y justificada.</p>
+
+        <h3 class="tc__subsection-title">H. Impuestos, retenciones, facturación y soportes</h3>
+        <p>El Capítulo V también se fundamenta en el Estatuto Tributario, especialmente en los artículos 615 y 616-1, sobre obligación de expedir factura o documento equivalente y sistema de facturación. Estas normas permiten exigir factura electrónica, documento equivalente, cuenta de cobro, RUT, certificación bancaria y demás soportes que resulten necesarios según la calidad tributaria de las partes y la naturaleza de la operación.</p>
+        <p>Asimismo, cuando el estudiante actúe como prestador independiente, puede ser necesario verificar obligaciones de seguridad social. El Decreto 1273 de 2018 regula que las cotizaciones de trabajadores independientes al Sistema de Seguridad Social Integral se efectúan mes vencido, por periodos mensuales, a través de la PILA y teniendo en cuenta los ingresos percibidos en el periodo de cotización.</p>
+        <p>Esto justifica que UNIDEV pueda solicitar soportes antes de liberar pagos, practicar o reflejar retenciones, discriminar comisiones, impuestos, cargos de pasarela y demás conceptos aplicables.</p>
+
+        <h3 class="tc__subsection-title">I. Proveedor externo de pagos</h3>
+        <p>El uso del proveedor de pagos habilitado por UNIDEV se soporta en la libertad contractual y en las reglas de comercio electrónico. UNIDEV puede habilitar un proveedor externo para procesar pagos bajo modelo marketplace, pero debe informar que dicho proveedor tiene términos, políticas, comisiones, tiempos de disponibilidad, validaciones, bloqueos, contracargos y procedimientos propios. La Ley 1480 de 2011, artículos 23, 26 y 50, exige que esa información económica y operativa sea clara para el usuario antes de pagar.</p>
+        <p>Para UNIDEV, esta previsión es importante porque evita que la plataforma asuma responsabilidad automática por retenciones, bloqueos, validaciones, contracargos o tiempos internos definidos por el proveedor de pagos, siempre que haya informado previamente esas condiciones y no exista culpa directa de UNIDEV.</p>
+      </section>
+
+      <div class="tc__chapter">
+        <p class="tc__chapter-eyebrow">CAPÍTULO V</p>
+        <h2 class="tc__chapter-title">SISTEMA DE PAGOS, RETENCIÓN Y LIBERACIÓN</h2>
+      </div>
+
+      <section id="medio-pago" class="tc__section">
+        <h2 class="tc__section-title">35. Medio de pago</h2>
+        <p>Todos los pagos de la plataforma se realizarán mediante el proveedor de pagos habilitado por UNIDEV bajo modelo marketplace.</p>
+        <p>El usuario acepta que el proveedor de pagos habilitado por UNIDEV es un tercero externo y que sus operaciones están sujetas a sus propios términos, condiciones, políticas de seguridad, validaciones, comisiones, tiempos de disponibilidad, retenciones tributarias, contracargos y procedimientos internos. UNIDEV no recibe ni administra directamente los recursos de los usuarios.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica la Ley 527 de 1999, artículos 2, 10, 14 y 15, porque los pagos, confirmaciones, aceptaciones y soportes transaccionales pueden constar como mensajes de datos. También aplica la Ley 1480 de 2011, artículos 23, 26, 50 y 51, porque en comercio electrónico deben informarse los medios de pago, precio, condiciones, reversión y canales de reclamación. De igual forma aplica el Decreto 587 de 2016, artículos 2.2.2.51.1 a 2.2.2.51.13, que reglamentan la reversión del pago en operaciones de comercio electrónico.</p>
+        </div>
+      </section>
+
+      <section id="pago-empresa" class="tc__section">
+        <h2 class="tc__section-title">36. Pago de la empresa</h2>
+        <p>Una vez el estudiante suba el proyecto a la plataforma y UNIDEV lo despliegue en el subdominio habilitado, la empresa deberá pagar para obtener acceso al subdominio y verificar el producto funcionando. El pago incluye:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Valor del servicio del estudiante.</li>
+          <li>Comisión de UNIDEV a cargo de la empresa, si aplica.</li>
+          <li>Cargos de procesamiento, si aplican.</li>
+          <li>Impuestos o retenciones aplicables.</li>
+          <li>Cualquier tarifa adicional previamente informada.</li>
+        </ol>
+        <p>El pago de la empresa no se entenderá liberado al estudiante hasta que se cumplan las condiciones de entrega, revisión y aceptación.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica el Código Civil, artículos 1530, 1602, 1603 y 1626, porque las partes pueden pactar una obligación de pago condicionada a la entrega, revisión y aceptación del proyecto. También aplica la Ley 1480 de 2011, artículos 23, 26 y 50, porque la empresa debe conocer previamente el valor total, comisiones, cargos, impuestos, descuentos, condiciones de pago y condiciones de ejecución del servicio. En contratación electrónica, aplican la Ley 527 de 1999, artículos 14 y 15.</p>
+        </div>
+      </section>
+
+      <section id="retencion-condicionada" class="tc__section">
+        <h2 class="tc__section-title">37. Retención condicionada del pago</h2>
+        <p>La empresa acepta que el valor pagado por el proyecto podrá ser retenido operativamente por el proveedor de pagos hasta que se produzca alguna de las siguientes situaciones:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Aprobación expresa de la empresa.</li>
+          <li>Aceptación tácita por vencimiento del plazo de revisión.</li>
+          <li>Resolución favorable al estudiante en controversia.</li>
+          <li>Acuerdo directo entre empresa y estudiante.</li>
+          <li>Decisión operativa de UNIDEV conforme a evidencias disponibles.</li>
+        </ol>
+        <p>Este mecanismo no convierte a UNIDEV en entidad financiera, fiduciaria, aseguradora ni garante universal del proyecto. Los recursos son administrados por el proveedor de pagos bajo modelo marketplace; UNIDEV únicamente emite la instrucción de liberación conforme a las condiciones pactadas.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica el Código Civil, artículo 1530, sobre obligaciones condicionales; artículo 1546, sobre condición resolutoria por incumplimiento; artículos 1602 y 1603, sobre fuerza obligatoria y buena fe contractual. También aplica la Ley 527 de 1999, artículos 10, 14 y 15, porque la aprobación, silencio, controversia, entrega y decisión operativa pueden documentarse digitalmente. En comercio electrónico, aplican la Ley 1480 de 2011, artículos 50 y 51, y el Decreto 587 de 2016, sobre reversión del pago.</p>
+        </div>
+      </section>
+
+      <section id="liberacion-pago" class="tc__section">
+        <h2 class="tc__section-title">38. Liberación del pago al estudiante</h2>
+        <p>UNIDEV emitirá la instrucción de liberación al proveedor de pagos cuando:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>El proyecto aparezca como entregado.</li>
+          <li>La empresa apruebe el producto desplegado en el subdominio o guarde silencio vencido el término de revisión.</li>
+          <li>No exista controversia pendiente.</li>
+          <li>El estudiante haya cumplido requisitos documentales.</li>
+          <li>Se hayan descontado comisiones y cargos aplicables.</li>
+          <li>El proveedor de pagos permita la disponibilidad o transferencia de los recursos.</li>
+        </ol>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica el Código Civil, artículos 1530, 1602, 1603 y 1626, porque la liberación del pago opera como cumplimiento de una obligación condicionada a la entrega, aprobación y disponibilidad de recursos. También aplica la Ley 527 de 1999, artículos 10, 14 y 15, porque la entrega, aprobación y aceptación tácita pueden probarse mediante mensajes de datos. En materia de comercio electrónico y reversión aplica la Ley 1480 de 2011, artículos 50 y 51. En materia tributaria pueden aplicar el Estatuto Tributario, artículos 615 y 616-1, si se requiere factura o documento equivalente.</p>
+        </div>
+      </section>
+
+      <section id="no-liberacion" class="tc__section">
+        <h2 class="tc__section-title">39. No liberación temporal del pago</h2>
+        <p>UNIDEV podrá suspender temporalmente la liberación del pago cuando:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>La empresa reporte incumplimiento grave.</li>
+          <li>El entregable esté incompleto.</li>
+          <li>Exista disputa técnica.</li>
+          <li>Se detecte plagio, fraude o uso de material no autorizado.</li>
+          <li>Exista sospecha de suplantación.</li>
+          <li>El proveedor de pagos bloquee o retenga la operación.</li>
+          <li>Exista requerimiento legal o administrativo.</li>
+          <li>Falten documentos tributarios o de pago.</li>
+        </ol>
+        <p>La suspensión no implica apropiación de recursos por parte de UNIDEV.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica el Código Civil, artículos 1546, 1602, 1603 y 1609, sobre incumplimiento, fuerza obligatoria, buena fe y excepción de contrato no cumplido. En propiedad intelectual aplica la Ley 23 de 1982, artículos 1, 12, 30 y 183, cuando exista plagio o uso de material no autorizado. En seguridad informática aplica la Ley 1273 de 2009, si se detectan conductas como fraude, suplantación, acceso abusivo o afectación de sistemas. En protección de datos aplica la Ley 1581 de 2012, artículos 17 y 18. En facturación y soportes aplica el Estatuto Tributario, artículos 615 y 616-1.</p>
+        </div>
+      </section>
+
+      <section id="devoluciones" class="tc__section">
+        <h2 class="tc__section-title">40. Devoluciones a la empresa</h2>
+        <p>La devolución total o parcial del dinero a la empresa procederá cuando:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>El estudiante no entregue el proyecto.</li>
+          <li>El entregable sea sustancialmente distinto al alcance pactado.</li>
+          <li>UNIDEV determine incumplimiento grave del estudiante.</li>
+          <li>Las partes acuerden cancelar el proyecto.</li>
+          <li>Proceda una reversión del pago conforme a la ley.</li>
+          <li>Exista orden de autoridad competente.</li>
+          <li>El proveedor de pagos tramite una reversión, contracargo o devolución.</li>
+        </ol>
+        <p>Cuando la devolución corresponda a una relación de consumo, se aplicarán las reglas de la Ley 1480 de 2011, Decreto 587 de 2016 y Ley 2439 de 2024, según corresponda.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica la Ley 1480 de 2011, artículos 47, 50 y 51, sobre derecho de retracto, comercio electrónico y reversión del pago. También aplica el Decreto 587 de 2016, artículos 2.2.2.51.1 a 2.2.2.51.13, que reglamentan la reversión en operaciones de comercio electrónico. De igual manera, aplica la Ley 2439 de 2024, artículos 1, 2, 3, 4 y 5, que modifica el marco de protección al consumidor en comercio electrónico y reglas sobre devolución de dinero. En materia contractual aplican el Código Civil, artículos 1546, 1602 y 1603.</p>
+        </div>
+      </section>
+
+      <section id="reversion-pago" class="tc__section">
+        <h2 class="tc__section-title">41. Reversión del pago</h2>
+        <p>Cuando la operación se realice mediante comercio electrónico y se configure una causal legal de reversión, el usuario podrá presentar reclamación ante UNIDEV y ante el emisor del instrumento de pago dentro de los términos legales.</p>
+        <p>La reversión podrá proceder, entre otros eventos, por fraude, operación no solicitada, no prestación del servicio, prestación defectuosa o cobro no autorizado, de acuerdo con la Ley 1480 de 2011 y el Decreto 587 de 2016.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica la Ley 1480 de 2011, artículo 51, que regula la reversión del pago en operaciones realizadas mediante mecanismos de comercio electrónico. También aplica el Decreto 587 de 2016, especialmente los artículos 2.2.2.51.1 a 2.2.2.51.13, que desarrollan el procedimiento, participantes, requisitos, trámite y efectos de la reversión. El artículo 2.2.2.51.8 del Decreto 587 de 2016 establece reglas sobre el trámite de la reversión del pago.</p>
+        </div>
+      </section>
+
+      <section id="derecho-retracto" class="tc__section">
+        <h2 class="tc__section-title">42. Derecho de retracto</h2>
+        <p>Cuando el usuario tenga la calidad de consumidor y la operación esté protegida por el Estatuto del Consumidor, podrá ejercer el derecho de retracto en los términos legales.</p>
+        <p>No obstante, en servicios digitales o proyectos personalizados, el retracto podrá limitarse cuando el servicio haya comenzado con autorización del consumidor o cuando se trate de bienes o servicios confeccionados conforme a especificaciones particulares, según la naturaleza del encargo y la legislación aplicable.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica la Ley 1480 de 2011, artículo 47, sobre derecho de retracto en ventas realizadas mediante sistemas de financiación, venta de tiempos compartidos, ventas a distancia o métodos no tradicionales. También aplica la Ley 2439 de 2024, artículos 1, 2, 3, 4 y 5, en cuanto refuerza la protección del consumidor en comercio electrónico y reglas de devolución de dinero. Para comercio electrónico aplica además la Ley 1480 de 2011, artículo 50.</p>
+        </div>
+      </section>
+
+      <section id="impuestos-retenciones" class="tc__section">
+        <h2 class="tc__section-title">43. Impuestos, retenciones y soportes</h2>
+        <p>Cada usuario será responsable de sus obligaciones tributarias. UNIDEV podrá practicar, reportar o reflejar retenciones, comisiones, impuestos o descuentos cuando la ley, el proveedor de pagos, la pasarela, la naturaleza del pago o el régimen tributario aplicable lo exijan.</p>
+        <p>El proveedor de pagos habilitado por UNIDEV podrá identificar conceptos asociados a comisiones, IVA, ICA, retención en la fuente y otros movimientos según aplique en Colombia.</p>
+        <p>UNIDEV podrá exigir factura electrónica, cuenta de cobro, RUT, certificación bancaria, soporte de seguridad social o documento equivalente antes de liberar pagos.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable</p>
+          <p>Aplica el Estatuto Tributario, artículos 615 y 616-1, sobre obligación de expedir factura o documento equivalente y sistema de facturación. También pueden aplicar las normas tributarias sobre retención en la fuente, IVA, ICA y soportes contables, según la calidad tributaria de las partes, el tipo de servicio, el monto de la operación y el régimen aplicable. En materia contractual aplican el Código Civil, artículos 1602 y 1603, porque los usuarios aceptan suministrar soportes y asumir obligaciones tributarias propias. En protección al consumidor aplica la Ley 1480 de 2011, artículo 26, por el deber de informar el precio total y los cargos asociados.</p>
+        </div>
+      </section>
+      </ng-container>
+
+      <!-- CAPÍTULO VI -->
+      <ng-container *ngIf="activeChapter === 6">
+      <section id="marco-normativo-universidades" class="tc__section">
+        <h2 class="tc__section-title">Marco normativo</h2>
+        <p>El presente capítulo se fundamenta en el ordenamiento jurídico colombiano aplicable a las instituciones de educación superior que participan en plataformas digitales de intermediación tecnológica, en particular en lo relativo al registro de personas jurídicas, habilitación de usuarios académicos, responsabilidad solidaria de las organizaciones por sus usuarios, protección de datos personales, comercio electrónico y contratación civil y comercial.</p>
+        <p>En materia de personería jurídica y representación legal, aplican el Código Civil, artículos 633 a 652, y el Código de Comercio, artículos 98 y siguientes, que regulan la capacidad de las personas jurídicas para obligarse y la validez de sus actos a través de su representante legal. Por ello, la Universidad que se registre en UNIDEV debe contar con representación legal válida y activa, y los documentos aportados deben acreditar su existencia y vigencia.</p>
+        <p>En materia de protección de datos personales, aplica la Ley 1581 de 2012, artículos 3, 4, 8, 9, 12, 17 y 18, dado que el registro de la Universidad implica el tratamiento de datos personales de sus representantes, contactos y usuarios académicos vinculados. La Universidad actúa como responsable del tratamiento de los datos de sus usuarios internos y debe garantizar que dicho tratamiento se realice conforme a la ley.</p>
+        <p>En materia de contratación electrónica y prueba digital, aplica la Ley 527 de 1999, artículos 6, 7, 10, 14 y 15, pues el registro, la aceptación de términos, la habilitación de usuarios y las comunicaciones entre UNIDEV y la Universidad pueden constar como mensajes de datos con plena validez jurídica y probatoria.</p>
+        <p>En cuanto a la responsabilidad solidaria de las organizaciones por sus usuarios, se apoya en el Código Civil, artículos 1568 y siguientes, sobre solidaridad en las obligaciones, y en el Código de Comercio, artículo 871, sobre buena fe contractual. Esto fundamenta que la Universidad responda frente a UNIDEV por las actuaciones de los usuarios que ella habilita dentro de la plataforma.</p>
+        <p>Finalmente, en materia de educación superior, la Ley 30 de 1992 regula las instituciones de educación superior en Colombia, su naturaleza jurídica, autonomía y responsabilidades. Esta norma es referente para entender la relación entre la Universidad, sus estudiantes y la plataforma, sin que UNIDEV asuma funciones propias de las instituciones educativas ni intervenga en la relación académica entre la universidad y sus estudiantes.</p>
+      </section>
+
+      <div class="tc__chapter">
+        <p class="tc__chapter-eyebrow">CAPÍTULO VI</p>
+        <h2 class="tc__chapter-title">TÉRMINOS PARA UNIVERSIDADES Y ROLES ACADÉMICOS</h2>
+      </div>
+
+      <section id="definiciones-universidad" class="tc__section">
+        <h2 class="tc__section-title">44. Definiciones del capítulo</h2>
+        <p>Para efectos del presente capítulo se entiende por:</p>
+        <dl class="tc__defs">
+          <div class="tc__def"><dt>Universidad</dt><dd>Institución de educación superior técnica, tecnológica o universitaria registrada en UNIDEV como organización con tipo UNIVERSIDAD, cuyo dominio institucional de correo electrónico es el mecanismo de vinculación automática de sus estudiantes a la plataforma.</dd></div>
+          <div class="tc__def"><dt>Admin de Sede</dt><dd>Usuario con permisos administrativos sobre un campus o sede específica de la Universidad, habilitado mediante invitación gestionada por la propia Universidad. Puede gestionar usuarios de su sede, ver equipos del campus y administrar sedes.</dd></div>
+          <div class="tc__def"><dt>Tutor de Sede</dt><dd>Usuario con rol de acompañamiento académico dentro de un campus universitario, habilitado mediante invitación gestionada por la Universidad. Puede hacer seguimiento a los equipos de estudiantes bajo su cargo, consultar proyectos publicados, gestionar invitaciones y solicitar tutorías a equipos.</dd></div>
+        </dl>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Ley 527 de 1999, artículo 2, sobre mensajes de datos y comercio electrónico; Ley 1480 de 2011, artículo 5, sobre definiciones en el marco del comercio electrónico; Ley 1581 de 2012, artículo 3, sobre definiciones de dato personal, titular, responsable y encargado del tratamiento; Ley 30 de 1992, artículo 16, sobre instituciones de educación superior y su naturaleza jurídica.</p>
+        </div>
+      </section>
+
+      <section id="registro-universidad" class="tc__section">
+        <h2 class="tc__section-title">45. Registro de la Universidad</h2>
+        <p>Para registrarse en UNIDEV, la Universidad deberá suministrar la siguiente información:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Nombre de la institución.</li>
+          <li>NIT.</li>
+          <li>Correo electrónico de contacto verificado mediante código OTP.</li>
+          <li>Dominio institucional de correo electrónico. Este campo es obligatorio y constituye el mecanismo mediante el cual UNIDEV vincula automáticamente a los estudiantes que se registren con un correo de ese dominio. UNIDEV validará que el dominio sea válido y corresponda a una institución de educación superior.</li>
+          <li>Documento legal: certificado de existencia y representación legal vigente.</li>
+          <li>Documento tributario: RUT.</li>
+          <li>Aceptación de los Términos y Condiciones y la Política de Privacidad de UNIDEV.</li>
+        </ol>
+        <p>Los campos de nombre de contacto, teléfono, sitio web, dirección y descripción son opcionales y no constituyen requisito para el registro.</p>
+        <p>La cuenta de la Universidad no quedará activa de forma inmediata. UNIDEV revisará la información y documentos suministrados y notificará la aprobación o rechazo del registro. Hasta tanto UNIDEV no apruebe el registro, la Universidad no podrá habilitar usuarios ni acceder a las funcionalidades de la plataforma.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Ley 1480 de 2011, artículos 23, 24 y 50, sobre deber de información clara y veraz en comercio electrónico; Ley 1581 de 2012, artículos 4, 9 y 12, sobre principios del tratamiento, autorización y deber de informar al titular; Ley 527 de 1999, artículos 14 y 15, sobre formación y validez de contratos por medios electrónicos; Código de Comercio, artículo 117, sobre prueba de la existencia y representación de personas jurídicas.</p>
+        </div>
+      </section>
+
+      <section id="vinculacion-dominio" class="tc__section">
+        <h2 class="tc__section-title">46. Vinculación automática de estudiantes por dominio</h2>
+        <p>La vinculación de un estudiante a una Universidad dentro de UNIDEV opera de forma automática mediante el dominio de su correo electrónico institucional. Cuando un usuario se registra o ingresa a la plataforma con un correo cuyo dominio coincide con el de una Universidad aprobada, el sistema lo vincula automáticamente como Usuario Universidad de dicha institución, sin que se requiera acción adicional por parte de la Universidad.</p>
+        <p>Para que esta vinculación opere, la Universidad debe estar en estado aprobado por UNIDEV y su dominio institucional debe estar registrado y activo en la plataforma. El sistema también puede vincular usuarios mediante una lista de correos pre-autorizados por la Universidad, en cuyo caso la vinculación opera por coincidencia de correo específico antes que por dominio.</p>
+        <p>UNIDEV no es responsable por vinculaciones incorrectas derivadas de dominios de correo compartidos, dominios genéricos o información inexacta suministrada por la Universidad en el momento del registro.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Ley 527 de 1999, artículos 6, 10 y 14, sobre equivalencia funcional del escrito, admisibilidad de mensajes de datos y formación de contratos electrónicos; Ley 1581 de 2012, artículos 4 y 9, sobre principios de finalidad y libertad en el tratamiento de datos personales y autorización del titular; Código Civil, artículo 1603, sobre ejecución de buena fe contractual.</p>
+        </div>
+      </section>
+
+      <section id="roles-academicos" class="tc__section">
+        <h2 class="tc__section-title">47. Roles académicos: Admin de Sede y Tutor de Sede</h2>
+        <p>Los roles de Admin de Sede y Tutor de Sede no pueden registrarse de forma independiente. Su acceso está subordinado al registro activo y aprobado de la Universidad a la que pertenecen. Estos roles se habilitan mediante invitación gestionada por la propia Universidad a través de los mecanismos habilitados en la plataforma.</p>
+        <h3 class="tc__subsection-title">El Admin de Sede podrá:</h3>
+        <ol class="tc__list tc__list--alpha">
+          <li>Gestionar los usuarios de su sede: crear y listar usuarios vinculados al campus.</li>
+          <li>Ver los equipos de estudiantes del campus.</li>
+          <li>Administrar equipos de su sede.</li>
+          <li>Consultar información de sedes y campus de la Universidad.</li>
+        </ol>
+        <h3 class="tc__subsection-title">El Tutor de Sede podrá:</h3>
+        <ol class="tc__list tc__list--alpha">
+          <li>Ver los equipos de estudiantes del campus.</li>
+          <li>Hacer seguimiento a los equipos bajo su tutoría.</li>
+          <li>Gestionar equipos e invitaciones de estudiantes.</li>
+          <li>Consultar proyectos publicados en la plataforma.</li>
+          <li>Solicitar tutoría a equipos de estudiantes.</li>
+          <li>Gestionar su perfil dentro de la plataforma.</li>
+          <li>Consultar información de sedes y campus de la Universidad.</li>
+        </ol>
+        <p>La diferencia fundamental entre ambos roles es que el Admin de Sede gestiona usuarios administrativamente, mientras que el Tutor de Sede se enfoca en el acompañamiento y seguimiento académico de los equipos de estudiantes bajo su cargo.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Código Civil, artículos 1602 y 1603, sobre fuerza obligatoria del contrato y ejecución de buena fe; Ley 527 de 1999, artículos 14 y 15, sobre validez de la aceptación electrónica; Ley 1581 de 2012, artículos 4 y 17, sobre principios del tratamiento y deberes del responsable; Ley 30 de 1992, artículos 28 y 29, sobre autonomía universitaria y responsabilidades de las instituciones de educación superior.</p>
+        </div>
+      </section>
+
+      <section id="responsabilidades-universidad" class="tc__section">
+        <h2 class="tc__section-title">48. Responsabilidades de la Universidad</h2>
+        <p>La Universidad, al registrarse en UNIDEV, asume las siguientes responsabilidades:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>Garantizar que la información suministrada en el registro es veraz, completa y vigente.</li>
+          <li>Garantizar que el dominio institucional registrado corresponde efectivamente a la institución y que los usuarios vinculados por ese dominio son estudiantes activos de la misma.</li>
+          <li>Responder solidariamente frente a UNIDEV por el uso que sus usuarios — incluyendo Usuarios Universidad, Admin de Sede y Tutor de Sede — hagan de la plataforma.</li>
+          <li>Aceptar los presentes Términos y Condiciones en nombre de sus usuarios internos en lo que les sea aplicable.</li>
+          <li>Notificar a UNIDEV cuando un usuario deje de estar vinculado a la institución, para que su acceso sea deshabilitado oportunamente.</li>
+          <li>Designar Tutores de Sede idóneos para el acompañamiento de los estudiantes bajo su cargo. UNIDEV no es responsable por el incumplimiento de proyectos derivado de la falta de seguimiento del Tutor, siendo esta responsabilidad atribuible a la Universidad que lo designó.</li>
+          <li>Mantener vigentes y actualizados sus documentos legales y tributarios ante UNIDEV.</li>
+        </ol>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Código Civil, artículos 1568 y siguientes, sobre solidaridad en las obligaciones; Código de Comercio, artículo 871, sobre buena fe contractual; Ley 1581 de 2012, artículos 17 y 18, sobre deberes de responsables y encargados del tratamiento de datos personales; Ley 30 de 1992, artículo 28, sobre autonomía y responsabilidades de las instituciones de educación superior.</p>
+        </div>
+      </section>
+
+      <section id="inhabilitacion-universidad" class="tc__section">
+        <h2 class="tc__section-title">49. Inhabilitación de la Universidad y efectos sobre sus usuarios</h2>
+        <p>Si la Universidad es inhabilitada por UNIDEV — ya sea por incumplimiento de estos Términos, por documentos vencidos, por solicitud propia o por decisión administrativa — todos los usuarios vinculados a dicha institución perderán el acceso a la plataforma de forma automática e inmediata.</p>
+        <p>La inhabilitación de la Universidad no afecta los proyectos en curso de sus estudiantes que ya tengan pago realizado y en proceso de revisión. UNIDEV gestionará estos casos de forma individual conforme a las reglas del Capítulo V.</p>
+        <p>UNIDEV notificará a la Universidad con al menos 10 días calendario de anticipación cuando la inhabilitación obedezca a causas subsanables, salvo en casos de fraude, suplantación o incumplimiento grave, donde la inhabilitación podrá ser inmediata.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Código Civil, artículos 1602 y 1609, sobre obligatoriedad del contrato y excepción de contrato no cumplido; Ley 527 de 1999, artículos 14 y 15, sobre contratos electrónicos; Ley 1480 de 2011, artículos 23 y 50, sobre información clara en comercio electrónico.</p>
+        </div>
+      </section>
+
+      <section id="limites-responsabilidad-universidad" class="tc__section">
+        <h2 class="tc__section-title">50. Límites de la responsabilidad de UNIDEV frente a las Universidades</h2>
+        <p>UNIDEV no será responsable por:</p>
+        <ol class="tc__list tc__list--alpha">
+          <li>La calidad académica ni el desempeño de los estudiantes vinculados a través de la plataforma.</li>
+          <li>La relación académica entre la Universidad y sus estudiantes, que se rige por sus propios reglamentos internos.</li>
+          <li>El incumplimiento de proyectos por parte de estudiantes derivado de falta de acompañamiento del Tutor de Sede designado por la Universidad.</li>
+          <li>Vinculaciones incorrectas de usuarios derivadas de dominios de correo compartidos, dominios genéricos o información inexacta suministrada por la Universidad.</li>
+          <li>Decisiones académicas, disciplinarias o administrativas de la Universidad respecto a sus estudiantes.</li>
+          <li>Fallas de acceso de usuarios vinculados cuando la Universidad esté en estado inhabilitado, pendiente o suspendido.</li>
+        </ol>
+        <p>UNIDEV actuará como facilitadora tecnológica y no asume funciones propias de las instituciones de educación superior ni interviene en la relación académica entre la Universidad y sus estudiantes.</p>
+        <div class="tc__legal">
+          <p class="tc__legal-label">Legislación aplicable y artículos</p>
+          <p>Código Civil, artículos 64, 1604 y 1616, sobre fuerza mayor, responsabilidad contractual y límites de indemnización; Ley 1480 de 2011, artículos 42 y 43, sobre cláusulas abusivas en relaciones de consumo; Ley 30 de 1992, artículo 28, sobre autonomía universitaria.</p>
+        </div>
+      </section>
+      </ng-container>
 
     </main>
   </div>
