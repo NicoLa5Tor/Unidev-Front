@@ -22,6 +22,10 @@ import { ApplicationNegotiationDialogComponent } from '../../../../shared/compon
 import { TeamChatDialogComponent } from '../../../../shared/components/team-chat-dialog/team-chat-dialog.component';
 import { CertificateModalComponent } from '../../../../shared/components/certificate-modal/certificate-modal.component';
 import { DeploymentModalComponent } from '../../../../shared/components/deployment-modal/deployment-modal.component';
+import { DeploymentLogsDialogComponent } from '../../../../shared/components/deployment-modal/deployment-logs-dialog.component';
+import { DeploymentListDialogComponent } from '../../../../shared/components/deployment-modal/deployment-list-dialog.component';
+import { DeploymentService } from '../../../../shared/services/deployment.service';
+import { Deployment } from '../../../../shared/models/deployment.model';
 
 @Component({
   selector: 'app-student-workspace',
@@ -37,6 +41,7 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   private readonly companyService = inject(CompanyService);
   private readonly paymentService = inject(PaymentService);
   private readonly ratingService = inject(RatingService);
+  private readonly deploymentService = inject(DeploymentService);
 
   userRanking: RankingEntry[] = [];
   teamRanking: RankingEntry[] = [];
@@ -320,11 +325,74 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
         this.myApplications = apps;
         this.appliedProjectIds = new Set(apps.map(a => a.projectId));
         this.isLoadingApplications = false;
-        // Cargar estados de pago para postulaciones aceptadas
-        apps.filter(a => a.status === 'ACCEPTED').forEach(a => this.loadProjectPayment(a.projectId));
+        // Cargar estados de pago y deployments para postulaciones aceptadas
+        apps.filter(a => a.status === 'ACCEPTED').forEach(a => {
+          this.loadProjectPayment(a.projectId);
+          this.loadDeployments(a.id);
+        });
       },
       error: () => { this.isLoadingApplications = false; }
     });
+  }
+
+  // ── Deployments per application ────────────────────────
+  appDeployments = new Map<number, Deployment[]>();
+  loadingDeployments = new Set<number>();
+
+  loadDeployments(applicationId: number): void {
+    this.loadingDeployments.add(applicationId);
+    this.deploymentService.listByApplication(applicationId).subscribe({
+      next: list => {
+        this.appDeployments.set(applicationId, list);
+        this.loadingDeployments.delete(applicationId);
+      },
+      error: () => { this.loadingDeployments.delete(applicationId); }
+    });
+  }
+
+  getAppDeployments(applicationId: number): Deployment[] {
+    return this.appDeployments.get(applicationId) ?? [];
+  }
+
+  isLoadingDeployments(applicationId: number): boolean {
+    return this.loadingDeployments.has(applicationId);
+  }
+
+  openDeploymentLogs(applicationId: number, deploymentId: string): void {
+    const ref = this.dialog.open(DeploymentLogsDialogComponent, {
+      width: '720px',
+      maxWidth: '96vw',
+      maxHeight: '90vh',
+      panelClass: 'app-shell-dialog-panel',
+      backdropClass: 'app-shell-dialog-backdrop',
+      data: { deploymentId }
+    });
+    ref.afterClosed().subscribe(() => this.loadDeployments(applicationId));
+  }
+
+  openDeploymentList(applicationId: number): void {
+    const ref = this.dialog.open(DeploymentListDialogComponent, {
+      width: '620px',
+      maxWidth: '96vw',
+      maxHeight: '90vh',
+      panelClass: 'app-shell-dialog-panel',
+      backdropClass: 'app-shell-dialog-backdrop',
+      data: { applicationId }
+    });
+    ref.afterClosed().subscribe(() => this.loadDeployments(applicationId));
+  }
+
+  deploymentStatusClass(status: string): string {
+    switch (status) {
+      case 'ACTIVE':   return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400';
+      case 'READY':    return 'border-yellow-500/30 bg-yellow-500/10 text-yellow-400';
+      case 'BUILDING': return 'border-sky-500/30 bg-sky-500/10 text-sky-400';
+      case 'PENDING':  return 'border-slate-500/30 bg-slate-500/10 text-slate-400';
+      case 'FAILED':   return 'border-red-500/30 bg-red-500/10 text-red-400';
+      case 'EXPIRED':  return 'border-zinc-500/30 bg-zinc-500/10 text-zinc-400';
+      case 'TRASHED':  return 'border-zinc-500/30 bg-zinc-500/15 text-zinc-300';
+      default:         return 'border-slate-500/30 bg-slate-500/10 text-slate-400';
+    }
   }
 
   loadProjectPayment(projectId: number): void {
@@ -984,6 +1052,6 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
       backdropClass: 'app-shell-dialog-backdrop',
       disableClose: false,
       data: { applicationId }
-    });
+    }).afterClosed().subscribe(() => this.loadDeployments(applicationId));
   }
 }

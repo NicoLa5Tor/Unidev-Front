@@ -4,7 +4,8 @@ export type DeploymentStatus =
   | 'READY'
   | 'ACTIVE'
   | 'EXPIRED'
-  | 'FAILED';
+  | 'FAILED'
+  | 'TRASHED';
 
 export type SubdomainStatus = 'AVAILABLE' | 'IN_USE' | 'RESERVED';
 

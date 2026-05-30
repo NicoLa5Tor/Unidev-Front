@@ -1,0 +1,37 @@
+<div class="w-full max-w-md rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel)] shadow-2xl overflow-hidden">
+
+  <!-- Header -->
+  <div class="flex items-start gap-3 px-6 pt-5 pb-3">
+    <div class="flex h-9 w-9 items-center justify-center rounded-xl shrink-0"
+      [ngClass]="isDanger
+        ? 'border border-red-500/30 bg-red-500/10 text-red-400'
+        : 'border border-[color:var(--accent-3)]/30 bg-[var(--accent-3)]/10 text-[var(--accent-3)]'">
+      <svg *ngIf="isDanger" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+      </svg>
+      <svg *ngIf="!isDanger" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+      </svg>
+    </div>
+    <div class="flex-1 min-w-0">
+      <h3 class="text-base font-semibold text-[var(--text)]">{{ data.title }}</h3>
+      <p class="mt-1 text-xs leading-relaxed text-[var(--muted)]">{{ data.message }}</p>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="flex items-center justify-end gap-2 px-6 pb-4 pt-2">
+    <button type="button" (click)="cancel()"
+      class="rounded-full border border-[color:var(--panel-border)] px-4 py-1.5 font-tech text-xs text-[var(--muted)] hover:text-[var(--text)] transition-colors">
+      {{ data.cancelLabel || 'Cancelar' }}
+    </button>
+    <button type="button" (click)="confirm()"
+      class="rounded-full px-5 py-1.5 font-tech text-xs uppercase tracking-[0.15em] transition-colors"
+      [ngClass]="isDanger
+        ? 'border border-red-500/50 bg-red-500/15 text-red-300 hover:bg-red-500/25'
+        : 'border border-[color:var(--accent-3)]/40 bg-[var(--accent-3)]/15 text-[var(--accent-3)] hover:bg-[var(--accent-3)]/25'">
+      {{ data.confirmLabel || 'Confirmar' }}
+    </button>
+  </div>
+
+</div>

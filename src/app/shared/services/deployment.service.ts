@@ -26,7 +26,21 @@ export class DeploymentService {
     return this.http.post<Deployment>(`${this.baseUrl}/${id}/activate`, {});
   }
 
+  /** Soft delete: stops containers, frees subdomain, but record stays in trash. */
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  /** Hard delete: removes the record from the trash bin. */
+  permanentDelete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}/permanent`);
+  }
+
+  listByApplication(applicationId: number): Observable<Deployment[]> {
+    return this.http.get<Deployment[]>(`${this.baseUrl}/by-application/${applicationId}`);
+  }
+
+  listTrashByApplication(applicationId: number): Observable<Deployment[]> {
+    return this.http.get<Deployment[]>(`${this.baseUrl}/by-application/${applicationId}/trash`);
   }
 }
