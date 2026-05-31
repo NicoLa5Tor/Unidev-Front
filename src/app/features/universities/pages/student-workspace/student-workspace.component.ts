@@ -376,7 +376,7 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     const hasPaid = payment?.status === 'PAID_HELD' || payment?.status === 'RELEASED';
     if (hasPaid) {
       this.dialog.open(DeliveryChatDialogComponent, {
-        width: '760px', maxWidth: '96vw', maxHeight: '92vh',
+        width: '1100px', maxWidth: '96vw', maxHeight: '92vh',
         panelClass: 'app-shell-dialog-panel',
         backdropClass: 'app-shell-dialog-backdrop',
         data: { viewerMode: 'student', applicationId, projectId }

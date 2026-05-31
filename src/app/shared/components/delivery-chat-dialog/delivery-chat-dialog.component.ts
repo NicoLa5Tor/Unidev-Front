@@ -2,7 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { Subscription } from 'rxjs';
 import { DeploymentService } from '../../services/deployment.service';
+import { DeliveryChatWsService } from '../../services/delivery-chat-ws.service';
 import { UiToastService } from '../../services/ui-toast.service';
 import { ApplicationDeliveryChatMessage, ApplicationDeliveryChatThread } from '../../models/deployment.model';
 import { PaymentService } from '../../../features/companies/services/payment.service';
@@ -21,8 +23,6 @@ export interface StagedFile {
   type: 'IMAGE' | 'VIDEO' | 'DOC';
   previewUrl: string | null;
 }
-
-const POLL_INTERVAL_MS = 4000;
 
 @Component({
   selector: 'app-delivery-chat-dialog',
@@ -43,10 +43,12 @@ export class DeliveryChatDialogComponent implements OnInit, OnDestroy {
   expandedDeployments = new Set<string>();
   payment: ProjectPaymentResponse | null = null;
   releasingPayment = false;
-  private pollHandle: ReturnType<typeof setTimeout> | null = null;
+
+  private wsSub: Subscription | null = null;
   private objectUrls: string[] = [];
 
   private readonly deploymentService = inject(DeploymentService);
+  private readonly wsService = inject(DeliveryChatWsService);
   private readonly paymentService = inject(PaymentService);
   private readonly toast = inject(UiToastService);
   private readonly dialogRef = inject(MatDialogRef<DeliveryChatDialogComponent>);
@@ -61,7 +63,8 @@ export class DeliveryChatDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.stopPolling();
+    this.wsSub?.unsubscribe();
+    this.wsService.unsubscribe(this.data.applicationId);
     this.objectUrls.forEach(u => URL.revokeObjectURL(u));
   }
 
@@ -80,24 +83,13 @@ export class DeliveryChatDialogComponent implements OnInit, OnDestroy {
         this.thread = thread;
         this.isLoading = false;
         this.scheduleScroll();
-        this.schedulePoll();
+        this.initWebSocket();
       },
       error: err => {
         this.isLoading = false;
         this.toast.error(err?.error?.message || 'No se pudo cargar el chat de entrega.');
         this.dialogRef.close();
       }
-    });
-  }
-
-  refresh(): void {
-    this.deploymentService.getDeliveryChatThread(this.data.applicationId).subscribe({
-      next: thread => {
-        this.thread = thread;
-        this.scheduleScroll();
-        this.schedulePoll();
-      },
-      error: () => {}
     });
   }
 
@@ -116,9 +108,8 @@ export class DeliveryChatDialogComponent implements OnInit, OnDestroy {
 
     obs.subscribe({
       next: msg => {
-        if (this.thread) {
-          this.thread = { ...this.thread, messages: [...this.thread.messages, msg] };
-        }
+        // WS broadcast will deliver to the other party; append locally for sender's own view
+        this.appendMessage(msg);
         this.sending = false;
         this.scheduleScroll();
       },
@@ -138,6 +129,36 @@ export class DeliveryChatDialogComponent implements OnInit, OnDestroy {
     }
   }
 
+  onPaste(event: ClipboardEvent): void {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.kind === 'file') {
+        const file = item.getAsFile();
+        if (file) {
+          event.preventDefault();
+          this.stageFile(file);
+          return;
+        }
+      }
+    }
+  }
+
+  private stageFile(file: File): void {
+    if (file.size > 50 * 1024 * 1024) {
+      this.toast.error('El archivo supera el límite de 50 MB.');
+      return;
+    }
+    const type = this.resolveType(file.type);
+    let previewUrl: string | null = null;
+    if (type === 'IMAGE') {
+      previewUrl = URL.createObjectURL(file);
+      this.objectUrls.push(previewUrl);
+    }
+    this.stagedFile = { file, name: file.name || 'pasted-file', sizeLabel: this.formatSize(file.size), type, previewUrl };
+  }
+
   openFilePicker(): void {
     this.fileInput?.nativeElement.click();
   }
@@ -147,26 +168,7 @@ export class DeliveryChatDialogComponent implements OnInit, OnDestroy {
     const file = input.files?.[0];
     if (!file) return;
     input.value = '';
-
-    if (file.size > 50 * 1024 * 1024) {
-      this.toast.error('El archivo supera el límite de 50 MB.');
-      return;
-    }
-
-    const type = this.resolveType(file.type);
-    let previewUrl: string | null = null;
-    if (type === 'IMAGE') {
-      previewUrl = URL.createObjectURL(file);
-      this.objectUrls.push(previewUrl);
-    }
-
-    this.stagedFile = {
-      file,
-      name: file.name,
-      sizeLabel: this.formatSize(file.size),
-      type,
-      previewUrl
-    };
+    this.stageFile(file);
   }
 
   removeStagedFile(): void {
@@ -240,6 +242,25 @@ export class DeliveryChatDialogComponent implements OnInit, OnDestroy {
     this.dialogRef.close();
   }
 
+  private initWebSocket(): void {
+    this.wsService.connect();
+    this.wsSub = this.wsService.messages$(this.data.applicationId).subscribe(msg => {
+      // Ignore echoes of messages the sender already appended locally
+      const alreadyPresent = this.thread?.messages.some(m => m.id === msg.id) ?? false;
+      if (!alreadyPresent) {
+        this.appendMessage(msg);
+        this.scheduleScroll();
+      }
+    });
+  }
+
+  private appendMessage(msg: ApplicationDeliveryChatMessage): void {
+    if (!this.thread) return;
+    // Deduplicate: REST response and WS echo can both arrive
+    if (this.thread.messages.some(m => m.id === msg.id)) return;
+    this.thread = { ...this.thread, messages: [...this.thread.messages, msg] };
+  }
+
   private resolveType(contentType: string): 'IMAGE' | 'VIDEO' | 'DOC' {
     if (contentType.startsWith('image/')) return 'IMAGE';
     if (contentType.startsWith('video/')) return 'VIDEO';
@@ -256,17 +277,5 @@ export class DeliveryChatDialogComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       try { this.messagesEnd?.nativeElement.scrollIntoView({ behavior: 'smooth' }); } catch {}
     }, 50);
-  }
-
-  private schedulePoll(): void {
-    this.stopPolling();
-    this.pollHandle = setTimeout(() => this.refresh(), POLL_INTERVAL_MS);
-  }
-
-  private stopPolling(): void {
-    if (this.pollHandle != null) {
-      clearTimeout(this.pollHandle);
-      this.pollHandle = null;
-    }
   }
 }
