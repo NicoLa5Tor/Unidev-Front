@@ -6,9 +6,11 @@ import { DeploymentService } from '../../services/deployment.service';
 import { Deployment } from '../../models/deployment.model';
 import { UiToastService } from '../../services/ui-toast.service';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { PublishReviewDialogComponent } from './publish-review-dialog.component';
 
 interface LogsDialogData {
   deploymentId: string;
+  applicationId?: number;
 }
 
 @Component({
@@ -26,6 +28,9 @@ export class DeploymentLogsDialogComponent implements OnInit, OnDestroy {
   deployment: Deployment | null = null;
   isLoading = true;
   isDeleting = false;
+  isPublishing = false;
+  isActivating = false;
+  showInfo = false;
   expandedPhases = new Set<string>();
   private pollSub: Subscription | null = null;
 
@@ -146,14 +151,40 @@ export class DeploymentLogsDialogComponent implements OnInit, OnDestroy {
     });
   }
 
-  activate(): void {
+  publish(): void {
     if (!this.deployment) return;
+    this.dialog.open(PublishReviewDialogComponent, {
+      width: '580px',
+      maxWidth: '94vw',
+      maxHeight: '90vh',
+      panelClass: 'app-shell-dialog-panel',
+      backdropClass: 'app-shell-dialog-backdrop',
+      data: {
+        applicationId: this.data.applicationId,
+        preselectedId: this.deployment.id
+      }
+    }).afterClosed().subscribe(result => {
+      if (result?.published?.length) {
+        const updated = result.published.find((d: Deployment) => d.id === this.deployment?.id);
+        if (updated) this.deployment = updated;
+      }
+    });
+  }
+
+  activate(): void {
+    if (!this.deployment || this.isActivating) return;
+    this.isActivating = true;
     this.deploymentService.activate(this.deployment.id).subscribe({
       next: d => {
+        this.isActivating = false;
         this.deployment = d;
-        this.toast.success('Deployment activado');
+        this.toast.success('Demo activado para tu IP. Abriendo en otra pestaña…');
+        if (d.url) window.open(d.url, '_blank', 'noopener');
       },
-      error: () => this.toast.error('No se pudo activar el deployment')
+      error: err => {
+        this.isActivating = false;
+        this.toast.error(err?.error?.message ?? 'No se pudo activar');
+      }
     });
   }
 

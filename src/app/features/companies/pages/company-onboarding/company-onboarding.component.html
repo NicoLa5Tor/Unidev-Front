@@ -800,16 +800,18 @@
                             <svg class="h-3 w-3" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l1.8 3.6L14 5.3l-3 2.9.7 4.1L8 10.4l-3.7 1.9.7-4.1-3-2.9 4.2-.7z"/></svg>
                             Calificar
                           </button>
-                          <!-- Botón desembolsar -->
+                          <!-- Botón demos / chat -->
                           <button
-                            *ngIf="project.paymentStatus === 'PAID_HELD'"
+                            *ngIf="project.acceptedApplicationId"
                             type="button"
-                            class="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/15 px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-emerald-400 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-                            [disabled]="releasingProjectId === project.id"
-                            (click)="releasePayment(project, $event)"
+                            class="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--accent-3)]/40 bg-[var(--accent-3)]/10 px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-3)] transition hover:brightness-110"
+                            (click)="openDeploymentCloud(project, $event)"
+                            [title]="(project.paymentStatus === 'PAID_HELD' || project.paymentStatus === 'RELEASED') ? 'Abrir chat de entrega' : 'Ver demos publicados'"
                           >
-                            <svg class="h-3 w-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2v9M4 8l4 4 4-4M2 13h12"/></svg>
-                            {{ releasingProjectId === project.id ? 'Procesando...' : 'Desembolsar' }}
+                            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                              <path d="M7 18a4 4 0 0 1-.88-7.9 5 5 0 0 1 9.74-1.3A4 4 0 0 1 18 18H7Z"/>
+                            </svg>
+                            {{ (project.paymentStatus === 'PAID_HELD' || project.paymentStatus === 'RELEASED') ? 'Chat' : 'Demos' }}
                           </button>
                           <span class="inline-flex items-center rounded-full border border-[color:var(--accent-2)]/35 bg-[var(--accent-2)]/10 px-3 py-1 font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--accent-2)]">
                             Ver detalle

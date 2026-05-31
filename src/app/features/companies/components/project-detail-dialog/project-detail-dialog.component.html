@@ -1110,7 +1110,16 @@
               {{ isInDevelopment ? 'Ya tiene una postulación adjudicada. No admite más cambios ni nuevas decisiones de postulaciones.' : 'Ya no admite cambios. Visible para equipos de estudiantes.' }}
             </p>
           </div>
-          <svg class="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg>
+          <div class="flex items-center gap-2 shrink-0">
+            <button *ngIf="isInDevelopment && acceptedApplication" type="button" (click)="openDeploymentList()"
+              title="Ver demos del equipo"
+              class="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/80 transition hover:bg-white/20">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M7 18a4 4 0 0 1-.88-7.9 5 5 0 0 1 9.74-1.3A4 4 0 0 1 18 18H7Z"/>
+              </svg>
+            </button>
+            <svg class="h-5 w-5 text-emerald-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg>
+          </div>
         </div>
         <div *ngIf="currentProject.companyPriceMinAmount != null" class="mt-4 grid gap-3 sm:grid-cols-2">
           <div class="rounded-[16px] border border-white/10 bg-black/20 px-4 py-3">
@@ -1279,16 +1288,10 @@
             </div>
           </div>
 
-          <!-- Acciones (solo admin/empresa, no vista estudiante) -->
-          <div *ngIf="canRelease" class="mt-4 flex flex-wrap gap-3 justify-end">
-            <button
-              type="button"
-              [disabled]="releasingPayment"
-              class="rounded-full border border-emerald-500 bg-emerald-500/15 px-6 py-2.5 font-tech text-xs uppercase tracking-[0.18em] text-emerald-300 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-              (click)="releasePayment()">
-              {{ releasingPayment ? 'Desembolsando...' : 'Desembolsar pago →' }}
-            </button>
-          </div>
+          <!-- El botón Desembolsar está en el chat de negociación -->
+          <p *ngIf="canRelease" class="mt-4 font-tech text-[10px] uppercase tracking-[0.18em] text-emerald-400/60">
+            Abre el chat de negociación para desembolsar el pago al equipo.
+          </p>
         </div>
 
         <!-- Pago reembolsado (REFUNDED) -->

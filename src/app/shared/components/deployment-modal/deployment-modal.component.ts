@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DeploymentInfoDialogComponent } from './deployment-info-dialog.component';
 import { GithubTokenGuideDialogComponent } from './github-token-guide-dialog.component';
+import { PublishReviewDialogComponent } from './publish-review-dialog.component';
 import { Subject, of, timer } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
 import { DeploymentService } from '../../services/deployment.service';
@@ -41,6 +42,8 @@ export class DeploymentModalComponent implements OnInit, OnDestroy {
   isSubmitting = false;
   deployment: Deployment | null = null;
   isActivating = false;
+  isPublishing = false;
+  showInfo = false;
 
   private pollHandle: ReturnType<typeof setInterval> | null = null;
   expandedPhases = new Set<string>();
@@ -224,11 +227,35 @@ export class DeploymentModalComponent implements OnInit, OnDestroy {
         this.deployment = updated;
         this.step = 'active';
         this.stopPolling();
-        this.toast.success('Despliegue activado correctamente.');
+        this.toast.success('Despliegue activado para tu IP. Abriendo demo en otra pestaña…');
+        if (updated.url) window.open(updated.url, '_blank', 'noopener');
       },
       error: err => {
         this.isActivating = false;
         this.toast.error(err?.error?.message ?? 'No se pudo activar el despliegue.');
+      }
+    });
+  }
+
+  publish(): void {
+    if (!this.deployment) return;
+    this.dialog.open(PublishReviewDialogComponent, {
+      width: '580px',
+      maxWidth: '94vw',
+      maxHeight: '90vh',
+      panelClass: 'app-shell-dialog-panel',
+      backdropClass: 'app-shell-dialog-backdrop',
+      data: {
+        applicationId: this.data.applicationId,
+        preselectedId: this.deployment.id
+      }
+    }).afterClosed().subscribe(result => {
+      if (result?.published?.length) {
+        const updated = result.published.find((d: Deployment) => d.id === this.deployment?.id);
+        if (updated) {
+          this.deployment = updated;
+          this.dialogRef.close(this.deployment);
+        }
       }
     });
   }

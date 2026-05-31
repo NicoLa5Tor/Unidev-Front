@@ -111,10 +111,19 @@
         class="rounded-full border border-[color:var(--panel-border)] px-4 py-1.5 font-tech text-xs text-[var(--muted)] hover:text-[var(--text)]">
         Refrescar
       </button>
-      <button *ngIf="view === 'active'" type="button" (click)="openCreate()"
+      <button *ngIf="view === 'active' && !appHasPublished && hasPublishableDeployments" type="button" (click)="openPublish()"
+        class="rounded-full bg-[color:var(--accent-3)] px-4 py-1.5 font-tech text-xs uppercase tracking-[0.15em] text-white hover:brightness-110">
+        Publicar
+      </button>
+      <button *ngIf="view === 'active' && !appHasPublished" type="button" (click)="openCreate()"
         class="rounded-full border border-[color:var(--accent-3)]/40 bg-[var(--accent-3)]/15 px-4 py-1.5 font-tech text-xs uppercase tracking-[0.15em] text-[var(--accent-3)] hover:bg-[var(--accent-3)]/25">
         + Nuevo deployment
       </button>
+      <span *ngIf="view === 'active' && appHasPublished"
+        class="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 font-tech text-[10px] uppercase tracking-[0.15em] text-emerald-400"
+        title="Hay un deployment publicado para revisión. La empresa debe aprobar o rechazar antes de crear otro.">
+        Frozen · esperando empresa
+      </span>
     </div>
   </div>
 

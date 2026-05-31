@@ -17,6 +17,7 @@ import { CheckoutResponse, FeePreview, ProjectPaymentResponse } from '../../../.
 import { UiToastService } from '../../../../shared/services/ui-toast.service';
 import { RequirementAssistantDialogComponent } from '../requirement-assistant-dialog/requirement-assistant-dialog.component';
 import { ApplicationNegotiationDialogComponent } from '../../../../shared/components/application-negotiation-dialog/application-negotiation-dialog.component';
+import { DeploymentListDialogComponent } from '../../../../shared/components/deployment-modal/deployment-list-dialog.component';
 
 export type ProjectDetailSection = 'detail' | 'applications';
 
@@ -256,6 +257,23 @@ export class ProjectDetailDialogComponent implements OnDestroy {
 
   get canRelease(): boolean {
     return this.payment?.status === 'PAID_HELD' && !this.isStudentView;
+  }
+
+  get acceptedApplication(): import('../../../../shared/models/project-application.model').ProjectApplication | null {
+    return this.applications.find(a => a.status === 'ACCEPTED') ?? null;
+  }
+
+  openDeploymentList(): void {
+    const app = this.acceptedApplication;
+    if (!app) return;
+    this.dialog.open(DeploymentListDialogComponent, {
+      width: '560px',
+      maxWidth: '96vw',
+      maxHeight: '90vh',
+      panelClass: 'app-shell-dialog-panel',
+      backdropClass: 'app-shell-dialog-backdrop',
+      data: { applicationId: app.id }
+    });
   }
 
   initiateCheckout(): void {
@@ -735,6 +753,10 @@ export class ProjectDetailDialogComponent implements OnDestroy {
         // Cargar estado de pago para proyectos publicados o en desarrollo (solo vista empresa)
         if (!this.isStudentView && (project.statusCode === 'PUBLISHED' || project.statusCode === 'IN_PROGRESS')) {
           this.loadPayment();
+        }
+        // Pre-cargar aplicación aceptada para el botón de deployments
+        if (!this.isStudentView && project.statusCode === 'IN_PROGRESS' && this.applications.length === 0) {
+          this.loadApplications();
         }
       },
       error: error => {

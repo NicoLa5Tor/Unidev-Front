@@ -1,18 +1,28 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
 import { AnnouncementService } from '../../../features/admin/services/announcement.service';
 import { PqrsService } from '../../services/pqrs.service';
+import { DeploymentService } from '../../services/deployment.service';
 import { UiToastService } from '../../services/ui-toast.service';
 import { UserSessionService } from '../../../core/services/user-session.service';
 import { StudentService } from '../../../features/universities/services/student.service';
 import { Announcement } from '../../models/announcement.model';
 import { Pqrs, PqrsStatus, PqrsType } from '../../models/pqrs.model';
 import { TeamInvitation } from '../../models/student.model';
+import { Deployment } from '../../models/deployment.model';
+import { ProjectDetailDialogComponent } from '../../../features/companies/components/project-detail-dialog/project-detail-dialog.component';
 
-type MainTab = 'invitations' | 'announcements' | 'pqrs';
+export interface PendingReviewProject {
+  projectId: number;
+  projectName: string;
+  deploymentCount: number;
+  latestPublishedAt: string | null;
+}
+
+type MainTab = 'invitations' | 'announcements' | 'pqrs' | 'deployments';
 type PqrsSubTab = 'list' | 'new';
 
 @Component({
@@ -33,6 +43,10 @@ export class NotificationsDialogComponent implements OnInit {
   loadingAnnouncements = false;
   expandedAnnouncementId: number | null = null;
   lastSeenAnnouncementId = 0;
+
+  // ── Deployments (company) ─────────────────────────────
+  pendingDeployments: Deployment[] = [];
+  loadingDeployments = false;
 
   // ── PQRS ──────────────────────────────────────────────
   pqrsSubTab: PqrsSubTab = 'list';
@@ -66,8 +80,10 @@ export class NotificationsDialogComponent implements OnInit {
     private readonly announcementService: AnnouncementService,
     private readonly pqrsService: PqrsService,
     private readonly studentService: StudentService,
+    private readonly deploymentService: DeploymentService,
     private readonly toast: UiToastService,
-    private readonly userSessionService: UserSessionService
+    private readonly userSessionService: UserSessionService,
+    private readonly dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -78,6 +94,10 @@ export class NotificationsDialogComponent implements OnInit {
       this.mainTab = 'invitations';
       this.loadInvitations();
     }
+    if (this.showDeploymentsTab) {
+      this.mainTab = 'deployments';
+      this.loadPendingDeployments();
+    }
     this.loadAnnouncements();
     this.loadTickets();
   }
@@ -85,6 +105,11 @@ export class NotificationsDialogComponent implements OnInit {
   get showInvitationsTab(): boolean {
     const role = this.userSessionService.snapshot?.roleName;
     return role === 'USUARIOS_UNIVERSIDAD' || role === 'TUTOR_SEDE';
+  }
+
+  get showDeploymentsTab(): boolean {
+    const role = this.userSessionService.snapshot?.roleName;
+    return role === 'EMPRESAS' || role === 'USUARIOS_EMPRESA';
   }
 
   get currentUserId(): number {
@@ -246,6 +271,52 @@ export class NotificationsDialogComponent implements OnInit {
       case 'CLOSED':      return 'text-[var(--muted)]';
     }
   }
+
+  // ── Deployments (company) ─────────────────────────────
+
+  loadPendingDeployments(): void {
+    this.loadingDeployments = true;
+    this.deploymentService.companyPendingReview().subscribe({
+      next: deps => { this.pendingDeployments = deps; this.loadingDeployments = false; },
+      error: () => { this.loadingDeployments = false; }
+    });
+  }
+
+  get pendingReviewProjects(): PendingReviewProject[] {
+    const map = new Map<number, PendingReviewProject>();
+    for (const dep of this.pendingDeployments) {
+      if (!dep.projectId) continue;
+      const existing = map.get(dep.projectId);
+      if (existing) {
+        existing.deploymentCount++;
+        if (dep.publishedAt && (!existing.latestPublishedAt || dep.publishedAt > existing.latestPublishedAt)) {
+          existing.latestPublishedAt = dep.publishedAt;
+        }
+      } else {
+        map.set(dep.projectId, {
+          projectId: dep.projectId,
+          projectName: dep.projectName ?? `Proyecto #${dep.projectId}`,
+          deploymentCount: 1,
+          latestPublishedAt: dep.publishedAt ?? null
+        });
+      }
+    }
+    return Array.from(map.values());
+  }
+
+  openProject(projectId: number): void {
+    this.dialogRef.close();
+    this.dialog.open(ProjectDetailDialogComponent, {
+      width: '860px',
+      maxWidth: '96vw',
+      maxHeight: '92vh',
+      panelClass: 'app-shell-dialog-panel',
+      backdropClass: 'app-shell-dialog-backdrop',
+      data: { projectId, viewerMode: 'company' }
+    });
+  }
+
+  // ── Shared ─────────────────────────────────────────────
 
   close(): void {
     this.dialogRef.close();

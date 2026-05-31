@@ -7,6 +7,7 @@ import { UiToastService } from '../../services/ui-toast.service';
 import { DeploymentLogsDialogComponent } from './deployment-logs-dialog.component';
 import { DeploymentModalComponent } from './deployment-modal.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { PublishReviewDialogComponent } from './publish-review-dialog.component';
 
 interface ListDialogData {
   applicationId: number;
@@ -43,6 +44,14 @@ export class DeploymentListDialogComponent implements OnInit {
 
   get currentList(): Deployment[] {
     return this.view === 'trash' ? this.trashed : this.deployments;
+  }
+
+  get appHasPublished(): boolean {
+    return this.deployments.some(d => d.publishedAt && d.status !== 'TRASHED');
+  }
+
+  get hasPublishableDeployments(): boolean {
+    return this.deployments.some(d => d.status === 'ACTIVE' || d.status === 'READY');
   }
 
   load(): void {
@@ -94,9 +103,26 @@ export class DeploymentListDialogComponent implements OnInit {
       maxHeight: '90vh',
       panelClass: 'app-shell-dialog-panel',
       backdropClass: 'app-shell-dialog-backdrop',
-      data: { deploymentId }
+      data: { deploymentId, applicationId: this.data.applicationId }
     });
     ref.afterClosed().subscribe(() => this.load());
+  }
+
+  openPublish(): void {
+    const firstActive = this.deployments.find(d => d.status === 'ACTIVE');
+    this.dialog.open(PublishReviewDialogComponent, {
+      width: '580px',
+      maxWidth: '94vw',
+      maxHeight: '90vh',
+      panelClass: 'app-shell-dialog-panel',
+      backdropClass: 'app-shell-dialog-backdrop',
+      data: {
+        applicationId: this.data.applicationId,
+        preselectedId: firstActive?.id ?? ''
+      }
+    }).afterClosed().subscribe(result => {
+      if (result?.published?.length) this.load();
+    });
   }
 
   openCreate(): void {

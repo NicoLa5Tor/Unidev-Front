@@ -24,6 +24,7 @@ import { CertificateModalComponent } from '../../../../shared/components/certifi
 import { DeploymentModalComponent } from '../../../../shared/components/deployment-modal/deployment-modal.component';
 import { DeploymentLogsDialogComponent } from '../../../../shared/components/deployment-modal/deployment-logs-dialog.component';
 import { DeploymentListDialogComponent } from '../../../../shared/components/deployment-modal/deployment-list-dialog.component';
+import { DeliveryChatDialogComponent } from '../../../../shared/components/delivery-chat-dialog/delivery-chat-dialog.component';
 import { DeploymentService } from '../../../../shared/services/deployment.service';
 import { Deployment } from '../../../../shared/models/deployment.model';
 
@@ -368,6 +369,21 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
       data: { deploymentId }
     });
     ref.afterClosed().subscribe(() => this.loadDeployments(applicationId));
+  }
+
+  openCloudButton(applicationId: number, projectId: number): void {
+    const payment = this.getProjectPayment(projectId);
+    const hasPaid = payment?.status === 'PAID_HELD' || payment?.status === 'RELEASED';
+    if (hasPaid) {
+      this.dialog.open(DeliveryChatDialogComponent, {
+        width: '760px', maxWidth: '96vw', maxHeight: '92vh',
+        panelClass: 'app-shell-dialog-panel',
+        backdropClass: 'app-shell-dialog-backdrop',
+        data: { viewerMode: 'student', applicationId, projectId }
+      });
+    } else {
+      this.openDeploymentList(applicationId);
+    }
   }
 
   openDeploymentList(applicationId: number): void {

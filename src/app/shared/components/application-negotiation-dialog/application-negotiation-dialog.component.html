@@ -25,6 +25,20 @@
     Cargando negociación...
   </div>
 
+  <!-- Desembolsar pago (solo empresa, cuando pago está en custodia) -->
+  <div *ngIf="!isStudentView && payment?.status === 'PAID_HELD'" class="mt-4 rounded-[20px] border border-emerald-500/30 bg-emerald-500/8 p-4">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+      <div>
+        <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-emerald-400">Pago recibido — en custodia</p>
+        <p class="mt-1 text-[12px] text-[var(--muted)]">El pago fue confirmado. Cuando apruebes el trabajo del equipo, desembolsa el pago.</p>
+      </div>
+      <button type="button" [disabled]="releasingPayment" (click)="releasePayment()"
+        class="shrink-0 rounded-full border border-emerald-500 bg-emerald-500/15 px-5 py-2 font-tech text-xs uppercase tracking-[0.18em] text-emerald-300 transition hover:brightness-110 disabled:opacity-60">
+        {{ releasingPayment ? 'Desembolsando...' : 'Desembolsar pago →' }}
+      </button>
+    </div>
+  </div>
+
   <div *ngIf="!isLoading && thread as currentThread" class="mt-6 space-y-5">
     <section class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <div class="rounded-[20px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-4">

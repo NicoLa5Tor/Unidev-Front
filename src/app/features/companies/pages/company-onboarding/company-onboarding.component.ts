@@ -21,6 +21,9 @@ import { CompanyAllowedEmail } from '../../../../shared/models/company-access.mo
 import { ProjectDetailDialogComponent, ProjectDetailSection } from '../../components/project-detail-dialog/project-detail-dialog.component';
 import { MessageDialogComponent, MessageDialogData } from '../../../../shared/components/modal/message-dialog/message-dialog.component';
 import { RatingDialogComponent, RatingDialogData } from '../../../../shared/components/rating-dialog/rating-dialog.component';
+import { DeploymentListDialogComponent } from '../../../../shared/components/deployment-modal/deployment-list-dialog.component';
+import { ApplicationNegotiationDialogComponent } from '../../../../shared/components/application-negotiation-dialog/application-negotiation-dialog.component';
+import { DeliveryChatDialogComponent } from '../../../../shared/components/delivery-chat-dialog/delivery-chat-dialog.component';
 import { RatingService } from '../../services/rating.service';
 import { RatingResponse, RankingEntry } from '../../../../shared/models/rating.model';
 import { CompanyFormModel, ProjectCreateFormModel } from './company-onboarding.types';
@@ -956,6 +959,28 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     );
   }
 
+  openDeploymentCloud(project: Project, event?: Event): void {
+    event?.stopPropagation();
+    const appId = project.acceptedApplicationId;
+    if (!appId) return;
+    const hasPaid = project.paymentStatus === 'PAID_HELD' || project.paymentStatus === 'RELEASED';
+    if (hasPaid) {
+      this.dialog.open(DeliveryChatDialogComponent, {
+        width: '760px', maxWidth: '96vw', maxHeight: '92vh',
+        panelClass: 'app-shell-dialog-panel',
+        backdropClass: 'app-shell-dialog-backdrop',
+        data: { viewerMode: 'company', applicationId: appId, projectId: project.id }
+      });
+    } else {
+      this.dialog.open(DeploymentListDialogComponent, {
+        width: '560px', maxWidth: '96vw', maxHeight: '90vh',
+        panelClass: 'app-shell-dialog-panel',
+        backdropClass: 'app-shell-dialog-backdrop',
+        data: { applicationId: appId }
+      });
+    }
+  }
+
   toggleProjectCreatePanel(): void {
     this.isProjectCreatePanelOpen = !this.isProjectCreatePanelOpen;
   }
@@ -1707,7 +1732,8 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
       archivedAt: project.archivedAt ?? null,
       companyFeePct: null,
       companyFeeAmount: null,
-      companyTotalAmount: null
+      companyTotalAmount: null,
+      acceptedApplicationId: project.acceptedApplicationId ?? null
     };
   }
 

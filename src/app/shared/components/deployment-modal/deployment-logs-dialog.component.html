@@ -29,8 +29,12 @@
       class="text-xs text-[var(--accent-3)] underline hover:opacity-80 break-all">
       {{ deployment.url }}
     </a>
-    <span *ngIf="deployment.status === 'READY'" class="text-[11px] text-[var(--muted)]">
-      Listo — falta activar (pago confirmado).
+    <span *ngIf="deployment.status === 'READY' && !deployment.publishedAt" class="text-[11px] text-[var(--muted)]">
+      Listo — publícalo para que la empresa lo revise.
+    </span>
+    <span *ngIf="deployment.publishedAt && deployment.status !== 'ACTIVE'"
+      class="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-0.5 font-tech text-[10px] uppercase tracking-[0.15em] text-emerald-400">
+      Publicado · esperando empresa
     </span>
   </div>
 
@@ -92,20 +96,61 @@
 
   </div>
 
+  <!-- Info popover (sobre el footer) -->
+  <div *ngIf="showInfo && deployment" class="px-6 pb-2">
+    <div class="rounded-xl border border-[color:var(--panel-border)] bg-[var(--panel-2)]/60 p-3 text-[11px] leading-relaxed text-[var(--muted)] space-y-1.5">
+      <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--accent-3)]">Acciones</p>
+      <p *ngIf="deployment.status === 'READY'"><strong class="text-emerald-400">Activar</strong> · vuelve público el subdominio para que lo pruebes tú mismo.</p>
+      <p *ngIf="deployment.status === 'ACTIVE' && !deployment.publishedAt"><strong class="text-sky-400">Cambiar IP</strong> · actualiza la IP permitida a tu dirección actual. Útil si cambiaste de red.</p>
+      <p *ngIf="!deployment.publishedAt && (deployment.status === 'READY' || deployment.status === 'ACTIVE')">
+        <strong class="text-[var(--accent-3)]">Publicar</strong> · notifica a la empresa y abre el chat de revisión.
+        <span class="text-amber-300">⚠ Una vez publicado <strong>no podrás seguir desplegando ni eliminar deployments</strong> en este proyecto hasta que la empresa lo apruebe o rechace.</span>
+      </p>
+      <p><strong class="text-red-400">{{ isTrashed ? 'Eliminar' : 'Papelera' }}</strong> ·
+        {{ isTrashed ? 'borra el registro definitivamente.' : 'detiene los contenedores y libera el subdominio. Puedes restaurar logs desde la papelera.' }}
+      </p>
+    </div>
+  </div>
+
   <!-- Footer actions -->
   <div *ngIf="deployment" class="flex items-center justify-between gap-3 px-6 py-3 border-t border-[color:var(--panel-border)]">
-    <p class="text-[10px] text-[var(--muted)]">ID: {{ deployment.id }}</p>
-    <div class="flex gap-2">
-      <button *ngIf="deployment.status === 'READY'" type="button" (click)="activate()"
-        class="rounded-full border border-[color:var(--accent-3)]/40 bg-[var(--accent-3)]/15 px-4 py-1.5 font-tech text-xs uppercase tracking-[0.15em] text-[var(--accent-3)] hover:bg-[var(--accent-3)]/25">
-        Activar
+    <p class="text-[10px] text-[var(--muted)] truncate max-w-[180px]">ID: {{ deployment.id }}</p>
+    <div class="flex items-center gap-1.5">
+      <!-- Info toggle -->
+      <button type="button" (click)="showInfo = !showInfo"
+        class="flex h-7 w-7 items-center justify-center rounded-full border transition-colors"
+        [ngClass]="showInfo
+          ? 'border-[color:var(--accent-3)] bg-[color:var(--accent-3)]/15 text-[var(--accent-3)]'
+          : 'border-[color:var(--panel-border)] text-[var(--muted)] hover:text-[var(--text)]'"
+        title="¿Qué hace cada acción?">
+        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+        </svg>
+      </button>
+
+      <button *ngIf="deployment.status === 'READY'" type="button" (click)="activate()" [disabled]="isActivating"
+        class="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 font-tech text-[11px] uppercase tracking-[0.12em] text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-40">
+        {{ isActivating ? '…' : 'Activar' }}
+      </button>
+      <button *ngIf="deployment.status === 'ACTIVE' && !deployment.publishedAt" type="button" (click)="activate()" [disabled]="isActivating"
+        class="rounded-full border border-sky-500/40 bg-sky-500/10 px-3 py-1.5 font-tech text-[11px] uppercase tracking-[0.12em] text-sky-400 hover:bg-sky-500/20 disabled:opacity-40"
+        title="Actualiza la IP permitida a tu dirección actual">
+        {{ isActivating ? '…' : 'Cambiar IP' }}
+      </button>
+      <button *ngIf="(deployment.status === 'READY' || deployment.status === 'ACTIVE') && !deployment.publishedAt"
+        type="button" (click)="publish()" [disabled]="isPublishing"
+        class="rounded-full border border-[color:var(--accent-3)]/40 bg-[var(--accent-3)]/15 px-3 py-1.5 font-tech text-[11px] uppercase tracking-[0.12em] text-[var(--accent-3)] hover:bg-[var(--accent-3)]/25 disabled:opacity-40">
+        {{ isPublishing ? '…' : 'Publicar' }}
       </button>
       <button type="button" (click)="delete()" [disabled]="isDeleting"
-        class="rounded-full border border-red-500/40 bg-red-500/10 px-4 py-1.5 font-tech text-xs uppercase tracking-[0.15em] text-red-400 hover:bg-red-500/20 disabled:opacity-40">
-        {{ isDeleting ? 'Eliminando…' : (isTrashed ? 'Eliminar definitivamente' : 'Enviar a papelera') }}
+        [title]="isTrashed ? 'Eliminar definitivamente' : 'Enviar a papelera'"
+        class="flex h-7 w-7 items-center justify-center rounded-full border border-red-500/40 bg-red-500/10 text-red-400 hover:bg-red-500/20 disabled:opacity-40">
+        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14"/>
+        </svg>
       </button>
       <button type="button" (click)="close()"
-        class="rounded-full border border-[color:var(--panel-border)] px-4 py-1.5 font-tech text-xs text-[var(--muted)] hover:text-[var(--text)]">
+        class="rounded-full border border-[color:var(--panel-border)] px-3 py-1.5 font-tech text-[11px] text-[var(--muted)] hover:text-[var(--text)]">
         Cerrar
       </button>
     </div>

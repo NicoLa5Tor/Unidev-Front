@@ -143,6 +143,7 @@ export interface Project {
   companyFeePct: number | null;
   companyFeeAmount: number | null;
   companyTotalAmount: number | null;
+  acceptedApplicationId: number | null;
 }
 
 export interface ProjectPage {

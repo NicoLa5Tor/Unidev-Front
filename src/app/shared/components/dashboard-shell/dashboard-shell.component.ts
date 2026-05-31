@@ -8,6 +8,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ThemeName, ThemeService } from '../../../core/services/theme.service';
 import { UserSessionService } from '../../../core/services/user-session.service';
 import { PqrsService } from '../../services/pqrs.service';
+import { DeploymentService } from '../../services/deployment.service';
 import { NotificationsDialogComponent } from '../notifications-dialog/notifications-dialog.component';
 import { AnnouncementService } from '../../../features/admin/services/announcement.service';
 
@@ -54,6 +55,7 @@ export class DashboardShellComponent implements OnChanges, OnInit {
     private readonly userSessionService: UserSessionService,
     private readonly pqrsService: PqrsService,
     private readonly announcementService: AnnouncementService,
+    private readonly deploymentService: DeploymentService,
     private readonly router: Router,
     private readonly dialog: MatDialog
   ) {}
@@ -69,11 +71,12 @@ export class DashboardShellComponent implements OnChanges, OnInit {
     const lastSeenId = Number(localStorage.getItem(`lastSeenAnnouncement_${userId}`) ?? 0);
     let pqrsUnread = 0;
     let announcementUnread = 0;
+    let deploymentPending = 0;
 
     this.pqrsService.mine().subscribe({
       next: tickets => {
         pqrsUnread = tickets.filter(t => t.adminResponse != null).length;
-        this.notifUnreadCount = pqrsUnread + announcementUnread;
+        this.notifUnreadCount = pqrsUnread + announcementUnread + deploymentPending;
       },
       error: () => {}
     });
@@ -81,10 +84,25 @@ export class DashboardShellComponent implements OnChanges, OnInit {
     this.announcementService.inbox().subscribe({
       next: announcements => {
         announcementUnread = announcements.filter(a => a.id > lastSeenId).length;
-        this.notifUnreadCount = pqrsUnread + announcementUnread;
+        this.notifUnreadCount = pqrsUnread + announcementUnread + deploymentPending;
       },
       error: () => {}
     });
+
+    if (this.isCompanyUser) {
+      this.deploymentService.companyPendingReview().subscribe({
+        next: deps => {
+          deploymentPending = deps.length;
+          this.notifUnreadCount = pqrsUnread + announcementUnread + deploymentPending;
+        },
+        error: () => {}
+      });
+    }
+  }
+
+  get isCompanyUser(): boolean {
+    const role = this.userSessionService.snapshot?.roleName;
+    return role === 'EMPRESAS' || role === 'USUARIOS_EMPRESA';
   }
 
   get isAdmin(): boolean {

@@ -7,7 +7,7 @@ import { ApplicationService } from '../../../features/companies/services/applica
 import { PaymentService } from '../../../features/companies/services/payment.service';
 import { StudentService } from '../../../features/universities/services/student.service';
 import { UiToastService } from '../../services/ui-toast.service';
-import { FeePreview } from '../../models/payment.model';
+import { FeePreview, ProjectPaymentResponse } from '../../models/payment.model';
 import { ApplicationNegotiationMessage, ApplicationNegotiationThread } from '../../models/project-application.model';
 
 export interface ApplicationNegotiationDialogData {
@@ -38,6 +38,9 @@ export class ApplicationNegotiationDialogComponent implements OnDestroy {
   messageFeePreviewMap = new Map<number, FeePreview>();
   draftFeePreview: FeePreview | null = null;
   draftFeePreviewLoading = false;
+  payment: ProjectPaymentResponse | null = null;
+  paymentLoading = false;
+  releasingPayment = false;
   private pollHandle: ReturnType<typeof setTimeout> | null = null;
   private draftFeeDebounce: ReturnType<typeof setTimeout> | null = null;
 
@@ -50,6 +53,9 @@ export class ApplicationNegotiationDialogComponent implements OnDestroy {
     private readonly toast: UiToastService
   ) {
     this.loadThread();
+    if (!this.isStudentView && this.data.projectId) {
+      this.loadPayment();
+    }
   }
 
   ngOnDestroy(): void {
@@ -274,6 +280,31 @@ export class ApplicationNegotiationDialogComponent implements OnDestroy {
     if (status === 'PENDING' || status === 'NEGOTIATING') {
       this.pollHandle = setTimeout(() => this.refreshThread(), POLL_INTERVAL_MS);
     }
+  }
+
+  loadPayment(): void {
+    if (!this.data.projectId) return;
+    this.paymentLoading = true;
+    this.paymentService.getPaymentStatus(this.data.projectId).subscribe({
+      next: p => { this.payment = p; this.paymentLoading = false; },
+      error: () => { this.paymentLoading = false; }
+    });
+  }
+
+  releasePayment(): void {
+    if (!this.data.projectId || this.releasingPayment) return;
+    this.releasingPayment = true;
+    this.paymentService.releasePayment(this.data.projectId).subscribe({
+      next: p => {
+        this.payment = p;
+        this.releasingPayment = false;
+        this.toast.success('Pago desembolsado correctamente al equipo.');
+      },
+      error: err => {
+        this.releasingPayment = false;
+        this.toast.error(err?.error?.message ?? 'No se pudo desembolsar el pago.');
+      }
+    });
   }
 
   private stopPolling(): void {
