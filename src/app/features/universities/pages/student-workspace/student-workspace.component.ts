@@ -371,10 +371,18 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     ref.afterClosed().subscribe(() => this.loadDeployments(applicationId));
   }
 
-  openCloudButton(applicationId: number, projectId: number): void {
+  hasPublishedDeployment(applicationId: number): boolean {
+    return this.getAppDeployments(applicationId).some(d => !!d.publishedAt);
+  }
+
+  canOpenDeliveryChat(applicationId: number, projectId: number): boolean {
     const payment = this.getProjectPayment(projectId);
     const hasPaid = payment?.status === 'PAID_HELD' || payment?.status === 'RELEASED';
-    if (hasPaid) {
+    return hasPaid && this.hasPublishedDeployment(applicationId);
+  }
+
+  openCloudButton(applicationId: number, projectId: number): void {
+    if (this.canOpenDeliveryChat(applicationId, projectId)) {
       this.dialog.open(DeliveryChatDialogComponent, {
         width: '1100px', maxWidth: '96vw', maxHeight: '92vh',
         panelClass: 'app-shell-dialog-panel',

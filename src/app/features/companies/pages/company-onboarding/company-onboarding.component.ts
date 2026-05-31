@@ -22,6 +22,7 @@ import { ProjectDetailDialogComponent, ProjectDetailSection } from '../../compon
 import { MessageDialogComponent, MessageDialogData } from '../../../../shared/components/modal/message-dialog/message-dialog.component';
 import { RatingDialogComponent, RatingDialogData } from '../../../../shared/components/rating-dialog/rating-dialog.component';
 import { DeploymentListDialogComponent } from '../../../../shared/components/deployment-modal/deployment-list-dialog.component';
+import { DeploymentService } from '../../../../shared/services/deployment.service';
 import { ApplicationNegotiationDialogComponent } from '../../../../shared/components/application-negotiation-dialog/application-negotiation-dialog.component';
 import { DeliveryChatDialogComponent } from '../../../../shared/components/delivery-chat-dialog/delivery-chat-dialog.component';
 import { RatingService } from '../../services/rating.service';
@@ -175,6 +176,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
   readonly projectFormExamples: ProjectCreateFormExample[] = PROJECT_CREATE_FORM_EXAMPLES;
 
   private readonly ratingService = inject(RatingService);
+  private readonly deploymentService = inject(DeploymentService);
   projectRatings = new Map<number, RatingResponse | null>();
   userRanking: RankingEntry[] = [];
   teamRanking: RankingEntry[] = [];
@@ -964,21 +966,38 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     const appId = project.acceptedApplicationId;
     if (!appId) return;
     const hasPaid = project.paymentStatus === 'PAID_HELD' || project.paymentStatus === 'RELEASED';
-    if (hasPaid) {
-      this.dialog.open(DeliveryChatDialogComponent, {
-        width: '1100px', maxWidth: '96vw', maxHeight: '92vh',
-        panelClass: 'app-shell-dialog-panel',
-        backdropClass: 'app-shell-dialog-backdrop',
-        data: { viewerMode: 'company', applicationId: appId, projectId: project.id }
-      });
-    } else {
+
+    const openDeploymentList = () => {
       this.dialog.open(DeploymentListDialogComponent, {
         width: '560px', maxWidth: '96vw', maxHeight: '90vh',
         panelClass: 'app-shell-dialog-panel',
         backdropClass: 'app-shell-dialog-backdrop',
         data: { applicationId: appId }
       });
+    };
+
+    if (!hasPaid) {
+      openDeploymentList();
+      return;
     }
+
+    // Paid: chat only if at least one published deployment exists
+    this.deploymentService.listByApplication(appId).subscribe({
+      next: deployments => {
+        const hasPublished = deployments.some(d => !!d.publishedAt);
+        if (hasPublished) {
+          this.dialog.open(DeliveryChatDialogComponent, {
+            width: '1100px', maxWidth: '96vw', maxHeight: '92vh',
+            panelClass: 'app-shell-dialog-panel',
+            backdropClass: 'app-shell-dialog-backdrop',
+            data: { viewerMode: 'company', applicationId: appId, projectId: project.id }
+          });
+        } else {
+          openDeploymentList();
+        }
+      },
+      error: () => openDeploymentList()
+    });
   }
 
   toggleProjectCreatePanel(): void {

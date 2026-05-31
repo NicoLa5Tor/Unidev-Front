@@ -239,14 +239,14 @@
             <button type="button" (click)="openCloudButton(app.id, app.projectId)"
               [attr.aria-label]="'Ver deployments o chat de entrega'"
               class="relative flex h-8 items-center justify-center gap-1.5 rounded-full border border-[color:var(--accent-3)]/40 bg-[var(--accent-3)]/10 px-2.5 text-[var(--accent-3)] hover:bg-[var(--accent-3)]/20 transition-colors"
-              [title]="(getProjectPayment(app.projectId)?.status === 'PAID_HELD' || getProjectPayment(app.projectId)?.status === 'RELEASED') ? 'Chat de entrega' : 'Ver deployments'">
+              [title]="canOpenDeliveryChat(app.id, app.projectId) ? 'Chat de entrega' : 'Ver deployments'">
               <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <path d="M7 18a4 4 0 0 1-.88-7.9 5 5 0 0 1 9.74-1.3A4 4 0 0 1 18 18H7Z"/>
               </svg>
               <span class="font-tech text-[10px] uppercase tracking-[0.14em]">
-                {{ (getProjectPayment(app.projectId)?.status === 'PAID_HELD' || getProjectPayment(app.projectId)?.status === 'RELEASED') ? 'Chat' : 'Demos' }}
+                {{ canOpenDeliveryChat(app.id, app.projectId) ? 'Chat' : 'Demos' }}
               </span>
-              <span *ngIf="getAppDeployments(app.id).length > 0 && !(getProjectPayment(app.projectId)?.status === 'PAID_HELD' || getProjectPayment(app.projectId)?.status === 'RELEASED')"
+              <span *ngIf="getAppDeployments(app.id).length > 0 && !canOpenDeliveryChat(app.id, app.projectId)"
                 class="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--accent-3)] px-1 text-[9px] font-bold text-black">
                 {{ getAppDeployments(app.id).length }}
               </span>
