@@ -14,6 +14,10 @@ import { Pqrs, PqrsStatus, PqrsType } from '../../models/pqrs.model';
 import { TeamInvitation } from '../../models/student.model';
 import { Deployment } from '../../models/deployment.model';
 import { DeliveryChatDialogComponent } from '../delivery-chat-dialog/delivery-chat-dialog.component';
+import { DeploymentListDialogComponent } from '../deployment-modal/deployment-list-dialog.component';
+import { PaymentService } from '../../../features/companies/services/payment.service';
+import { DisputeService, ProjectDispute } from '../../services/dispute.service';
+import { Router } from '@angular/router';
 
 export interface PendingReviewProject {
   projectId: number;
@@ -23,7 +27,7 @@ export interface PendingReviewProject {
   latestPublishedAt: string | null;
 }
 
-type MainTab = 'invitations' | 'announcements' | 'pqrs' | 'deployments';
+type MainTab = 'invitations' | 'announcements' | 'pqrs' | 'deployments' | 'disputes';
 type PqrsSubTab = 'list' | 'new';
 
 @Component({
@@ -85,8 +89,60 @@ export class NotificationsDialogComponent implements OnInit {
     private readonly deploymentService: DeploymentService,
     private readonly toast: UiToastService,
     private readonly userSessionService: UserSessionService,
-    private readonly dialog: MatDialog
+    private readonly dialog: MatDialog,
+    private readonly paymentService: PaymentService,
+    private readonly disputeService: DisputeService,
+    private readonly router: Router
   ) {}
+
+  // ── Disputes ────────────────────────────────────────────
+  pendingDisputes: ProjectDispute[] = [];
+  myDisputes: ProjectDispute[] = [];
+  loadingDisputes = false;
+
+  get isAdmin(): boolean {
+    return this.userSessionService.snapshot?.roleName === 'ADMINISTRADORES';
+  }
+
+  get showDisputesTab(): boolean {
+    const role = this.userSessionService.snapshot?.roleName;
+    return role === 'ADMINISTRADORES'
+        || role === 'EMPRESAS' || role === 'USUARIOS_EMPRESA'
+        || role === 'USUARIOS_UNIVERSIDAD' || role === 'TUTOR_SEDE';
+  }
+
+  loadPendingDisputes(): void {
+    this.loadingDisputes = true;
+    this.disputeService.listPending().subscribe({
+      next: list => { this.pendingDisputes = list; this.loadingDisputes = false; },
+      error: () => { this.loadingDisputes = false; }
+    });
+  }
+
+  loadMyDisputes(): void {
+    this.loadingDisputes = true;
+    this.disputeService.listMine().subscribe({
+      next: list => { this.myDisputes = list; this.loadingDisputes = false; },
+      error: () => { this.loadingDisputes = false; }
+    });
+  }
+
+  get disputesToShow(): ProjectDispute[] {
+    return this.isAdmin ? this.pendingDisputes : this.myDisputes;
+  }
+
+  get pendingDisputeBadge(): number {
+    if (this.isAdmin) return this.pendingDisputes.length;
+    // Mostrar contador de disputas resueltas no leídas (todas las resolved como notif)
+    return this.myDisputes.filter(d => d.status !== 'PENDING').length;
+  }
+
+  goToDisputes(): void {
+    this.dialogRef.close();
+    if (this.isAdmin) {
+      this.router.navigate(['/admin/disputes']);
+    }
+  }
 
   ngOnInit(): void {
     const userId = this.userSessionService.snapshot?.id ?? 'anon';
@@ -99,6 +155,14 @@ export class NotificationsDialogComponent implements OnInit {
     if (this.showDeploymentsTab) {
       this.mainTab = 'deployments';
       this.loadPendingDeployments();
+    }
+    if (this.showDisputesTab) {
+      if (this.isAdmin) {
+        this.mainTab = 'disputes';
+        this.loadPendingDisputes();
+      } else {
+        this.loadMyDisputes();
+      }
     }
     this.loadAnnouncements();
     this.loadTickets();
@@ -314,17 +378,42 @@ export class NotificationsDialogComponent implements OnInit {
   openProject(projectId: number): void {
     const item = this.pendingReviewProjects.find(p => p.projectId === projectId);
     if (!item?.applicationId) {
-      this.toast.error('No se pudo abrir el chat de entrega.');
+      this.toast.error('No se pudo abrir el proyecto.');
       return;
     }
+    const appId = item.applicationId;
     this.dialogRef.close();
-    this.dialog.open(DeliveryChatDialogComponent, {
-      width: '1100px',
-      maxWidth: '96vw',
-      maxHeight: '92vh',
-      panelClass: 'app-shell-dialog-panel',
-      backdropClass: 'app-shell-dialog-backdrop',
-      data: { viewerMode: 'company', applicationId: item.applicationId, projectId }
+
+    // Chat de entrega solo se desbloquea con pago confirmado. Si no hay pago,
+    // abrir vista de demos publicados (read-only para la empresa).
+    this.paymentService.getPaymentStatus(projectId).subscribe({
+      next: payment => {
+        const paid = payment?.status === 'PAID_HELD' || payment?.status === 'RELEASED';
+        if (paid) {
+          this.dialog.open(DeliveryChatDialogComponent, {
+            width: '1100px', maxWidth: '96vw', maxHeight: '92vh',
+            panelClass: 'app-shell-dialog-panel',
+            backdropClass: 'app-shell-dialog-backdrop',
+            data: { viewerMode: 'company', applicationId: appId, projectId }
+          });
+        } else {
+          this.dialog.open(DeploymentListDialogComponent, {
+            width: '560px', maxWidth: '96vw', maxHeight: '90vh',
+            panelClass: 'app-shell-dialog-panel',
+            backdropClass: 'app-shell-dialog-backdrop',
+            data: { applicationId: appId, viewerMode: 'company' }
+          });
+        }
+      },
+      error: () => {
+        // Fallback: sin info de pago, ir a la lista de demos (más restrictivo)
+        this.dialog.open(DeploymentListDialogComponent, {
+          width: '560px', maxWidth: '96vw', maxHeight: '90vh',
+          panelClass: 'app-shell-dialog-panel',
+          backdropClass: 'app-shell-dialog-backdrop',
+          data: { applicationId: appId, viewerMode: 'company' }
+        });
+      }
     });
   }
 

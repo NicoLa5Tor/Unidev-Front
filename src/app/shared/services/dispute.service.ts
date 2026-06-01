@@ -17,6 +17,9 @@ export interface ProjectDispute {
   createdAt: string;
   resolvedAt: string | null;
   resolvedByDisplayName: string | null;
+  refundedAmount: number | null;
+  refundCurrency: string | null;
+  refundedAt: string | null;
 }
 
 export interface ProjectTimeExtension {
@@ -53,6 +56,10 @@ export class DisputeService {
 
   listPending(): Observable<ProjectDispute[]> {
     return this.http.get<ProjectDispute[]>(`${this.baseUrl}/pending`);
+  }
+
+  listMine(): Observable<ProjectDispute[]> {
+    return this.http.get<ProjectDispute[]>(`${this.baseUrl}/mine`);
   }
 
   resolve(id: number, decision: 'APPROVED' | 'REJECTED', adminNotes: string | null): Observable<ProjectDispute> {
