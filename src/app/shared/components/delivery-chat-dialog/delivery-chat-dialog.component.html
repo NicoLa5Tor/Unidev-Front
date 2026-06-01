@@ -41,6 +41,75 @@
         </button>
 
         <!-- Desembolsar pago -->
+        <!-- Acciones de gestión: extensión + disputa (oculto si proyecto concluido) -->
+        <div *ngIf="thread.paymentStatus !== 'RELEASED'"
+          class="rounded-[14px] border border-[color:var(--panel-border)] bg-black/15 p-3 space-y-2">
+          <p class="font-tech text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">Gestión del proyecto</p>
+
+          <!-- Extensión (solo estudiante) -->
+          <button *ngIf="isStudentView && !showExtensionForm" type="button"
+            (click)="openExtensionForm()"
+            [disabled]="extensionsUsed >= extensionsMax"
+            class="w-full flex items-center justify-between gap-2 rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1.5 font-tech text-[11px] uppercase tracking-[0.14em] text-amber-300 transition hover:brightness-110 disabled:opacity-40">
+            <span>Pedir más tiempo</span>
+            <span class="rounded-full bg-black/30 px-1.5 py-0.5 text-[9px]">{{ extensionsUsed }}/{{ extensionsMax }}</span>
+          </button>
+
+          <div *ngIf="showExtensionForm" class="space-y-2 rounded-[10px] border border-amber-400/30 bg-amber-400/5 p-2.5">
+            <p class="font-tech text-[10px] uppercase tracking-[0.16em] text-amber-300">Solicitar extensión</p>
+            <label class="block text-[10px] text-[var(--muted)]">
+              Días (1-5)
+              <input type="number" [(ngModel)]="extensionDays" min="1" max="5"
+                class="mt-1 w-full rounded-md border border-[color:var(--panel-border)] bg-black/30 px-2 py-1 text-[12px] text-[var(--text)] outline-none" />
+            </label>
+            <label class="block text-[10px] text-[var(--muted)]">
+              Motivo (opcional)
+              <textarea [(ngModel)]="extensionReason" rows="2"
+                placeholder="Ej: bloqueado esperando contenido de la empresa..."
+                class="mt-1 w-full resize-none rounded-md border border-[color:var(--panel-border)] bg-black/30 px-2 py-1 text-[11px] text-[var(--text)] outline-none"></textarea>
+            </label>
+            <div class="flex gap-1.5">
+              <button type="button" (click)="closeExtensionForm()"
+                class="flex-1 rounded-full border border-[color:var(--panel-border)] px-2 py-1 font-tech text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">Cancelar</button>
+              <button type="button" (click)="submitExtension()" [disabled]="submittingExtension"
+                class="flex-1 rounded-full border border-amber-400/50 bg-amber-400/20 px-2 py-1 font-tech text-[10px] uppercase tracking-[0.14em] text-amber-200">
+                {{ submittingExtension ? 'Enviando...' : 'Solicitar' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Disputa (ambas partes) -->
+          <button *ngIf="!showDisputeForm" type="button" (click)="openDisputeForm()"
+            class="w-full rounded-full border border-rose-500/40 bg-rose-500/10 px-3 py-1.5 font-tech text-[11px] uppercase tracking-[0.14em] text-rose-300 transition hover:brightness-110">
+            Abrir disputa
+          </button>
+
+          <div *ngIf="showDisputeForm" class="space-y-2 rounded-[10px] border border-rose-500/30 bg-rose-500/5 p-2.5">
+            <p class="font-tech text-[10px] uppercase tracking-[0.16em] text-rose-300">Abrir disputa</p>
+            <p class="text-[10px] text-[var(--muted)]">Un administrador revisará tu solicitud. Si se aprueba, el proyecto se cancela y se procesa reembolso.</p>
+            <label class="block text-[10px] text-[var(--muted)]">
+              Razón *
+              <textarea [(ngModel)]="disputeReason" rows="3"
+                placeholder="Describe qué pasó (mín. 20 caracteres)..."
+                class="mt-1 w-full resize-none rounded-md border border-[color:var(--panel-border)] bg-black/30 px-2 py-1 text-[11px] text-[var(--text)] outline-none"></textarea>
+            </label>
+            <label class="block text-[10px] text-[var(--muted)]">
+              Documento de respaldo (opcional)
+              <input type="file" (change)="onDisputeFile($event)"
+                accept=".pdf,.docx,.jpg,.jpeg,.png"
+                class="mt-1 block w-full text-[11px] text-[var(--muted)]" />
+            </label>
+            <div class="flex gap-1.5">
+              <button type="button" (click)="closeDisputeForm()"
+                class="flex-1 rounded-full border border-[color:var(--panel-border)] px-2 py-1 font-tech text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">Cancelar</button>
+              <button type="button" (click)="submitDispute()" [disabled]="submittingDispute"
+                class="flex-1 rounded-full border border-rose-500/50 bg-rose-500/20 px-2 py-1 font-tech text-[10px] uppercase tracking-[0.14em] text-rose-200">
+                {{ submittingDispute ? 'Enviando...' : 'Enviar' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Estudiante: proyecto concluido (pago desembolsado) -->
         <div *ngIf="thread.paymentStatus === 'RELEASED'"
           class="rounded-[14px] border border-emerald-500/40 bg-emerald-500/10 p-3.5">
@@ -89,6 +158,13 @@
                 class="mt-1 block truncate text-[12px] text-sky-400 underline-offset-2 hover:underline">
                 {{ dep.url }}
               </a>
+              <p *ngIf="dep.expiresAt" class="mt-1 flex items-center gap-1 font-tech text-[10px] text-[var(--muted)]"
+                [title]="'Expira: ' + (dep.expiresAt | date:'medium')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Expira {{ dep.expiresAt | date:'dd/MM/yyyy HH:mm' }}
+              </p>
               <div class="mt-2 flex items-center gap-3">
                 <button *ngIf="dep.publishDescription" type="button"
                   (click)="$event.stopPropagation(); toggleDeployment(dep.id)"

@@ -6,6 +6,7 @@ import { DeploymentLogsDialogComponent } from '../deployment-modal/deployment-lo
 import { Subscription } from 'rxjs';
 import { DeploymentService } from '../../services/deployment.service';
 import { DeliveryChatWsService } from '../../services/delivery-chat-ws.service';
+import { DisputeService } from '../../services/dispute.service';
 import { UiToastService } from '../../services/ui-toast.service';
 import { ApplicationDeliveryChatMessage, ApplicationDeliveryChatThread } from '../../models/deployment.model';
 import { PaymentService } from '../../../features/companies/services/payment.service';
@@ -46,11 +47,26 @@ export class DeliveryChatDialogComponent implements OnInit, OnDestroy {
   payment: ProjectPaymentResponse | null = null;
   releasingPayment = false;
 
+  // ── Disputes ──
+  showDisputeForm = false;
+  disputeReason = '';
+  disputeDocument: File | null = null;
+  submittingDispute = false;
+
+  // ── Time extensions ──
+  showExtensionForm = false;
+  extensionDays = 1;
+  extensionReason = '';
+  extensionsUsed = 0;
+  extensionsMax = 2;
+  submittingExtension = false;
+
   private wsSub: Subscription | null = null;
   private objectUrls: string[] = [];
 
   private readonly deploymentService = inject(DeploymentService);
   private readonly wsService = inject(DeliveryChatWsService);
+  private readonly disputeService = inject(DisputeService);
   private readonly paymentService = inject(PaymentService);
   private readonly toast = inject(UiToastService);
   private readonly dialogRef = inject(MatDialogRef<DeliveryChatDialogComponent>);
@@ -63,6 +79,87 @@ export class DeliveryChatDialogComponent implements OnInit, OnDestroy {
     if (!this.isStudentView && this.data.projectId) {
       this.loadPayment();
     }
+    if (this.data.projectId) {
+      this.loadExtensionsCount();
+    }
+  }
+
+  private loadExtensionsCount(): void {
+    if (!this.data.projectId) return;
+    this.disputeService.listExtensions(this.data.projectId).subscribe({
+      next: r => { this.extensionsUsed = r.used; this.extensionsMax = r.max; },
+      error: () => {}
+    });
+  }
+
+  openDisputeForm(): void {
+    this.showDisputeForm = true;
+    this.showExtensionForm = false;
+    this.disputeReason = '';
+    this.disputeDocument = null;
+  }
+
+  closeDisputeForm(): void { this.showDisputeForm = false; }
+
+  onDisputeFile(ev: Event): void {
+    const f = (ev.target as HTMLInputElement).files?.[0] ?? null;
+    this.disputeDocument = f;
+  }
+
+  submitDispute(): void {
+    if (this.submittingDispute) return;
+    if (!this.data.projectId) return;
+    if (this.disputeReason.trim().length < 20) {
+      this.toast.error('Describe la disputa con al menos 20 caracteres.');
+      return;
+    }
+    this.submittingDispute = true;
+    this.disputeService.createDispute(this.data.projectId, this.disputeReason.trim(), this.disputeDocument).subscribe({
+      next: () => {
+        this.submittingDispute = false;
+        this.showDisputeForm = false;
+        this.toast.success('Disputa enviada. Un administrador la revisará.');
+      },
+      error: err => {
+        this.submittingDispute = false;
+        this.toast.error(err?.error?.message || 'No se pudo enviar la disputa.');
+      }
+    });
+  }
+
+  openExtensionForm(): void {
+    if (this.extensionsUsed >= this.extensionsMax) {
+      this.toast.error('Ya usaste el máximo de extensiones de tiempo para este proyecto.');
+      return;
+    }
+    this.showExtensionForm = true;
+    this.showDisputeForm = false;
+    this.extensionDays = 1;
+    this.extensionReason = '';
+  }
+
+  closeExtensionForm(): void { this.showExtensionForm = false; }
+
+  submitExtension(): void {
+    if (this.submittingExtension) return;
+    if (!this.data.projectId) return;
+    if (this.extensionDays < 1 || this.extensionDays > 5) {
+      this.toast.error('Días debe estar entre 1 y 5.');
+      return;
+    }
+    this.submittingExtension = true;
+    this.disputeService.requestExtension(this.data.projectId, this.extensionDays, this.extensionReason.trim() || null).subscribe({
+      next: () => {
+        this.submittingExtension = false;
+        this.showExtensionForm = false;
+        this.extensionsUsed++;
+        this.toast.success(`Extensión registrada (+${this.extensionDays} días).`);
+      },
+      error: err => {
+        this.submittingExtension = false;
+        this.toast.error(err?.error?.message || 'No se pudo registrar la extensión.');
+      }
+    });
   }
 
   ngOnDestroy(): void {
