@@ -9,13 +9,19 @@
         </svg>
       </div>
       <div>
-        <p class="font-tech text-xs uppercase tracking-[0.24em] text-[var(--accent-3)]">Deployments</p>
-        <h3 class="mt-1 text-lg font-semibold text-[var(--text)]">Despliegues de esta postulación</h3>
-        <p class="mt-1 text-[11px] text-[var(--muted)]">Historial de demos temporales, incluyendo fallidos y activos.</p>
+        <p class="font-tech text-xs uppercase tracking-[0.24em] text-[var(--accent-3)]">Demos</p>
+        <h3 class="mt-1 text-lg font-semibold text-[var(--text)]">
+          <ng-container *ngIf="isCompanyView">Demos publicados</ng-container>
+          <ng-container *ngIf="!isCompanyView">Despliegues de esta postulación</ng-container>
+        </h3>
+        <p class="mt-1 text-[11px] text-[var(--muted)]">
+          <ng-container *ngIf="isCompanyView">Demos que el equipo publicó para tu revisión.</ng-container>
+          <ng-container *ngIf="!isCompanyView">Historial de demos temporales, incluyendo fallidos y activos.</ng-container>
+        </p>
       </div>
     </div>
     <div class="flex items-center gap-2 shrink-0">
-      <button type="button" (click)="setView(view === 'trash' ? 'active' : 'trash')"
+      <button *ngIf="!isCompanyView" type="button" (click)="setView(view === 'trash' ? 'active' : 'trash')"
         [title]="view === 'trash' ? 'Ver activos' : 'Ver papelera'"
         class="flex h-8 w-8 items-center justify-center rounded-full border transition-colors"
         [ngClass]="view === 'trash'
@@ -34,7 +40,7 @@
   </div>
 
   <!-- View label -->
-  <div class="px-6 pb-2">
+  <div *ngIf="!isCompanyView" class="px-6 pb-2">
     <span *ngIf="view === 'active'"
       class="rounded-full border border-[color:var(--accent-3)]/30 bg-[var(--accent-3)]/10 px-2.5 py-0.5 font-tech text-[10px] uppercase tracking-[0.15em] text-[var(--accent-3)]">Activos</span>
     <span *ngIf="view === 'trash'"
@@ -68,8 +74,30 @@
       </p>
     </div>
 
-    <!-- List -->
-    <div *ngIf="currentList.length > 0" class="flex flex-col gap-2">
+    <!-- Empresa: solo publicados, link + descripción -->
+    <div *ngIf="isCompanyView" class="flex flex-col gap-3">
+      <div *ngIf="publishedList.length === 0 && !isLoading"
+        class="rounded-[14px] border border-dashed border-[color:var(--panel-border)] px-4 py-6 text-center">
+        <p class="text-sm text-[var(--muted)]">El equipo todavía no ha publicado demos.</p>
+      </div>
+      <div *ngFor="let dep of publishedList"
+        class="rounded-[14px] border border-[color:var(--panel-border)] bg-[var(--panel-2)]/40 px-4 py-3">
+        <a [href]="'https://' + dep.subdomain + '.unidev.site'" target="_blank" rel="noopener noreferrer"
+          class="block truncate text-sm font-medium text-sky-400 underline-offset-2 hover:underline">
+          {{ dep.subdomain }}.unidev.site
+        </a>
+        <p *ngIf="dep.publishDescription"
+          class="mt-2 whitespace-pre-wrap text-[12px] leading-5 text-[var(--muted)]">
+          {{ dep.publishDescription }}
+        </p>
+        <p *ngIf="!dep.publishDescription" class="mt-2 text-[12px] italic text-[var(--muted)]/60">
+          Sin descripción del equipo.
+        </p>
+      </div>
+    </div>
+
+    <!-- Estudiante: lista completa con acciones -->
+    <div *ngIf="!isCompanyView && currentList.length > 0" class="flex flex-col gap-2">
       <div *ngFor="let dep of currentList"
         class="flex items-center justify-between gap-3 rounded-[12px] border border-[color:var(--panel-border)] bg-[var(--panel-2)]/40 px-3.5 py-2.5 hover:border-[color:var(--accent-3)]/40 transition-colors">
         <button type="button" (click)="openLogs(dep.id)" class="flex-1 min-w-0 text-left">
@@ -103,8 +131,17 @@
 
   </div>
 
-  <!-- Footer -->
-  <div class="flex items-center justify-between gap-3 px-6 py-3 border-t border-[color:var(--panel-border)]">
+  <!-- Footer empresa -->
+  <div *ngIf="isCompanyView" class="flex items-center justify-between gap-3 px-6 py-3 border-t border-[color:var(--panel-border)]">
+    <p class="text-[11px] text-[var(--muted)]">{{ publishedList.length }} demo{{ publishedList.length === 1 ? '' : 's' }} publicado{{ publishedList.length === 1 ? '' : 's' }}</p>
+    <button type="button" (click)="close()"
+      class="rounded-full border border-[color:var(--panel-border)] px-4 py-1.5 font-tech text-xs text-[var(--muted)] hover:text-[var(--text)]">
+      Cerrar
+    </button>
+  </div>
+
+  <!-- Footer estudiante -->
+  <div *ngIf="!isCompanyView" class="flex items-center justify-between gap-3 px-6 py-3 border-t border-[color:var(--panel-border)]">
     <p class="text-[11px] text-[var(--muted)]">{{ currentList.length }} deployment{{ currentList.length === 1 ? '' : 's' }}</p>
     <div class="flex gap-2">
       <button type="button" (click)="load()"

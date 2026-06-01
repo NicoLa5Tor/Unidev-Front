@@ -972,7 +972,7 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
         width: '560px', maxWidth: '96vw', maxHeight: '90vh',
         panelClass: 'app-shell-dialog-panel',
         backdropClass: 'app-shell-dialog-backdrop',
-        data: { applicationId: appId }
+        data: { applicationId: appId, viewerMode: 'company' }
       });
     };
 

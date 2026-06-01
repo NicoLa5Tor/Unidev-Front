@@ -66,6 +66,7 @@ export interface ApplicationDeliveryChatThread {
   projectName: string | null;
   studentDisplayName: string | null;
   companyName: string | null;
+  paymentStatus: string | null;
   publishedDeployments: Deployment[];
   messages: ApplicationDeliveryChatMessage[];
 }

@@ -33,6 +33,14 @@ export class DeploymentListDialogComponent implements OnInit {
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: ListDialogData) {}
 
+  get isCompanyView(): boolean {
+    return this.data.viewerMode === 'company';
+  }
+
+  get publishedList(): Deployment[] {
+    return this.deployments.filter(d => !!d.publishedAt && d.status !== 'TRASHED');
+  }
+
   ngOnInit(): void {
     this.load();
   }
