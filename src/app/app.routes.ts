@@ -125,6 +125,19 @@ export const routes: Routes = [
     }
   },
   {
+    path: 'admin/disputes',
+    title: 'Disputas | UniDev',
+    loadComponent: () =>
+      import('./features/admin/pages/admin-disputes/admin-disputes.component').then(
+        m => m.AdminDisputesComponent
+      ),
+    canActivate: [authGuard, roleGuard],
+    data: {
+      roles: ['ADMINISTRADORES'],
+      description: 'Revisa y resuelve disputas abiertas por empresas o estudiantes.'
+    }
+  },
+  {
     path: 'companies',
     title: 'Empresas | UniDev',
     loadComponent: () =>

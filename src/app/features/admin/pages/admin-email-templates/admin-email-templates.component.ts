@@ -48,7 +48,8 @@ export class AdminEmailTemplatesComponent implements OnInit {
       ]
     },
     { id: 'admin-pqrs', label: 'PQRS', accent: 'accent-3', route: '/admin/pqrs' },
-    { id: 'admin-announcements', label: 'Anuncios', accent: 'accent-1', route: '/admin/announcements' }
+    { id: 'admin-announcements', label: 'Anuncios', accent: 'accent-1', route: '/admin/announcements' },
+    { id: 'admin-disputes', label: 'Disputas', accent: 'accent-2', route: '/admin/disputes' }
   ];
 
   editor: EmailTemplateEditorModel = this.createEmptyEditor();

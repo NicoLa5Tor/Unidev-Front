@@ -91,7 +91,8 @@ export class AdminProjectPricingComponent implements OnInit {
     },
     { id: 'admin-emails', label: 'Correos', accent: 'accent-4', route: '/admin/email-templates' },
     { id: 'admin-pqrs', label: 'PQRS', accent: 'accent-3', route: '/admin/pqrs' },
-    { id: 'admin-announcements', label: 'Anuncios', accent: 'accent-1', route: '/admin/announcements' }
+    { id: 'admin-announcements', label: 'Anuncios', accent: 'accent-1', route: '/admin/announcements' },
+    { id: 'admin-disputes', label: 'Disputas', accent: 'accent-2', route: '/admin/disputes' }
   ];
 
   editor: PricingRateEditorModel = this.createEmptyEditor();
