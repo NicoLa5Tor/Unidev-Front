@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { DeploymentLogsDialogComponent } from '../deployment-modal/deployment-logs-dialog.component';
 import { Subscription } from 'rxjs';
 import { DeploymentService } from '../../services/deployment.service';
 import { DeliveryChatWsService } from '../../services/delivery-chat-ws.service';
@@ -40,6 +41,7 @@ export class DeliveryChatDialogComponent implements OnInit, OnDestroy {
   thread: ApplicationDeliveryChatThread | null = null;
   draftMessage = '';
   stagedFile: StagedFile | null = null;
+  selectedDeploymentId: string | null = null;
   expandedDeployments = new Set<string>();
   payment: ProjectPaymentResponse | null = null;
   releasingPayment = false;
@@ -52,6 +54,7 @@ export class DeliveryChatDialogComponent implements OnInit, OnDestroy {
   private readonly paymentService = inject(PaymentService);
   private readonly toast = inject(UiToastService);
   private readonly dialogRef = inject(MatDialogRef<DeliveryChatDialogComponent>);
+  private readonly dialog = inject(MatDialog);
 
   constructor(@Inject(MAT_DIALOG_DATA) readonly data: DeliveryChatDialogData) {}
 
@@ -74,6 +77,33 @@ export class DeliveryChatDialogComponent implements OnInit, OnDestroy {
 
   get canSend(): boolean {
     return !this.sending && (this.draftMessage.trim().length > 0 || this.stagedFile != null);
+  }
+
+  get visibleMessages(): ApplicationDeliveryChatMessage[] {
+    if (!this.thread) return [];
+    const sel = this.selectedDeploymentId;
+    return this.thread.messages.filter(m => (m.deploymentId ?? null) === sel);
+  }
+
+  get selectedDeploymentSubdomain(): string | null {
+    if (!this.selectedDeploymentId || !this.thread) return null;
+    const dep = this.thread.publishedDeployments.find(d => d.id === this.selectedDeploymentId);
+    return dep?.subdomain ?? null;
+  }
+
+  selectThread(deploymentId: string | null): void {
+    this.selectedDeploymentId = deploymentId;
+    this.scheduleScroll();
+  }
+
+  unreadInDeployment(deploymentId: string): number {
+    if (!this.thread) return 0;
+    return this.thread.messages.filter(m => m.deploymentId === deploymentId).length;
+  }
+
+  unreadInGeneral(): number {
+    if (!this.thread) return 0;
+    return this.thread.messages.filter(m => !m.deploymentId).length;
   }
 
   load(): void {
@@ -102,9 +132,10 @@ export class DeliveryChatDialogComponent implements OnInit, OnDestroy {
     this.draftMessage = '';
     this.stagedFile = null;
 
+    const depId = this.selectedDeploymentId;
     const obs = staged
-      ? this.deploymentService.sendDeliveryChatAttachment(this.data.applicationId, staged.file, text || undefined)
-      : this.deploymentService.sendDeliveryChatMessage(this.data.applicationId, text);
+      ? this.deploymentService.sendDeliveryChatAttachment(this.data.applicationId, staged.file, text || undefined, depId)
+      : this.deploymentService.sendDeliveryChatMessage(this.data.applicationId, text, depId);
 
     obs.subscribe({
       next: msg => {
@@ -219,6 +250,51 @@ export class DeliveryChatDialogComponent implements OnInit, OnDestroy {
     this.paymentService.getPaymentStatus(this.data.projectId).subscribe({
       next: p => { this.payment = p; },
       error: () => {}
+    });
+  }
+
+  resyncingId: string | null = null;
+  confirmingResyncId: string | null = null;
+  resyncPort: number | null = null;
+  resyncEnv = '';
+
+  requestResync(deploymentId: string): void {
+    if (this.resyncingId) return;
+    const next = this.confirmingResyncId === deploymentId ? null : deploymentId;
+    this.confirmingResyncId = next;
+    this.resyncPort = null;
+    this.resyncEnv = '';
+  }
+
+  cancelResync(): void {
+    this.confirmingResyncId = null;
+    this.resyncPort = null;
+    this.resyncEnv = '';
+  }
+
+  confirmResync(deploymentId: string): void {
+    if (this.resyncingId) return;
+    const port = this.resyncPort;
+    const env = this.resyncEnv.trim() || null;
+    this.confirmingResyncId = null;
+    this.resyncingId = deploymentId;
+    this.deploymentService.resync(deploymentId, port, env).subscribe({
+      next: () => {
+        this.resyncingId = null;
+        this.toast.success('Aplicando cambios desde GitHub.');
+        this.dialog.open(DeploymentLogsDialogComponent, {
+          width: '720px',
+          maxWidth: '96vw',
+          maxHeight: '90vh',
+          panelClass: 'app-shell-dialog-panel',
+          backdropClass: 'app-shell-dialog-backdrop',
+          data: { deploymentId }
+        });
+      },
+      error: err => {
+        this.resyncingId = null;
+        this.toast.error(err?.error?.message || 'No se pudo resincronizar.');
+      }
     });
   }
 

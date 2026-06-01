@@ -30,6 +30,13 @@ export class DeploymentService {
     return this.http.post<Deployment>(`${this.baseUrl}/${id}/publish`, {});
   }
 
+  resync(id: string, port?: number | null, envFileContent?: string | null): Observable<Deployment> {
+    const body: { port?: number; envFileContent?: string } = {};
+    if (port != null) body.port = port;
+    if (envFileContent) body.envFileContent = envFileContent;
+    return this.http.post<Deployment>(`${this.baseUrl}/${id}/resync`, body);
+  }
+
   /** Soft delete: stops containers, frees subdomain, but record stays in trash. */
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
@@ -63,17 +70,18 @@ export class DeploymentService {
     return this.http.get<ApplicationDeliveryChatThread>(`${this.deliveryChatUrl}/${applicationId}`);
   }
 
-  sendDeliveryChatMessage(applicationId: number, textBody: string): Observable<ApplicationDeliveryChatMessage> {
+  sendDeliveryChatMessage(applicationId: number, textBody: string, deploymentId?: string | null): Observable<ApplicationDeliveryChatMessage> {
     return this.http.post<ApplicationDeliveryChatMessage>(
       `${this.deliveryChatUrl}/${applicationId}/messages`,
-      { textBody }
+      { textBody, deploymentId: deploymentId ?? null }
     );
   }
 
-  sendDeliveryChatAttachment(applicationId: number, file: File, textBody?: string): Observable<ApplicationDeliveryChatMessage> {
+  sendDeliveryChatAttachment(applicationId: number, file: File, textBody?: string, deploymentId?: string | null): Observable<ApplicationDeliveryChatMessage> {
     const form = new FormData();
     form.append('file', file);
     if (textBody) form.append('textBody', textBody);
+    if (deploymentId) form.append('deploymentId', deploymentId);
     return this.http.post<ApplicationDeliveryChatMessage>(
       `${this.deliveryChatUrl}/${applicationId}/attachments`,
       form

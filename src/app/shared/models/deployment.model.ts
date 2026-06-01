@@ -55,6 +55,7 @@ export interface ApplicationDeliveryChatMessage {
   attachmentUrl: string | null;
   attachmentName: string | null;
   attachmentType: 'IMAGE' | 'VIDEO' | 'DOC' | null;
+  deploymentId: string | null;
   createdAt: string;
 }
 

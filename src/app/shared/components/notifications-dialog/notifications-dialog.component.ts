@@ -13,11 +13,12 @@ import { Announcement } from '../../models/announcement.model';
 import { Pqrs, PqrsStatus, PqrsType } from '../../models/pqrs.model';
 import { TeamInvitation } from '../../models/student.model';
 import { Deployment } from '../../models/deployment.model';
-import { ProjectDetailDialogComponent } from '../../../features/companies/components/project-detail-dialog/project-detail-dialog.component';
+import { DeliveryChatDialogComponent } from '../delivery-chat-dialog/delivery-chat-dialog.component';
 
 export interface PendingReviewProject {
   projectId: number;
   projectName: string;
+  applicationId: number | null;
   deploymentCount: number;
   latestPublishedAt: string | null;
 }
@@ -46,6 +47,7 @@ export class NotificationsDialogComponent implements OnInit {
 
   // ── Deployments (company) ─────────────────────────────
   pendingDeployments: Deployment[] = [];
+  pendingReviewProjects: PendingReviewProject[] = [];
   loadingDeployments = false;
 
   // ── PQRS ──────────────────────────────────────────────
@@ -277,14 +279,18 @@ export class NotificationsDialogComponent implements OnInit {
   loadPendingDeployments(): void {
     this.loadingDeployments = true;
     this.deploymentService.companyPendingReview().subscribe({
-      next: deps => { this.pendingDeployments = deps; this.loadingDeployments = false; },
+      next: deps => {
+        this.pendingDeployments = deps;
+        this.pendingReviewProjects = this.computePendingReviewProjects(deps);
+        this.loadingDeployments = false;
+      },
       error: () => { this.loadingDeployments = false; }
     });
   }
 
-  get pendingReviewProjects(): PendingReviewProject[] {
+  private computePendingReviewProjects(deps: Deployment[]): PendingReviewProject[] {
     const map = new Map<number, PendingReviewProject>();
-    for (const dep of this.pendingDeployments) {
+    for (const dep of deps) {
       if (!dep.projectId) continue;
       const existing = map.get(dep.projectId);
       if (existing) {
@@ -296,6 +302,7 @@ export class NotificationsDialogComponent implements OnInit {
         map.set(dep.projectId, {
           projectId: dep.projectId,
           projectName: dep.projectName ?? `Proyecto #${dep.projectId}`,
+          applicationId: dep.applicationId ?? null,
           deploymentCount: 1,
           latestPublishedAt: dep.publishedAt ?? null
         });
@@ -305,14 +312,19 @@ export class NotificationsDialogComponent implements OnInit {
   }
 
   openProject(projectId: number): void {
+    const item = this.pendingReviewProjects.find(p => p.projectId === projectId);
+    if (!item?.applicationId) {
+      this.toast.error('No se pudo abrir el chat de entrega.');
+      return;
+    }
     this.dialogRef.close();
-    this.dialog.open(ProjectDetailDialogComponent, {
-      width: '860px',
+    this.dialog.open(DeliveryChatDialogComponent, {
+      width: '1100px',
       maxWidth: '96vw',
       maxHeight: '92vh',
       panelClass: 'app-shell-dialog-panel',
       backdropClass: 'app-shell-dialog-backdrop',
-      data: { projectId, viewerMode: 'company' }
+      data: { viewerMode: 'company', applicationId: item.applicationId, projectId }
     });
   }
 
