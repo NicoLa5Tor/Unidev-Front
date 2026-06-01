@@ -1,6 +1,7 @@
 export interface ProjectPublishRequest {
   agreedToSuggestedPrice: boolean;
   customAmount?: number | null;
+  termsAndConditions: string;
 }
 
 export interface CreateProjectDto {
@@ -16,6 +17,7 @@ export interface CreateProjectDto {
   deliveryDeadline?: string | null;
   developmentTypeId?: number | null;
   budgetAmount?: number | null;
+  termsAndConditions?: string | null;
 }
 
 export interface ProjectPricingLevelOption {
@@ -125,6 +127,7 @@ export interface Project {
   budgetAmount: number | null;
   statusCode: string;
   publishedAt: string | null;
+  termsAndConditions?: string | null;
   requirementsStatus: string;
   estimationStatus: string;
   requirementsError: string | null;

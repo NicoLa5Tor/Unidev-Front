@@ -615,18 +615,43 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
+  applyAcceptedTerms = false;
+  termsModalProject: Project | null = null;
+
   openApply(project: Project): void {
+    // Si el proyecto tiene T&C, mostrar modal previo. Recién al aceptar se abre el dialog de postular.
+    if (project.termsAndConditions && project.termsAndConditions.trim().length > 0) {
+      this.termsModalProject = project;
+      return;
+    }
+    this.openApplyForm(project);
+  }
+
+  private openApplyForm(project: Project, acceptedTerms: boolean = false): void {
     this.applyingToProject = project;
     this.applyMessage = '';
     this.applyTeamId = null;
     this.applyProposedAmount = null;
     this.applyWantsCustomOffer = false;
+    this.applyAcceptedTerms = acceptedTerms;
+  }
+
+  acceptTermsAndApply(): void {
+    if (!this.termsModalProject) return;
+    const project = this.termsModalProject;
+    this.termsModalProject = null;
+    this.openApplyForm(project, true);
+  }
+
+  closeTermsModal(): void {
+    this.termsModalProject = null;
   }
 
   closeApply(): void {
     this.applyingToProject = null;
     this.applyProposedAmount = null;
     this.applyWantsCustomOffer = false;
+    this.applyAcceptedTerms = false;
   }
 
   canSubmitApply(): boolean {
@@ -649,7 +674,8 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     this.studentService.applyToProject(this.applyingToProject.id, {
       message: this.applyMessage.trim() || null,
       teamId: this.applyTeamId,
-      proposedAmount: this.applyWantsCustomOffer && this.applyProposedAmount != null ? this.applyProposedAmount : null
+      proposedAmount: this.applyWantsCustomOffer && this.applyProposedAmount != null ? this.applyProposedAmount : null,
+      acceptTerms: this.applyAcceptedTerms
     }).subscribe({
       next: app => {
         this.myApplications = [app, ...this.myApplications];

@@ -38,6 +38,7 @@ export interface ApplyToProjectDto {
   message?: string | null;
   teamId?: number | null;
   proposedAmount?: number | null;
+  acceptTerms?: boolean | null;
 }
 
 export interface ProjectApplication {
@@ -58,6 +59,7 @@ export interface ProjectApplication {
   message: string | null;
   status: 'PENDING' | 'NEGOTIATING' | 'ACCEPTED' | 'REJECTED';
   createdAt: string;
+  termsAcceptedAt: string | null;
 }
 
 export interface StudentProfileUpdateDto {

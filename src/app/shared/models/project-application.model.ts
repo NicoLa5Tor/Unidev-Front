@@ -92,4 +92,5 @@ export interface ProjectApplication {
   message: string | null;
   status: ApplicationStatus;
   createdAt: string;
+  termsAcceptedAt?: string | null;
 }

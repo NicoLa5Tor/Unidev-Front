@@ -501,6 +501,8 @@ export class ProjectDetailDialogComponent implements OnDestroy {
     });
   }
 
+  publishTerms = '';
+
   confirmPriceAndPublish(): void {
     if (!this.project || !this.priceDecision) {
       return;
@@ -517,11 +519,18 @@ export class ProjectDetailDialogComponent implements OnDestroy {
       }
     }
 
+    const terms = (this.publishTerms || '').trim();
+    if (terms.length < 30) {
+      this.uiToastService.error('Debes redactar los términos y condiciones del proyecto (mínimo 30 caracteres).');
+      return;
+    }
+
     const payload: ProjectPublishRequest = this.priceDecision === 'agreed'
-      ? { agreedToSuggestedPrice: true }
+      ? { agreedToSuggestedPrice: true, termsAndConditions: terms }
       : {
           agreedToSuggestedPrice: false,
-          customAmount: this.customPriceAmount
+          customAmount: this.customPriceAmount,
+          termsAndConditions: terms
         };
 
     this.showPriceApprovalModal = false;

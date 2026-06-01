@@ -1147,19 +1147,10 @@ export class CompanyOnboardingComponent implements OnInit, OnDestroy {
     if (this.publishingProjectId === project.id || !this.canPublishProject(project)) {
       return;
     }
-
-    this.publishingProjectId = project.id;
-    this.projectService.publishProject(project.id, { agreedToSuggestedPrice: true }).subscribe({
-      next: (publishedProject: Project) => {
-        this.projects = this.projects.map(item => item.id === publishedProject.id ? publishedProject : item);
-        this.publishingProjectId = null;
-        this.uiToastService.success('Proyecto publicado. Ya no admite cambios.');
-      },
-      error: (error: unknown) => {
-        this.publishingProjectId = null;
-        this.uiToastService.error(this.resolveErrorMessage(error, 'No pudimos publicar el proyecto.'));
-      }
-    });
+    // Publish requires terms and conditions. Open the project detail dialog so
+    // the company can write them and confirm pricing in the same modal.
+    this.uiToastService.notify('Para publicar debes redactar los términos y condiciones del proyecto.');
+    this.openProject(project.id);
   }
 
   applyProjectFormExample(exampleId: string): void {

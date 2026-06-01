@@ -878,6 +878,37 @@
 </button>
 
 <!-- ══════════════════════════════════
+     MODAL: TÉRMINOS Y CONDICIONES (previo a postular)
+══════════════════════════════════ -->
+<div *ngIf="termsModalProject" class="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center">
+  <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" (click)="closeTermsModal()"></div>
+  <div class="relative flex w-full max-w-lg flex-col gap-4 rounded-3xl border border-[color:var(--accent-2)]/40 bg-[var(--panel)] p-6 shadow-2xl">
+    <div>
+      <p class="font-tech text-xs uppercase tracking-[0.3em] text-[var(--accent-2)]">Términos y condiciones</p>
+      <h2 class="mt-1 font-cyber text-base font-bold text-[var(--text)]">{{ termsModalProject!.name }}</h2>
+      <p class="mt-1 text-xs text-[var(--muted)]">
+        Para postularte a este proyecto debes leer y aceptar las cláusulas que estableció la empresa.
+      </p>
+    </div>
+
+    <div class="max-h-[40vh] overflow-y-auto rounded-2xl border border-[color:var(--panel-border)] bg-black/30 px-4 py-3 whitespace-pre-wrap text-sm leading-6 text-[var(--muted)]">
+      {{ termsModalProject!.termsAndConditions }}
+    </div>
+
+    <div class="flex gap-2">
+      <button type="button" (click)="closeTermsModal()"
+        class="flex-1 rounded-full border border-[color:var(--panel-border)] px-5 py-2 font-tech text-xs text-[var(--muted)] hover:text-[var(--text)]">
+        Cancelar
+      </button>
+      <button type="button" (click)="acceptTermsAndApply()"
+        class="flex-1 rounded-full border border-[color:var(--accent-2)]/40 bg-[var(--accent-2)]/15 px-5 py-2 font-tech text-xs uppercase tracking-[0.2em] text-[var(--accent-2)] hover:bg-[var(--accent-2)]/25">
+        Acepto y continuar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
      MODAL: POSTULARSE A PROYECTO
 ══════════════════════════════════ -->
 <div *ngIf="applyingToProject" class="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center">
