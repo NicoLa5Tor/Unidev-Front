@@ -728,7 +728,7 @@
                         <div *ngIf="project.quote?.available" class="rounded-[18px] border border-[color:var(--accent-1)]/30 bg-[color:color-mix(in_srgb,var(--accent-1)_6%,transparent)] px-3 py-2">
                           <p class="font-tech text-[10px] uppercase tracking-[0.16em] text-[var(--accent-1)]">Estimación IA</p>
                           <p class="mt-1 text-sm font-semibold text-[var(--text)]">
-                            {{ formatMoney(project.quote.minAmount, project.quote.currency) }} – {{ formatMoney(project.quote.maxAmount, project.quote.currency) }}
+                            {{ formatMoney(project.quote.baseAmount, project.quote.currency) }}
                           </p>
                           <p class="text-[10px] text-[var(--muted)]">{{ project.quote.baseHours }} h · escenario base</p>
                         </div>

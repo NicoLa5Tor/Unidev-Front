@@ -693,10 +693,10 @@
               </div>
             </div>
 
-            <!-- Base -->
-            <div class="relative rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3">
+            <!-- Precio -->
+            <div class="relative rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3 sm:col-span-3">
               <div class="flex items-center justify-between gap-1">
-                <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Base</p>
+                <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Precio</p>
                 <button type="button" (click)="toggleInfo('card-base-' + levelEstimation.levelCode)"
                   class="text-[var(--muted)]/40 hover:text-[var(--accent-2)] transition">
                   <svg viewBox="0 0 16 16" fill="currentColor" width="12" height="12"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a.75.75 0 110 1.5A.75.75 0 018 4zm-.25 3h1.5v4.5h-1.5V7z"/></svg>
@@ -705,27 +705,7 @@
               <p class="mt-2 text-sm font-semibold text-[var(--text)]">{{ formatMoney(levelEstimation.baseAmount, levelEstimation.currency) }}</p>
               <div *ngIf="infoOpen['card-base-' + levelEstimation.levelCode]"
                 class="absolute right-0 top-full z-20 mt-1.5 w-56 rounded-[12px] border border-[color:var(--accent-2)]/30 bg-[var(--panel)] px-3 py-2.5 text-[11px] leading-[1.55] text-[var(--muted)] shadow-xl">
-                Horas × tarifa/hora. Costo puntual sin margen. El rango se aplica sobre este valor.
-              </div>
-            </div>
-
-            <!-- Rango mín–máx -->
-            <div class="relative rounded-[18px] border border-[color:var(--panel-border)] bg-[var(--panel-2)] p-3 sm:col-span-2">
-              <div class="flex items-center justify-between gap-1">
-                <p class="font-tech text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">Rango comercial</p>
-                <button type="button" (click)="toggleInfo('card-rango-' + levelEstimation.levelCode)"
-                  class="text-[var(--muted)]/40 hover:text-[var(--accent-2)] transition">
-                  <svg viewBox="0 0 16 16" fill="currentColor" width="12" height="12"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a.75.75 0 110 1.5A.75.75 0 018 4zm-.25 3h1.5v4.5h-1.5V7z"/></svg>
-                </button>
-              </div>
-              <div class="mt-2 flex items-baseline gap-2">
-                <span class="text-sm font-semibold text-[var(--text)]">{{ formatMoney(levelEstimation.minAmount, levelEstimation.currency) }}</span>
-                <span class="text-[var(--muted)]">–</span>
-                <span class="text-sm font-semibold text-[var(--text)]">{{ formatMoney(levelEstimation.maxAmount, levelEstimation.currency) }}</span>
-              </div>
-              <div *ngIf="infoOpen['card-rango-' + levelEstimation.levelCode]"
-                class="absolute right-0 top-full z-20 mt-1.5 w-64 rounded-[12px] border border-[color:var(--accent-2)]/30 bg-[var(--panel)] px-3 py-2.5 text-[11px] leading-[1.55] text-[var(--muted)] shadow-xl">
-                Monto base ± porcentaje de apertura configurado. El margen cubre variabilidad: cambios de alcance, bugs imprevistos y reuniones.
+                Horas × tarifa/hora.
               </div>
             </div>
           </div>
@@ -1132,7 +1112,7 @@
           <div *ngIf="!currentProject.companyAgreedToSuggestedPrice && currentProject.quote?.available" class="rounded-[16px] border border-white/10 bg-black/20 px-4 py-3">
             <p class="font-tech text-[10px] uppercase tracking-[0.2em] text-white/50">Precio sugerido por IA</p>
             <p class="mt-1 font-semibold text-white/70">
-              {{ formatMoney(currentProject.quote.minAmount, currentProject.quote.currency) }} – {{ formatMoney(currentProject.quote.maxAmount, currentProject.quote.currency) }}
+              {{ formatMoney(currentProject.quote.baseAmount, currentProject.quote.currency) }}
             </p>
             <p class="mt-1 text-[10px] text-white/40">Referencia de la estimación automática</p>
           </div>
@@ -1451,13 +1431,9 @@
               </button>
             </span>
 
-            <!-- Rango final -->
+            <!-- Precio -->
             <span class="flex items-center gap-1 font-semibold text-[var(--text)]">
-              {{ formatMoney(lvl.minAmount, lvl.currency) }} – {{ formatMoney(lvl.maxAmount, lvl.currency) }}
-              <button type="button" (click)="toggleInfo('rango-' + lvl.levelCode)"
-                class="font-normal text-[var(--muted)]/50 hover:text-[var(--accent-2)] transition" title="¿De dónde sale el rango?">
-                <svg viewBox="0 0 16 16" fill="currentColor" width="11" height="11"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a.75.75 0 110 1.5A.75.75 0 018 4zm-.25 3h1.5v4.5h-1.5V7z"/></svg>
-              </button>
+              {{ formatMoney(lvl.baseAmount, lvl.currency) }}
             </span>
           </div>
 
@@ -1501,10 +1477,10 @@
           </div>
         </div>
         <p class="mt-1 text-lg font-semibold text-[var(--text)]">
-          {{ formatMoney(project.quote.minAmount, project.quote.currency) }} – {{ formatMoney(project.quote.maxAmount, project.quote.currency) }}
+          {{ formatMoney(project.quote.baseAmount, project.quote.currency) }}
         </p>
         <p class="mt-1 text-[10px] text-[var(--muted)]">
-          {{ project.quote.baseHours }} h × {{ formatMoney(project.quote.hourlyRate, project.quote.currency) }}/h = {{ formatMoney(project.quote.baseAmount, project.quote.currency) }} base · apertura ±{{ project.quote.rangePercentage ?? 20 }}%
+          {{ project.quote.baseHours }} h × {{ formatMoney(project.quote.hourlyRate, project.quote.currency) }}/h
         </p>
         <div *ngIf="infoOpen['precio-final']" class="mt-2 rounded-[12px] border border-[color:var(--accent-1)]/20 bg-[color:color-mix(in_srgb,var(--accent-1)_8%,transparent)] px-3 py-2 text-[11px] leading-5 text-[var(--muted)]">
           Se usa Junior como base porque es el escenario más conservador y accesible para el cliente. Los estudiantes pueden ver todos los escenarios para comparar. Aceptar este precio no significa que el equipo sea Junior — es solo la referencia económica mínima.

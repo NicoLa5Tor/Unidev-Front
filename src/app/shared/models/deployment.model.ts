@@ -38,6 +38,7 @@ export interface Deployment {
   projectId?: number | null;
   projectName?: string | null;
   applicationId?: number | null;
+  repoZipUrl?: string | null;
 }
 
 export interface SubdomainCheck {

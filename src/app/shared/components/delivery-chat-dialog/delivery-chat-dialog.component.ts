@@ -255,6 +255,38 @@ export class DeliveryChatDialogComponent implements OnInit, OnDestroy {
 
   resyncingId: string | null = null;
   confirmingResyncId: string | null = null;
+  zippingId: string | null = null;
+
+  get canDownloadCode(): boolean {
+    return !this.isStudentView && this.payment?.status === 'RELEASED';
+  }
+
+  downloadCode(deploymentId: string): void {
+    if (this.zippingId) return;
+    // If the URL is already cached on the response, just open it directly.
+    const dep = this.thread?.publishedDeployments.find(d => d.id === deploymentId);
+    if (dep?.repoZipUrl) {
+      window.open(dep.repoZipUrl, '_blank', 'noopener');
+      return;
+    }
+    this.zippingId = deploymentId;
+    this.deploymentService.generateRepoZip(deploymentId).subscribe({
+      next: res => {
+        this.zippingId = null;
+        if (res?.url) {
+          if (dep) dep.repoZipUrl = res.url;
+          window.open(res.url, '_blank', 'noopener');
+        } else {
+          this.toast.error('No se obtuvo URL del ZIP.');
+        }
+      },
+      error: err => {
+        this.zippingId = null;
+        this.toast.error(err?.error?.message || 'No se pudo generar el ZIP.');
+      }
+    });
+  }
+
   resyncPort: number | null = null;
   resyncEnv = '';
 

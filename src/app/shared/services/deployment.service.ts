@@ -30,6 +30,10 @@ export class DeploymentService {
     return this.http.post<Deployment>(`${this.baseUrl}/${id}/publish`, {});
   }
 
+  generateRepoZip(id: string): Observable<{ url: string }> {
+    return this.http.post<{ url: string }>(`${this.baseUrl}/${id}/zip`, {});
+  }
+
   resync(id: string, port?: number | null, envFileContent?: string | null): Observable<Deployment> {
     const body: { port?: number; envFileContent?: string } = {};
     if (port != null) body.port = port;

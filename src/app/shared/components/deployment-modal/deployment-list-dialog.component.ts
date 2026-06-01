@@ -11,6 +11,7 @@ import { PublishReviewDialogComponent } from './publish-review-dialog.component'
 
 interface ListDialogData {
   applicationId: number;
+  viewerMode?: 'student' | 'company';
 }
 
 @Component({

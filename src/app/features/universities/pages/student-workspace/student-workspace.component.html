@@ -58,7 +58,7 @@
             {{ project.companyPriceMinAmount | number:'1.0-0' }} {{ project.companyPriceCurrency }}
           </p>
           <div *ngIf="!project.companyAgreedToSuggestedPrice && project.quote?.available" class="mt-1 text-xs text-[var(--muted)]">
-            Precio IA: {{ project.quote.minAmount | number:'1.0-0' }} – {{ project.quote.maxAmount | number:'1.0-0' }} {{ project.quote.currency }}
+            Precio IA: {{ project.quote.baseAmount | number:'1.0-0' }} {{ project.quote.currency }}
           </div>
         </div>
 
